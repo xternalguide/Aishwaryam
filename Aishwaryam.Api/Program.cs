@@ -159,8 +159,14 @@ var app = builder.Build();
 try
 {
     var firebaseCredentialPath = builder.Configuration["Firebase:ServiceAccountPath"];
+    var firebaseServiceAccountJson = builder.Configuration["Firebase:ServiceAccountJson"];
     GoogleCredential credential;
-    if (!string.IsNullOrEmpty(firebaseCredentialPath) && File.Exists(firebaseCredentialPath))
+
+    if (!string.IsNullOrEmpty(firebaseServiceAccountJson))
+    {
+        credential = GoogleCredential.FromJson(firebaseServiceAccountJson);
+    }
+    else if (!string.IsNullOrEmpty(firebaseCredentialPath) && File.Exists(firebaseCredentialPath))
     {
         await using var stream = new FileStream(firebaseCredentialPath, FileMode.Open, FileAccess.Read);
         credential = GoogleCredential.FromStream(stream);
@@ -182,7 +188,7 @@ try
 catch (Exception ex)
 {
     Console.WriteLine($"[WARNING] Firebase Admin SDK init failed: {ex.Message}");
-    Console.WriteLine("[WARNING] Add Firebase:ServiceAccountPath in appsettings.json to enable Firebase Phone Auth.");
+    Console.WriteLine("[WARNING] Add Firebase:ServiceAccountPath or Firebase:ServiceAccountJson in configuration to enable Firebase Phone Auth.");
 }
 // ────────────────────────────────────────────────────────────────────────────
 
