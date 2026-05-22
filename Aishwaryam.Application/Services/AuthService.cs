@@ -191,6 +191,15 @@ namespace Aishwaryam.Application.Services
             try
             {
                 // Verify the Firebase ID token using Firebase Admin SDK
+                if (FirebaseAdmin.FirebaseApp.DefaultInstance == null)
+                {
+                    return new AuthResponse
+                    {
+                        Success = false,
+                        Message = "Firebase Admin SDK is not initialized on the server. Please configure the Firebase__ServiceAccountJson environment variable in Railway."
+                    };
+                }
+
                 var decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance
                     .VerifyIdTokenAsync(request.FirebaseIdToken);
 
