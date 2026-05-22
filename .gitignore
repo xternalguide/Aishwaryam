@@ -1,0 +1,42 @@
+## .NET Build Artifacts
+bin/
+obj/
+*.user
+*.suo
+
+## Visual Studio
+.vs/
+
+## NuGet
+packages/
+*.lock.json
+!**/packages/build/**
+
+## Logs
+*.log
+backend_log.txt
+UpgradeLog.htm
+
+## Sensitive / Secret Files (DO NOT COMMIT)
+appsettings.Development.json
+appsettings.Local.json
+firebase-service-account.json
+firebase-service-account-production.json
+*.pfx
+*.key
+
+## Cache files
+gold_price_cache.json
+
+## Temp & Test Artifacts
+temp_db_test/
+Backup/
+LoadTests/
+
+## PowerShell test scripts (dev-only)
+activate_wedding_scheme.ps1
+list_user_schemes.ps1
+reset_user_schemes.ps1
+
+## Migration helpers (dev-only)
+migration.sql

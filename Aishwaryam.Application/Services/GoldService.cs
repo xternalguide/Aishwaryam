@@ -1,0 +1,464 @@
+using System;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using Aishwaryam.Application.DTOs.Gold;
+using Aishwaryam.Application.DTOs.Wallet;
+using Aishwaryam.Application.Interfaces.Repositories;
+using Aishwaryam.Application.Interfaces.Services;
+using Aishwaryam.Domain.Entities;
+using System.Linq;
+
+namespace Aishwaryam.Application.Services
+{
+    public class GoldService : IGoldService
+    {
+        private readonly IGoldRepository _goldRepository;
+        private readonly IWalletService _walletService;
+        private readonly ISchemeRepository _schemeRepository;
+        private readonly INotificationService _notificationService;
+        private readonly IKycComplianceService _complianceService;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IMemoryCache _cache;
+        private readonly IGoldPriceManager _priceManager;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IAuthRepository _authRepository;
+        private readonly IEmailService _emailService;
+
+        public GoldService(
+            IGoldRepository goldRepository, 
+            IWalletService walletService,
+            ISchemeRepository schemeRepository,
+            INotificationService notificationService,
+            IKycComplianceService complianceService,
+            IHttpClientFactory httpClientFactory,
+            IMemoryCache cache,
+            IGoldPriceManager priceManager,
+            IUnitOfWork unitOfWork,
+            IAuthRepository authRepository,
+            IEmailService emailService)
+        {
+            _goldRepository = goldRepository;
+            _walletService = walletService;
+            _schemeRepository = schemeRepository;
+            _notificationService = notificationService;
+            _complianceService = complianceService;
+            _httpClientFactory = httpClientFactory;
+            _cache = cache;
+            _priceManager = priceManager;
+            _unitOfWork = unitOfWork;
+            _authRepository = authRepository;
+            _emailService = emailService;
+        }
+
+        public async Task<CurrentGoldPriceResponse> GetCurrentPriceAsync()
+        {
+            var price = await _priceManager.GetPriceAsync();
+            return new CurrentGoldPriceResponse
+            {
+                BuyPricePaise = (long)(price.BuyPrice * 100),
+                SellPricePaise = (long)(price.SellPrice * 100),
+                Price24KPaise = (long)(price.Price24K * 100),
+                Price22KPaise = (long)(price.Price22K * 100),
+                UpdatedAt = price.Timestamp,
+                Source = price.Source,
+                IsFallback = price.Source == "StaticFallback"
+            };
+        }
+
+        public async Task<GoldTransactionResponse> BuyGoldAsync(BuyGoldRequest request)
+        {
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                // 1. Get Wallet Balance
+                var walletResponse = await _walletService.GetBalanceAsync(request.UserId);
+                if (walletResponse.BalancePaise < request.TotalAmountPaise)
+                {
+                    return new GoldTransactionResponse { Success = false, Message = "Insufficient wallet balance." };
+                }
+
+                // 2. Check Price Lock
+                long effectiveBuyPricePaise;
+                DateTimeOffset effectiveUpdatedAt;
+                string effectiveSource;
+                
+                if (!string.IsNullOrEmpty(request.PriceLockId))
+                {
+                    var lockedPrice = await _priceManager.GetLockedPriceAsync(request.PriceLockId);
+                    if (lockedPrice == null)
+                        return new GoldTransactionResponse { Success = false, Message = "Price lock expired or invalid." };
+                    
+                    effectiveBuyPricePaise = (long)(lockedPrice.BuyPrice * 100);
+                    effectiveUpdatedAt = lockedPrice.Timestamp;
+                    effectiveSource = "LOCKED_" + lockedPrice.Source;
+                }
+                else
+                {
+                    var currentPrice = await GetCurrentPriceAsync();
+                    effectiveBuyPricePaise = currentPrice.BuyPricePaise;
+                    effectiveUpdatedAt = currentPrice.UpdatedAt;
+                    effectiveSource = currentPrice.Source;
+                }
+
+                // 3. Calculation Logic
+                long totalAmountPaise = request.TotalAmountPaise;
+                long baseAmountPaise = (totalAmountPaise * 100) / 103;
+                long gstAmountPaise = totalAmountPaise - baseAmountPaise;
+                long goldWeightMg = (baseAmountPaise * 1000) / effectiveBuyPricePaise;
+
+                if (goldWeightMg <= 0)
+                    return new GoldTransactionResponse { Success = false, Message = "Amount too low after GST." };
+
+                // 4. Scheme Bonus
+                UserScheme? activeScheme = null;
+                if (request.UserSchemeId.HasValue && request.UserSchemeId.Value != Guid.Empty)
+                {
+                    activeScheme = await _schemeRepository.GetUserSchemeByIdAsync(request.UserSchemeId.Value);
+                }
+                else
+                {
+                    activeScheme = await _schemeRepository.GetActiveUserSchemeAsync(request.UserId);
+                }
+                decimal bonusPercentage = 0;
+                long bonusGoldMg = 0;
+                long bonusAmountPaise = 0;
+                int schemeDayNumber = 0;
+
+                if (activeScheme != null)
+                {
+                    schemeDayNumber = (int)(DateTime.UtcNow - activeScheme.CreatedAt).TotalDays;
+                    var master = await _schemeRepository.GetSchemeMasterByPlanNameAsync(activeScheme.PlanName);
+                    List<SchemeBonusTier>? dbTiers = null;
+                    if (master != null)
+                    {
+                        dbTiers = await _schemeRepository.GetBonusTiersAsync(master.Id);
+                    }
+
+                    if (dbTiers != null && dbTiers.Count > 0)
+                    {
+                        var matchingTier = dbTiers.FirstOrDefault(t => schemeDayNumber >= t.StartDay && schemeDayNumber <= t.EndDay);
+                        bonusPercentage = matchingTier != null ? matchingTier.BonusPercentage : 0;
+                    }
+                    else
+                    {
+                        if (schemeDayNumber <= 75) bonusPercentage = 7.5m;
+                        else if (schemeDayNumber <= 150) bonusPercentage = 5.5m;
+                        else if (schemeDayNumber <= 225) bonusPercentage = 3.5m;
+                        else if (schemeDayNumber <= 330) bonusPercentage = 1.5m;
+                        else bonusPercentage = 0;
+                    }
+
+                    bonusGoldMg = (long)(goldWeightMg * (bonusPercentage / 100m));
+                    bonusAmountPaise = (long)(baseAmountPaise * (bonusPercentage / 100m));
+                }
+
+                long totalGoldCreditedMg = goldWeightMg + bonusGoldMg;
+
+                // 5. Atomic Wallet Debit
+                var walletTx = await _walletService.ProcessTransactionAsync(new WalletTransactionRequest
+                {
+                    UserId = request.UserId,
+                    AmountPaise = request.TotalAmountPaise,
+                    TransactionType = "DEBIT",
+                    ReferenceId = "GOLD_BUY_" + Guid.NewGuid().ToString("N")[..8],
+                    Description = $"Bought {goldWeightMg}mg of Gold",
+                    IpAddress = request.IpAddress,
+                    DeviceFingerprint = request.DeviceFingerprint
+                });
+
+                // 6. Record Gold Transaction
+                var txId = Guid.NewGuid();
+                var goldTx = new GoldTransaction
+                {
+                    Id = txId,
+                    UserId = request.UserId,
+                    TransactionType = "BUY",
+                    GoldWeightMg = goldWeightMg,
+                    PricePerGmPaise = effectiveBuyPricePaise,
+                    TotalAmountPaise = totalAmountPaise,
+                    IpAddress = request.IpAddress,
+                    DeviceFingerprint = request.DeviceFingerprint,
+                    RateSource = effectiveSource,
+                    RateTimestamp = effectiveUpdatedAt,
+                    UserSchemeId = activeScheme?.Id,
+                    BonusAmountPaise = bonusAmountPaise,
+                    BonusGoldMg = bonusGoldMg,
+                    Invoice = new Invoice
+                    {
+                        TransactionId = txId,
+                        BaseAmountPaise = baseAmountPaise,
+                        GstAmountPaise = gstAmountPaise,
+                        TotalAmountPaise = totalAmountPaise,
+                        BonusPercentage = bonusPercentage,
+                        BonusAmountPaise = bonusAmountPaise,
+                        BonusGoldMg = bonusGoldMg
+                    }
+                };
+                await _goldRepository.RecordGoldTransactionAsync(goldTx);
+
+                if (bonusGoldMg > 0)
+                {
+                    await _goldRepository.RecordGoldTransactionAsync(new GoldTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = request.UserId,
+                        TransactionType = "BONUS",
+                        GoldWeightMg = bonusGoldMg,
+                        PricePerGmPaise = effectiveBuyPricePaise,
+                        TotalAmountPaise = 0,
+                        IpAddress = request.IpAddress,
+                        DeviceFingerprint = request.DeviceFingerprint,
+                        RateSource = "SCHEME_REWARD",
+                        RateTimestamp = effectiveUpdatedAt,
+                        UserSchemeId = activeScheme?.Id
+                    });
+                }
+
+                // 7. Update Scheme and Cache
+                if (activeScheme != null)
+                {
+                    activeScheme.AccumulatedGoldMg += totalGoldCreditedMg;
+                    activeScheme.InstallmentsPaid += 1;
+                    activeScheme.NextDueDate = activeScheme.PaymentFrequency.ToLower() switch
+                    {
+                        "daily" => activeScheme.NextDueDate.AddDays(1),
+                        "weekly" => activeScheme.NextDueDate.AddDays(7),
+                        _ => activeScheme.NextDueDate.AddMonths(1)
+                    };
+                    activeScheme.UpdatedAt = DateTime.UtcNow;
+                    await _schemeRepository.UpdateUserSchemeAsync(activeScheme);
+
+                    // Record regular installment investment ledger record
+                    var installmentInv = new SchemeInvestment
+                    {
+                        Id = Guid.NewGuid(),
+                        UserSchemeId = activeScheme.Id,
+                        UserId = request.UserId,
+                        TransactionType = "INSTALLMENT",
+                        InstallmentNumber = activeScheme.InstallmentsPaid,
+                        AmountPaise = totalAmountPaise,
+                        BaseAmountPaise = baseAmountPaise,
+                        GstAmountPaise = gstAmountPaise,
+                        GoldWeightMg = goldWeightMg,
+                        PricePerGmPaise = effectiveBuyPricePaise,
+                        BonusPercentage = bonusPercentage,
+                        BonusAmountPaise = bonusAmountPaise,
+                        BonusGoldMg = bonusGoldMg,
+                        RazorpayPaymentId = request.RazorpayPaymentId,
+                        Status = "COMPLETED",
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    await _schemeRepository.RecordSchemeInvestmentAsync(installmentInv);
+
+                    if (bonusGoldMg > 0)
+                    {
+                        // Record separate BONUS transaction entry
+                        var bonusInv = new SchemeInvestment
+                        {
+                            Id = Guid.NewGuid(),
+                            UserSchemeId = activeScheme.Id,
+                            UserId = request.UserId,
+                            TransactionType = "BONUS",
+                            InstallmentNumber = activeScheme.InstallmentsPaid,
+                            AmountPaise = 0,
+                            BaseAmountPaise = 0,
+                            GstAmountPaise = 0,
+                            GoldWeightMg = bonusGoldMg,
+                            PricePerGmPaise = effectiveBuyPricePaise,
+                            BonusPercentage = bonusPercentage,
+                            BonusAmountPaise = bonusAmountPaise,
+                            BonusGoldMg = bonusGoldMg,
+                            RazorpayPaymentId = request.RazorpayPaymentId,
+                            Status = "COMPLETED",
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        await _schemeRepository.RecordSchemeInvestmentAsync(bonusInv);
+                    }
+                }
+
+                long updatedGoldBalance = await _goldRepository.CalculateGoldBalanceAsync(request.UserId);
+                await _goldRepository.UpdateGoldCacheAsync(request.UserId, updatedGoldBalance);
+
+                await _unitOfWork.CommitAsync();
+
+                await _notificationService.SendNotificationAsync(request.UserId, "Gold Purchased! ✨", $"Successfully purchased {(goldWeightMg / 1000.0):F4}g of gold.", "GOLD_BUY");
+
+                try
+                {
+                    var user = await _authRepository.GetUserByIdAsync(request.UserId);
+                    if (user != null && !string.IsNullOrEmpty(user.Email))
+                    {
+                        var receiptData = new
+                        {
+                            UserName = user.FullName ?? "Customer",
+                            AmountPaise = totalAmountPaise,
+                            GoldWeightMg = totalGoldCreditedMg,
+                            TransactionId = txId.ToString(),
+                            Date = DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt")
+                        };
+                        await _emailService.SendTemplatedAsync(user.Email, user.FullName ?? "Customer", EmailTemplate.GoldPurchaseReceipt, receiptData);
+                    }
+                }
+                catch { /* ignore email error */ }
+
+                var status = await _goldRepository.GetGoldStatusAsync(request.UserId);
+                return new GoldTransactionResponse
+                {
+                    Success = true,
+                    TransactionId = txId.ToString(),
+                    GoldWeightMg = goldWeightMg,
+                    PricePerGmPaise = effectiveBuyPricePaise,
+                    TotalAmountPaise = totalAmountPaise,
+                    BonusGoldMg = bonusGoldMg,
+                    BonusAmountPaise = bonusAmountPaise,
+                    NewWalletBalancePaise = walletTx.BalancePaise,
+                    NewGoldBalanceMg = updatedGoldBalance,
+                    RedeemableGoldMg = status.RedeemableMg
+                };
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<GoldTransactionResponse> SellGoldAsync(SellGoldRequest request)
+        {
+            await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                // 1. Check Limits & Compliance
+                var status = await _goldRepository.GetGoldStatusAsync(request.UserId);
+                if (status.RedeemableMg < request.GoldWeightMg)
+                {
+                    return new GoldTransactionResponse { Success = false, Message = "Insufficient redeemable gold." };
+                }
+
+                var compliance = await _complianceService.ValidateRedemptionAsync(request.UserId, request.GoldWeightMg, "CASH_OUT");
+                if (!compliance.IsAllowed)
+                {
+                    return new GoldTransactionResponse { Success = false, Message = compliance.Message };
+                }
+
+                // 2. Pricing Logic
+                long effectiveSellPricePaise;
+                DateTimeOffset effectiveUpdatedAt;
+                string effectiveSource;
+                
+                if (!string.IsNullOrEmpty(request.PriceLockId))
+                {
+                    var lockedPrice = await _priceManager.GetLockedPriceAsync(request.PriceLockId);
+                    if (lockedPrice == null)
+                        return new GoldTransactionResponse { Success = false, Message = "Price lock expired or invalid." };
+                    
+                    effectiveSellPricePaise = (long)(lockedPrice.SellPrice * 100);
+                    effectiveUpdatedAt = lockedPrice.Timestamp;
+                    effectiveSource = "LOCKED_" + lockedPrice.Source;
+                }
+                else
+                {
+                    var currentPrice = await GetCurrentPriceAsync();
+                    effectiveSellPricePaise = currentPrice.SellPricePaise;
+                    effectiveUpdatedAt = currentPrice.UpdatedAt;
+                    effectiveSource = currentPrice.Source;
+                }
+
+                long totalAmountPaise = (request.GoldWeightMg * effectiveSellPricePaise) / 1000;
+
+                // 3. Record Gold De-listing (Atomic)
+                var goldTx = new GoldTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = request.UserId,
+                    TransactionType = "SELL",
+                    GoldWeightMg = request.GoldWeightMg,
+                    PricePerGmPaise = effectiveSellPricePaise,
+                    TotalAmountPaise = totalAmountPaise,
+                    IpAddress = request.IpAddress,
+                    DeviceFingerprint = request.DeviceFingerprint,
+                    RateSource = effectiveSource,
+                    RateTimestamp = effectiveUpdatedAt
+                };
+                await _goldRepository.RecordGoldTransactionAsync(goldTx);
+
+                // 4. Credit Wallet
+                var walletTx = await _walletService.ProcessTransactionAsync(new WalletTransactionRequest
+                {
+                    UserId = request.UserId,
+                    AmountPaise = totalAmountPaise,
+                    TransactionType = "CREDIT",
+                    ReferenceId = "GOLD_SELL_" + Guid.NewGuid().ToString("N")[..8],
+                    Description = $"Sold {request.GoldWeightMg}mg of Gold",
+                    IpAddress = request.IpAddress,
+                    DeviceFingerprint = request.DeviceFingerprint
+                });
+
+                // 5. Update Balance Cache
+                long updatedGoldBalance = await _goldRepository.CalculateGoldBalanceAsync(request.UserId);
+                await _goldRepository.UpdateGoldCacheAsync(request.UserId, updatedGoldBalance);
+
+                await _unitOfWork.CommitAsync();
+
+                await _notificationService.SendNotificationAsync(request.UserId, "Gold Sold! 💰", $"Successfully sold {(request.GoldWeightMg / 1000.0):F4}g of gold.", "GOLD_SELL");
+
+                try
+                {
+                    var user = await _authRepository.GetUserByIdAsync(request.UserId);
+                    if (user != null && !string.IsNullOrEmpty(user.Email))
+                    {
+                        var receiptData = new
+                        {
+                            UserName = user.FullName ?? "Customer",
+                            AmountPaise = totalAmountPaise,
+                            GoldWeightMg = request.GoldWeightMg,
+                            TransactionId = goldTx.Id.ToString(),
+                            Date = DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt")
+                        };
+                        await _emailService.SendTemplatedAsync(user.Email, user.FullName ?? "Customer", EmailTemplate.GoldRedeemed, receiptData);
+                    }
+                }
+                catch { /* ignore email error */ }
+
+                var newStatus = await _goldRepository.GetGoldStatusAsync(request.UserId);
+                return new GoldTransactionResponse
+                {
+                    Success = true,
+                    TransactionId = goldTx.Id.ToString(),
+                    GoldWeightMg = request.GoldWeightMg,
+                    PricePerGmPaise = effectiveSellPricePaise,
+                    TotalAmountPaise = totalAmountPaise,
+                    NewWalletBalancePaise = walletTx.BalancePaise,
+                    NewGoldBalanceMg = updatedGoldBalance,
+                    RedeemableGoldMg = newStatus.RedeemableMg
+                };
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<(long LockedMg, long MaturedRedeemableMg, long RedeemableMg, long RedeemedMg)> GetGoldStatusAsync(Guid userId)
+        {
+            return await _goldRepository.GetGoldStatusAsync(userId);
+        }
+
+        public class MetalPriceApiResponse
+        {
+            public bool Success { get; set; }
+            public MetalPriceRates Rates { get; set; }
+        }
+
+        public class MetalPriceRates
+        {
+            public decimal INR { get; set; }
+            public decimal USDINR { get; set; }
+            public decimal USDXAU { get; set; }
+            public decimal XAU { get; set; }
+        }
+    }
+}

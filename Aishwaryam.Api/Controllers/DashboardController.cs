@@ -1,0 +1,175 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Aishwaryam.Infrastructure.Data;
+using Aishwaryam.Domain.Entities;
+using Aishwaryam.Application.Interfaces.Services;
+
+namespace Aishwaryam.Api.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class DashboardController : ControllerBase
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly IGoldPriceManager _priceManager;
+        private readonly IGoldService _goldService;
+        private readonly ISchemeService _schemeService;
+
+        public DashboardController(
+            ApplicationDbContext context,
+            IGoldPriceManager priceManager,
+            IGoldService goldService,
+            ISchemeService schemeService)
+        {
+            _context = context;
+            _priceManager = priceManager;
+            _goldService = goldService;
+            _schemeService = schemeService;
+        }
+
+        [HttpGet("overview/{userId}")]
+        public async Task<IActionResult> GetDashboardOverview(Guid userId)
+        {
+            // 1. Get Live Gold Price
+            var price = await _priceManager.GetPriceAsync();
+            long buyPricePaise = (long)(price.BuyPrice * 100);
+            long sellPricePaise = (long)(price.SellPrice * 100);
+            long price24KPaise = (long)(price.Price24K * 100);
+            long price22KPaise = (long)(price.Price22K * 100);
+            string priceUpdatedAt = price.Timestamp.ToString("yyyy-MM-ddTHH:mm:ssZ");
+
+            // 2. Get Gold Holding
+            var holding = await _context.GoldHoldings.FirstOrDefaultAsync(h => h.UserId == userId);
+            long goldBalanceMg = holding?.GoldBalanceMg ?? 0;
+            long investedAmountPaise = (goldBalanceMg * buyPricePaise) / 1000;
+            long currentValuePaise = investedAmountPaise;
+
+            // 3. Get Recent Transactions
+            var txs = await _context.GoldTransactions
+                .Where(t => t.UserId == userId)
+                .OrderByDescending(t => t.CreatedAt)
+                .Take(5)
+                .Select(t => new {
+                    transactionId = t.Id.ToString(),
+                    type = t.TransactionType,
+                    goldWeightMg = (long)t.GoldWeightMg,
+                    amountPaise = (long)t.TotalAmountPaise,
+                    createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ")
+                })
+                .ToListAsync();
+
+            // 4. Get Active Banners
+            var banners = await _context.AppBanners
+                .Where(b => b.IsActive)
+                .OrderBy(b => b.DisplayOrder)
+                .Select(b => new {
+                    id = b.Id.ToString(),
+                    title = b.Title,
+                    imageBase64 = b.ImageBase64,
+                    tapActionUrl = b.TapActionUrl
+                })
+                .ToListAsync();
+
+            // 5. Get Active Schemes (if any)
+            var activeScheme = await _context.UserSchemes
+                .Where(s => s.UserId == userId && (s.Status == "Active" || s.Status == "Matured"))
+                .OrderByDescending(s => s.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            bool hasActiveScheme = activeScheme != null;
+            string? schemePlanName = activeScheme?.PlanName;
+            int schemeInstallmentsPaid = activeScheme?.InstallmentsPaid ?? 0;
+            int schemeTotalInstallments = activeScheme?.TotalInstallments ?? 0;
+            long schemeInstallmentAmountPaise = activeScheme?.InstallmentAmountPaise ?? 0;
+            string? schemeNextDueDate = activeScheme?.NextDueDate.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            bool autoPayEnabled = activeScheme?.AutoPayEnabled ?? false;
+
+            return Ok(new {
+                goldBalanceMg,
+                buyPricePaise,
+                sellPricePaise,
+                price24KPaise,
+                price22KPaise,
+                priceUpdatedAt,
+                investedAmountPaise,
+                currentValuePaise,
+                returnPercentage = 0.0,
+                recentTransactions = txs,
+                activeBanners = banners,
+                hasActiveScheme,
+                schemePlanName,
+                schemeInstallmentsPaid,
+                schemeTotalInstallments,
+                schemeInstallmentAmountPaise,
+                schemeNextDueDate,
+                goldAddedTodayMg = 0L,
+                autoPayEnabled
+            });
+        }
+
+        [HttpGet("portfolio/{userId}")]
+        public async Task<IActionResult> GetPortfolio(Guid userId)
+        {
+            var holding = await _context.GoldHoldings.FirstOrDefaultAsync(h => h.UserId == userId);
+            long goldBalanceMg = holding?.GoldBalanceMg ?? 0;
+
+            var price = await _priceManager.GetPriceAsync();
+            long buyPricePaise = (long)(price.BuyPrice * 100);
+            long investedAmountPaise = (goldBalanceMg * buyPricePaise) / 1000;
+            long currentValuePaise = investedAmountPaise;
+
+            var status = await _goldService.GetGoldStatusAsync(userId);
+
+            return Ok(new {
+                userId = userId.ToString(),
+                goldBalanceMg,
+                investedAmountPaise,
+                currentValuePaise,
+                returnPercentage = 0.0,
+                lockedGoldMg = status.LockedMg,
+                maturedRedeemableGoldMg = status.MaturedRedeemableMg,
+                redeemableGoldMg = status.RedeemableMg,
+                redeemedGoldMg = status.RedeemedMg
+            });
+        }
+
+        [HttpGet("transactions/{userId}")]
+        public async Task<IActionResult> GetRecentTransactions(Guid userId)
+        {
+            var txs = await _context.GoldTransactions
+                .Where(t => t.UserId == userId)
+                .OrderByDescending(t => t.CreatedAt)
+                .Select(t => new {
+                    transactionId = t.Id.ToString(),
+                    type = t.TransactionType,
+                    goldWeightMg = (long)t.GoldWeightMg,
+                    amountPaise = (long)t.TotalAmountPaise,
+                    createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ")
+                })
+                .ToListAsync();
+
+            return Ok(txs);
+        }
+
+        [HttpGet("config")]
+        public async Task<IActionResult> GetConfig()
+        {
+            var config = await _context.AppConfigs.FirstOrDefaultAsync();
+            if (config == null)
+            {
+                config = new AppConfig();
+                _context.AppConfigs.Add(config);
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(new {
+                faqJson = config.FaqJson,
+                referralBonusMsg = config.ReferralBonusMsg
+            });
+        }
+    }
+}

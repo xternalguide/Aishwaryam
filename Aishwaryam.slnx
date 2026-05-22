@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Aishwaryam.Api/Aishwaryam.Api.csproj" />
+  <Project Path="Aishwaryam.Application/Aishwaryam.Application.csproj" />
+  <Project Path="Aishwaryam.Domain/Aishwaryam.Domain.csproj" />
+  <Project Path="Aishwaryam.Infrastructure/Aishwaryam.Infrastructure.csproj" />
+</Solution>

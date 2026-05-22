@@ -1,0 +1,11 @@
+.vs/
+bin/
+obj/
+*.user
+*.log
+backend_log.txt
+LoadTests/
+Backup/
+**/.vs/
+**/bin/
+**/obj/
