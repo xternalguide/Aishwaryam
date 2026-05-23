@@ -40,15 +40,7 @@ namespace Aishwaryam.Application.Services
                     phone = "+91" + phone;
                 }
 
-                // Test Bypass: If it is a local developer/debug test number, immediately return success!
-                if (phone == "+916369344011" || 
-                    phone == "+919999999999" || 
-                    phone == "6369344011" || 
-                    phone.StartsWith("+91900000000") || 
-                    phone.StartsWith("900000000"))
-                {
-                    return new AuthResponse { Success = true, Message = "OTP Sent Successfully (Bypass Mode)." };
-                }
+
 
                 // Get Supabase credentials from configuration
                 var supabaseUrl = _configuration["Supabase:Url"] ?? "https://jmpgjrwtguninjmovawu.supabase.co";
@@ -87,23 +79,8 @@ namespace Aishwaryam.Application.Services
                 {
                     phone = "+91" + phone;
                 }
-                // Test Bypass for specific numbers and UAT test accounts (DEBUG ONLY)
-                if (request.Otp == "123456" && (
-                    phone == "+916369344011" || 
-                    phone == "+919999999999" || 
-                    phone == "6369344011" || 
-                    phone.StartsWith("+91900000000") || 
-                    phone == "+919000000010" ||
-                    phone.StartsWith("900000000") || 
-                    phone == "9000000010"
-                ))
-                {
-                    // Master OTP bypass. Skip Supabase verification.
-                }
-                else
-                {
-                    // Get Supabase credentials from configuration
-                    var supabaseUrl = _configuration["Supabase:Url"] ?? "https://jmpgjrwtguninjmovawu.supabase.co";
+                // Get Supabase credentials from configuration
+                var supabaseUrl = _configuration["Supabase:Url"] ?? "https://jmpgjrwtguninjmovawu.supabase.co";
                     var supabaseAnonKey = _configuration["Supabase:AnonKey"] ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptcGdqcnd0Z3VuaW5qbW92YXd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzY2MzMsImV4cCI6MjA1NjgxMjYzM30.6t_4vG745V2D-Z3D7s9NpeG3h8JvVv8tF_3B79lT9e8";
 
                     using var client = new HttpClient();
@@ -121,7 +98,6 @@ namespace Aishwaryam.Application.Services
                         var errorContent = await response.Content.ReadAsStringAsync();
                         return new AuthResponse { Success = false, Message = $"OTP verification failed via Supabase: {errorContent}" };
                     }
-                }
 
                 // Supabase verified it successfully! Now check/create the user in our PostgreSQL database.
                 var cleanPhone = request.PhoneNumber.Replace("+91", "").Trim();
