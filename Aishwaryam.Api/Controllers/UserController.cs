@@ -57,7 +57,8 @@ namespace Aishwaryam.Api.Controllers
                 user.BiometricEnabled,
                 user.ReferralCode,
                 DateOfBirth = user.DateOfBirth?.ToString("yyyy-MM-dd"),
-                user.NomineeName
+                user.NomineeName,
+                user.PreferredLanguage
             });
         }
 
@@ -90,6 +91,7 @@ namespace Aishwaryam.Api.Controllers
             }
 
             if (!string.IsNullOrEmpty(updateObj.NomineeName)) user.NomineeName = updateObj.NomineeName;
+            if (!string.IsNullOrEmpty(updateObj.PreferredLanguage)) user.PreferredLanguage = updateObj.PreferredLanguage;
             if (updateObj.DateOfBirth.HasValue) user.DateOfBirth = updateObj.DateOfBirth.Value;
             if (updateObj.BiometricEnabled.HasValue) user.BiometricEnabled = updateObj.BiometricEnabled.Value;
 
@@ -135,7 +137,7 @@ namespace Aishwaryam.Api.Controllers
             try {
                 await Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(
                     _context.Database,
-                    "ALTER TABLE users ADD COLUMN mpin_hash character varying(255); ALTER TABLE users ADD COLUMN biometric_enabled boolean DEFAULT false; ALTER TABLE users ADD COLUMN referral_code character varying(50); ALTER TABLE users ADD COLUMN date_of_birth date; ALTER TABLE users ADD COLUMN nominee_name character varying(100);"
+                    "ALTER TABLE users ADD COLUMN IF NOT EXISTS mpin_hash character varying(255); ALTER TABLE users ADD COLUMN IF NOT EXISTS biometric_enabled boolean DEFAULT false; ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code character varying(50); ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth date; ALTER TABLE users ADD COLUMN IF NOT EXISTS nominee_name character varying(100); ALTER TABLE users ADD COLUMN IF NOT EXISTS preferred_language character varying(10) DEFAULT 'en';"
                 );
                 return Ok("Migrated");
             } catch (Exception e) {
@@ -151,5 +153,6 @@ namespace Aishwaryam.Api.Controllers
         public string? NomineeName { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public bool? BiometricEnabled { get; set; }
+        public string? PreferredLanguage { get; set; }
     }
 }
