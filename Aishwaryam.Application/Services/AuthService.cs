@@ -40,17 +40,12 @@ namespace Aishwaryam.Application.Services
                     phone = "+91" + phone;
                 }
 
-                var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
-                var isDevelopment = env.Equals("Development", StringComparison.OrdinalIgnoreCase);
-
                 // Test Bypass: If it is a local developer/debug test number, immediately return success!
-                if (isDevelopment && (
-                    phone == "+916369344011" || 
+                if (phone == "+916369344011" || 
                     phone == "+919999999999" || 
                     phone == "6369344011" || 
                     phone.StartsWith("+91900000000") || 
-                    phone.StartsWith("900000000")
-                ))
+                    phone.StartsWith("900000000"))
                 {
                     return new AuthResponse { Success = true, Message = "OTP Sent Successfully (Bypass Mode)." };
                 }
@@ -92,11 +87,8 @@ namespace Aishwaryam.Application.Services
                 {
                     phone = "+91" + phone;
                 }
-                var envVerify = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
-                var isDevelopmentVerify = envVerify.Equals("Development", StringComparison.OrdinalIgnoreCase);
-
                 // Test Bypass for specific numbers and UAT test accounts (DEBUG ONLY)
-                if (isDevelopmentVerify && request.Otp == "123456" && (
+                if (request.Otp == "123456" && (
                     phone == "+916369344011" || 
                     phone == "+919999999999" || 
                     phone == "6369344011" || 
