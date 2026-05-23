@@ -52,6 +52,7 @@ namespace Aishwaryam.Infrastructure.Data
         public DbSet<SchemeInvestment> SchemeInvestments { get; set; }
         public DbSet<SchemeRedemption> SchemeRedemptions { get; set; }
         public DbSet<RedemptionStatusHistory> RedemptionStatusHistories { get; set; }
+        public DbSet<ChatbotLog> ChatbotLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -664,6 +665,23 @@ namespace Aishwaryam.Infrastructure.Data
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasIndex(e => e.SchemeRedemptionId);
+            });
+
+            // ChatbotLogs
+            modelBuilder.Entity<ChatbotLog>(entity =>
+            {
+                entity.ToTable("chatbot_logs");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity.Property(e => e.UserMessage).HasColumnName("user_message").IsRequired();
+                entity.Property(e => e.BotResponse).HasColumnName("bot_response").IsRequired();
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasOne(d => d.User)
+                    .WithMany()
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

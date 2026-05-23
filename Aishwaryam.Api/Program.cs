@@ -511,6 +511,14 @@ using (var scope = app.Services.CreateScope())
     TryExec("CREATE INDEX IF NOT EXISTS \"IX_scheme_redemptions_user_scheme_id\" ON scheme_redemptions(user_scheme_id);", "IX_scheme_redemptions_user_scheme_id");
     TryExec("CREATE INDEX IF NOT EXISTS \"IX_redemption_status_history_scheme_redemption_id\" ON redemption_status_history(scheme_redemption_id);", "IX_redemption_status_history_scheme_redemption_id");
 
+    TryExec(@"CREATE TABLE IF NOT EXISTS chatbot_logs (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id uuid REFERENCES users(id) ON DELETE CASCADE,
+        user_message text NOT NULL,
+        bot_response text NOT NULL,
+        created_at timestamptz DEFAULT CURRENT_TIMESTAMP
+    );", "chatbot_logs");
+
     Console.WriteLine("[DB-INIT] All database migrations completed.");
 }
 // ─────────────────────────────────────────────────────────────────────────────
