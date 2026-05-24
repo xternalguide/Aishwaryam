@@ -19,6 +19,7 @@ namespace Aishwaryam.Tests.Resilience
         private readonly Mock<INotificationDispatcher> _mockNotificationDispatcher;
         private readonly Mock<IAuthRepository> _mockAuthRepo;
         private readonly Mock<IBankingRepository> _mockBankingRepo;
+        private readonly Mock<IGoldRepository> _mockGoldRepo;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<ILogger<PaymentFulfillmentService>> _mockLogger;
         private readonly PaymentFulfillmentService _fulfillmentService;
@@ -30,6 +31,7 @@ namespace Aishwaryam.Tests.Resilience
             _mockNotificationDispatcher = new Mock<INotificationDispatcher>();
             _mockAuthRepo = new Mock<IAuthRepository>();
             _mockBankingRepo = new Mock<IBankingRepository>();
+            _mockGoldRepo = new Mock<IGoldRepository>();
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockLogger = new Mock<ILogger<PaymentFulfillmentService>>();
 
@@ -40,6 +42,7 @@ namespace Aishwaryam.Tests.Resilience
                 _mockNotificationDispatcher.Object,
                 _mockAuthRepo.Object,
                 _mockBankingRepo.Object,
+                _mockGoldRepo.Object,
                 _mockLogger.Object
             );
         }

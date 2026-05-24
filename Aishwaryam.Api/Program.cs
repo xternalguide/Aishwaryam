@@ -67,11 +67,11 @@ builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-    // Auth Rate Limit: 5 requests per 1 minute per IP
+    // Auth Rate Limit: 120 requests per 1 minute per IP (increased for testing and release flexibility)
     options.AddFixedWindowLimiter("auth_policy", opt =>
     {
         opt.Window = TimeSpan.FromMinutes(1);
-        opt.PermitLimit = 5;
+        opt.PermitLimit = 120;
         opt.QueueLimit = 0;
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
     });

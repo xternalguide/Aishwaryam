@@ -129,7 +129,8 @@ namespace Aishwaryam.Api.Controllers
                 var receipt = await _fulfillmentService.FulfillPaymentAsync(
                     request.RazorpayOrderId, 
                     request.RazorpayPaymentId, 
-                    "CLIENT_VERIFY"
+                    "CLIENT_VERIFY",
+                    request.UserId
                 );
 
                 return Ok(receipt);

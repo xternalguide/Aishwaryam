@@ -131,7 +131,7 @@ namespace Aishwaryam.Application.Services
                     RefreshToken = hashedRefreshToken,
                     IpAddress = request.IpAddress,
                     DeviceFingerprint = request.DeviceFingerprint,
-                    ExpiresAt = DateTimeOffset.UtcNow.AddDays(30)
+                    ExpiresAt = DateTimeOffset.UtcNow.AddDays(365)
                 };
 
                 await _authRepository.CreateAuthSessionAsync(session);
@@ -214,7 +214,7 @@ namespace Aishwaryam.Application.Services
                     RefreshToken = hashedRefreshToken,
                     IpAddress = request.IpAddress,
                     DeviceFingerprint = request.DeviceFingerprint,
-                    ExpiresAt = DateTimeOffset.UtcNow.AddDays(30)
+                    ExpiresAt = DateTimeOffset.UtcNow.AddDays(365)
                 };
 
                 await _authRepository.CreateAuthSessionAsync(session);
@@ -290,7 +290,7 @@ namespace Aishwaryam.Application.Services
                 RefreshToken = hashedRefreshToken,
                 IpAddress = request.IpAddress,
                 DeviceFingerprint = request.DeviceFingerprint,
-                ExpiresAt = DateTimeOffset.UtcNow.AddDays(30)
+                ExpiresAt = DateTimeOffset.UtcNow.AddDays(365)
             };
 
             await _authRepository.CreateAuthSessionAsync(session);
@@ -408,7 +408,7 @@ namespace Aishwaryam.Application.Services
                                 IpAddress = ipAddress,
                                 DeviceFingerprint = request.DeviceFingerprint,
                                 UserAgent = userAgent,
-                                ExpiresAt = DateTimeOffset.UtcNow.AddDays(30),
+                                ExpiresAt = DateTimeOffset.UtcNow.AddDays(365),
                                 IsRevoked = false
                             };
                             await _authRepository.CreateAuthSessionAsync(graceSession);
@@ -465,7 +465,7 @@ namespace Aishwaryam.Application.Services
                 IpAddress = ipAddress,
                 DeviceFingerprint = request.DeviceFingerprint,
                 UserAgent = userAgent,
-                ExpiresAt = DateTimeOffset.UtcNow.AddDays(30), // Sliding expiration
+                ExpiresAt = DateTimeOffset.UtcNow.AddDays(365), // Sliding expiration
                 IsRevoked = false
             };
 

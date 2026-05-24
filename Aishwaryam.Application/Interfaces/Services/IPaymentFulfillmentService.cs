@@ -10,6 +10,6 @@ namespace Aishwaryam.Application.Interfaces.Services
         /// Fulfills a payment by crediting the wallet and purchasing gold.
         /// This method is idempotent and handles database transactions.
         /// </summary>
-        Task<GoldTransactionResponse> FulfillPaymentAsync(string razorpayOrderId, string razorpayPaymentId, string source);
+        Task<GoldTransactionResponse> FulfillPaymentAsync(string razorpayOrderId, string razorpayPaymentId, string source, Guid? userId = null);
     }
 }

@@ -43,28 +43,23 @@ namespace Aishwaryam.Infrastructure.Services
 
         public async Task DispatchAsync(NotificationPayload payload)
         {
-            var tasks = new List<Task>();
-
             // ── 1. In-App + FCM Push ─────────────────────────────────────────
             if (payload.SendPush)
             {
-                tasks.Add(SendPushSafe(payload));
+                await SendPushSafe(payload);
             }
 
             // ── 2. SMS ───────────────────────────────────────────────────────
             if (payload.SendSms && !string.IsNullOrEmpty(payload.ToPhone) && !string.IsNullOrEmpty(payload.SmsText))
             {
-                tasks.Add(SendSmsSafe(payload.ToPhone, payload.SmsText));
+                await SendSmsSafe(payload.ToPhone, payload.SmsText);
             }
 
             // ── 3. Email ─────────────────────────────────────────────────────
             if (payload.SendEmail && !string.IsNullOrEmpty(payload.ToEmail) && payload.EmailTemplate.HasValue)
             {
-                tasks.Add(SendEmailSafe(payload));
+                await SendEmailSafe(payload);
             }
-
-            // Run all channels in parallel — no channel blocks another
-            await Task.WhenAll(tasks);
         }
 
         // ── Private safe wrappers (never throw) ─────────────────────────────

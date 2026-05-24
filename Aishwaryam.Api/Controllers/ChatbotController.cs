@@ -88,6 +88,8 @@ namespace Aishwaryam.Api.Controllers
             systemInstructions.AppendLine("2. Always relate recommendations to 'Aishwaryam @ your home' policies. For example, if the current gold price drops, suggest that they purchase gold directly or pay their scheme installments now since it is highly cost-effective and will maximize their accumulated gold weight.");
             systemInstructions.AppendLine("3. If the user asks a general domain question (e.g. general news, recipes, global market details), answer it using Google/LLM search knowledge, but seamlessly ground the conclusion or wrapping comments back to gold savings or their personal relationship with Aishwaryam.");
             systemInstructions.AppendLine("4. Under no circumstances provide actual stock or crypto advice outside of Gold savings.");
+            systemInstructions.AppendLine("5. The official name of this app is 'Aishwaryam @ your home' (ஐஸ்வர்யம் @ யுவர் ஹோம்). You must ALWAYS refer to the app/platform as 'Aishwaryam @ your home' (or 'ஐஸ்வர்யம் @ யுவர் ஹோம்' in Tamil). Never use 'Akshayam', 'Akshayam Jewellery', 'Akshayam at your home', or any other brand name. The '@' symbol in the brand name is mandatory.");
+            systemInstructions.AppendLine("6. Do NOT greet the user with 'Hello', 'Hi', 'Vanakkam', or mention their name at the start of your response, unless explicitly asked. Answer questions directly without greeting loops.");
 
             // 4. Invoke Gemini API
             var responseText = await CallGeminiApiAsync(systemInstructions.ToString(), request.Message);

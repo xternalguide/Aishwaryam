@@ -49,5 +49,12 @@ namespace Aishwaryam.Infrastructure.Repositories
             _context.Payments.Update(payment);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Payment> AddPaymentAsync(Payment payment)
+        {
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
+            return payment;
+        }
     }
 }

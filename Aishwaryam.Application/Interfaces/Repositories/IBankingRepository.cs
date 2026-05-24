@@ -12,5 +12,6 @@ namespace Aishwaryam.Application.Interfaces.Repositories
         Task<WithdrawalRequest> AddWithdrawalRequestAsync(WithdrawalRequest request);
         Task<Payment?> GetPaymentByOrderIdAsync(string orderId);
         Task UpdatePaymentAsync(Payment payment);
+        Task<Payment> AddPaymentAsync(Payment payment);
     }
 }
