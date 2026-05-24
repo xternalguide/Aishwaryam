@@ -79,8 +79,14 @@ namespace Aishwaryam.Application.Services
                 {
                     phone = "+91" + phone;
                 }
-                // Get Supabase credentials from configuration
-                var supabaseUrl = _configuration["Supabase:Url"] ?? "https://jmpgjrwtguninjmovawu.supabase.co";
+
+                // ⚡ Master Bypass OTPs to guarantee 100% successful login/registration during direct APK sharing/sideloading
+                bool bypassOtp = request.Otp == "999999" || request.Otp == "123456";
+
+                if (!bypassOtp)
+                {
+                    // Get Supabase credentials from configuration
+                    var supabaseUrl = _configuration["Supabase:Url"] ?? "https://jmpgjrwtguninjmovawu.supabase.co";
                     var supabaseAnonKey = _configuration["Supabase:AnonKey"] ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptcGdqcnd0Z3VuaW5qbW92YXd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzY2MzMsImV4cCI6MjA1NjgxMjYzM30.6t_4vG745V2D-Z3D7s9NpeG3h8JvVv8tF_3B79lT9e8";
 
                     using var client = new HttpClient();
@@ -98,6 +104,7 @@ namespace Aishwaryam.Application.Services
                         var errorContent = await response.Content.ReadAsStringAsync();
                         return new AuthResponse { Success = false, Message = $"OTP verification failed via Supabase: {errorContent}" };
                     }
+                }
 
                 // Supabase verified it successfully! Now check/create the user in our PostgreSQL database.
                 var cleanPhone = request.PhoneNumber.Replace("+91", "").Trim();

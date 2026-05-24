@@ -101,7 +101,7 @@ namespace Aishwaryam.Api.Controllers
             }
 
             var client = _httpClientFactory.CreateClient();
-            string endpointUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={_geminiApiKey}";
+            string endpointUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={_geminiApiKey}";
 
             var requestPayload = new
             {
