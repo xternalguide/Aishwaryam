@@ -127,5 +127,11 @@ namespace Aishwaryam.Infrastructure.Repositories
             
             return (locked, maturedRedeemable, maturedRedeemable + regularRedeemable, redeemed);
         }
+
+        public async Task<GoldTransaction?> GetTransactionByPaymentIdAsync(string paymentId)
+        {
+            return await _context.GoldTransactions
+                .FirstOrDefaultAsync(t => t.RazorpayPaymentId == paymentId);
+        }
     }
 }

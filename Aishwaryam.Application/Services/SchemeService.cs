@@ -60,7 +60,7 @@ namespace Aishwaryam.Application.Services
             // Real-time automatic maturity check for all schemes
             foreach (var s in activeSchemes.Where(sch => sch.Status == "Active"))
             {
-                if (s.MaturityDate <= DateTime.UtcNow)
+                if (s.MaturityDate <= DateTime.UtcNow || s.InstallmentsPaid >= s.TotalInstallments)
                 {
                     s.Status = "Matured";
                     s.UpdatedAt = DateTime.UtcNow;
@@ -384,7 +384,19 @@ namespace Aishwaryam.Application.Services
 
         private DateTime CalculateMaturityDate(string frequency, int installments)
         {
-            return DateTime.UtcNow.AddDays(330);
+            if (string.Equals(frequency, "Daily", StringComparison.OrdinalIgnoreCase))
+            {
+                return DateTime.UtcNow.AddDays(installments);
+            }
+            if (string.Equals(frequency, "Weekly", StringComparison.OrdinalIgnoreCase))
+            {
+                return DateTime.UtcNow.AddDays(installments * 7);
+            }
+            if (string.Equals(frequency, "Monthly", StringComparison.OrdinalIgnoreCase))
+            {
+                return DateTime.UtcNow.AddMonths(installments);
+            }
+            return DateTime.UtcNow.AddDays(330); // Default fallback
         }
 
         public async Task<IEnumerable<object>> GetMaturedSchemesForAdminAsync()

@@ -11,5 +11,6 @@ namespace Aishwaryam.Application.Interfaces.Repositories
         Task UpdateGoldCacheAsync(Guid userId, long newBalanceMg);
         Task<GoldTransaction> RecordGoldTransactionAsync(GoldTransaction transaction);
         Task<(long LockedMg, long MaturedRedeemableMg, long RedeemableMg, long RedeemedMg)> GetGoldStatusAsync(Guid userId);
+        Task<GoldTransaction?> GetTransactionByPaymentIdAsync(string paymentId);
     }
 }

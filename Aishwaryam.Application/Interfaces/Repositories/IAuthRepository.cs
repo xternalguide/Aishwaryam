@@ -19,5 +19,6 @@ namespace Aishwaryam.Application.Interfaces.Repositories
         Task UpdateUserAsync(User user);
         Task<bool> IsIdempotencyKeyUsedAsync(string key);
         Task SaveIdempotencyKeyAsync(IdempotencyKey key);
+        Task<AuthSession?> GetLatestActiveSessionByUserIdAsync(Guid userId);
     }
 }

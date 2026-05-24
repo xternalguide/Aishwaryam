@@ -106,5 +106,13 @@ namespace Aishwaryam.Infrastructure.Repositories
             _context.IdempotencyKeys.Add(key);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<AuthSession?> GetLatestActiveSessionByUserIdAsync(Guid userId)
+        {
+            return await _context.AuthSessions
+                .Where(s => s.UserId == userId && !s.IsRevoked && s.ExpiresAt > DateTimeOffset.UtcNow)
+                .OrderByDescending(s => s.CreatedAt)
+                .FirstOrDefaultAsync();
+        }
     }
 }

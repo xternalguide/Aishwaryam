@@ -19,6 +19,7 @@ namespace Aishwaryam.Application.Services
         private readonly INotificationDispatcher _dispatcher;
         private readonly IAuthRepository _authRepository; // For IdempotencyKeys
         private readonly IBankingRepository _bankingRepository; // For Payments
+        private readonly IGoldRepository _goldRepository; // For fetching already processed receipts
         private readonly ILogger<PaymentFulfillmentService> _logger;
 
         public PaymentFulfillmentService(
@@ -28,6 +29,7 @@ namespace Aishwaryam.Application.Services
             INotificationDispatcher dispatcher,
             IAuthRepository authRepository,
             IBankingRepository bankingRepository,
+            IGoldRepository goldRepository,
             ILogger<PaymentFulfillmentService> logger)
         {
             _unitOfWork = unitOfWork;
@@ -36,6 +38,7 @@ namespace Aishwaryam.Application.Services
             _dispatcher = dispatcher;
             _authRepository = authRepository;
             _bankingRepository = bankingRepository;
+            _goldRepository = goldRepository;
             _logger = logger;
         }
 
@@ -45,8 +48,20 @@ namespace Aishwaryam.Application.Services
             var isAlreadyProcessed = await _authRepository.IsIdempotencyKeyUsedAsync(razorpayPaymentId);
             if (isAlreadyProcessed)
             {
-                _logger.LogInformation("Payment {PaymentId} already fulfilled. Skipping.", razorpayPaymentId);
-                return new GoldTransactionResponse { Success = true, Message = "Already processed" };
+                _logger.LogInformation("Payment {PaymentId} already fulfilled. Returning existing receipt details.", razorpayPaymentId);
+                var existingTx = await _goldRepository.GetTransactionByPaymentIdAsync(razorpayPaymentId);
+                return new GoldTransactionResponse 
+                { 
+                    Success = true, 
+                    Message = "Already processed",
+                    TransactionId = existingTx?.Id.ToString(),
+                    GoldWeightMg = existingTx?.GoldWeightMg ?? 0L,
+                    TotalGoldCreditedMg = existingTx?.GoldWeightMg ?? 0L,
+                    PricePerGmPaise = existingTx?.PricePerGmPaise ?? 0L,
+                    TotalAmountPaise = existingTx?.TotalAmountPaise ?? 0L,
+                    BonusGoldMg = existingTx?.BonusGoldMg ?? 0L,
+                    BonusAmountPaise = existingTx?.BonusAmountPaise ?? 0L
+                };
             }
 
             // 2. Start Atomic Transaction

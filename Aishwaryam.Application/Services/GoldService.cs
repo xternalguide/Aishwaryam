@@ -183,6 +183,7 @@ namespace Aishwaryam.Application.Services
                     RateSource = effectiveSource,
                     RateTimestamp = effectiveUpdatedAt,
                     UserSchemeId = activeScheme?.Id,
+                    RazorpayPaymentId = request.RazorpayPaymentId,
                     BonusAmountPaise = bonusAmountPaise,
                     BonusGoldMg = bonusGoldMg,
                     Invoice = new Invoice
@@ -293,10 +294,15 @@ namespace Aishwaryam.Application.Services
                         var receiptData = new
                         {
                             UserName = user.FullName ?? "Customer",
-                            AmountPaise = totalAmountPaise,
-                            GoldWeightMg = totalGoldCreditedMg,
                             TransactionId = txId.ToString(),
-                            Date = DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt")
+                            GoldWeightMg = totalGoldCreditedMg.ToString(),
+                            AmountPaid = (totalAmountPaise / 100.0).ToString("F2"),
+                            GoldRatePerGm = (effectiveBuyPricePaise / 100.0).ToString("F2"),
+                            GstAmount = (gstAmountPaise / 100.0).ToString("F2"),
+                            BonusGoldMg = bonusGoldMg.ToString(),
+                            BonusPercent = bonusPercentage.ToString("F1"),
+                            NewGoldBalanceMg = updatedGoldBalance.ToString(),
+                            TransactionDate = DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt")
                         };
                         await _emailService.SendTemplatedAsync(user.Email, user.FullName ?? "Customer", EmailTemplate.GoldPurchaseReceipt, receiptData);
                     }
