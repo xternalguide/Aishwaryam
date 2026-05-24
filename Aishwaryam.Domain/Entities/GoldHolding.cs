@@ -6,6 +6,7 @@ namespace Aishwaryam.Domain.Entities
     {
         public Guid UserId { get; set; }
         public long GoldBalanceMg { get; set; } = 0; // 1g = 1000 mg
+        public long BonusGoldBalanceMg { get; set; } = 0; // Offer/event bonus gold (separate)
         public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 
         /// <summary>

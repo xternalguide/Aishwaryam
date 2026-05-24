@@ -14,6 +14,7 @@ namespace Aishwaryam.Domain.Entities
         public bool BiometricEnabled { get; set; } = false;
         public string? ReferralCode { get; set; }
         public DateTime? DateOfBirth { get; set; }
+        public DateTime? WeddingAnniversaryDate { get; set; }
         public string? NomineeName { get; set; }
         public string PreferredLanguage { get; set; } = "en";
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;

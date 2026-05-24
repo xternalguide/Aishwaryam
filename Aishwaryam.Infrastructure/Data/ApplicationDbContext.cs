@@ -93,6 +93,7 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.BiometricEnabled).HasColumnName("biometric_enabled").HasDefaultValue(false);
                 entity.Property(e => e.ReferralCode).HasColumnName("referral_code").HasMaxLength(50);
                 entity.Property(e => e.DateOfBirth).HasColumnName("date_of_birth").HasColumnType("date");
+                entity.Property(e => e.WeddingAnniversaryDate).HasColumnName("wedding_anniversary_date").HasColumnType("date");
                 entity.Property(e => e.NomineeName).HasColumnName("nominee_name").HasMaxLength(100);
                 entity.Property(e => e.PreferredLanguage).HasColumnName("preferred_language").HasMaxLength(10).HasDefaultValue("en");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
@@ -180,6 +181,7 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.HasKey(e => e.UserId);
                 entity.Property(e => e.UserId).HasColumnName("user_id");
                 entity.Property(e => e.GoldBalanceMg).HasColumnName("gold_balance_mg").HasDefaultValue(0);
+                entity.Property(e => e.BonusGoldBalanceMg).HasColumnName("bonus_gold_balance_mg").HasDefaultValue(0L);
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.RowVersion).HasColumnName("row_version").IsRowVersion().IsConcurrencyToken();
 

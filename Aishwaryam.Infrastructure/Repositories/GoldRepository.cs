@@ -32,7 +32,7 @@ namespace Aishwaryam.Infrastructure.Repositories
             var sql = @"
                 SELECT COALESCE(SUM(
                     CASE 
-                        WHEN transaction_type IN ('BUY', 'BONUS') THEN gold_weight_mg 
+                        WHEN transaction_type IN ('BUY', 'BONUS', 'EVENT_BONUS') THEN gold_weight_mg 
                         WHEN transaction_type = 'SELL' THEN -gold_weight_mg 
                         ELSE 0 
                     END
@@ -50,7 +50,7 @@ namespace Aishwaryam.Infrastructure.Repositories
             
             if (holding == null)
             {
-                holding = new GoldHolding { UserId = userId, GoldBalanceMg = newBalanceMg, UpdatedAt = DateTimeOffset.UtcNow };
+                holding = new GoldHolding { UserId = userId, GoldBalanceMg = newBalanceMg, BonusGoldBalanceMg = 0, UpdatedAt = DateTimeOffset.UtcNow };
                 _context.GoldHoldings.Add(holding);
             }
             else
@@ -103,7 +103,7 @@ namespace Aishwaryam.Infrastructure.Repositories
                         ELSE 0 
                     END) as matured_redeemable,
                     SUM(CASE 
-                        WHEN (transaction_type = 'BUY' AND (""UserSchemeId"" IS NULL OR scheme_status NOT IN ('Active', 'Matured', 'Completed'))) 
+                        WHEN (transaction_type IN ('BUY', 'EVENT_BONUS') AND (""UserSchemeId"" IS NULL OR scheme_status NOT IN ('Active', 'Matured', 'Completed'))) 
                         THEN gold_weight_mg 
                         WHEN transaction_type = 'SELL' 
                         THEN -gold_weight_mg 
@@ -132,6 +132,52 @@ namespace Aishwaryam.Infrastructure.Repositories
         {
             return await _context.GoldTransactions
                 .FirstOrDefaultAsync(t => t.RazorpayPaymentId == paymentId);
+        }
+
+        public async Task<PromotionalOffer?> GetActiveEventOfferAsync(Guid userId)
+        {
+            var now = DateTime.UtcNow;
+            return await _context.PromotionalOffers
+                .Where(o => o.IsActive && o.ExpiresAt > now && o.TargetUserId == userId
+                    && (o.OfferType == "BIRTHDAY" || o.OfferType == "ANNIVERSARY")
+                    && o.BonusPercent > 0)
+                .OrderByDescending(o => o.BonusPercent)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> IsOfferClaimedAsync(Guid userId, Guid offerId)
+        {
+            return await _context.UserClaimedOffers
+                .AnyAsync(c => c.UserId == userId && c.OfferId == offerId);
+        }
+
+        public async Task RecordClaimedOfferAsync(UserClaimedOffer claimedOffer)
+        {
+            _context.UserClaimedOffers.Add(claimedOffer);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RecordAuditLogAsync(PlatformAuditLog auditLog)
+        {
+            _context.PlatformAuditLogs.Add(auditLog);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task IncrementBonusGoldBalanceAsync(Guid userId, long bonusGoldMg)
+        {
+            var holding = await _context.GoldHoldings.FirstOrDefaultAsync(h => h.UserId == userId);
+            if (holding == null)
+            {
+                holding = new GoldHolding { UserId = userId, GoldBalanceMg = 0, BonusGoldBalanceMg = bonusGoldMg, UpdatedAt = DateTimeOffset.UtcNow };
+                _context.GoldHoldings.Add(holding);
+            }
+            else
+            {
+                holding.BonusGoldBalanceMg += bonusGoldMg;
+                holding.UpdatedAt = DateTimeOffset.UtcNow;
+                _context.GoldHoldings.Update(holding);
+            }
+            await _context.SaveChangesAsync();
         }
     }
 }

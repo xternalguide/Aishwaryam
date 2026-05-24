@@ -152,6 +152,7 @@ builder.Services.AddHostedService<Aishwaryam.Api.Services.SchemeAutoPayService>(
 builder.Services.AddHostedService<SchemeMaturityJob>();
 builder.Services.AddHostedService<NightlyReconciliationJob>();
 builder.Services.AddHostedService<Aishwaryam.Infrastructure.BackgroundServices.GoldRateScraperWorker>();
+builder.Services.AddHostedService<Aishwaryam.Api.Services.EventOfferWorker>(); // Daily 9 AM IST: birthday/anniversary offers
 
 var app = builder.Build();
 

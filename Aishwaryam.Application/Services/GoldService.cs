@@ -279,6 +279,74 @@ namespace Aishwaryam.Application.Services
                     }
                 }
 
+                // 7.5 Apply promotional/event offer bonus if this is a direct buy (no scheme)
+                long promotionalBonusGoldMg = 0;
+                long promotionalBonusAmountPaise = 0;
+                
+                if (activeScheme == null)
+                {
+                    var activeEventOffer = await _goldRepository.GetActiveEventOfferAsync(request.UserId);
+
+                    if (activeEventOffer != null)
+                    {
+                        var alreadyClaimed = await _goldRepository.IsOfferClaimedAsync(request.UserId, activeEventOffer.Id);
+
+                        if (!alreadyClaimed && request.TotalAmountPaise >= activeEventOffer.MinPurchaseAmountPaise)
+                        {
+                            promotionalBonusAmountPaise = (long)(request.TotalAmountPaise * (double)(activeEventOffer.BonusPercent / 100m));
+                            var bonusBaseAmountPaise = (promotionalBonusAmountPaise * 100) / 103;
+                            promotionalBonusGoldMg = (bonusBaseAmountPaise * 1000) / effectiveBuyPricePaise;
+
+                            if (promotionalBonusGoldMg > 0)
+                            {
+                                await _goldRepository.IncrementBonusGoldBalanceAsync(request.UserId, promotionalBonusGoldMg);
+
+                                await _goldRepository.RecordGoldTransactionAsync(new GoldTransaction
+                                {
+                                    Id = Guid.NewGuid(),
+                                    UserId = request.UserId,
+                                    TransactionType = "EVENT_BONUS",
+                                    GoldWeightMg = promotionalBonusGoldMg,
+                                    PricePerGmPaise = effectiveBuyPricePaise,
+                                    TotalAmountPaise = 0,
+                                    IpAddress = request.IpAddress,
+                                    DeviceFingerprint = request.DeviceFingerprint,
+                                    RateSource = $"{activeEventOffer.OfferType}_OFFER",
+                                    RateTimestamp = DateTimeOffset.UtcNow,
+                                    BonusAmountPaise = promotionalBonusAmountPaise,
+                                    BonusGoldMg = promotionalBonusGoldMg,
+                                    CreatedAt = DateTime.UtcNow
+                                });
+
+                                await _goldRepository.RecordClaimedOfferAsync(new UserClaimedOffer
+                                {
+                                    OfferId = activeEventOffer.Id,
+                                    UserId = request.UserId,
+                                    ClaimedAt = DateTime.UtcNow
+                                });
+
+                                await _goldRepository.RecordAuditLogAsync(new PlatformAuditLog
+                                {
+                                    UserId = request.UserId,
+                                    Action = $"{activeEventOffer.OfferType}_BONUS_CREDITED",
+                                    Details = $"{activeEventOffer.BonusPercent}% bonus = ₹{promotionalBonusAmountPaise / 100.0:F2} → {promotionalBonusGoldMg}mg bonus gold credited (separate balance)",
+                                    IpAddress = request.IpAddress ?? "SYSTEM",
+                                    Status = "SUCCESS"
+                                });
+
+                                try
+                                {
+                                    await _notificationService.SendNotificationAsync(request.UserId,
+                                        $"🎁 {activeEventOffer.BonusPercent}% Bonus Gold Credited!",
+                                        $"You received {promotionalBonusGoldMg / 1000.0:F4}g of bonus gold from your {activeEventOffer.OfferType.ToLower()} offer!",
+                                        "OFFER_BONUS_CREDITED");
+                                }
+                                catch { }
+                            }
+                        }
+                    }
+                }
+
                 long updatedGoldBalance = await _goldRepository.CalculateGoldBalanceAsync(request.UserId);
                 await _goldRepository.UpdateGoldCacheAsync(request.UserId, updatedGoldBalance);
 
@@ -295,12 +363,12 @@ namespace Aishwaryam.Application.Services
                         {
                             UserName = user.FullName ?? "Customer",
                             TransactionId = txId.ToString(),
-                            GoldWeightMg = totalGoldCreditedMg.ToString(),
+                            GoldWeightMg = (totalGoldCreditedMg + promotionalBonusGoldMg).ToString(),
                             AmountPaid = (totalAmountPaise / 100.0).ToString("F2"),
                             GoldRatePerGm = (effectiveBuyPricePaise / 100.0).ToString("F2"),
                             GstAmount = (gstAmountPaise / 100.0).ToString("F2"),
-                            BonusGoldMg = bonusGoldMg.ToString(),
-                            BonusPercent = bonusPercentage.ToString("F1"),
+                            BonusGoldMg = (bonusGoldMg + promotionalBonusGoldMg).ToString(),
+                            BonusPercent = (bonusPercentage + (activeScheme == null && promotionalBonusGoldMg > 0 ? (promotionalBonusAmountPaise * 100m / totalAmountPaise) : 0m)).ToString("F1"),
                             NewGoldBalanceMg = updatedGoldBalance.ToString(),
                             TransactionDate = DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt")
                         };
@@ -317,8 +385,8 @@ namespace Aishwaryam.Application.Services
                     GoldWeightMg = goldWeightMg,
                     PricePerGmPaise = effectiveBuyPricePaise,
                     TotalAmountPaise = totalAmountPaise,
-                    BonusGoldMg = bonusGoldMg,
-                    BonusAmountPaise = bonusAmountPaise,
+                    BonusGoldMg = bonusGoldMg + promotionalBonusGoldMg,
+                    BonusAmountPaise = bonusAmountPaise + promotionalBonusAmountPaise,
                     NewWalletBalancePaise = walletTx.BalancePaise,
                     NewGoldBalanceMg = updatedGoldBalance,
                     RedeemableGoldMg = status.RedeemableMg

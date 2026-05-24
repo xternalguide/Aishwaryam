@@ -36,6 +36,8 @@ namespace Aishwaryam.Api.Controllers
                     u.Email,
                     u.KycLevel,
                     u.IsActive,
+                    u.DateOfBirth,
+                    u.WeddingAnniversaryDate,
                     u.CreatedAt
                 })
                 .ToListAsync();
@@ -57,6 +59,7 @@ namespace Aishwaryam.Api.Controllers
                 user.BiometricEnabled,
                 user.ReferralCode,
                 DateOfBirth = user.DateOfBirth?.ToString("yyyy-MM-dd"),
+                WeddingAnniversaryDate = user.WeddingAnniversaryDate?.ToString("yyyy-MM-dd"),
                 user.NomineeName,
                 user.PreferredLanguage
             });
@@ -93,6 +96,7 @@ namespace Aishwaryam.Api.Controllers
             if (!string.IsNullOrEmpty(updateObj.NomineeName)) user.NomineeName = updateObj.NomineeName;
             if (!string.IsNullOrEmpty(updateObj.PreferredLanguage)) user.PreferredLanguage = updateObj.PreferredLanguage;
             if (updateObj.DateOfBirth.HasValue) user.DateOfBirth = updateObj.DateOfBirth.Value;
+            if (updateObj.WeddingAnniversaryDate.HasValue) user.WeddingAnniversaryDate = updateObj.WeddingAnniversaryDate.Value;
             if (updateObj.BiometricEnabled.HasValue) user.BiometricEnabled = updateObj.BiometricEnabled.Value;
 
             user.UpdatedAt = DateTimeOffset.UtcNow;
@@ -137,9 +141,20 @@ namespace Aishwaryam.Api.Controllers
             try {
                 await Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(
                     _context.Database,
-                    "ALTER TABLE users ADD COLUMN IF NOT EXISTS mpin_hash character varying(255); ALTER TABLE users ADD COLUMN IF NOT EXISTS biometric_enabled boolean DEFAULT false; ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code character varying(50); ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth date; ALTER TABLE users ADD COLUMN IF NOT EXISTS nominee_name character varying(100); ALTER TABLE users ADD COLUMN IF NOT EXISTS preferred_language character varying(10) DEFAULT 'en';"
+                    "ALTER TABLE users ADD COLUMN IF NOT EXISTS mpin_hash character varying(255); " +
+                    "ALTER TABLE users ADD COLUMN IF NOT EXISTS biometric_enabled boolean DEFAULT false; " +
+                    "ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code character varying(50); " +
+                    "ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth date; " +
+                    "ALTER TABLE users ADD COLUMN IF NOT EXISTS wedding_anniversary_date date; " +
+                    "ALTER TABLE users ADD COLUMN IF NOT EXISTS nominee_name character varying(100); " +
+                    "ALTER TABLE users ADD COLUMN IF NOT EXISTS preferred_language character varying(10) DEFAULT 'en'; " +
+                    "ALTER TABLE gold_holdings ADD COLUMN IF NOT EXISTS bonus_gold_balance_mg bigint DEFAULT 0 NOT NULL; " +
+                    "ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS offer_type varchar(30) DEFAULT 'FLASH_SALE' NOT NULL; " +
+                    "ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS bonus_percent decimal(5,2) DEFAULT 0 NOT NULL; " +
+                    "ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS min_purchase_amount_paise bigint DEFAULT 0 NOT NULL; " +
+                    "ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS duration_hours int DEFAULT 24 NOT NULL;"
                 );
-                return Ok("Migrated");
+                return Ok("Migrated successfully");
             } catch (Exception e) {
                 return BadRequest(e.Message);
             }
@@ -152,6 +167,7 @@ namespace Aishwaryam.Api.Controllers
         public string? Email { get; set; }
         public string? NomineeName { get; set; }
         public DateTime? DateOfBirth { get; set; }
+        public DateTime? WeddingAnniversaryDate { get; set; }
         public bool? BiometricEnabled { get; set; }
         public string? PreferredLanguage { get; set; }
     }
