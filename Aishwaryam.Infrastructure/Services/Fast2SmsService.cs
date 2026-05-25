@@ -20,7 +20,7 @@ namespace Aishwaryam.Infrastructure.Services
             _logger = logger;
         }
 
-        public async Task<bool> SendSmsAsync(string phoneNumber, string message)
+        public async Task<(bool Success, string ErrorMessage)> SendSmsAsync(string phoneNumber, string message)
         {
             try
             {
@@ -32,18 +32,24 @@ namespace Aishwaryam.Infrastructure.Services
                 if (_apiKey == "FAKE_KEY_FOR_DEV")
                 {
                     _logger.LogWarning("SMS API Key is missing. Using Console Gateway.");
-                    return true;
+                    return (true, "Console simulated success");
                 }
 
                 var url = $"https://www.fast2sms.com/dev/bulkV2?authorization={_apiKey}&route=otp&variables_values={message}&numbers={phoneNumber}";
                 
                 var response = await _httpClient.GetAsync(url);
-                return response.IsSuccessStatusCode;
+                if (response.IsSuccessStatusCode)
+                {
+                    return (true, "");
+                }
+                
+                var errContent = await response.Content.ReadAsStringAsync();
+                return (false, $"HTTP {(int)response.StatusCode}: {errContent}");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Failed to send SMS to {phoneNumber}");
-                return false;
+                return (false, ex.Message);
             }
         }
     }

@@ -25,7 +25,7 @@ namespace Aishwaryam.Infrastructure.Services
             _logger = logger;
         }
 
-        public async Task<bool> SendSmsAsync(string phoneNumber, string message)
+        public async Task<(bool Success, string ErrorMessage)> SendSmsAsync(string phoneNumber, string message)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace Aishwaryam.Infrastructure.Services
                 if (_apiKey == "FAKE_KEY_FOR_DEV")
                 {
                     _logger.LogWarning($"[BREVO-SMS-DEV] SMS API Key is missing. Message: {message}");
-                    return true;
+                    return (true, "Console simulated success");
                 }
 
                 var payload = new
@@ -66,18 +66,19 @@ namespace Aishwaryam.Infrastructure.Services
                 if (response.IsSuccessStatusCode)
                 {
                     _logger.LogInformation($"[BREVO-SMS] ✅ SMS sent successfully to {cleanRecipient}");
-                    return true;
+                    return (true, "");
                 }
                 else
                 {
-                    _logger.LogError($"[BREVO-SMS] ❌ Failed to send SMS: HTTP {response.StatusCode} | {responseBody}");
-                    return false;
+                    var err = $"HTTP {(int)response.StatusCode}: {responseBody}";
+                    _logger.LogError($"[BREVO-SMS] ❌ Failed to send SMS: {err}");
+                    return (false, err);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"[BREVO-SMS] ❌ Exception occurred while sending SMS to {phoneNumber}");
-                return false;
+                return (false, ex.Message);
             }
         }
     }

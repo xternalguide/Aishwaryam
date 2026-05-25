@@ -62,11 +62,11 @@ namespace Aishwaryam.Application.Services
 
                 // 3. Send SMS via Brevo (ISmsService)
                 var message = $"Your OTP for Aishwaryam Digital Gold is {otpCode}. Valid for 5 minutes.";
-                var smsSent = await _smsService.SendSmsAsync(phone, message);
+                var smsResult = await _smsService.SendSmsAsync(phone, message);
 
-                if (!smsSent)
+                if (!smsResult.Success)
                 {
-                    return new AuthResponse { Success = false, Message = "Failed to send SMS." };
+                    return new AuthResponse { Success = false, Message = $"Failed to send SMS: {smsResult.ErrorMessage}" };
                 }
 
                 return new AuthResponse { Success = true, Message = "OTP Sent Successfully." };
