@@ -96,8 +96,8 @@ namespace Aishwaryam.Infrastructure.Services
             try
             {
                 var result = await _sms.SendSmsAsync(phone, message);
-                if (!result)
-                    _logger.LogWarning("[DISPATCHER] SMS delivery failed to {Phone}", phone);
+                if (!result.Success)
+                    _logger.LogWarning("[DISPATCHER] SMS delivery failed to {Phone}: {Error}", phone, result.ErrorMessage);
             }
             catch (Exception ex)
             {

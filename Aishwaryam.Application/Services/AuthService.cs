@@ -40,26 +40,33 @@ namespace Aishwaryam.Application.Services
                     phone = "+91" + phone;
                 }
 
+                var cleanPhone = phone.Replace("+91", "").Trim();
 
+                // 1. Generate secure random 6-digit OTP code (different every time)
+                var otpCode = Random.Shared.Next(100000, 1000000).ToString();
+                var hashedOtp = ComputeSha256Hash(otpCode);
 
-                // Get Supabase credentials from configuration
-                var supabaseUrl = _configuration["Supabase:Url"] ?? "https://jmpgjrwtguninjmovawu.supabase.co";
-                var supabaseAnonKey = _configuration["Supabase:AnonKey"] ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptcGdqcnd0Z3VuaW5qbW92YXd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzY2MzMsImV4cCI6MjA1NjgxMjYzM30.6t_4vG745V2D-Z3D7s9NpeG3h8JvVv8tF_3B79lT9e8";
-
-                using var client = new HttpClient();
-                client.DefaultRequestHeaders.Add("apikey", supabaseAnonKey);
-
-                var payload = new { phone = phone, channel = "sms" };
-                var json = JsonSerializer.Serialize(payload);
-                using var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                var url = $"{supabaseUrl.TrimEnd('/')}/auth/v1/otp";
-                var response = await client.PostAsync(url, content);
-
-                if (!response.IsSuccessStatusCode)
+                // 2. Save in database (otp_logs)
+                var otpLog = new OtpLog
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    return new AuthResponse { Success = false, Message = $"Failed to send OTP via Supabase: {errorContent}" };
+                    Id = Guid.NewGuid(),
+                    PhoneNumber = cleanPhone,
+                    OtpHash = hashedOtp,
+                    IpAddress = request.IpAddress ?? "unknown",
+                    ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(5),
+                    IsUsed = false,
+                    CreatedAt = DateTimeOffset.UtcNow
+                };
+
+                await _authRepository.SaveOtpAsync(otpLog);
+
+                // 3. Send SMS via Brevo (ISmsService)
+                var message = $"Your OTP for Aishwaryam Digital Gold is {otpCode}. Valid for 5 minutes.";
+                var smsResult = await _smsService.SendSmsAsync(phone, message);
+
+                if (!smsResult.Success)
+                {
+                    return new AuthResponse { Success = false, Message = $"Failed to send SMS: {smsResult.ErrorMessage}" };
                 }
 
                 return new AuthResponse { Success = true, Message = "OTP Sent Successfully." };
@@ -80,34 +87,31 @@ namespace Aishwaryam.Application.Services
                     phone = "+91" + phone;
                 }
 
+                var cleanPhone = phone.Replace("+91", "").Trim();
+
                 // ⚡ Master Bypass OTPs to guarantee 100% successful login/registration during direct APK sharing/sideloading
                 bool bypassOtp = request.Otp == "999999" || request.Otp == "123456";
 
                 if (!bypassOtp)
                 {
-                    // Get Supabase credentials from configuration
-                    var supabaseUrl = _configuration["Supabase:Url"] ?? "https://jmpgjrwtguninjmovawu.supabase.co";
-                    var supabaseAnonKey = _configuration["Supabase:AnonKey"] ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImptcGdqcnd0Z3VuaW5qbW92YXd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMzY2MzMsImV4cCI6MjA1NjgxMjYzM30.6t_4vG745V2D-Z3D7s9NpeG3h8JvVv8tF_3B79lT9e8";
-
-                    using var client = new HttpClient();
-                    client.DefaultRequestHeaders.Add("apikey", supabaseAnonKey);
-
-                    var payload = new { type = "sms", phone = phone, token = request.Otp };
-                    var json = JsonSerializer.Serialize(payload);
-                    using var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-                    var url = $"{supabaseUrl.TrimEnd('/')}/auth/v1/verify";
-                    var response = await client.PostAsync(url, content);
-
-                    if (!response.IsSuccessStatusCode)
+                    // Fetch latest unused, unexpired OTP for this phone
+                    var latestOtp = await _authRepository.GetLatestValidOtpAsync(cleanPhone);
+                    if (latestOtp == null)
                     {
-                        var errorContent = await response.Content.ReadAsStringAsync();
-                        return new AuthResponse { Success = false, Message = $"OTP verification failed via Supabase: {errorContent}" };
+                        return new AuthResponse { Success = false, Message = "OTP expired or invalid. Please request a new OTP." };
                     }
+
+                    var hashedInput = ComputeSha256Hash(request.Otp);
+                    if (latestOtp.OtpHash != hashedInput)
+                    {
+                        return new AuthResponse { Success = false, Message = "Incorrect OTP. Please try again." };
+                    }
+
+                    // Mark OTP as used
+                    await _authRepository.MarkOtpAsUsedAsync(latestOtp.Id);
                 }
 
-                // Supabase verified it successfully! Now check/create the user in our PostgreSQL database.
-                var cleanPhone = request.PhoneNumber.Replace("+91", "").Trim();
+                // Check/create the user in our PostgreSQL database.
                 var user = await _authRepository.GetUserByPhoneAsync(cleanPhone);
                 if (user == null)
                 {
