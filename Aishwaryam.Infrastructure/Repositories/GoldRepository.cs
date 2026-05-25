@@ -131,6 +131,7 @@ namespace Aishwaryam.Infrastructure.Repositories
         public async Task<GoldTransaction?> GetTransactionByPaymentIdAsync(string paymentId)
         {
             return await _context.GoldTransactions
+                .Include(t => t.Invoice)
                 .FirstOrDefaultAsync(t => t.RazorpayPaymentId == paymentId);
         }
 

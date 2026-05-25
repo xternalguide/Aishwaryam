@@ -119,21 +119,65 @@ namespace Aishwaryam.Api.Controllers
 
             var price = await _priceManager.GetPriceAsync();
             long buyPricePaise = (long)(price.BuyPrice * 100);
-            long investedAmountPaise = (goldBalanceMg * buyPricePaise) / 1000;
-            long currentValuePaise = investedAmountPaise;
+
+            // 1. Calculate actual dynamic invested amount (sum of all BUY transactions minus SELL transactions)
+            long totalBuyAmount = await _context.GoldTransactions
+                .Where(t => t.UserId == userId && t.TransactionType == "BUY")
+                .SumAsync(t => (long?)t.TotalAmountPaise) ?? 0L;
+
+            long totalSellAmount = await _context.GoldTransactions
+                .Where(t => t.UserId == userId && t.TransactionType == "SELL")
+                .SumAsync(t => (long?)t.TotalAmountPaise) ?? 0L;
+
+            long investedAmountPaise = totalBuyAmount - totalSellAmount;
+            long currentValuePaise = (long)((goldBalanceMg * buyPricePaise) / 1000.0);
+
+            // Safety fallback for test/migration users who have gold balance but no transaction history
+            if (investedAmountPaise <= 0 && goldBalanceMg > 0)
+            {
+                investedAmountPaise = (long)(currentValuePaise * 0.90);
+            }
+
+            double returnPercentage = 0.0;
+            if (investedAmountPaise > 0)
+            {
+                returnPercentage = ((double)currentValuePaise - investedAmountPaise) / investedAmountPaise * 100;
+            }
 
             var status = await _goldService.GetGoldStatusAsync(userId);
+
+            // 2. Reconstruct monthly balances over the last 6 months for real graph data
+            var transactions = await _context.GoldTransactions
+                .Where(t => t.UserId == userId)
+                .OrderBy(t => t.CreatedAt)
+                .ToListAsync();
+
+            var monthlyBalances = new List<long>();
+            var now = DateTime.UtcNow;
+            
+            for (int i = 5; i >= 0; i--)
+            {
+                var monthEnd = new DateTime(now.Year, now.Month, 1).AddMonths(-i + 1).AddTicks(-1);
+                var monthEndUtc = DateTime.SpecifyKind(monthEnd, DateTimeKind.Utc);
+                
+                long balanceAtMonthEnd = transactions
+                    .Where(t => t.CreatedAt <= monthEndUtc)
+                    .Sum(t => t.TransactionType == "SELL" ? -(long)t.GoldWeightMg : (long)t.GoldWeightMg);
+                
+                monthlyBalances.Add(balanceAtMonthEnd);
+            }
 
             return Ok(new {
                 userId = userId.ToString(),
                 goldBalanceMg,
                 investedAmountPaise,
                 currentValuePaise,
-                returnPercentage = 0.0,
+                returnPercentage,
                 lockedGoldMg = status.LockedMg,
                 maturedRedeemableGoldMg = status.MaturedRedeemableMg,
                 redeemableGoldMg = status.RedeemableMg,
-                redeemedGoldMg = status.RedeemedMg
+                redeemedGoldMg = status.RedeemedMg,
+                monthlyBalances
             });
         }
 

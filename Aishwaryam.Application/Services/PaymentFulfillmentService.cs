@@ -71,18 +71,31 @@ namespace Aishwaryam.Application.Services
             {
                 _logger.LogInformation("Payment {PaymentId} already fulfilled. Returning existing receipt details.", razorpayPaymentId);
                 var existingTx = await _goldRepository.GetTransactionByPaymentIdAsync(razorpayPaymentId);
-                return new GoldTransactionResponse 
-                { 
-                    Success = true, 
-                    Message = "Already processed",
-                    TransactionId = existingTx?.Id.ToString(),
-                    GoldWeightMg = existingTx?.GoldWeightMg ?? 0L,
-                    TotalGoldCreditedMg = existingTx?.GoldWeightMg ?? 0L,
-                    PricePerGmPaise = existingTx?.PricePerGmPaise ?? 0L,
-                    TotalAmountPaise = existingTx?.TotalAmountPaise ?? 0L,
-                    BonusGoldMg = existingTx?.BonusGoldMg ?? 0L,
-                    BonusAmountPaise = existingTx?.BonusAmountPaise ?? 0L
-                };
+                if (existingTx != null)
+                {
+                    var userStatus = await _goldRepository.GetGoldStatusAsync(existingTx.UserId);
+                    var invoice = existingTx.Invoice;
+                    return new GoldTransactionResponse 
+                    { 
+                        Success = true, 
+                        Message = "Already processed",
+                        TransactionId = existingTx.Id.ToString(),
+                        GoldWeightMg = existingTx.GoldWeightMg,
+                        PricePerGmPaise = existingTx.PricePerGmPaise,
+                        TotalAmountPaise = existingTx.TotalAmountPaise,
+                        BaseAmountPaise = invoice?.BaseAmountPaise ?? (existingTx.TotalAmountPaise * 100 / 103),
+                        GstAmountPaise = invoice?.GstAmountPaise ?? (existingTx.TotalAmountPaise - (existingTx.TotalAmountPaise * 100 / 103)),
+                        BonusPercentage = invoice?.BonusPercentage ?? (existingTx.BonusGoldMg > 0 ? 10m : 0m),
+                        BonusGoldMg = existingTx.BonusGoldMg,
+                        BonusAmountPaise = existingTx.BonusAmountPaise,
+                        TotalGoldCreditedMg = existingTx.GoldWeightMg + existingTx.BonusGoldMg,
+                        NewWalletBalancePaise = 0,
+                        NewGoldBalanceMg = await _goldRepository.CalculateGoldBalanceAsync(existingTx.UserId),
+                        LockedGoldMg = userStatus.LockedMg,
+                        RedeemableGoldMg = userStatus.RedeemableMg
+                    };
+                }
+                return new GoldTransactionResponse { Success = true, Message = "Already processed" };
             }
 
             // 2. Start Atomic Transaction
@@ -153,6 +166,36 @@ namespace Aishwaryam.Application.Services
 
                 if (paymentRecord.Status == "SUCCESS")
                 {
+                    _logger.LogInformation("Payment record already SUCCESS for order {OrderId}. Returning existing transaction details.", razorpayOrderId);
+                    var existingTx = await _goldRepository.GetTransactionByPaymentIdAsync(razorpayPaymentId);
+                    if (existingTx == null && !string.IsNullOrEmpty(paymentRecord.ProviderPaymentId))
+                    {
+                        existingTx = await _goldRepository.GetTransactionByPaymentIdAsync(paymentRecord.ProviderPaymentId);
+                    }
+                    if (existingTx != null)
+                    {
+                        var userStatus = await _goldRepository.GetGoldStatusAsync(paymentRecord.UserId);
+                        var invoice = existingTx.Invoice;
+                        return new GoldTransactionResponse 
+                        { 
+                            Success = true, 
+                            Message = "Already SUCCESS",
+                            TransactionId = existingTx.Id.ToString(),
+                            GoldWeightMg = existingTx.GoldWeightMg,
+                            PricePerGmPaise = existingTx.PricePerGmPaise,
+                            TotalAmountPaise = existingTx.TotalAmountPaise,
+                            BaseAmountPaise = invoice?.BaseAmountPaise ?? (existingTx.TotalAmountPaise * 100 / 103),
+                            GstAmountPaise = invoice?.GstAmountPaise ?? (existingTx.TotalAmountPaise - (existingTx.TotalAmountPaise * 100 / 103)),
+                            BonusPercentage = invoice?.BonusPercentage ?? (existingTx.BonusGoldMg > 0 ? 10m : 0m),
+                            BonusGoldMg = existingTx.BonusGoldMg,
+                            BonusAmountPaise = existingTx.BonusAmountPaise,
+                            TotalGoldCreditedMg = existingTx.GoldWeightMg + existingTx.BonusGoldMg,
+                            NewWalletBalancePaise = 0,
+                            NewGoldBalanceMg = await _goldRepository.CalculateGoldBalanceAsync(paymentRecord.UserId),
+                            LockedGoldMg = userStatus.LockedMg,
+                            RedeemableGoldMg = userStatus.RedeemableMg
+                        };
+                    }
                     return new GoldTransactionResponse { Success = true, Message = "Already SUCCESS" };
                 }
 

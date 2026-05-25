@@ -128,30 +128,10 @@ namespace Aishwaryam.Application.Services
 
                 if (activeScheme != null)
                 {
-                    schemeDayNumber = (int)(DateTime.UtcNow - activeScheme.CreatedAt).TotalDays;
-                    var master = await _schemeRepository.GetSchemeMasterByPlanNameAsync(activeScheme.PlanName);
-                    List<SchemeBonusTier>? dbTiers = null;
-                    if (master != null)
-                    {
-                        dbTiers = await _schemeRepository.GetBonusTiersAsync(master.Id);
-                    }
-
-                    if (dbTiers != null && dbTiers.Count > 0)
-                    {
-                        var matchingTier = dbTiers.FirstOrDefault(t => schemeDayNumber >= t.StartDay && schemeDayNumber <= t.EndDay);
-                        bonusPercentage = matchingTier != null ? matchingTier.BonusPercentage : 0;
-                    }
-                    else
-                    {
-                        if (schemeDayNumber <= 75) bonusPercentage = 7.5m;
-                        else if (schemeDayNumber <= 150) bonusPercentage = 5.5m;
-                        else if (schemeDayNumber <= 225) bonusPercentage = 3.5m;
-                        else if (schemeDayNumber <= 330) bonusPercentage = 1.5m;
-                        else bonusPercentage = 0;
-                    }
-
-                    bonusGoldMg = (long)(goldWeightMg * (bonusPercentage / 100m));
-                    bonusAmountPaise = (long)(baseAmountPaise * (bonusPercentage / 100m));
+                    // Loyalty bonus is now calculated and awarded as a separate milestone bonus at the end of each tier period, not per-transaction.
+                    bonusPercentage = 0;
+                    bonusGoldMg = 0;
+                    bonusAmountPaise = 0;
                 }
 
                 long totalGoldCreditedMg = goldWeightMg + bonusGoldMg;
@@ -385,10 +365,15 @@ namespace Aishwaryam.Application.Services
                     GoldWeightMg = goldWeightMg,
                     PricePerGmPaise = effectiveBuyPricePaise,
                     TotalAmountPaise = totalAmountPaise,
+                    BaseAmountPaise = baseAmountPaise,
+                    GstAmountPaise = gstAmountPaise,
+                    BonusPercentage = (decimal)bonusPercentage + (activeScheme == null && promotionalBonusGoldMg > 0 ? (promotionalBonusAmountPaise * 100m / totalAmountPaise) : 0m),
                     BonusGoldMg = bonusGoldMg + promotionalBonusGoldMg,
                     BonusAmountPaise = bonusAmountPaise + promotionalBonusAmountPaise,
+                    TotalGoldCreditedMg = goldWeightMg + bonusGoldMg + promotionalBonusGoldMg,
                     NewWalletBalancePaise = walletTx.BalancePaise,
                     NewGoldBalanceMg = updatedGoldBalance,
+                    LockedGoldMg = status.LockedMg,
                     RedeemableGoldMg = status.RedeemableMg
                 };
             }

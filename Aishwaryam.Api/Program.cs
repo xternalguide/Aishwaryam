@@ -16,6 +16,8 @@ using Google.Apis.Auth.OAuth2;
 using Serilog;
 using Serilog.Events;
 
+System.AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -324,6 +326,11 @@ using (var scope = app.Services.CreateScope())
         is_active boolean DEFAULT true,
         created_at timestamptz DEFAULT CURRENT_TIMESTAMP
     );", "promotional_offers");
+
+    TryExec("ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS offer_type varchar(50) DEFAULT 'FLASH_SALE';", "promotional_offers.offer_type");
+    TryExec("ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS bonus_percent numeric(5,2) DEFAULT 0;", "promotional_offers.bonus_percent");
+    TryExec("ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS min_purchase_amount_paise bigint DEFAULT 0;", "promotional_offers.min_purchase_amount_paise");
+    TryExec("ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS duration_hours integer DEFAULT 24;", "promotional_offers.duration_hours");
 
     TryExec(@"CREATE TABLE IF NOT EXISTS user_claimed_offers (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
