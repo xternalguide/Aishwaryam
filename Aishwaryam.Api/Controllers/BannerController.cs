@@ -52,10 +52,12 @@ namespace Aishwaryam.Api.Controllers
     public class BannerController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly Microsoft.AspNetCore.Hosting.IWebHostEnvironment _env;
 
-        public BannerController(ApplicationDbContext context)
+        public BannerController(ApplicationDbContext context, Microsoft.AspNetCore.Hosting.IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         // ── APP ENDPOINTS ─────────────────────────────────────────────────
@@ -278,8 +280,8 @@ namespace Aishwaryam.Api.Controllers
                 var imageBytes = Convert.FromBase64String(cleanBase64);
 
                 // Ensure directories exist in wwwroot
-                var relativeDir = Path.Combine("wwwroot", "uploads", "banners");
-                var absoluteDir = Path.Combine(Directory.GetCurrentDirectory(), relativeDir);
+                var webRootPath = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+                var absoluteDir = Path.Combine(webRootPath, "uploads", "banners");
                 if (!Directory.Exists(absoluteDir))
                 {
                     Directory.CreateDirectory(absoluteDir);
@@ -292,7 +294,20 @@ namespace Aishwaryam.Api.Controllers
 
                 // Return relative path to be served statically
                 var request = HttpContext.Request;
-                var baseUrl = $"{request.Scheme}://{request.Host}{request.PathBase}";
+                var scheme = request.Scheme;
+                
+                // If requested host is the production host, force HTTPS scheme
+                if (request.Host.Host.Equals("aishwaryam.blazewing.in", StringComparison.OrdinalIgnoreCase))
+                {
+                    scheme = "https";
+                }
+                // Also, if the request has X-Forwarded-Proto header, respect that
+                else if (request.Headers.TryGetValue("X-Forwarded-Proto", out var proto))
+                {
+                    scheme = proto.ToString();
+                }
+
+                var baseUrl = $"{scheme}://{request.Host}{request.PathBase}";
                 return $"{baseUrl}/uploads/banners/{fileName}";
             }
             catch (Exception ex)

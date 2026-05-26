@@ -156,6 +156,17 @@ builder.Services.AddHostedService<NightlyReconciliationJob>();
 builder.Services.AddHostedService<Aishwaryam.Infrastructure.BackgroundServices.GoldRateScraperWorker>();
 builder.Services.AddHostedService<Aishwaryam.Api.Services.EventOfferWorker>(); // Daily 9 AM IST: birthday/anniversary offers
 
+// Ensure wwwroot exists and WebRootPath is set before building the app to enable static files serving correctly
+var wwwrootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+if (!Directory.Exists(wwwrootPath))
+{
+    Directory.CreateDirectory(wwwrootPath);
+}
+if (string.IsNullOrEmpty(builder.Environment.WebRootPath))
+{
+    builder.Environment.WebRootPath = wwwrootPath;
+}
+
 var app = builder.Build();
 
 // ── Initialize Firebase Admin SDK ──────────────────────────────────────────
