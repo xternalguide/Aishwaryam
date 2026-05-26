@@ -28,6 +28,9 @@ namespace Aishwaryam.Domain.Entities
         /// <summary>Lower number = appears first in the carousel.</summary>
         public int DisplayOrder { get; set; } = 0;
 
+        /// <summary>Where the banner is displayed: e.g. "DASHBOARD" or "ONBOARDING".</summary>
+        public string Location { get; set; } = "DASHBOARD";
+
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
         public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 

@@ -538,6 +538,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 // Security ordering is critical
 app.UseCors("AllowAll");

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ namespace Aishwaryam.Api.Controllers
         public string ImageBase64 { get; set; } = string.Empty;
         public string? TapActionUrl { get; set; }
         public int DisplayOrder { get; set; }
+        public string Location { get; set; } = "DASHBOARD";
     }
 
     /// <summary>Admin creates/updates banners with this payload.</summary>
@@ -29,6 +31,7 @@ namespace Aishwaryam.Api.Controllers
         public string ImageBase64 { get; set; } = string.Empty;
         public string? TapActionUrl { get; set; }
         public int DisplayOrder { get; set; } = 0;
+        public string Location { get; set; } = "DASHBOARD";
         public string? CreatedByAdminId { get; set; }
     }
 
@@ -39,6 +42,7 @@ namespace Aishwaryam.Api.Controllers
         public string? TapActionUrl { get; set; }
         public bool? IsActive { get; set; }
         public int? DisplayOrder { get; set; }
+        public string? Location { get; set; }
     }
 
     // ── Controller ───────────────────────────────────────────────────────────
@@ -62,10 +66,11 @@ namespace Aishwaryam.Api.Controllers
         /// Returns only active banners ordered by display_order ASC.
         /// </summary>
         [HttpGet("active")]
-        public async Task<IActionResult> GetActiveBanners()
+        public async Task<IActionResult> GetActiveBanners([FromQuery] string location = "DASHBOARD")
         {
+            // Treat null/empty location as "DASHBOARD" (handles rows created before the location column was added)
             var banners = await _context.AppBanners
-                .Where(b => b.IsActive)
+                .Where(b => b.IsActive && (b.Location == location || (location == "DASHBOARD" && (b.Location == null || b.Location == ""))))
                 .OrderBy(b => b.DisplayOrder)
                 .Select(b => new BannerResponse
                 {
@@ -73,7 +78,8 @@ namespace Aishwaryam.Api.Controllers
                     Title = b.Title,
                     ImageBase64 = b.ImageBase64,
                     TapActionUrl = b.TapActionUrl,
-                    DisplayOrder = b.DisplayOrder
+                    DisplayOrder = b.DisplayOrder,
+                    Location = b.Location ?? "DASHBOARD"
                 })
                 .ToListAsync();
 
@@ -106,6 +112,9 @@ namespace Aishwaryam.Api.Controllers
                         CONSTRAINT ""PK_app_banners"" PRIMARY KEY (id)
                     );
 
+                    ALTER TABLE app_banners ADD COLUMN IF NOT EXISTS location character varying(50);
+                    UPDATE app_banners SET location = 'DASHBOARD' WHERE location IS NULL OR location = '';
+
                     INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
                     VALUES 
                         ('20260501114037_AddUserOnboardingFields', '9.0.0'),
@@ -117,6 +126,28 @@ namespace Aishwaryam.Api.Controllers
                     .ExecuteSqlRawAsync(_context.Database, sql);
 
                 return Ok(new { success = true, message = "app_banners table created and migrations marked as applied." });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { success = false, message = e.Message });
+            }
+        }
+
+        /// <summary>
+        /// POST /api/Banner/admin/fix-locations
+        /// One-time: backfills any null/empty location values to 'DASHBOARD'.
+        /// Run this once after the separation of onboarding and dashboard banners.
+        /// </summary>
+        [HttpPost("admin/fix-locations")]
+        public async Task<IActionResult> FixNullLocations()
+        {
+            try
+            {
+                var sql = @"UPDATE app_banners SET location = 'DASHBOARD' WHERE location IS NULL OR location = ''";
+                var affected = await Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions
+                    .ExecuteSqlRawAsync(_context.Database, sql);
+
+                return Ok(new { success = true, message = $"Fixed {affected} banner(s) with null/empty location → DASHBOARD." });
             }
             catch (Exception e)
             {
@@ -154,9 +185,10 @@ namespace Aishwaryam.Api.Controllers
             var banner = new AppBanner
             {
                 Title = request.Title.Trim(),
-                ImageBase64 = request.ImageBase64,
+                ImageBase64 = SaveImageFromBase64(request.ImageBase64),
                 TapActionUrl = request.TapActionUrl,
                 DisplayOrder = request.DisplayOrder,
+                Location = request.Location,
                 IsActive = true,
                 CreatedByAdminId = request.CreatedByAdminId,
                 CreatedAt = DateTimeOffset.UtcNow,
@@ -181,10 +213,11 @@ namespace Aishwaryam.Api.Controllers
                 return NotFound(new { success = false, message = "Banner not found." });
 
             if (!string.IsNullOrWhiteSpace(request.Title))        banner.Title = request.Title.Trim();
-            if (!string.IsNullOrWhiteSpace(request.ImageBase64))  banner.ImageBase64 = request.ImageBase64;
+            if (!string.IsNullOrWhiteSpace(request.ImageBase64))  banner.ImageBase64 = SaveImageFromBase64(request.ImageBase64);
             if (request.TapActionUrl != null)                       banner.TapActionUrl = request.TapActionUrl;
             if (request.IsActive.HasValue)                          banner.IsActive = request.IsActive.Value;
             if (request.DisplayOrder.HasValue)                      banner.DisplayOrder = request.DisplayOrder.Value;
+            if (!string.IsNullOrWhiteSpace(request.Location))     banner.Location = request.Location.Trim();
 
             banner.UpdatedAt = DateTimeOffset.UtcNow;
             await _context.SaveChangesAsync();
@@ -207,6 +240,67 @@ namespace Aishwaryam.Api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(new { success = true, message = "Banner deleted." });
+        }
+
+        private string SaveImageFromBase64(string base64String)
+        {
+            if (string.IsNullOrWhiteSpace(base64String))
+                return string.Empty;
+
+            // Check if it's already a URL (e.g. if the admin is updating a banner but keeping the same image URL)
+            if (base64String.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+                base64String.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+                base64String.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
+            {
+                return base64String;
+            }
+
+            try
+            {
+                // Remove base64 metadata headers if present (e.g., "data:image/png;base64,")
+                var cleanBase64 = base64String;
+                var extension = ".png"; // default
+
+                if (cleanBase64.Contains(","))
+                {
+                    var parts = cleanBase64.Split(',');
+                    var header = parts[0];
+                    cleanBase64 = parts[1];
+
+                    if (header.Contains("image/jpeg") || header.Contains("image/jpg"))
+                        extension = ".jpg";
+                    else if (header.Contains("image/webp"))
+                        extension = ".webp";
+                    else if (header.Contains("image/gif"))
+                        extension = ".gif";
+                }
+
+                var imageBytes = Convert.FromBase64String(cleanBase64);
+
+                // Ensure directories exist in wwwroot
+                var relativeDir = Path.Combine("wwwroot", "uploads", "banners");
+                var absoluteDir = Path.Combine(Directory.GetCurrentDirectory(), relativeDir);
+                if (!Directory.Exists(absoluteDir))
+                {
+                    Directory.CreateDirectory(absoluteDir);
+                }
+
+                var fileName = $"banner_{Guid.NewGuid()}{extension}";
+                var absoluteFilePath = Path.Combine(absoluteDir, fileName);
+
+                System.IO.File.WriteAllBytes(absoluteFilePath, imageBytes);
+
+                // Return relative path to be served statically
+                var request = HttpContext.Request;
+                var baseUrl = $"{request.Scheme}://{request.Host}{request.PathBase}";
+                return $"{baseUrl}/uploads/banners/{fileName}";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SAVE-IMAGE-ERROR] {ex.Message}");
+                // Fallback to saving base64 to db if disk save fails (failsafe)
+                return base64String;
+            }
         }
     }
 }

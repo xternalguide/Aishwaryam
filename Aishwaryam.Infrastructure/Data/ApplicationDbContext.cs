@@ -322,6 +322,7 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.TapActionUrl).HasColumnName("tap_action_url").HasMaxLength(500);
                 entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
                 entity.Property(e => e.DisplayOrder).HasColumnName("display_order").HasDefaultValue(0);
+                entity.Property(e => e.Location).HasColumnName("location").HasDefaultValue("DASHBOARD").HasMaxLength(50);
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.CreatedByAdminId).HasColumnName("created_by_admin_id").HasMaxLength(100);

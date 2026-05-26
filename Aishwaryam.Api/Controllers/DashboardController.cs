@@ -62,9 +62,9 @@ namespace Aishwaryam.Api.Controllers
                 })
                 .ToListAsync();
 
-            // 4. Get Active Banners
+            // 4. Get Active Banners (Dashboard location only)
             var banners = await _context.AppBanners
-                .Where(b => b.IsActive)
+                .Where(b => b.IsActive && b.Location == "DASHBOARD")
                 .OrderBy(b => b.DisplayOrder)
                 .Select(b => new {
                     id = b.Id.ToString(),
