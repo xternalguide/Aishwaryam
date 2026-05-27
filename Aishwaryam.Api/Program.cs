@@ -423,6 +423,29 @@ using (var scope = app.Services.CreateScope())
         sent_at timestamptz
     );", "email_logs");
 
+    // ── app_configs table ───────────────────────────────────────────────────
+    TryExec(@"CREATE TABLE IF NOT EXISTS app_configs (
+        id varchar(50) PRIMARY KEY,
+        support_email text NOT NULL,
+        support_phone text NOT NULL,
+        terms_url text NOT NULL,
+        privacy_url text NOT NULL,
+        faq_json jsonb NOT NULL,
+        referral_bonus_msg text NOT NULL,
+        primary_color_hex text NOT NULL,
+        secondary_color_hex text NOT NULL,
+        festival_banner_url text NOT NULL,
+        is_referral_enabled boolean DEFAULT true NOT NULL,
+        is_autosave_enabled boolean DEFAULT true NOT NULL,
+        referrer_reward_mg bigint DEFAULT 100 NOT NULL,
+        referee_reward_mg bigint DEFAULT 50 NOT NULL,
+        updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    );", "app_configs");
+
+    TryExec(@"INSERT INTO app_configs (id, support_email, support_phone, terms_url, privacy_url, faq_json, referral_bonus_msg, primary_color_hex, secondary_color_hex, festival_banner_url, is_referral_enabled, is_autosave_enabled, referrer_reward_mg, referee_reward_mg)
+        VALUES ('global_config', 'support@aishwaryamgold.com', '+91-9876543210', 'https://aishwaryamgold.com/terms', 'https://aishwaryamgold.com/privacy', '[{""q"":""How to buy gold?"",""a"":""Go to Market tab and buy.""}]', 'Invite friends and earn 1mg of 24K Gold!', '#01211A', '#E8A83A', 'https://images.unsplash.com/photo-1610652492500-ded49ceeb378?auto=format&fit=crop&q=80&w=800', true, true, 100, 50)
+        ON CONFLICT (id) DO NOTHING;", "seed_app_configs");
+
     // ── ALTER TABLE: financial tables optimistic concurrency ─────────────────
     TryExec("ALTER TABLE gold_holdings ADD COLUMN IF NOT EXISTS row_version bytea;", "gold_holdings.row_version");
     TryExec("ALTER TABLE wallets ADD COLUMN IF NOT EXISTS row_version bytea;", "wallets.row_version");
