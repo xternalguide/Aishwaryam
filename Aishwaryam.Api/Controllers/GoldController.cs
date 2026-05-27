@@ -79,21 +79,28 @@ namespace Aishwaryam.Api.Controllers
             if (pageSize < 1) pageSize = 10;
             if (pageSize > 100) pageSize = 100;
 
-            var query = _context.GoldTransactions.Where(t => t.UserId == userId);
-            var total = await query.CountAsync();
+            var baseQuery = _context.GoldTransactions.Where(t => t.UserId == userId);
+            var total = await baseQuery.CountAsync();
 
-            var txs = await query
+            var paginatedQuery = baseQuery
                 .OrderByDescending(t => t.CreatedAt)
                 .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(t => new {
-                    transactionId = t.Id.ToString(),
-                    type = t.TransactionType,
-                    goldWeightMg = t.GoldWeightMg,
-                    amountPaise = t.TotalAmountPaise,
-                    createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ")
-                })
-                .ToListAsync();
+                .Take(pageSize);
+
+            var queryWithScheme = from t in paginatedQuery
+                                  join s in _context.UserSchemes on t.UserSchemeId equals s.Id into sj
+                                  from s in sj.DefaultIfEmpty()
+                                  select new {
+                                      transactionId = t.Id.ToString(),
+                                      type = t.TransactionType,
+                                      goldWeightMg = t.GoldWeightMg,
+                                      amountPaise = t.TotalAmountPaise,
+                                      createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                                      rateSource = t.RateSource,
+                                      schemeName = s != null ? s.PlanName : null
+                                  };
+
+            var txs = await queryWithScheme.ToListAsync();
 
             var totalPages = (int)Math.Ceiling((double)total / pageSize);
                 
@@ -120,22 +127,29 @@ namespace Aishwaryam.Api.Controllers
             if (pageSize < 1) pageSize = 10;
             if (pageSize > 500) pageSize = 500;
 
-            var query = _context.GoldTransactions;
-            var total = await query.CountAsync();
+            var baseQuery = _context.GoldTransactions;
+            var total = await baseQuery.CountAsync();
 
-            var txs = await query
+            var paginatedQuery = baseQuery
                 .OrderByDescending(t => t.CreatedAt)
                 .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(t => new {
-                    transactionId = t.Id.ToString(),
-                    userId = t.UserId.ToString(),
-                    type = t.TransactionType,
-                    goldWeightMg = t.GoldWeightMg,
-                    amountPaise = t.TotalAmountPaise,
-                    createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ")
-                })
-                .ToListAsync();
+                .Take(pageSize);
+
+            var queryWithScheme = from t in paginatedQuery
+                                  join s in _context.UserSchemes on t.UserSchemeId equals s.Id into sj
+                                  from s in sj.DefaultIfEmpty()
+                                  select new {
+                                      transactionId = t.Id.ToString(),
+                                      userId = t.UserId.ToString(),
+                                      type = t.TransactionType,
+                                      goldWeightMg = t.GoldWeightMg,
+                                      amountPaise = t.TotalAmountPaise,
+                                      createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                                      rateSource = t.RateSource,
+                                      schemeName = s != null ? s.PlanName : null
+                                  };
+
+            var txs = await queryWithScheme.ToListAsync();
 
             var totalPages = (int)Math.Ceiling((double)total / pageSize);
                 

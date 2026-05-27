@@ -24,6 +24,20 @@ namespace Aishwaryam.Infrastructure.Repositories
 
         public async Task<User> CreateUserAsync(User user)
         {
+            if (string.IsNullOrEmpty(user.ReferralCode))
+            {
+                var random = new Random();
+                string code;
+                bool isUnique = false;
+                do
+                {
+                    code = "AISH" + random.Next(100000, 999999).ToString();
+                    isUnique = !await _context.Users.AnyAsync(u => u.ReferralCode == code);
+                } while (!isUnique);
+                
+                user.ReferralCode = code;
+            }
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return user;

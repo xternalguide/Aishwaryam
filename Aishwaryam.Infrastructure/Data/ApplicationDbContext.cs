@@ -308,6 +308,8 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.FestivalBannerUrl).HasColumnName("festival_banner_url");
                 entity.Property(e => e.IsReferralEnabled).HasColumnName("is_referral_enabled").HasDefaultValue(true);
                 entity.Property(e => e.IsAutoSaveEnabled).HasColumnName("is_autosave_enabled").HasDefaultValue(true);
+                entity.Property(e => e.ReferrerRewardMg).HasColumnName("referrer_reward_mg").HasDefaultValue(100L);
+                entity.Property(e => e.RefereeRewardMg).HasColumnName("referee_reward_mg").HasDefaultValue(50L);
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 

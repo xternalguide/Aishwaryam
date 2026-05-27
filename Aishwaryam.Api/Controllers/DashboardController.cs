@@ -49,18 +49,24 @@ namespace Aishwaryam.Api.Controllers
             long currentValuePaise = investedAmountPaise;
 
             // 3. Get Recent Transactions
-            var txs = await _context.GoldTransactions
+            var paginatedOverviewTxs = _context.GoldTransactions
                 .Where(t => t.UserId == userId)
                 .OrderByDescending(t => t.CreatedAt)
-                .Take(5)
-                .Select(t => new {
-                    transactionId = t.Id.ToString(),
-                    type = t.TransactionType,
-                    goldWeightMg = (long)t.GoldWeightMg,
-                    amountPaise = (long)t.TotalAmountPaise,
-                    createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ")
-                })
-                .ToListAsync();
+                .Take(5);
+
+            var txs = await (from t in paginatedOverviewTxs
+                             join s in _context.UserSchemes on t.UserSchemeId equals s.Id into sj
+                             from s in sj.DefaultIfEmpty()
+                             select new {
+                                 transactionId = t.Id.ToString(),
+                                 type = t.TransactionType,
+                                 goldWeightMg = (long)t.GoldWeightMg,
+                                 amountPaise = (long)t.TotalAmountPaise,
+                                 createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                                 rateSource = t.RateSource,
+                                 schemeName = s != null ? s.PlanName : null
+                             })
+                             .ToListAsync();
 
             // 4. Get Active Banners (Dashboard location only)
             var banners = await _context.AppBanners
@@ -184,17 +190,23 @@ namespace Aishwaryam.Api.Controllers
         [HttpGet("transactions/{userId}")]
         public async Task<IActionResult> GetRecentTransactions(Guid userId)
         {
-            var txs = await _context.GoldTransactions
+            var baseQuery = _context.GoldTransactions
                 .Where(t => t.UserId == userId)
-                .OrderByDescending(t => t.CreatedAt)
-                .Select(t => new {
-                    transactionId = t.Id.ToString(),
-                    type = t.TransactionType,
-                    goldWeightMg = (long)t.GoldWeightMg,
-                    amountPaise = (long)t.TotalAmountPaise,
-                    createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ")
-                })
-                .ToListAsync();
+                .OrderByDescending(t => t.CreatedAt);
+
+            var txs = await (from t in baseQuery
+                             join s in _context.UserSchemes on t.UserSchemeId equals s.Id into sj
+                             from s in sj.DefaultIfEmpty()
+                             select new {
+                                 transactionId = t.Id.ToString(),
+                                 type = t.TransactionType,
+                                 goldWeightMg = (long)t.GoldWeightMg,
+                                 amountPaise = (long)t.TotalAmountPaise,
+                                 createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                                 rateSource = t.RateSource,
+                                 schemeName = s != null ? s.PlanName : null
+                             })
+                             .ToListAsync();
 
             return Ok(txs);
         }

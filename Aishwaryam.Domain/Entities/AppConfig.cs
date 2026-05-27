@@ -18,6 +18,8 @@ namespace Aishwaryam.Domain.Entities
         public string FestivalBannerUrl { get; set; } = "https://images.unsplash.com/photo-1610652492500-ded49ceeb378?auto=format&fit=crop&q=80&w=800";
         public bool IsReferralEnabled { get; set; } = true;
         public bool IsAutoSaveEnabled { get; set; } = true;
+        public long ReferrerRewardMg { get; set; } = 100;
+        public long RefereeRewardMg { get; set; } = 50;
 
         public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
     }

@@ -15,13 +15,22 @@ namespace Aishwaryam.Api.Controllers
     {
         private readonly Aishwaryam.Infrastructure.Data.ApplicationDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly IGoldRepository _goldRepository;
+        private readonly INotificationService _notificationService;
+        private readonly IGoldService _goldService;
 
         public UserController(
             Aishwaryam.Infrastructure.Data.ApplicationDbContext context,
-            IEmailService emailService)
+            IEmailService emailService,
+            IGoldRepository goldRepository,
+            INotificationService notificationService,
+            IGoldService goldService)
         {
             _context = context;
             _emailService = emailService;
+            _goldRepository = goldRepository;
+            _notificationService = notificationService;
+            _goldService = goldService;
         }
 
         [HttpGet("all")]
@@ -48,7 +57,31 @@ namespace Aishwaryam.Api.Controllers
         public async Task<IActionResult> GetProfile(Guid userId)
         {
             var user = await _context.Users.FindAsync(userId);
-            if (user == null) return NotFound();
+            if (user == null) 
+            {
+                user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null) return NotFound();
+            }
+
+            if (string.IsNullOrEmpty(user.ReferralCode))
+            {
+                var random = new Random();
+                string code;
+                bool isUnique = false;
+                do
+                {
+                    code = "AISH" + random.Next(100000, 999999).ToString();
+                    isUnique = !await _context.Users.AnyAsync(u => u.ReferralCode == code);
+                } while (!isUnique);
+                
+                user.ReferralCode = code;
+                await _context.SaveChangesAsync();
+            }
+            
+            var referralEvent = await _context.ReferralEvents
+                .Include(r => r.ReferrerUser)
+                .FirstOrDefaultAsync(r => r.RefereeUserId == userId);
+            string? referredByCode = referralEvent?.ReferrerUser?.ReferralCode;
             
             return Ok(new {
                 user.FullName,
@@ -58,6 +91,7 @@ namespace Aishwaryam.Api.Controllers
                 user.IsActive,
                 user.BiometricEnabled,
                 user.ReferralCode,
+                ReferredByCode = referredByCode,
                 DateOfBirth = user.DateOfBirth?.ToString("yyyy-MM-dd"),
                 WeddingAnniversaryDate = user.WeddingAnniversaryDate?.ToString("yyyy-MM-dd"),
                 user.NomineeName,
@@ -71,9 +105,22 @@ namespace Aishwaryam.Api.Controllers
             var user = await _context.Users.FindAsync(userId);
             if (user == null) 
             {
-                // If Guid lookup fails, try finding by string ID just in case
                 user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
                 if (user == null) return NotFound(new { Message = $"User with ID {userId} not found in database." });
+            }
+
+            if (string.IsNullOrEmpty(user.ReferralCode))
+            {
+                var random = new Random();
+                string code;
+                bool isUnique = false;
+                do
+                {
+                    code = "AISH" + random.Next(100000, 999999).ToString();
+                    isUnique = !await _context.Users.AnyAsync(u => u.ReferralCode == code);
+                } while (!isUnique);
+                
+                user.ReferralCode = code;
             }
 
             if (!string.IsNullOrEmpty(updateObj.FullName)) user.FullName = updateObj.FullName;
@@ -98,6 +145,51 @@ namespace Aishwaryam.Api.Controllers
             if (updateObj.DateOfBirth.HasValue) user.DateOfBirth = updateObj.DateOfBirth.Value;
             if (updateObj.WeddingAnniversaryDate.HasValue) user.WeddingAnniversaryDate = updateObj.WeddingAnniversaryDate.Value;
             if (updateObj.BiometricEnabled.HasValue) user.BiometricEnabled = updateObj.BiometricEnabled.Value;
+
+            // Handle Referral Registration
+            if (!string.IsNullOrEmpty(updateObj.ReferredByCode))
+            {
+                // 1. Verify referrer exists
+                var referrer = await _context.Users.FirstOrDefaultAsync(u => u.ReferralCode == updateObj.ReferredByCode);
+                if (referrer == null)
+                {
+                    return BadRequest(new { Message = "Invalid referral code. Please check the code and try again.", Success = false });
+                }
+
+                // 2. Prevent self-referral
+                if (referrer.Id == user.Id || string.Equals(updateObj.ReferredByCode, user.ReferralCode, StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new { Message = "You cannot use your own referral code.", Success = false });
+                }
+
+                // 3. Ensure no duplicate referral record (i.e. referee hasn't been referred yet)
+                var alreadyReferred = await _context.ReferralEvents.AnyAsync(r => r.RefereeUserId == user.Id);
+                if (alreadyReferred)
+                {
+                    return BadRequest(new { Message = "You have already applied a referral code.", Success = false });
+                }
+
+                // 4. Fetch reward configs
+                var config = await _context.AppConfigs.FirstOrDefaultAsync();
+                if (config == null)
+                {
+                    config = new AppConfig();
+                    _context.AppConfigs.Add(config);
+                    await _context.SaveChangesAsync();
+                }
+
+                // 5. Create referral event as "Pending" (to be credited on referee's first gold purchase)
+                var referralEvent = new ReferralEvent
+                {
+                    Id = Guid.NewGuid(),
+                    ReferrerUserId = referrer.Id,
+                    RefereeUserId = user.Id,
+                    RewardStatus = "Pending",
+                    BonusAwardedMg = config.ReferrerRewardMg,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.ReferralEvents.Add(referralEvent);
+            }
 
             user.UpdatedAt = DateTimeOffset.UtcNow;
             await _context.SaveChangesAsync();
@@ -132,6 +224,22 @@ namespace Aishwaryam.Api.Controllers
                 _context.AppConfigs.Add(config);
                 _context.SaveChanges();
             }
+            return Ok(config);
+        }
+
+        [HttpPost("config")]
+        public IActionResult UpdateConfig([FromBody] UpdateConfigRequest request)
+        {
+            var config = _context.AppConfigs.FirstOrDefault();
+            if (config == null)
+            {
+                config = new AppConfig();
+                _context.AppConfigs.Add(config);
+            }
+            config.ReferrerRewardMg = request.ReferrerRewardMg;
+            config.RefereeRewardMg = request.RefereeRewardMg;
+            config.UpdatedAt = DateTimeOffset.UtcNow;
+            _context.SaveChanges();
             return Ok(config);
         }
 
@@ -170,5 +278,12 @@ namespace Aishwaryam.Api.Controllers
         public DateTime? WeddingAnniversaryDate { get; set; }
         public bool? BiometricEnabled { get; set; }
         public string? PreferredLanguage { get; set; }
+        public string? ReferredByCode { get; set; }
+    }
+
+    public class UpdateConfigRequest
+    {
+        public long ReferrerRewardMg { get; set; }
+        public long RefereeRewardMg { get; set; }
     }
 }

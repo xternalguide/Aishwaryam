@@ -180,5 +180,28 @@ namespace Aishwaryam.Infrastructure.Repositories
             }
             await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> HasAnyBuyTransactionAsync(Guid userId, Guid excludeTxId)
+        {
+            return await _context.GoldTransactions
+                .AnyAsync(t => t.UserId == userId && t.TransactionType == "BUY" && t.Id != excludeTxId);
+        }
+
+        public async Task<ReferralEvent?> GetPendingReferralEventAsync(Guid refereeUserId)
+        {
+            return await _context.ReferralEvents
+                .FirstOrDefaultAsync(r => r.RefereeUserId == refereeUserId && r.RewardStatus == "Pending");
+        }
+
+        public async Task UpdateReferralEventAsync(ReferralEvent referralEvent)
+        {
+            _context.ReferralEvents.Update(referralEvent);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<AppConfig?> GetAppConfigAsync()
+        {
+            return await _context.AppConfigs.FirstOrDefaultAsync();
+        }
     }
 }

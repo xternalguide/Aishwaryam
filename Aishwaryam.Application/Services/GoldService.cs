@@ -327,6 +327,85 @@ namespace Aishwaryam.Application.Services
                     }
                 }
 
+                // Check if referee has any pending referral event to credit rewards on their FIRST gold purchase
+                var isFirstGoldPurchase = !await _goldRepository.HasAnyBuyTransactionAsync(request.UserId, txId);
+                if (isFirstGoldPurchase)
+                {
+                    var pendingReferral = await _goldRepository.GetPendingReferralEventAsync(request.UserId);
+                    if (pendingReferral != null)
+                    {
+                        var config = await _goldRepository.GetAppConfigAsync() ?? new AppConfig();
+                        
+                        // Fetch referee (friend) name
+                        var refereeUser = await _authRepository.GetUserByIdAsync(request.UserId);
+                        var refereeName = refereeUser?.FullName ?? "Friend";
+
+                        // 1. Credit Referrer
+                        var referrerTx = new GoldTransaction
+                        {
+                            Id = Guid.NewGuid(),
+                            UserId = pendingReferral.ReferrerUserId,
+                            TransactionType = "EVENT_BONUS",
+                            GoldWeightMg = config.ReferrerRewardMg,
+                            PricePerGmPaise = effectiveBuyPricePaise,
+                            TotalAmountPaise = 0,
+                            IpAddress = request.IpAddress ?? "127.0.0.1",
+                            DeviceFingerprint = "REFERRAL",
+                            RateSource = $"REFERRAL_BONUS:{refereeName}",
+                            RateTimestamp = DateTimeOffset.UtcNow,
+                            BonusAmountPaise = 0,
+                            BonusGoldMg = config.ReferrerRewardMg,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        await _goldRepository.IncrementBonusGoldBalanceAsync(pendingReferral.ReferrerUserId, config.ReferrerRewardMg);
+                        await _goldRepository.RecordGoldTransactionAsync(referrerTx);
+
+                        // Recalculate referrer balance and update cache
+                        long referrerBal = await _goldRepository.CalculateGoldBalanceAsync(pendingReferral.ReferrerUserId);
+                        await _goldRepository.UpdateGoldCacheAsync(pendingReferral.ReferrerUserId, referrerBal);
+
+                        // 2. Credit Referee
+                        var refereeTx = new GoldTransaction
+                        {
+                            Id = Guid.NewGuid(),
+                            UserId = request.UserId,
+                            TransactionType = "EVENT_BONUS",
+                            GoldWeightMg = config.RefereeRewardMg,
+                            PricePerGmPaise = effectiveBuyPricePaise,
+                            TotalAmountPaise = 0,
+                            IpAddress = request.IpAddress ?? "127.0.0.1",
+                            DeviceFingerprint = "REFERRAL",
+                            RateSource = "REFERRAL_SIGNUP",
+                            RateTimestamp = DateTimeOffset.UtcNow,
+                            BonusAmountPaise = 0,
+                            BonusGoldMg = config.RefereeRewardMg,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        await _goldRepository.IncrementBonusGoldBalanceAsync(request.UserId, config.RefereeRewardMg);
+                        await _goldRepository.RecordGoldTransactionAsync(refereeTx);
+
+                        // 3. Mark Referral Event as Awarded
+                        pendingReferral.RewardStatus = "Awarded";
+                        pendingReferral.BonusAwardedMg = config.ReferrerRewardMg;
+                        await _goldRepository.UpdateReferralEventAsync(pendingReferral);
+
+                        // 4. Notifications
+                        try
+                        {
+                            await _notificationService.SendNotificationAsync(pendingReferral.ReferrerUserId,
+                                "Referral Reward! 🎁",
+                                $"Congratulations! Your friend {refereeName} made their first gold purchase. You earned {config.ReferrerRewardMg}mg of bonus gold!",
+                                "REFERRAL_BONUS");
+
+                            await _notificationService.SendNotificationAsync(request.UserId,
+                                "Referral Reward! 🎁",
+                                $"Welcome to Aishwaryam! You earned {config.RefereeRewardMg}mg of bonus gold for making your first gold purchase under a referral code.",
+                                "REFERRAL_BONUS");
+                        }
+                        catch { }
+                    }
+                }
+
                 long updatedGoldBalance = await _goldRepository.CalculateGoldBalanceAsync(request.UserId);
                 await _goldRepository.UpdateGoldCacheAsync(request.UserId, updatedGoldBalance);
 

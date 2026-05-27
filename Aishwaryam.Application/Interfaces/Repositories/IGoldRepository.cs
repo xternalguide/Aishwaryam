@@ -17,5 +17,9 @@ namespace Aishwaryam.Application.Interfaces.Repositories
         Task RecordClaimedOfferAsync(UserClaimedOffer claimedOffer);
         Task RecordAuditLogAsync(PlatformAuditLog auditLog);
         Task IncrementBonusGoldBalanceAsync(Guid userId, long bonusGoldMg);
+        Task<bool> HasAnyBuyTransactionAsync(Guid userId, Guid excludeTxId);
+        Task<ReferralEvent?> GetPendingReferralEventAsync(Guid refereeUserId);
+        Task UpdateReferralEventAsync(ReferralEvent referralEvent);
+        Task<AppConfig?> GetAppConfigAsync();
     }
 }

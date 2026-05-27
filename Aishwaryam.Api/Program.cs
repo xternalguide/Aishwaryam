@@ -350,6 +350,15 @@ using (var scope = app.Services.CreateScope())
         claimed_at timestamptz DEFAULT CURRENT_TIMESTAMP
     );", "user_claimed_offers");
 
+    TryExec(@"CREATE TABLE IF NOT EXISTS referral_events (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        referrer_user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        referee_user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        reward_status varchar(20) DEFAULT 'Pending' NOT NULL,
+        bonus_awarded_mg bigint DEFAULT 0 NOT NULL,
+        created_at timestamptz DEFAULT CURRENT_TIMESTAMP
+    );", "referral_events");
+
     TryExec(@"CREATE TABLE IF NOT EXISTS user_devices (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id uuid REFERENCES users(id) ON DELETE CASCADE,
@@ -417,6 +426,8 @@ using (var scope = app.Services.CreateScope())
     // ── ALTER TABLE: financial tables optimistic concurrency ─────────────────
     TryExec("ALTER TABLE gold_holdings ADD COLUMN IF NOT EXISTS row_version bytea;", "gold_holdings.row_version");
     TryExec("ALTER TABLE wallets ADD COLUMN IF NOT EXISTS row_version bytea;", "wallets.row_version");
+    TryExec("ALTER TABLE app_configs ADD COLUMN IF NOT EXISTS referrer_reward_mg bigint DEFAULT 100 NOT NULL;", "app_configs.referrer_reward_mg");
+    TryExec("ALTER TABLE app_configs ADD COLUMN IF NOT EXISTS referee_reward_mg bigint DEFAULT 50 NOT NULL;", "app_configs.referee_reward_mg");
 
     // ── ALTER TABLE: gold_transactions idempotency & new columns ─────────────
     TryExec("ALTER TABLE gold_transactions ADD COLUMN IF NOT EXISTS razorpay_payment_id varchar(100);",
