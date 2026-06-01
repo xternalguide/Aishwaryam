@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Aishwaryam.Application.DTOs.Admin;
 using Aishwaryam.Application.Interfaces.Services;
+using Microsoft.EntityFrameworkCore;
+using Aishwaryam.Infrastructure.Data;
 
 namespace Aishwaryam.Api.Controllers
 {
@@ -97,6 +99,41 @@ namespace Aishwaryam.Api.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Error generating report", error = ex.Message });
+            }
+        }
+
+        [HttpGet("daily-notification-setting")]
+        public async Task<IActionResult> GetDailyNotificationSetting([FromServices] ApplicationDbContext db)
+        {
+            try
+            {
+                var config = await db.AppConfigs.FirstOrDefaultAsync();
+                if (config == null) return NotFound("App configuration not found.");
+                return Ok(new { isEnabled = config.IsDailyPriceNotificationEnabled });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error fetching daily price notification setting", error = ex.Message });
+            }
+        }
+
+        [HttpPost("daily-notification-setting/toggle")]
+        public async Task<IActionResult> ToggleDailyNotificationSetting([FromServices] ApplicationDbContext db)
+        {
+            try
+            {
+                var config = await db.AppConfigs.FirstOrDefaultAsync();
+                if (config == null) return NotFound("App configuration not found.");
+                
+                config.IsDailyPriceNotificationEnabled = !config.IsDailyPriceNotificationEnabled;
+                config.UpdatedAt = DateTimeOffset.UtcNow;
+                await db.SaveChangesAsync();
+
+                return Ok(new { success = true, isEnabled = config.IsDailyPriceNotificationEnabled, message = $"Automated daily price notification set to {config.IsDailyPriceNotificationEnabled}" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error toggling daily price notification setting", error = ex.Message });
             }
         }
 

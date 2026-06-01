@@ -267,7 +267,55 @@ namespace Aishwaryam.Api.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> DeleteAccount(Guid userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound(new { Message = "User not found." });
+
+            // Remove associated schemes and related investments/redemptions
+            var schemes = await _context.UserSchemes.Where(s => s.UserId == userId).ToListAsync();
+            foreach (var scheme in schemes)
+            {
+                var investments = await _context.SchemeInvestments.Where(i => i.UserSchemeId == scheme.Id).ToListAsync();
+                _context.SchemeInvestments.RemoveRange(investments);
+
+                var redemptions = await _context.SchemeRedemptions.Where(r => r.UserSchemeId == scheme.Id).ToListAsync();
+                _context.SchemeRedemptions.RemoveRange(redemptions);
+            }
+            _context.UserSchemes.RemoveRange(schemes);
+
+            // Remove wallets and ledger
+            var wallet = await _context.Wallets.FindAsync(userId);
+            if (wallet != null) _context.Wallets.Remove(wallet);
+
+            var ledgerEntries = await _context.WalletLedgers.Where(l => l.UserId == userId).ToListAsync();
+            _context.WalletLedgers.RemoveRange(ledgerEntries);
+
+            // Remove gold holdings and transactions
+            var goldHolding = await _context.GoldHoldings.FindAsync(userId);
+            if (goldHolding != null) _context.GoldHoldings.Remove(goldHolding);
+
+            var transactions = await _context.GoldTransactions.Where(t => t.UserId == userId).ToListAsync();
+            _context.GoldTransactions.RemoveRange(transactions);
+
+            // Remove user devices
+            var devices = await _context.UserDevices.Where(d => d.UserId == userId).ToListAsync();
+            _context.UserDevices.RemoveRange(devices);
+
+            // Remove KYC documents
+            var kycDocs = await _context.KycDocuments.Where(d => d.UserId == userId).ToListAsync();
+            _context.KycDocuments.RemoveRange(kycDocs);
+
+            // Finally delete the user
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Account deleted successfully.", Success = true });
+        }
     }
+
 
     public class UpdateProfileRequest
     {

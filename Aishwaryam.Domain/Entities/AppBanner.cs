@@ -31,6 +31,9 @@ namespace Aishwaryam.Domain.Entities
         /// <summary>Where the banner is displayed: e.g. "DASHBOARD" or "ONBOARDING".</summary>
         public string Location { get; set; } = "DASHBOARD";
 
+        /// <summary>Optional: countdown timer expiry date/time for Meesho-style banner timer.</summary>
+        public DateTimeOffset? ExpiresAt { get; set; }
+
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
         public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 

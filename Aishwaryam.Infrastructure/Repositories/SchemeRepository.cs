@@ -107,12 +107,14 @@ namespace Aishwaryam.Infrastructure.Repositories
         public async Task<(long TotalSavingsAdded, long TotalBonusEarned, long TotalBonusGoldMg)> GetSchemeSavingsSummaryAsync(Guid userSchemeId)
         {
             var txs = await _context.GoldTransactions
-                .Where(t => t.UserSchemeId == userSchemeId && t.TransactionType == "BUY")
+                .Where(t => t.UserSchemeId == userSchemeId && (t.TransactionType == "BUY" || t.TransactionType == "BONUS"))
                 .ToListAsync();
 
-            long totalSavings = txs.Sum(t => t.TotalAmountPaise);
-            long totalBonusEarned = txs.Sum(t => t.BonusAmountPaise);
-            long totalBonusGoldMg = txs.Sum(t => t.BonusGoldMg);
+            long totalSavings = txs.Where(t => t.TransactionType == "BUY").Sum(t => t.TotalAmountPaise);
+            long totalBonusEarned = txs.Where(t => t.TransactionType == "BUY").Sum(t => t.BonusAmountPaise)
+                                   + txs.Where(t => t.TransactionType == "BONUS").Sum(t => (t.GoldWeightMg * t.PricePerGmPaise) / 1000);
+            long totalBonusGoldMg = txs.Where(t => t.TransactionType == "BUY").Sum(t => t.BonusGoldMg)
+                                    + txs.Where(t => t.TransactionType == "BONUS").Sum(t => t.GoldWeightMg);
 
             return (totalSavings, totalBonusEarned, totalBonusGoldMg);
         }

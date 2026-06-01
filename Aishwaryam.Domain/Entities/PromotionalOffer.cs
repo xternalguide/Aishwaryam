@@ -26,6 +26,9 @@ namespace Aishwaryam.Domain.Entities
         [Column("bonus_worth_paise")]
         public long BonusWorthPaise { get; set; } = 0; // Flat bonus (legacy / flash sales)
 
+        [Column("bonus_gold_mg")]
+        public long BonusGoldMg { get; set; } = 0; // Flat gold weight awarded as bonus (e.g. 5000mg for 5g)
+
         [Column("bonus_percent")]
         public decimal BonusPercent { get; set; } = 0; // Percentage bonus on purchase (birthday/anniversary)
 

@@ -102,25 +102,45 @@ namespace Aishwaryam.Application.Services
                     effectiveSource = currentPrice.Source;
                 }
 
-                // 3. Calculation Logic
-                long totalAmountPaise = request.TotalAmountPaise;
-                long baseAmountPaise = (totalAmountPaise * 100) / 103;
-                long gstAmountPaise = totalAmountPaise - baseAmountPaise;
-                long goldWeightMg = (baseAmountPaise * 1000) / effectiveBuyPricePaise;
-
-                if (goldWeightMg <= 0)
-                    return new GoldTransactionResponse { Success = false, Message = "Amount too low after GST." };
-
-                // 4. Scheme Bonus
+                // 4. Scheme Bonus (moved up to determine if it is a Silver scheme)
                 UserScheme? activeScheme = null;
                 if (request.UserSchemeId.HasValue && request.UserSchemeId.Value != Guid.Empty)
                 {
                     activeScheme = await _schemeRepository.GetUserSchemeByIdAsync(request.UserSchemeId.Value);
+                    if (activeScheme == null)
+                    {
+                        // Fallback: the provided ID might be a master scheme ID or stale reference.
+                        // Try to find the user's active scheme by userId to ensure bonus is calculated.
+                        activeScheme = await _schemeRepository.GetActiveUserSchemeAsync(request.UserId);
+                    }
+                }
+
+                Console.WriteLine($"[LOYALTY_AUDIT] request.UserSchemeId: {request.UserSchemeId}, request.UserId: {request.UserId}");
+                if (activeScheme != null)
+                {
+                    Console.WriteLine($"[LOYALTY_AUDIT] activeScheme found! Id: {activeScheme.Id}, PlanName: {activeScheme.PlanName}, Status: {activeScheme.Status}");
                 }
                 else
                 {
-                    activeScheme = await _schemeRepository.GetActiveUserSchemeAsync(request.UserId);
+                    Console.WriteLine("[LOYALTY_AUDIT] activeScheme is NULL!");
                 }
+
+                bool isSilverScheme = activeScheme != null && activeScheme.PlanName.Contains("silver", StringComparison.OrdinalIgnoreCase);
+                long effectiveRate = isSilverScheme ? 9500L : effectiveBuyPricePaise;
+
+                Console.WriteLine($"[LOYALTY_AUDIT] isSilverScheme: {isSilverScheme}, effectiveRate: {effectiveRate}");
+
+                // 3. Calculation Logic
+                long totalAmountPaise = request.TotalAmountPaise;
+                long baseAmountPaise = (totalAmountPaise * 100) / 103;
+                long gstAmountPaise = totalAmountPaise - baseAmountPaise;
+                long goldWeightMg = (baseAmountPaise * 1000) / effectiveRate;
+
+                Console.WriteLine($"[LOYALTY_AUDIT] baseAmountPaise: {baseAmountPaise}, gstAmountPaise: {gstAmountPaise}, goldWeightMg: {goldWeightMg}");
+
+                if (goldWeightMg <= 0)
+                    return new GoldTransactionResponse { Success = false, Message = "Amount too low after GST." };
+
                 decimal bonusPercentage = 0;
                 long bonusGoldMg = 0;
                 long bonusAmountPaise = 0;
@@ -128,10 +148,57 @@ namespace Aishwaryam.Application.Services
 
                 if (activeScheme != null)
                 {
-                    // Loyalty bonus is now calculated and awarded as a separate milestone bonus at the end of each tier period, not per-transaction.
-                    bonusPercentage = 0;
-                    bonusGoldMg = 0;
-                    bonusAmountPaise = 0;
+                    schemeDayNumber = (int)(DateTime.UtcNow - activeScheme.CreatedAt).TotalDays;
+                    if (schemeDayNumber < 0) schemeDayNumber = 0;
+
+                    var master = await _schemeRepository.GetSchemeMasterByPlanNameAsync(activeScheme.PlanName);
+                    Console.WriteLine($"[LOYALTY_AUDIT] master plan found: {master?.PlanName}, id: {master?.Id}");
+                    
+                    List<SchemeBonusTier>? dbTiers = null;
+                    if (master != null)
+                    {
+                        dbTiers = await _schemeRepository.GetBonusTiersAsync(master.Id);
+                    }
+                    Console.WriteLine($"[LOYALTY_AUDIT] dbTiers count: {dbTiers?.Count ?? 0}, schemeDayNumber: {schemeDayNumber}");
+
+                    if (dbTiers != null && dbTiers.Count > 0)
+                    {
+                        var matchingTier = dbTiers.FirstOrDefault(t => schemeDayNumber >= t.StartDay && schemeDayNumber <= t.EndDay);
+                        if (matchingTier != null)
+                        {
+                            bonusPercentage = matchingTier.BonusPercentage;
+                        }
+                    }
+                    else
+                    {
+                        // Fallback to original hardcoded 330-day scheme rules
+                        if (schemeDayNumber <= 75)
+                        {
+                            bonusPercentage = 7.5m;
+                        }
+                        else if (schemeDayNumber <= 150)
+                        {
+                            bonusPercentage = 5.5m;
+                        }
+                        else if (schemeDayNumber <= 225)
+                        {
+                            bonusPercentage = 3.5m;
+                        }
+                        else if (schemeDayNumber <= 330)
+                        {
+                            bonusPercentage = 1.5m;
+                        }
+                    }
+
+                    Console.WriteLine($"[LOYALTY_AUDIT] final bonusPercentage: {bonusPercentage}");
+
+                    if (bonusPercentage > 0)
+                    {
+                        bonusAmountPaise = (long)(baseAmountPaise * (bonusPercentage / 100m));
+                        bonusGoldMg = (bonusAmountPaise * 1000) / effectiveRate;
+                    }
+
+                    Console.WriteLine($"[LOYALTY_AUDIT] bonusAmountPaise: {bonusAmountPaise}, bonusGoldMg: {bonusGoldMg}");
                 }
 
                 long totalGoldCreditedMg = goldWeightMg + bonusGoldMg;
@@ -143,7 +210,7 @@ namespace Aishwaryam.Application.Services
                     AmountPaise = request.TotalAmountPaise,
                     TransactionType = "DEBIT",
                     ReferenceId = "GOLD_BUY_" + Guid.NewGuid().ToString("N")[..8],
-                    Description = $"Bought {goldWeightMg}mg of Gold",
+                    Description = $"Bought {goldWeightMg}mg of {(isSilverScheme ? "Silver" : "Gold")}",
                     IpAddress = request.IpAddress,
                     DeviceFingerprint = request.DeviceFingerprint
                 });
@@ -156,7 +223,7 @@ namespace Aishwaryam.Application.Services
                     UserId = request.UserId,
                     TransactionType = "BUY",
                     GoldWeightMg = goldWeightMg,
-                    PricePerGmPaise = effectiveBuyPricePaise,
+                    PricePerGmPaise = effectiveRate,
                     TotalAmountPaise = totalAmountPaise,
                     IpAddress = request.IpAddress,
                     DeviceFingerprint = request.DeviceFingerprint,
@@ -187,7 +254,7 @@ namespace Aishwaryam.Application.Services
                         UserId = request.UserId,
                         TransactionType = "BONUS",
                         GoldWeightMg = bonusGoldMg,
-                        PricePerGmPaise = effectiveBuyPricePaise,
+                        PricePerGmPaise = effectiveRate,
                         TotalAmountPaise = 0,
                         IpAddress = request.IpAddress,
                         DeviceFingerprint = request.DeviceFingerprint,
@@ -223,7 +290,7 @@ namespace Aishwaryam.Application.Services
                         BaseAmountPaise = baseAmountPaise,
                         GstAmountPaise = gstAmountPaise,
                         GoldWeightMg = goldWeightMg,
-                        PricePerGmPaise = effectiveBuyPricePaise,
+                        PricePerGmPaise = effectiveRate,
                         BonusPercentage = bonusPercentage,
                         BonusAmountPaise = bonusAmountPaise,
                         BonusGoldMg = bonusGoldMg,
@@ -247,7 +314,7 @@ namespace Aishwaryam.Application.Services
                             BaseAmountPaise = 0,
                             GstAmountPaise = 0,
                             GoldWeightMg = bonusGoldMg,
-                            PricePerGmPaise = effectiveBuyPricePaise,
+                            PricePerGmPaise = effectiveRate,
                             BonusPercentage = bonusPercentage,
                             BonusAmountPaise = bonusAmountPaise,
                             BonusGoldMg = bonusGoldMg,
@@ -273,9 +340,19 @@ namespace Aishwaryam.Application.Services
 
                         if (!alreadyClaimed && request.TotalAmountPaise >= activeEventOffer.MinPurchaseAmountPaise)
                         {
-                            promotionalBonusAmountPaise = (long)(request.TotalAmountPaise * (double)(activeEventOffer.BonusPercent / 100m));
-                            var bonusBaseAmountPaise = (promotionalBonusAmountPaise * 100) / 103;
-                            promotionalBonusGoldMg = (bonusBaseAmountPaise * 1000) / effectiveBuyPricePaise;
+                            if (activeEventOffer.BonusGoldMg > 0)
+                            {
+                                // Flat Gold Weight Offer (e.g. 5 grams free)
+                                promotionalBonusGoldMg = activeEventOffer.BonusGoldMg;
+                                promotionalBonusAmountPaise = (promotionalBonusGoldMg * effectiveBuyPricePaise) / 1000;
+                            }
+                            else if (activeEventOffer.BonusPercent > 0)
+                            {
+                                // Percentage-based Offer
+                                promotionalBonusAmountPaise = (long)(request.TotalAmountPaise * (double)(activeEventOffer.BonusPercent / 100m));
+                                var bonusBaseAmountPaise = (promotionalBonusAmountPaise * 100) / 103;
+                                promotionalBonusGoldMg = (bonusBaseAmountPaise * 1000) / effectiveBuyPricePaise;
+                            }
 
                             if (promotionalBonusGoldMg > 0)
                             {
@@ -411,7 +488,10 @@ namespace Aishwaryam.Application.Services
 
                 await _unitOfWork.CommitAsync();
 
-                await _notificationService.SendNotificationAsync(request.UserId, "Gold Purchased! ✨", $"Successfully purchased {(goldWeightMg / 1000.0):F4}g of gold.", "GOLD_BUY");
+                await _notificationService.SendNotificationAsync(request.UserId, 
+                    isSilverScheme ? "Silver Purchased! ✨" : "Gold Purchased! ✨", 
+                    $"Successfully purchased {(goldWeightMg / 1000.0):F4}g of {(isSilverScheme ? "silver" : "gold")}.", 
+                    isSilverScheme ? "SILVER_BUY" : "GOLD_BUY");
 
                 try
                 {
@@ -424,7 +504,7 @@ namespace Aishwaryam.Application.Services
                             TransactionId = txId.ToString(),
                             GoldWeightMg = (totalGoldCreditedMg + promotionalBonusGoldMg).ToString(),
                             AmountPaid = (totalAmountPaise / 100.0).ToString("F2"),
-                            GoldRatePerGm = (effectiveBuyPricePaise / 100.0).ToString("F2"),
+                            GoldRatePerGm = (effectiveRate / 100.0).ToString("F2"),
                             GstAmount = (gstAmountPaise / 100.0).ToString("F2"),
                             BonusGoldMg = (bonusGoldMg + promotionalBonusGoldMg).ToString(),
                             BonusPercent = (bonusPercentage + (activeScheme == null && promotionalBonusGoldMg > 0 ? (promotionalBonusAmountPaise * 100m / totalAmountPaise) : 0m)).ToString("F1"),
@@ -442,7 +522,7 @@ namespace Aishwaryam.Application.Services
                     Success = true,
                     TransactionId = txId.ToString(),
                     GoldWeightMg = goldWeightMg,
-                    PricePerGmPaise = effectiveBuyPricePaise,
+                    PricePerGmPaise = effectiveRate,
                     TotalAmountPaise = totalAmountPaise,
                     BaseAmountPaise = baseAmountPaise,
                     GstAmountPaise = gstAmountPaise,

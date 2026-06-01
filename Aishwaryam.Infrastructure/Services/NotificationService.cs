@@ -82,7 +82,7 @@ namespace Aishwaryam.Infrastructure.Services
             }
         }
 
-        private async Task SendPushToDeviceAsync(UserDevice device, string title, string message, Dictionary<string, string> data)
+        private async Task SendPushToDeviceAsync(UserDevice device, string title, string message, Dictionary<string, string> data, string? imageUrl = null)
         {
             try
             {
@@ -94,9 +94,23 @@ namespace Aishwaryam.Infrastructure.Services
                     Notification = new FirebaseAdmin.Messaging.Notification()
                     {
                         Title = title,
-                        Body = message
+                        Body = message,
+                        ImageUrl = imageUrl
                     },
-                    Data = data
+                    Data = data,
+                    Android = new FirebaseAdmin.Messaging.AndroidConfig()
+                    {
+                        Priority = FirebaseAdmin.Messaging.Priority.High,
+                        Notification = new FirebaseAdmin.Messaging.AndroidNotification()
+                        {
+                            ChannelId = "aishwaryam_push_notifs",
+                            Icon = "ic_launcher",
+                            Sound = "default",
+                            DefaultSound = true,
+                            DefaultVibrateTimings = true,
+                            ClickAction = "FLUTTER_NOTIFICATION_CLICK"
+                        }
+                    }
                 };
 
                 string response = await FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance.SendAsync(fcmMessage);
@@ -123,7 +137,7 @@ namespace Aishwaryam.Infrastructure.Services
             }
         }
 
-        public async Task RegisterDeviceTokenAsync(Guid userId, string token, string deviceType = "ANDROID")
+        public async Task RegisterDeviceTokenAsync(Guid? userId, string token, string deviceType = "ANDROID")
         {
             var existing = await _context.UserDevices.FirstOrDefaultAsync(d => d.FcmToken == token);
             if (existing != null)
@@ -200,6 +214,49 @@ namespace Aishwaryam.Infrastructure.Services
         {
             return await _context.UserNotifications
                 .CountAsync(n => n.UserId == userId && !n.IsRead && !n.IsDeleted);
+        }
+
+        public async Task BroadcastNotificationAsync(string title, string message, string type = "GENERAL", System.Collections.Generic.Dictionary<string, string>? pushData = null, string? imageUrl = null)
+        {
+            try
+            {
+                pushData ??= new System.Collections.Generic.Dictionary<string, string>();
+                if (!pushData.ContainsKey("type")) pushData["type"] = type;
+                if (!pushData.ContainsKey("click_action")) pushData["click_action"] = "FLUTTER_NOTIFICATION_CLICK";
+
+                // 1. Get all active users
+                var users = await _context.Users.Where(u => u.IsActive).ToListAsync();
+                
+                // 2. Persist in history in bulk for all active users
+                var notifications = users.Select(u => new UserNotification
+                {
+                    UserId = u.Id,
+                    Title = title,
+                    Message = message,
+                    Type = type,
+                    CreatedAt = DateTime.UtcNow,
+                    IsRead = false
+                }).ToList();
+
+                _context.UserNotifications.AddRange(notifications);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"[NOTIFICATION] Broadcasted in-app history for {users.Count} users: {title}");
+
+                // 3. Get all active devices
+                var devices = await _context.UserDevices.Where(d => d.IsActive).ToListAsync();
+                if (devices.Any())
+                {
+                    foreach (var device in devices)
+                    {
+                        await SendPushToDeviceAsync(device, title, message, pushData, imageUrl);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to broadcast notification");
+            }
         }
     }
 }

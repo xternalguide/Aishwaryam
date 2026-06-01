@@ -16,10 +16,12 @@ namespace Aishwaryam.Api.Controllers
     public class SchemeController : ControllerBase
     {
         private readonly ISchemeService _schemeService;
+        private readonly Aishwaryam.Infrastructure.Data.ApplicationDbContext _db;
 
-        public SchemeController(ISchemeService schemeService)
+        public SchemeController(ISchemeService schemeService, Aishwaryam.Infrastructure.Data.ApplicationDbContext db)
         {
             _schemeService = schemeService;
+            _db = db;
         }
 
         [HttpGet("list")]
@@ -205,7 +207,8 @@ namespace Aishwaryam.Api.Controllers
                 request.UserId, 
                 request.SchemeId, 
                 request.RedemptionType, 
-                request.Address
+                request.Address,
+                request.IncludeBonusGold
             );
             return Ok(result);
         }
@@ -231,6 +234,20 @@ namespace Aishwaryam.Api.Controllers
         {
             var redemptions = await _schemeService.GetPendingRedemptionsForAdminAsync();
             return Ok(redemptions);
+        }
+
+        [HttpDelete("admin/wipe-all")]
+        public async Task<IActionResult> WipeAllSchemes([FromHeader(Name = "X-Confirm")] string? confirm)
+        {
+            if (confirm != "WIPE") return BadRequest(new { error = "Send header X-Confirm: WIPE to confirm wipe." });
+            // Delete in FK-safe order
+            await _db.Database.ExecuteSqlRawAsync("DELETE FROM scheme_investments;");
+            await _db.Database.ExecuteSqlRawAsync("DELETE FROM scheme_redemptions;");
+            await _db.Database.ExecuteSqlRawAsync("DELETE FROM redemption_status_history;");
+            await _db.Database.ExecuteSqlRawAsync("DELETE FROM scheme_bonus_tiers;");
+            await _db.Database.ExecuteSqlRawAsync("DELETE FROM user_schemes;");
+            await _db.Database.ExecuteSqlRawAsync("DELETE FROM schemes_master;");
+            return Ok(new { message = "All scheme data wiped successfully. Users and gold wallets are untouched." });
         }
     }
 
@@ -269,6 +286,7 @@ namespace Aishwaryam.Api.Controllers
         public Guid SchemeId { get; set; }
         public string RedemptionType { get; set; } = "CASH"; // CASH, DELIVERY, JEWELLERY
         public string? Address { get; set; }
+        public bool IncludeBonusGold { get; set; } = false;
     }
 
     public class AdminApproveRedemptionRequest

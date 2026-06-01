@@ -116,9 +116,8 @@ namespace Aishwaryam.Api.Controllers
         [HttpPost("verify")]
         public async Task<IActionResult> VerifyPayment([FromBody] PaymentVerificationRequest request)
         {
-            // 1. Verify Razorpay Signature (relaxed for testing keys/empty signatures to support sandbox and mock checkout flows)
-            bool isTestMode = _razorpayKey.StartsWith("rzp_test_") || string.IsNullOrEmpty(request.RazorpaySignature) || request.RazorpaySignature == "MOCK_SIGNATURE";
-            if (!isTestMode && !VerifyRazorpaySignature(request.RazorpayOrderId, request.RazorpayPaymentId, request.RazorpaySignature))
+            // 1. Verify Razorpay Signature (Strict fintech check - required for all transactions to prevent mock client-side validation bypasses)
+            if (!VerifyRazorpaySignature(request.RazorpayOrderId, request.RazorpayPaymentId, request.RazorpaySignature))
             {
                 return BadRequest(new { Message = "Invalid payment signature." });
             }

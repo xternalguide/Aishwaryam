@@ -28,13 +28,15 @@ namespace Aishwaryam.Api.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IGoldPriceManager _priceManager;
         private readonly IMemoryCache _cache;
+        private readonly INotificationService _notificationService;
 
-        public GoldController(IGoldService goldService, ApplicationDbContext context, IGoldPriceManager priceManager, IMemoryCache cache)
+        public GoldController(IGoldService goldService, ApplicationDbContext context, IGoldPriceManager priceManager, IMemoryCache cache, INotificationService notificationService)
         {
             _goldService = goldService;
             _context = context;
             _priceManager = priceManager;
             _cache = cache;
+            _notificationService = notificationService;
         }
 
         private Guid GetAuthenticatedUserId()
@@ -172,6 +174,11 @@ namespace Aishwaryam.Api.Controllers
             var buyDecimal = (decimal)request.BuyPricePaise / 100m;
             var sellDecimal = (decimal)request.SellPricePaise / 100m;
 
+            // Fetch previous snapshot to compare price trends before inserting new rate
+            var previousSnapshot = await _context.GoldPriceSnapshots
+                .OrderByDescending(s => s.FetchedAt)
+                .FirstOrDefaultAsync();
+
             var snapshot = new Aishwaryam.Domain.Entities.GoldPriceSnapshot
             {
                 Price24KPerGram = buyDecimal / 0.916m,
@@ -196,6 +203,45 @@ namespace Aishwaryam.Api.Controllers
 
             // CRITICAL: Invalidate cache so all users see the update immediately!
             _cache.Remove("LiveGoldPrice");
+
+            // Automatically call api backend function to broadcast push notification if daily price alerts are active
+            var config = await _context.AppConfigs.FirstOrDefaultAsync();
+            if (config != null && config.IsDailyPriceNotificationEnabled && previousSnapshot != null)
+            {
+                var currentPrice = buyDecimal;
+                var oldPrice = previousSnapshot.BuyPricePerGram;
+
+                string title = "";
+                string body = "";
+                string type = "PRICE_UPDATE";
+
+                if (currentPrice > oldPrice)
+                {
+                    title = "Gold Price Trend: Rising! 📈";
+                    body = $"Today's gold price has increased to ₹{currentPrice:F2}/g (compared to ₹{oldPrice:F2}/g yesterday). Secure your systematic savings rate now.";
+                }
+                else if (currentPrice < oldPrice)
+                {
+                    title = "Gold Price Trend: Dropping! 📉";
+                    body = $"Gold price has dropped to ₹{currentPrice:F2}/g (compared to ₹{oldPrice:F2}/g yesterday). Purchase gold now and get maximum gold grams benefits!";
+                }
+                else
+                {
+                    title = "Today's Gold Price Update 🔔";
+                    body = $"Today's gold rate is holding steady at ₹{currentPrice:F2}/g. Keep saving systematically and secure your future!";
+                }
+
+                try
+                {
+                    await _notificationService.BroadcastNotificationAsync(title, body, type, new System.Collections.Generic.Dictionary<string, string> {
+                        { "screen", "buyGold" }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    // Fail-safe: log but do not disrupt primary price update
+                }
+            }
 
             return Ok(new { message = "Prices updated successfully." });
         }
@@ -259,12 +305,20 @@ namespace Aishwaryam.Api.Controllers
         {
             if (request.Price24KPerGram <= 0) return BadRequest("Invalid price.");
 
+            var buyDecimal = request.Price24KPerGram * 0.916m;
+            var sellDecimal = request.Price24KPerGram * 0.916m * 0.97m;
+
+            // Fetch previous snapshot to compare price trends before inserting new rate
+            var previousSnapshot = await _context.GoldPriceSnapshots
+                .OrderByDescending(s => s.FetchedAt)
+                .FirstOrDefaultAsync();
+
             var snapshot = new Aishwaryam.Domain.Entities.GoldPriceSnapshot
             {
                 Price24KPerGram = request.Price24KPerGram,
-                Price22KPerGram = request.Price24KPerGram * 0.916m,
-                BuyPricePerGram = request.Price24KPerGram * 0.916m,
-                SellPricePerGram = request.Price24KPerGram * 0.916m * 0.97m,
+                Price22KPerGram = buyDecimal,
+                BuyPricePerGram = buyDecimal,
+                SellPricePerGram = sellDecimal,
                 Source = "AdminOverride",
                 AdminNote = request.Note,
                 IsAdminOverride = true,
@@ -280,6 +334,48 @@ namespace Aishwaryam.Api.Controllers
                 snapshot.Id, snapshot.Price24KPerGram, snapshot.Price22KPerGram,
                 snapshot.BuyPricePerGram, snapshot.SellPricePerGram, snapshot.Source,
                 snapshot.AdminNote ?? "", snapshot.IsAdminOverride, snapshot.FetchedAt, snapshot.ExpiresAt);
+
+            // CRITICAL: Invalidate cache so all users see the update immediately!
+            _cache.Remove("LiveGoldPrice");
+
+            // Automatically call api backend function to broadcast push notification if daily price alerts are active
+            var config = await _context.AppConfigs.FirstOrDefaultAsync();
+            if (config != null && config.IsDailyPriceNotificationEnabled && previousSnapshot != null)
+            {
+                var currentPrice = buyDecimal;
+                var oldPrice = previousSnapshot.BuyPricePerGram;
+
+                string title = "";
+                string body = "";
+                string type = "PRICE_UPDATE";
+
+                if (currentPrice > oldPrice)
+                {
+                    title = "Gold Price Trend: Rising! 📈";
+                    body = $"Today's gold price has increased to ₹{currentPrice:F2}/g (compared to ₹{oldPrice:F2}/g yesterday). Secure your systematic savings rate now.";
+                }
+                else if (currentPrice < oldPrice)
+                {
+                    title = "Gold Price Trend: Dropping! 📉";
+                    body = $"Gold price has dropped to ₹{currentPrice:F2}/g (compared to ₹{oldPrice:F2}/g yesterday). Purchase gold now and get maximum gold grams benefits!";
+                }
+                else
+                {
+                    title = "Today's Gold Price Update 🔔";
+                    body = $"Today's gold rate is holding steady at ₹{currentPrice:F2}/g. Keep saving systematically and secure your future!";
+                }
+
+                try
+                {
+                    await _notificationService.BroadcastNotificationAsync(title, body, type, new System.Collections.Generic.Dictionary<string, string> {
+                        { "screen", "buyGold" }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    // Fail-safe: log but do not disrupt primary price update
+                }
+            }
 
             return Ok(new { message = "Admin price override applied and logged.", snapshot.Id });
         }

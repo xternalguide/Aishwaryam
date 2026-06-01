@@ -14,6 +14,9 @@ namespace Aishwaryam.Domain.Entities
         public string? BonusConfigJson { get; set; }
         public string? CustomSectionsJson { get; set; }
         public string? RazorpayPlanId { get; set; }  // Razorpay recurring plan ID
+        public string? PosterImageBase64 { get; set; }   // Admin-uploaded card poster image
+        public string? PaymentRulesJson { get; set; }     // JSON: {minAmountPaise, maxAmountPaise, multiplePerDay, earlyExitAfterDays}
+        public string? KeywordsJson { get; set; }         // JSON array of strings e.g. ["Flexible","7.5% Bonus"]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

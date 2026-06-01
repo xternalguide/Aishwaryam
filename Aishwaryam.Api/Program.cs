@@ -483,6 +483,12 @@ using (var scope = app.Services.CreateScope())
         "schemes_master.custom_sections_json");
     TryExec("ALTER TABLE schemes_master ADD COLUMN IF NOT EXISTS razorpay_plan_id text;",
         "schemes_master.razorpay_plan_id");
+    TryExec("ALTER TABLE schemes_master ADD COLUMN IF NOT EXISTS poster_image_base64 text;",
+        "schemes_master.poster_image_base64");
+    TryExec("ALTER TABLE schemes_master ADD COLUMN IF NOT EXISTS payment_rules_json text;",
+        "schemes_master.payment_rules_json");
+    TryExec("ALTER TABLE schemes_master ADD COLUMN IF NOT EXISTS keywords_json text;",
+        "schemes_master.keywords_json");
 
     // ── ALTER TABLE: user_schemes columns ─────────────────────────────────────
     TryExec("ALTER TABLE user_schemes ADD COLUMN IF NOT EXISTS razorpay_subscription_id text;",

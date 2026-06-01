@@ -72,6 +72,9 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.BonusConfigJson).HasColumnName("bonus_config_json");
                 entity.Property(e => e.CustomSectionsJson).HasColumnName("custom_sections_json");
                 entity.Property(e => e.RazorpayPlanId).HasColumnName("razorpay_plan_id");
+                entity.Property(e => e.PosterImageBase64).HasColumnName("poster_image_base64");
+                entity.Property(e => e.PaymentRulesJson).HasColumnName("payment_rules_json");
+                entity.Property(e => e.KeywordsJson).HasColumnName("keywords_json");
                 entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
@@ -310,6 +313,8 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.IsAutoSaveEnabled).HasColumnName("is_autosave_enabled").HasDefaultValue(true);
                 entity.Property(e => e.ReferrerRewardMg).HasColumnName("referrer_reward_mg").HasDefaultValue(100L);
                 entity.Property(e => e.RefereeRewardMg).HasColumnName("referee_reward_mg").HasDefaultValue(50L);
+                entity.Property(e => e.IsDailyPriceNotificationEnabled).HasColumnName("is_daily_price_notification_enabled").HasDefaultValue(false);
+                entity.Property(e => e.LastDailyPriceNotificationSent).HasColumnName("last_daily_price_notification_sent");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 
@@ -325,6 +330,7 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
                 entity.Property(e => e.DisplayOrder).HasColumnName("display_order").HasDefaultValue(0);
                 entity.Property(e => e.Location).HasColumnName("location").HasDefaultValue("DASHBOARD").HasMaxLength(50);
+                entity.Property(e => e.ExpiresAt).HasColumnName("expires_at");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.CreatedByAdminId).HasColumnName("created_by_admin_id").HasMaxLength(100);
@@ -493,7 +499,7 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.ToTable("user_devices");
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
-                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity.Property(e => e.UserId).HasColumnName("user_id").IsRequired(false);
                 entity.Property(e => e.FcmToken).HasColumnName("fcm_token").IsRequired();
                 entity.Property(e => e.DeviceType).HasColumnName("device_type").HasMaxLength(20).HasDefaultValue("ANDROID");
                 entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);

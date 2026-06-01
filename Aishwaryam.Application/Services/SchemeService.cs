@@ -178,7 +178,7 @@ namespace Aishwaryam.Application.Services
                 TotalInstallments = primary.TotalInstallments,
                 InstallmentAmountPaise = primary.InstallmentAmountPaise,
                 TotalInvestmentPaise = primaryTotalSavings,
-                RemainingInvestmentPaise = primaryTotalBonusEarned,
+                RemainingInvestmentPaise = (primary.TotalInstallments - primary.InstallmentsPaid) * primary.InstallmentAmountPaise,
                 RemainingInstallments = primary.TotalInstallments - primary.InstallmentsPaid,
                 NextDueDate = primary.NextDueDate,
                 MaturityDate = primary.MaturityDate,
@@ -410,17 +410,19 @@ namespace Aishwaryam.Application.Services
                                     {
                                         long bonusAmountPaise = (long)(tierTotalAmountPaise * (tier.BonusPercentage / 100m));
                                         
-                                        // Get live gold price
+                                        // Get live gold price or fixed silver rate
+                                        bool isSilverScheme = scheme.PlanName.Contains("silver", StringComparison.OrdinalIgnoreCase);
                                         var currentPrice = await _goldService.GetCurrentPriceAsync();
-                                        if (currentPrice != null && currentPrice.BuyPricePaise > 0)
+                                        long effectiveRate = isSilverScheme ? 9500L : (currentPrice != null ? currentPrice.BuyPricePaise : 0L);
+                                        if (effectiveRate > 0)
                                         {
-                                            long bonusGoldMg = (bonusAmountPaise * 1000) / currentPrice.BuyPricePaise;
+                                            long bonusGoldMg = (bonusAmountPaise * 1000) / effectiveRate;
                                             
                                             if (bonusGoldMg > 0)
                                             {
                                                 _logger.LogInformation($"Awarding milestone bonus for Scheme: {scheme.Id}, Tier: {tier.StartDay}-{tier.EndDay} ({tier.BonusPercentage}%). Bonus: {bonusGoldMg}mg (Worth: {bonusAmountPaise} paise).");
 
-                                                // 1. Record Gold Transaction
+                                                // 1. Record Gold/Silver Transaction
                                                 var bonusTxId = Guid.NewGuid();
                                                 var goldTx = new GoldTransaction
                                                 {
@@ -428,12 +430,12 @@ namespace Aishwaryam.Application.Services
                                                     UserId = scheme.UserId,
                                                     TransactionType = "BONUS",
                                                     GoldWeightMg = bonusGoldMg,
-                                                    PricePerGmPaise = currentPrice.BuyPricePaise,
+                                                    PricePerGmPaise = effectiveRate,
                                                     TotalAmountPaise = 0,
                                                     IpAddress = "127.0.0.1",
                                                     DeviceFingerprint = "BACKEND_SYSTEM",
                                                     RateSource = "SCHEME_REWARD",
-                                                    RateTimestamp = currentPrice.UpdatedAt,
+                                                    RateTimestamp = currentPrice != null ? currentPrice.UpdatedAt : DateTimeOffset.UtcNow,
                                                     UserSchemeId = scheme.Id
                                                 };
                                                 await _goldRepository.RecordGoldTransactionAsync(goldTx);
@@ -450,7 +452,7 @@ namespace Aishwaryam.Application.Services
                                                     BaseAmountPaise = 0,
                                                     GstAmountPaise = 0,
                                                     GoldWeightMg = bonusGoldMg,
-                                                    PricePerGmPaise = currentPrice.BuyPricePaise,
+                                                    PricePerGmPaise = effectiveRate,
                                                     BonusPercentage = tier.BonusPercentage,
                                                     BonusAmountPaise = bonusAmountPaise,
                                                     BonusGoldMg = bonusGoldMg,
@@ -468,6 +470,8 @@ namespace Aishwaryam.Application.Services
                                                 var user = await _authRepository.GetUserByIdAsync(scheme.UserId);
                                                 if (user != null)
                                                 {
+                                                    string metalName = isSilverScheme ? "silver" : "gold";
+                                                    string metalNameTitle = isSilverScheme ? "Silver" : "Gold";
                                                     string bonusGrams = string.Format("{0:F4}g", bonusGoldMg / 1000.0);
                                                     await _dispatcher.DispatchAsync(new NotificationPayload
                                                     {
@@ -475,8 +479,8 @@ namespace Aishwaryam.Application.Services
                                                         ToPhone = user.PhoneNumber,
                                                         ToEmail = user.Email,
                                                         ToName = user.FullName,
-                                                        Title = "Milestone Gold Bonus Credited! 🎁",
-                                                        Body = $"Congratulations! You've received a loyalty bonus of {bonusGrams} gold for completing the {tier.EndDay}-day milestone under scheme '{scheme.PlanName}'!",
+                                                        Title = $"Milestone {metalNameTitle} Bonus Credited! 🎁",
+                                                        Body = $"Congratulations! You've received a loyalty bonus of {bonusGrams} {metalName} for completing the {tier.EndDay}-day milestone under scheme '{scheme.PlanName}'!",
                                                         Type = "INSTALLMENT_SUCCESS",
                                                         SendPush = true,
                                                         PushData = new Dictionary<string, string>
@@ -485,7 +489,7 @@ namespace Aishwaryam.Application.Services
                                                             { "entityId", scheme.Id.ToString() }
                                                         },
                                                         SendSms = true,
-                                                        SmsText = $"Aishwaryam: Loyalty gold bonus of {bonusGrams} credited for completing the {tier.EndDay}-day milestone!",
+                                                        SmsText = $"Aishwaryam: Loyalty {metalName} bonus of {bonusGrams} credited for completing the {tier.EndDay}-day milestone!",
                                                         SendEmail = false
                                                     });
                                                 }
@@ -719,6 +723,7 @@ namespace Aishwaryam.Application.Services
                 TotalBonusEarnedPaise = totalBonusEarned,
                 TotalBonusGoldMg = totalBonusGoldMg,
                 AccumulatedGoldMg = scheme.AccumulatedGoldMg,
+                RedeemedGoldMg = scheme.RedeemedGoldMg,
                 SchemeDayNumber = dayNumber,
                 CurrentBonusTierPercent = (double)currentBonusPercent,
                 RemainingDaysForCurrentTier = remainingDaysForCurrentTier,
@@ -735,7 +740,7 @@ namespace Aishwaryam.Application.Services
             return await _schemeRepository.GetSchemeLedgerAsync(schemeId);
         }
 
-        public async Task<object> RequestRedemptionAsync(Guid userId, Guid schemeId, string redemptionType, string? address)
+        public async Task<object> RequestRedemptionAsync(Guid userId, Guid schemeId, string redemptionType, string? address, bool includeBonusGold = false)
         {
             await _unitOfWork.BeginTransactionAsync();
             try
@@ -751,16 +756,53 @@ namespace Aishwaryam.Application.Services
                     return new { Success = false, Message = $"Scheme status '{scheme.Status}' is not eligible for redemption." };
                 }
 
+                long redemptionWeightMg = scheme.AccumulatedGoldMg;
+                bool isSilverScheme = scheme.PlanName.Contains("silver", StringComparison.OrdinalIgnoreCase);
+                var price = await _goldService.GetCurrentPriceAsync();
+                long effectiveRate = isSilverScheme ? 9500L : price.SellPricePaise;
+
+                if (includeBonusGold)
+                {
+                    long bonusGoldMg = await _goldRepository.GetBonusGoldBalanceAsync(userId);
+                    if (bonusGoldMg > 0)
+                    {
+                        redemptionWeightMg += bonusGoldMg;
+
+                        // Debit user's BonusGoldBalanceMg
+                        await _goldRepository.IncrementBonusGoldBalanceAsync(userId, -bonusGoldMg);
+
+                        // Record SELL transaction for the event bonus gold
+                        var bonusDebitTx = new GoldTransaction
+                        {
+                            Id = Guid.NewGuid(),
+                            UserId = userId,
+                            TransactionType = "SELL",
+                            GoldWeightMg = bonusGoldMg,
+                            PricePerGmPaise = effectiveRate,
+                            TotalAmountPaise = (bonusGoldMg * effectiveRate) / 1000,
+                            IpAddress = "127.0.0.1",
+                            DeviceFingerprint = "SYSTEM_MERGE",
+                            RateSource = "EVENT_BONUS_DEBIT",
+                            RateTimestamp = DateTimeOffset.UtcNow,
+                            UserSchemeId = schemeId,
+                            RazorpayPaymentId = "MERGE_REDEMPTION"
+                        };
+                        await _goldRepository.RecordGoldTransactionAsync(bonusDebitTx);
+
+                        // Update Gold balance cache
+                        long updatedGoldBalance = await _goldRepository.CalculateGoldBalanceAsync(userId);
+                        await _goldRepository.UpdateGoldCacheAsync(userId, updatedGoldBalance);
+                    }
+                }
+
                 // Compliance Check
-                var compliance = await _complianceService.ValidateRedemptionAsync(userId, scheme.AccumulatedGoldMg, redemptionType);
+                var compliance = await _complianceService.ValidateRedemptionAsync(userId, redemptionWeightMg, redemptionType);
                 if (!compliance.IsAllowed)
                 {
                     return new { Success = false, Message = compliance.Message, ErrorCode = compliance.ErrorCode };
                 }
 
-                // Get current live gold price
-                var price = await _goldService.GetCurrentPriceAsync();
-                long totalAmountPaise = (scheme.AccumulatedGoldMg * price.SellPricePaise) / 1000;
+                long totalAmountPaise = (redemptionWeightMg * effectiveRate) / 1000;
 
                 var redemption = new SchemeRedemption
                 {
@@ -768,8 +810,8 @@ namespace Aishwaryam.Application.Services
                     UserSchemeId = schemeId,
                     UserId = userId,
                     RedemptionType = redemptionType.ToUpperInvariant(),
-                    GoldWeightMg = scheme.AccumulatedGoldMg,
-                    PricePerGmPaise = price.SellPricePaise,
+                    GoldWeightMg = redemptionWeightMg,
+                    PricePerGmPaise = effectiveRate,
                     TotalAmountPaise = totalAmountPaise,
                     Status = "PENDING",
                     Address = address,
@@ -800,7 +842,7 @@ namespace Aishwaryam.Application.Services
                     ToEmail = user?.Email,
                     ToName = user?.FullName ?? "Customer",
                     Title = "Redemption Requested ⏳",
-                    Body = $"Your request to redeem {scheme.AccumulatedGoldMg / 1000.0:F4}g of gold via {redemptionType} is pending approval.",
+                    Body = $"Your request to redeem {redemption.GoldWeightMg / 1000.0:F4}g of gold via {redemptionType} is pending approval.",
                     Type = "SCHEME_REDEMPTION_REQUESTED",
                     SendPush = true,
                     SendEmail = true,
@@ -808,7 +850,7 @@ namespace Aishwaryam.Application.Services
                     EmailData = new
                     {
                         UserName = user?.FullName ?? "Customer",
-                        RedeemedGoldMg = scheme.AccumulatedGoldMg.ToString(),
+                        RedeemedGoldMg = redemption.GoldWeightMg.ToString(),
                         CreditAmountRs = (totalAmountPaise / 100.0).ToString("F2"),
                         BankAccountMasked = "****",
                         UtrNumber = "Pending Approval",
@@ -1037,7 +1079,7 @@ namespace Aishwaryam.Application.Services
                         Name = $"Tier {t.StartDay}-{t.EndDay} ({t.BonusPercentage:0.#}%)",
                         TargetDay = t.EndDay,
                         BonusPercentage = (double)t.BonusPercentage,
-                        IsAchieved = dayNumber > t.EndDay
+                        IsAchieved = dayNumber >= t.EndDay
                     });
                 }
             }
@@ -1070,10 +1112,10 @@ namespace Aishwaryam.Application.Services
                     remainingDaysForCurrentTier = 0;
                 }
 
-                milestones.Add(new { Name = "Tier 1 (7.5%)", TargetDay = 75, BonusPercentage = 7.5, IsAchieved = dayNumber > 75 });
-                milestones.Add(new { Name = "Tier 2 (5.5%)", TargetDay = 150, BonusPercentage = 5.5, IsAchieved = dayNumber > 150 });
-                milestones.Add(new { Name = "Tier 3 (3.5%)", TargetDay = 225, BonusPercentage = 3.5, IsAchieved = dayNumber > 225 });
-                milestones.Add(new { Name = "Tier 4 (1.5%)", TargetDay = 330, BonusPercentage = 1.5, IsAchieved = dayNumber > 330 });
+                milestones.Add(new { Name = "Tier 1 (7.5%)", TargetDay = 75, BonusPercentage = 7.5, IsAchieved = dayNumber >= 75 });
+                milestones.Add(new { Name = "Tier 2 (5.5%)", TargetDay = 150, BonusPercentage = 5.5, IsAchieved = dayNumber >= 150 });
+                milestones.Add(new { Name = "Tier 3 (3.5%)", TargetDay = 225, BonusPercentage = 3.5, IsAchieved = dayNumber >= 225 });
+                milestones.Add(new { Name = "Tier 4 (1.5%)", TargetDay = 330, BonusPercentage = 1.5, IsAchieved = dayNumber >= 330 });
             }
 
             int remainingDaysForScheme = schemeMaturityDays - dayNumber;

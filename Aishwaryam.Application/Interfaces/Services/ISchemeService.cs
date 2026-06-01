@@ -25,7 +25,7 @@ namespace Aishwaryam.Application.Interfaces.Services
         Task<object> InvestInSchemeAsync(Guid userId, Guid schemeId, long amountPaise, string? razorpayPaymentId, string ipAddress, string deviceFingerprint);
         Task<object> GetSchemeProgressAsync(Guid schemeId);
         Task<IEnumerable<SchemeInvestment>> GetSchemeLedgerAsync(Guid schemeId);
-        Task<object> RequestRedemptionAsync(Guid userId, Guid schemeId, string redemptionType, string? address);
+        Task<object> RequestRedemptionAsync(Guid userId, Guid schemeId, string redemptionType, string? address, bool includeBonusGold = false);
         Task<bool> ApproveRedemptionAsync(Guid redemptionId, string? adminId, string? notes);
         Task<bool> RejectRedemptionAsync(Guid redemptionId, string? adminId, string reason);
         Task<IEnumerable<object>> GetPendingRedemptionsForAdminAsync();

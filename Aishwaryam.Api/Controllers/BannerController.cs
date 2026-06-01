@@ -20,6 +20,7 @@ namespace Aishwaryam.Api.Controllers
         public string? TapActionUrl { get; set; }
         public int DisplayOrder { get; set; }
         public string Location { get; set; } = "DASHBOARD";
+        public DateTimeOffset? ExpiresAt { get; set; }
     }
 
     /// <summary>Admin creates/updates banners with this payload.</summary>
@@ -33,6 +34,7 @@ namespace Aishwaryam.Api.Controllers
         public int DisplayOrder { get; set; } = 0;
         public string Location { get; set; } = "DASHBOARD";
         public string? CreatedByAdminId { get; set; }
+        public DateTimeOffset? ExpiresAt { get; set; }
     }
 
     public class UpdateBannerRequest
@@ -43,6 +45,7 @@ namespace Aishwaryam.Api.Controllers
         public bool? IsActive { get; set; }
         public int? DisplayOrder { get; set; }
         public string? Location { get; set; }
+        public DateTimeOffset? ExpiresAt { get; set; }
     }
 
     // ── Controller ───────────────────────────────────────────────────────────
@@ -81,7 +84,8 @@ namespace Aishwaryam.Api.Controllers
                     ImageBase64 = b.ImageBase64,
                     TapActionUrl = b.TapActionUrl,
                     DisplayOrder = b.DisplayOrder,
-                    Location = b.Location ?? "DASHBOARD"
+                    Location = b.Location ?? "DASHBOARD",
+                    ExpiresAt = b.ExpiresAt
                 })
                 .ToListAsync();
 
@@ -115,6 +119,7 @@ namespace Aishwaryam.Api.Controllers
                     );
 
                     ALTER TABLE app_banners ADD COLUMN IF NOT EXISTS location character varying(50);
+                    ALTER TABLE app_banners ADD COLUMN IF NOT EXISTS expires_at timestamp with time zone;
                     UPDATE app_banners SET location = 'DASHBOARD' WHERE location IS NULL OR location = '';
 
                     INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
@@ -191,6 +196,7 @@ namespace Aishwaryam.Api.Controllers
                 TapActionUrl = request.TapActionUrl,
                 DisplayOrder = request.DisplayOrder,
                 Location = request.Location,
+                ExpiresAt = request.ExpiresAt,
                 IsActive = true,
                 CreatedByAdminId = request.CreatedByAdminId,
                 CreatedAt = DateTimeOffset.UtcNow,
@@ -220,6 +226,7 @@ namespace Aishwaryam.Api.Controllers
             if (request.IsActive.HasValue)                          banner.IsActive = request.IsActive.Value;
             if (request.DisplayOrder.HasValue)                      banner.DisplayOrder = request.DisplayOrder.Value;
             if (!string.IsNullOrWhiteSpace(request.Location))     banner.Location = request.Location.Trim();
+            if (request.ExpiresAt != null)                         banner.ExpiresAt = request.ExpiresAt;
 
             banner.UpdatedAt = DateTimeOffset.UtcNow;
             await _context.SaveChangesAsync();

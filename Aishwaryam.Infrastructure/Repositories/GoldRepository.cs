@@ -141,8 +141,9 @@ namespace Aishwaryam.Infrastructure.Repositories
             return await _context.PromotionalOffers
                 .Where(o => o.IsActive && o.ExpiresAt > now && o.TargetUserId == userId
                     && (o.OfferType == "BIRTHDAY" || o.OfferType == "ANNIVERSARY")
-                    && o.BonusPercent > 0)
+                    && (o.BonusPercent > 0 || o.BonusGoldMg > 0))
                 .OrderByDescending(o => o.BonusPercent)
+                .ThenByDescending(o => o.BonusGoldMg)
                 .FirstOrDefaultAsync();
         }
 
@@ -179,6 +180,12 @@ namespace Aishwaryam.Infrastructure.Repositories
                 _context.GoldHoldings.Update(holding);
             }
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<long> GetBonusGoldBalanceAsync(Guid userId)
+        {
+            var holding = await _context.GoldHoldings.FirstOrDefaultAsync(h => h.UserId == userId);
+            return holding?.BonusGoldBalanceMg ?? 0L;
         }
 
         public async Task<bool> HasAnyBuyTransactionAsync(Guid userId, Guid excludeTxId)

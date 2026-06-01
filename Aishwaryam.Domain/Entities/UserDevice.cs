@@ -12,7 +12,7 @@ namespace Aishwaryam.Domain.Entities
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Column("user_id")]
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
 
         [Column("fcm_token")]
         [Required]

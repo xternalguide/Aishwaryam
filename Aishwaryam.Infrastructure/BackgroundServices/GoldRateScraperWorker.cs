@@ -71,6 +71,11 @@ namespace Aishwaryam.Infrastructure.BackgroundServices
 
             if (scrapedResult != null)
             {
+                // Fetch previous snapshot to compare price trends
+                var previousSnapshot = await context.GoldPriceSnapshots
+                    .OrderByDescending(s => s.FetchedAt)
+                    .FirstOrDefaultAsync();
+
                 var snapshot = new Aishwaryam.Domain.Entities.GoldPriceSnapshot
                 {
                     Price24KPerGram = scrapedResult.Price24K,
@@ -99,6 +104,54 @@ namespace Aishwaryam.Infrastructure.BackgroundServices
                 // Clear memory cache so all clients receive updated live prices immediately
                 cache.Remove("LiveGoldPrice");
                 _logger.LogInformation("LiveGoldPrice cache invalidated successfully.");
+
+                // Process Automated Daily Price push alerts if trend option is enabled
+                var config = await context.AppConfigs.FirstOrDefaultAsync();
+                if (config != null && config.IsDailyPriceNotificationEnabled)
+                {
+                    var today = DateTime.UtcNow.Date;
+                    var lastSent = config.LastDailyPriceNotificationSent?.UtcDateTime.Date;
+
+                    if (lastSent == null || lastSent < today)
+                    {
+                        if (previousSnapshot != null)
+                        {
+                            var currentPrice = scrapedResult.BuyPrice;
+                            var oldPrice = previousSnapshot.BuyPricePerGram;
+
+                            string title = "";
+                            string body = "";
+                            string type = "PRICE_UPDATE";
+
+                            if (currentPrice > oldPrice)
+                            {
+                                title = "Gold Price Trend: Rising! 📈";
+                                body = $"Today's gold price has increased to ₹{currentPrice:F2}/g (compared to ₹{oldPrice:F2}/g yesterday). Secure your systematic savings rate now.";
+                            }
+                            else if (currentPrice < oldPrice)
+                            {
+                                title = "Gold Price Trend: Dropping! 📉";
+                                body = $"Gold price has dropped to ₹{currentPrice:F2}/g (compared to ₹{oldPrice:F2}/g yesterday). Purchase gold now and get maximum gold grams benefits!";
+                            }
+                            else
+                            {
+                                title = "Today's Gold Price Update 🔔";
+                                body = $"Today's gold rate is holding steady at ₹{currentPrice:F2}/g. Keep saving systematically and secure your future!";
+                            }
+
+                            // Trigger broadcast via INotificationService
+                            var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                            await notificationService.BroadcastNotificationAsync(title, body, type);
+
+                            // Update last sent timestamp
+                            config.LastDailyPriceNotificationSent = DateTimeOffset.UtcNow;
+                            context.AppConfigs.Update(config);
+                            await context.SaveChangesAsync();
+
+                            _logger.LogInformation("[AUTO-BROADCAST] Successfully sent automated daily price alert: '{Title}'", title);
+                        }
+                    }
+                }
             }
             else
             {

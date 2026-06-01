@@ -19,7 +19,8 @@ namespace Aishwaryam.Api.Controllers
         [HttpPost("register-token")]
         public async Task<IActionResult> RegisterToken([FromBody] RegisterTokenRequest request)
         {
-            await _notificationService.RegisterDeviceTokenAsync(request.UserId, request.Token, request.DeviceType);
+            Guid? mappedUserId = request.UserId == Guid.Empty ? null : request.UserId;
+            await _notificationService.RegisterDeviceTokenAsync(mappedUserId, request.Token, request.DeviceType);
             return Ok(new { Message = "Device token registered successfully." });
         }
 
@@ -73,11 +74,25 @@ namespace Aishwaryam.Api.Controllers
             await _notificationService.DeleteNotificationAsync(id, userId);
             return Ok(new { Message = "Notification deleted" });
         }
+
+        [HttpPost("broadcast")]
+        public async Task<IActionResult> BroadcastNotification([FromBody] BroadcastNotificationRequest request)
+        {
+            try
+            {
+                await _notificationService.BroadcastNotificationAsync(request.Title, request.Message, request.Type, request.PushData, request.ImageUrl);
+                return Ok(new { success = true, message = "Broadcast notification dispatched successfully to all installed devices!" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error dispatching broadcast notification", error = ex.Message });
+            }
+        }
     }
 
     public class RegisterTokenRequest
     {
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
         public string Token { get; set; } = string.Empty;
         public string DeviceType { get; set; } = "ANDROID";
     }
@@ -85,5 +100,14 @@ namespace Aishwaryam.Api.Controllers
     public class UnregisterTokenRequest
     {
         public string Token { get; set; } = string.Empty;
+    }
+
+    public class BroadcastNotificationRequest
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public string Type { get; set; } = "GENERAL";
+        public System.Collections.Generic.Dictionary<string, string>? PushData { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }

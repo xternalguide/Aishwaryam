@@ -21,6 +21,9 @@ namespace Aishwaryam.Domain.Entities
         public long ReferrerRewardMg { get; set; } = 100;
         public long RefereeRewardMg { get; set; } = 50;
 
+        public bool IsDailyPriceNotificationEnabled { get; set; } = false;
+        public DateTimeOffset? LastDailyPriceNotificationSent { get; set; }
+
         public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
     }
 }

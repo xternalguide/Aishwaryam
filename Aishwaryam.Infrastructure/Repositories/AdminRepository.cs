@@ -66,13 +66,13 @@ namespace Aishwaryam.Infrastructure.Repositories
         {
             var connection = _context.Database.GetDbConnection();
             // Assuming high value is > 100g (100,000 mg)
-            return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM user_gold_cache WHERE total_gold_mg > 100000");
+            return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM gold_holdings WHERE gold_balance_mg > 100000");
         }
 
         public async Task<long> GetTotalGoldLiabilityMgAsync()
         {
             var connection = _context.Database.GetDbConnection();
-            return await connection.ExecuteScalarAsync<long?>("SELECT SUM(total_gold_mg) FROM user_gold_cache") ?? 0;
+            return await connection.ExecuteScalarAsync<long?>("SELECT SUM(gold_balance_mg) FROM gold_holdings") ?? 0;
         }
 
         public async Task<int> GetActiveSchemesCountAsync()

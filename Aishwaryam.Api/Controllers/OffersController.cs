@@ -402,6 +402,59 @@ namespace Aishwaryam.Api.Controllers
             await _context.SaveChangesAsync();
             return Ok(new { success = true, isActive = offer.IsActive });
         }
+
+        // ─── UPDATE: Update promotional offer (admin) ───────────────────────────
+        [HttpPatch("{id:guid}")]
+        public async Task<IActionResult> UpdateOffer(Guid id, [FromBody] UpdateOfferRequest req)
+        {
+            var offer = await _context.PromotionalOffers.FindAsync(id);
+            if (offer == null) return NotFound(new { message = "Offer not found." });
+
+            if (req.Title != null) offer.Title = req.Title.Trim();
+            if (req.Description != null) offer.Description = req.Description.Trim();
+            if (req.OfferType != null) offer.OfferType = req.OfferType;
+            if (req.BonusPercent.HasValue) offer.BonusPercent = req.BonusPercent.Value;
+            if (req.BonusWorthPaise.HasValue) offer.BonusWorthPaise = req.BonusWorthPaise.Value;
+            if (req.MinPurchaseAmountPaise.HasValue) offer.MinPurchaseAmountPaise = req.MinPurchaseAmountPaise.Value;
+            if (req.DurationHours.HasValue) offer.DurationHours = req.DurationHours.Value;
+            if (req.ExpiresAt.HasValue) offer.ExpiresAt = req.ExpiresAt.Value;
+            if (req.IsActive.HasValue) offer.IsActive = req.IsActive.Value;
+
+            _context.PlatformAuditLogs.Add(new PlatformAuditLog
+            {
+                Action = "UPDATE_OFFER",
+                Details = $"Admin updated offer {id}: {offer.Title}",
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+                Status = "SUCCESS"
+            });
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Offer updated successfully.", offer });
+        }
+
+        // ─── DELETE: Delete promotional offer (admin) ───────────────────────────
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> DeleteOffer(Guid id)
+        {
+            var offer = await _context.PromotionalOffers.FindAsync(id);
+            if (offer == null) return NotFound(new { message = "Offer not found." });
+
+            var claimed = await _context.UserClaimedOffers.Where(c => c.OfferId == id).ToListAsync();
+            _context.UserClaimedOffers.RemoveRange(claimed);
+
+            _context.PromotionalOffers.Remove(offer);
+            
+            _context.PlatformAuditLogs.Add(new PlatformAuditLog
+            {
+                Action = "DELETE_OFFER",
+                Details = $"Admin deleted offer {id}: {offer.Title}",
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+                Status = "SUCCESS"
+            });
+
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true, message = "Offer deleted successfully." });
+        }
     }
 
     // ─── Request DTOs ─────────────────────────────────────────────────────────────
@@ -431,5 +484,18 @@ namespace Aishwaryam.Api.Controllers
     {
         public Guid UserId { get; set; }
         public long PurchaseAmountPaise { get; set; }
+    }
+
+    public class UpdateOfferRequest
+    {
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public string? OfferType { get; set; }
+        public decimal? BonusPercent { get; set; }
+        public long? BonusWorthPaise { get; set; }
+        public long? MinPurchaseAmountPaise { get; set; }
+        public int? DurationHours { get; set; }
+        public DateTime? ExpiresAt { get; set; }
+        public bool? IsActive { get; set; }
     }
 }
