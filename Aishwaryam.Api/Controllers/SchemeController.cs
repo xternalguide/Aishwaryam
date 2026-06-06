@@ -31,6 +31,51 @@ namespace Aishwaryam.Api.Controllers
             return Ok(schemes);
         }
 
+        [HttpGet("scrape-pothys")]
+        public IActionResult ScrapePothysScheme()
+        {
+            var data = new
+            {
+                planName = "DiGiGOLD Purchase Plan",
+                description = "Accumulate gold weight daily with instant bonuses. Lock-in period of 330 days. No cash refunds allowed.",
+                installmentAmount = 100, // ₹100
+                totalInstallments = 300, // 300 days duration
+                frequency = "Flexible",
+                bonusTiers = new[]
+                {
+                    new { startDay = 0, endDay = 75, bonusPercentage = 7.0 },
+                    new { startDay = 76, endDay = 150, bonusPercentage = 5.0 },
+                    new { startDay = 151, endDay = 225, bonusPercentage = 3.0 },
+                    new { startDay = 226, endDay = 300, bonusPercentage = 1.0 }
+                },
+                customSections = new[]
+                {
+                    new { title = "Scheme Overview", content = "• Name: DiGiGOLD Purchase Plan\n• Minimum Investment: ₹100 per installment. Subsequent payments can be made for any amount starting from ₹100.\n• Tenure: The scheme tenure is 300 days from the date of the first payment. No further accumulation is allowed after 300 days.\n• Maturity: The maturity period is 330 days from the date of the first payment. The lock-in period is a minimum of 330 days.", type = 0 },
+                    new { title = "Benefits & Bonus Structure", content = "An instant GOLD weight bonus is calculated and added to the member's account based on the date of each payment:\n• 0 to 75 days: 7% instant GOLD weight bonus (e.g., Rs. 10,000 paid yields Rs. 700 worth of bonus gold).\n• 76 to 150 days: 5% instant GOLD weight bonus (e.g., Rs. 6,000 paid yields Rs. 300 worth of bonus gold).\n• 151 to 225 days: 3% instant GOLD weight bonus (e.g., Rs. 7,000 paid yields Rs. 210 worth of bonus gold).\n• 226 to 300 days: 1% instant GOLD weight bonus (e.g., Rs. 12,000 paid yields Rs. 120 worth of bonus gold).\nNote: Accumulated instant bonus benefits are redeemable only upon successful completion of 330 days.", type = 1 },
+                    new { title = "Redemption Policy", content = "• The accumulated gold weight can be redeemed after 330 days at any Aishwaryam Swarna Mahal store.\n• The gold weight can be used to purchase Gold, Platinum, Diamond Jewellery, Silver Articles, Gift items, or Coins.\n• No cash refunds are permitted under any circumstances.", type = 0 },
+                    new { title = "Pre-closure & Terms", content = "• Pre-closure: If the account is closed prior to the 330-day maturity period, members can redeem their accumulated gold weight but will not receive any accumulated bonus gold benefits.\n• Taxes: Members shall bear all GST and other government levies applicable at the time of invoice/redemption.\n• Making Charges: Value Addition (V.A.) charges, stone charges, and other making charges are applicable as per store rules and must be borne by the customer.", type = 0 }
+                },
+                paymentRules = new
+                {
+                    minAmount = 100,
+                    maxAmount = 50000,
+                    multiplePerDay = true,
+                    earlyExitAfterDays = 180,
+                    rating = 4.9,
+                    attributes = new[]
+                    {
+                        new { key = "maturity", enabled = 1, title = "Maturity benefits", description = "Get accumulated gold bonus automatically credited upon completing plan installments." },
+                        new { key = "lockable", enabled = 1, title = "Lockable scheme", description = "Lock in lower gold rates during market drops to maximize profit yields." },
+                        new { key = "known", enabled = 1, title = "Known rates", description = "Transparent processing and physical gold delivery rates with zero extra charges." }
+                    }
+                },
+                keywords = new[] { "Flexible", "7% Gold Bonus", "Start ₹100", "330 Days Lock-in" }
+            };
+
+            return Ok(data);
+        }
+
+
         [HttpPost("create")]
         public async Task<IActionResult> CreateScheme([FromBody] SchemeMaster scheme)
         {
