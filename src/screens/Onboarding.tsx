@@ -51,6 +51,8 @@ export const Onboarding: React.FC = () => {
   const [area, setArea] = useState(SessionManager.getPartialArea() || '');
   const [isManualArea, setIsManualArea] = useState(SessionManager.getPartialIsManualArea() || false);
   const [termsAccepted, setTermsAccepted] = useState(SessionManager.getPartialTermsAccepted() || false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   // Auto-save Step 1 to Session Storage reactively
   useEffect(() => {
@@ -231,8 +233,26 @@ export const Onboarding: React.FC = () => {
     }
   };
 
+  const calculateAge = (dateStr: string): number | null => {
+    if (!dateStr) return null;
+    const parts = dateStr.split('/');
+    if (parts.length !== 3) return null;
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
+    if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+
+    const today = new Date();
+    let age = today.getFullYear() - year;
+    const monthDiff = today.getMonth() + 1 - month;
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < day)) {
+      age--;
+    }
+    return age;
+  };
+
   const isStep1Valid = () => {
-    const basicInfo = name.trim().length > 0 && phone.trim().length > 0 && termsAccepted && email.includes('@') && nomineeName.trim().length > 0;
+    const basicInfo = name.trim().length > 0 && phone.trim().length > 0 && termsAccepted && email.includes('@');
     const dobValid = isValidDateString(dob) && dobError === null;
     const marriageValid = !isMarried || (isValidDateString(weddingDate) && weddingDateError === null);
     return basicInfo && dobValid && marriageValid;
@@ -461,6 +481,11 @@ export const Onboarding: React.FC = () => {
                     />
                     <Calendar size={18} color="var(--brand-mid)" style={{ position: 'absolute', right: '12px', top: '19px', pointerEvents: 'none' }} />
                   </div>
+                  {dob && isValidDateString(dob) && dobError === null && (
+                    <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--brand-mid)', marginTop: '6px', display: 'block' }}>
+                      Calculated Age: {calculateAge(dob)} years
+                    </span>
+                  )}
                   {dobError && <span style={{ fontSize: '11px', color: 'var(--error-red)', marginTop: '4px', display: 'block' }}>{dobError}</span>}
                 </div>
 
@@ -717,9 +742,28 @@ export const Onboarding: React.FC = () => {
                 />
                 <span>
                   I accept the{' '}
-                  <span style={{ color: 'var(--brand-mid)', textDecoration: 'underline', fontWeight: 'bold' }}>Terms of Service</span>
+                  <span 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowTermsModal(true);
+                    }}
+                    style={{ color: 'var(--brand-mid)', textDecoration: 'underline', fontWeight: 'bold', cursor: 'pointer' }}
+                  >
+                    Terms of Service
+                  </span>
                   {' '}and{' '}
-                  <span style={{ color: 'var(--brand-mid)', textDecoration: 'underline', fontWeight: 'bold' }}>Privacy Policy</span>.
+                  <span 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowPrivacyModal(true);
+                    }}
+                    style={{ color: 'var(--brand-mid)', textDecoration: 'underline', fontWeight: 'bold', cursor: 'pointer' }}
+                  >
+                    Privacy Policy
+                  </span>
+                  .
                 </span>
               </label>
             </div>
@@ -1293,6 +1337,136 @@ export const Onboarding: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Terms of Service Modal */}
+      {showTermsModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '20px',
+            width: '100%',
+            maxWidth: '400px',
+            maxHeight: '80vh',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+            animation: 'scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          }}>
+            <div style={{ padding: '20px', borderBottom: '1px solid #ECECEC', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--brand-dark)' }}>Terms of Service</h3>
+              <button 
+                onClick={() => setShowTermsModal(false)}
+                style={{ background: 'transparent', border: 'none', fontSize: '20px', color: 'var(--text-light)', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={{ padding: '20px', overflowY: 'auto', fontSize: '13px', lineHeight: '20px', color: 'var(--text-secondary)' }}>
+              <p>Welcome to Aishwaryam. These Terms of Service govern your use of the Aishwaryam Digital Metal Platform and services.</p>
+              <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>1. Savings Scheme</h4>
+              <p>Aishwaryam provides metal accumulation chits. Installment savings plan starting at ₹100 allows users to save in pure 24K gold and 99.9% silver. Instalments are calculated at live market gold rates at the time of transaction.</p>
+              <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>2. Physical Backing</h4>
+              <p>Every purchase is backed by physical gold/silver stored securely in independent insured third-party vault lockers.</p>
+              <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>3. Maturity and Redemptions</h4>
+              <p>Upon scheme maturity, the accumulated metal weight can be exchanged for physical jewelry at designated partner showrooms, or shipped as physical bullion coins, or sold back for cash payouts directly into the user's linked bank account.</p>
+            </div>
+            <div style={{ padding: '16px 20px', borderTop: '1px solid #ECECEC', display: 'flex', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={() => setShowTermsModal(false)}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: '10px',
+                  background: 'var(--brand-dark)',
+                  color: 'white',
+                  border: 'none',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  cursor: 'pointer'
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Privacy Policy Modal */}
+      {showPrivacyModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '20px',
+            width: '100%',
+            maxWidth: '400px',
+            maxHeight: '80vh',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+            animation: 'scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+          }}>
+            <div style={{ padding: '20px', borderBottom: '1px solid #ECECEC', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--brand-dark)' }}>Privacy Policy</h3>
+              <button 
+                onClick={() => setShowPrivacyModal(false)}
+                style={{ background: 'transparent', border: 'none', fontSize: '20px', color: 'var(--text-light)', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={{ padding: '20px', overflowY: 'auto', fontSize: '13px', lineHeight: '20px', color: 'var(--text-secondary)' }}>
+              <p>We values your privacy and is committed to protecting your personal information.</p>
+              <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>1. Data Collection</h4>
+              <p>We collect personal information such as Name, Phone Number, Email, Date of Birth, and Nominee details during registration. For KYC verification, documents like Aadhaar Card and PAN Card are collected.</p>
+              <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>2. Data Encryption and Security</h4>
+              <p>All user profiles, bank account details, and KYC scanned images are encrypted and securely stored. We use industry-standard encryption protocols to protect your transactions and identity data.</p>
+              <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>3. Data Sharing</h4>
+              <p>We do not sell or lease your personal information to third parties. Data is shared with bank transfer partners, custodian vaults, and government regulatory agencies strictly for transactions compliance.</p>
+            </div>
+            <div style={{ padding: '16px 20px', borderTop: '1px solid #ECECEC', display: 'flex', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={() => setShowPrivacyModal(false)}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: '10px',
+                  background: 'var(--brand-dark)',
+                  color: 'white',
+                  border: 'none',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  cursor: 'pointer'
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
