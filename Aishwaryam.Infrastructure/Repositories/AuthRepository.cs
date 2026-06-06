@@ -22,6 +22,11 @@ namespace Aishwaryam.Infrastructure.Repositories
             return await _context.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber);
         }
 
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
         public async Task<User> CreateUserAsync(User user)
         {
             if (string.IsNullOrEmpty(user.ReferralCode))

@@ -7,6 +7,7 @@ namespace Aishwaryam.Application.Interfaces.Repositories
     public interface IAuthRepository
     {
         Task<User?> GetUserByPhoneAsync(string phoneNumber);
+        Task<User?> GetUserByEmailAsync(string email);
         Task<User> CreateUserAsync(User user);
         Task SaveOtpAsync(OtpLog otpLog);
         Task<OtpLog?> GetLatestValidOtpAsync(string phoneNumber);

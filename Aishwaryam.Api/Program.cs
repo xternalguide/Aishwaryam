@@ -130,7 +130,7 @@ builder.Services.AddScoped<ISchemeRepository, SchemeRepository>();
 // Dependency Injection: Services
 builder.Services.AddScoped<IGoldService, GoldService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
-builder.Services.AddScoped<ISmsService, BrevoSmsService>();
+builder.Services.AddScoped<ISmsService, FirebaseSmsService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IKycService, KycService>();
 builder.Services.AddScoped<IBankingService, BankingService>();

@@ -182,29 +182,75 @@ namespace Aishwaryam.Application.Services
                 var decodedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance
                     .VerifyIdTokenAsync(request.FirebaseIdToken);
 
-                // Extract phone number from the verified token claims
+                // Extract claims from the verified token
                 var phoneFromToken = decodedToken.Claims.ContainsKey("phone_number")
                     ? decodedToken.Claims["phone_number"]?.ToString()
                     : null;
 
-                // Use phone from token (most secure), fall back to request phone
+                var emailFromToken = decodedToken.Claims.ContainsKey("email")
+                    ? decodedToken.Claims["email"]?.ToString()
+                    : null;
+
+                var nameFromToken = decodedToken.Claims.ContainsKey("name")
+                    ? decodedToken.Claims["name"]?.ToString()
+                    : null;
+
+                // Clean phone number from +91 format
                 var phoneNumber = !string.IsNullOrEmpty(phoneFromToken)
                     ? phoneFromToken.Replace("+91", "").Trim()
-                    : request.PhoneNumber;
+                    : (!string.IsNullOrEmpty(request.PhoneNumber) ? request.PhoneNumber.Replace("+91", "").Trim() : "");
 
-                if (string.IsNullOrEmpty(phoneNumber))
-                    return new AuthResponse { Success = false, Message = "Could not extract phone number from token." };
+                User? user = null;
 
-                // Check if user exists, else create (same as OTP flow)
-                var user = await _authRepository.GetUserByPhoneAsync(phoneNumber);
+                // 1. First look up by Email (for Google logins)
+                if (!string.IsNullOrEmpty(emailFromToken))
+                {
+                    user = await _authRepository.GetUserByEmailAsync(emailFromToken);
+                }
+
+                // 2. Fallback to look up by Phone Number
+                if (user == null && !string.IsNullOrEmpty(phoneNumber))
+                {
+                    user = await _authRepository.GetUserByPhoneAsync(phoneNumber);
+                }
+
+                // 3. Create new user if not found
                 if (user == null)
                 {
+                    var finalPhone = phoneNumber;
+                    if (string.IsNullOrEmpty(finalPhone))
+                    {
+                        // Generate unique dummy phone number for Google users to satisfy UNIQUE NOT NULL db constraint
+                        finalPhone = "G-" + Guid.NewGuid().ToString("N").Substring(0, 13);
+                    }
+
                     user = new User
                     {
-                        PhoneNumber = phoneNumber,
+                        PhoneNumber = finalPhone,
+                        Email = emailFromToken,
+                        FullName = nameFromToken,
                         KycLevel = "BASIC"
                     };
                     await _authRepository.CreateUserAsync(user);
+                }
+                else
+                {
+                    // Update email or name if they weren't set previously
+                    bool needsUpdate = false;
+                    if (string.IsNullOrEmpty(user.Email) && !string.IsNullOrEmpty(emailFromToken))
+                    {
+                        user.Email = emailFromToken;
+                        needsUpdate = true;
+                    }
+                    if (string.IsNullOrEmpty(user.FullName) && !string.IsNullOrEmpty(nameFromToken))
+                    {
+                        user.FullName = nameFromToken;
+                        needsUpdate = true;
+                    }
+                    if (needsUpdate)
+                    {
+                        await _authRepository.UpdateUserAsync(user);
+                    }
                 }
 
                 // Generate our own JWT + refresh token for the app
