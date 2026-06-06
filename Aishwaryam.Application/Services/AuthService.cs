@@ -89,27 +89,21 @@ namespace Aishwaryam.Application.Services
 
                 var cleanPhone = phone.Replace("+91", "").Trim();
 
-                // ⚡ Master Bypass OTPs to guarantee 100% successful login/registration during direct APK sharing/sideloading
-                bool bypassOtp = request.Otp == "999999" || request.Otp == "123456";
-
-                if (!bypassOtp)
+                // Fetch latest unused, unexpired OTP for this phone
+                var latestOtp = await _authRepository.GetLatestValidOtpAsync(cleanPhone);
+                if (latestOtp == null)
                 {
-                    // Fetch latest unused, unexpired OTP for this phone
-                    var latestOtp = await _authRepository.GetLatestValidOtpAsync(cleanPhone);
-                    if (latestOtp == null)
-                    {
-                        return new AuthResponse { Success = false, Message = "OTP expired or invalid. Please request a new OTP." };
-                    }
-
-                    var hashedInput = ComputeSha256Hash(request.Otp);
-                    if (latestOtp.OtpHash != hashedInput)
-                    {
-                        return new AuthResponse { Success = false, Message = "Incorrect OTP. Please try again." };
-                    }
-
-                    // Mark OTP as used
-                    await _authRepository.MarkOtpAsUsedAsync(latestOtp.Id);
+                    return new AuthResponse { Success = false, Message = "OTP expired or invalid. Please request a new OTP." };
                 }
+
+                var hashedInput = ComputeSha256Hash(request.Otp);
+                if (latestOtp.OtpHash != hashedInput)
+                {
+                    return new AuthResponse { Success = false, Message = "Incorrect OTP. Please try again." };
+                }
+
+                // Mark OTP as used
+                await _authRepository.MarkOtpAsUsedAsync(latestOtp.Id);
 
                 // Check/create the user in our PostgreSQL database.
                 var user = await _authRepository.GetUserByPhoneAsync(cleanPhone);

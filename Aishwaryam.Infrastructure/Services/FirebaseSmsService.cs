@@ -32,6 +32,7 @@ namespace Aishwaryam.Infrastructure.Services
                 var cleanPhone = phone.Replace("+", "").Trim();
 
                 _logger.LogInformation($"[FIREBASE-SMS] Attempting to send OTP via FCM to phone: {cleanPhone}");
+                _logger.LogInformation($"[FIREBASE-SMS] Generated OTP message for {cleanPhone}: {message}");
 
                 // Find user by phone number
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.PhoneNumber == cleanPhone);
