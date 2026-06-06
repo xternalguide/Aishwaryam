@@ -108,7 +108,7 @@ namespace Aishwaryam.Application.Services
             // Send unified notification to user
             var title = request.IsApproved ? "KYC Approved! ✅" : "KYC Rejected ❌";
             var message = request.IsApproved 
-                ? "Congratulations! Your KYC verification has been completed. All premium saving limits are now unlocked."
+                ? "Your KYC verification is completed"
                 : $"Your KYC verification was rejected. Reason: {request.AdminNotes}. Please re-submit valid documents.";
             
             if (request.IsApproved)
