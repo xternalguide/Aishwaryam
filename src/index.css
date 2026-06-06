@@ -41,9 +41,9 @@
   --text-light: #A0A0AB;
   --text-on-dark: #FFFFFF;
 
-  /* Fonts */
-  --font-playfair: 'Playfair Display', Georgia, serif;
-  --font-poppins: 'Poppins', sans-serif;
+  /* Fonts: Montserrat and Roman combination */
+  --font-playfair: 'Lora', 'Times New Roman', Times, Georgia, serif;
+  --font-poppins: 'Montserrat', sans-serif;
   
   box-sizing: border-box;
 }

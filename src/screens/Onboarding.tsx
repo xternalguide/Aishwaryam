@@ -15,6 +15,12 @@ export const Onboarding: React.FC = () => {
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const todayStr = new Date().toISOString().split('T')[0];
+  const getEighteenYearsAgoDate = () => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 18);
+    return d.toISOString().split('T')[0];
+  };
+  const maxDobStr = getEighteenYearsAgoDate();
 
   // Step 2 base64 document images
   const [panImage, setPanImage] = useState<string | null>(null);
@@ -49,10 +55,12 @@ export const Onboarding: React.FC = () => {
   const [state, setState] = useState(SessionManager.getPartialState() || '');
   const [city, setCity] = useState(SessionManager.getPartialCity() || '');
   const [area, setArea] = useState(SessionManager.getPartialArea() || '');
-  const [isManualArea, setIsManualArea] = useState(SessionManager.getPartialIsManualArea() || false);
+  const [isManualArea] = useState(SessionManager.getPartialIsManualArea() || false);
   const [termsAccepted, setTermsAccepted] = useState(SessionManager.getPartialTermsAccepted() || false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [dbTerms, setDbTerms] = useState<string | null>(null);
+  const [dbPrivacy, setDbPrivacy] = useState<string | null>(null);
 
   // Auto-save Step 1 to Session Storage reactively
   useEffect(() => {
@@ -72,6 +80,27 @@ export const Onboarding: React.FC = () => {
     });
     SessionManager.saveNomineeName(nomineeName);
   }, [name, email, dob, isMarried, weddingDate, gender, pincode, state, city, area, isManualArea, termsAccepted, nomineeName]);
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const res = await ApiClient.get('api/User/config');
+        if (res.data) {
+          const terms = res.data.termsAndConditionsUrl;
+          const privacy = res.data.privacyPolicyUrl;
+          if (terms && !terms.startsWith('http')) {
+            setDbTerms(terms);
+          }
+          if (privacy && !privacy.startsWith('http')) {
+            setDbPrivacy(privacy);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load terms/privacy from config', err);
+      }
+    };
+    fetchConfig();
+  }, []);
 
   // --- Step 2 State Variables ---
   const [fetchedPanName, setFetchedPanName] = useState('');
@@ -158,6 +187,13 @@ export const Onboarding: React.FC = () => {
       if (d < 1 || d > days) {
         errorCallback('Invalid day for the selected month');
         return;
+      }
+      if (!isWedding) {
+        const age = calculateAge(input);
+        if (age === null || age < 18) {
+          setDobError('You must be at least 18 years old');
+          return;
+        }
       }
       errorCallback(null);
     } else if (input.length > 10) {
@@ -255,7 +291,8 @@ export const Onboarding: React.FC = () => {
 
   const isStep1Valid = () => {
     const basicInfo = name.trim().length > 0 && phone.trim().length > 0 && termsAccepted && email.includes('@');
-    const dobValid = isValidDateString(dob) && dobError === null;
+    const age = calculateAge(dob);
+    const dobValid = isValidDateString(dob) && dobError === null && age !== null && age >= 18;
     const marriageValid = !isMarried || (isValidDateString(weddingDate) && weddingDateError === null);
     return basicInfo && dobValid && marriageValid;
   };
@@ -364,8 +401,8 @@ export const Onboarding: React.FC = () => {
       setCurrentStep(3);
     } else if (currentStep === 3) {
       SessionManager.saveOnboardingStage(OnboardingStage.FULLY_VERIFIED);
-      await refreshData();
       navigate('/dashboard');
+      refreshData().catch(err => console.error("Error refreshing data:", err));
     }
   };
 
@@ -478,7 +515,7 @@ export const Onboarding: React.FC = () => {
                       type="date"
                       value={convertToInputDateFormat(dob)}
                       min="1926-06-06"
-                      max={todayStr}
+                      max={maxDobStr}
                       onKeyDown={(e) => e.preventDefault()}
                       onChange={(e) => {
                         const formatted = convertFromInputDateFormat(e.target.value);
@@ -717,14 +754,13 @@ export const Onboarding: React.FC = () => {
 
                 <div>
                   <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
-                    Area {isManualArea ? '(Enter Manually)' : '(Auto-populated)'}
+                    Area <span style={{ color: 'var(--error-red)' }}>*</span>
                   </label>
                   <input
                     type="text"
-                    disabled={!isManualArea}
                     value={area}
                     onChange={(e) => setArea(e.target.value)}
-                    placeholder={isManualArea ? "Enter your area name" : "Auto-populated"}
+                    placeholder="Enter your area name"
                     style={{
                       width: '100%',
                       height: '48px',
@@ -733,21 +769,11 @@ export const Onboarding: React.FC = () => {
                       padding: '0 12px',
                       fontSize: '14px',
                       outline: 'none',
-                      background: isManualArea ? 'white' : '#F3F4F6',
+                      background: 'white',
                       marginTop: '4px'
                     }}
                   />
                 </div>
-
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
-                  <input
-                    type="checkbox"
-                    checked={isManualArea}
-                    onChange={(e) => setIsManualArea(e.target.checked)}
-                    style={{ accentColor: 'var(--brand-mid)' }}
-                  />
-                  Area not listed? Enter manually
-                </label>
               </div>
 
               {/* Terms Checkbox */}
@@ -1217,13 +1243,19 @@ export const Onboarding: React.FC = () => {
               </button>
             </div>
             <div style={{ padding: '20px', overflowY: 'auto', fontSize: '13px', lineHeight: '20px', color: 'var(--text-secondary)' }}>
-              <p>Welcome to Aishwaryam. These Terms of Service govern your use of the Aishwaryam Digital Metal Platform and services.</p>
-              <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>1. Savings Scheme</h4>
-              <p>Aishwaryam provides metal accumulation chits. Installment savings plan starting at ₹100 allows users to save in pure 24K gold and 99.9% silver. Instalments are calculated at live market gold rates at the time of transaction.</p>
-              <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>2. Physical Backing</h4>
-              <p>Every purchase is backed by physical gold/silver stored securely in independent insured third-party vault lockers.</p>
-              <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>3. Maturity and Redemptions</h4>
-              <p>Upon scheme maturity, the accumulated metal weight can be exchanged for physical jewelry at designated partner showrooms, or shipped as physical bullion coins, or sold back for cash payouts directly into the user's linked bank account.</p>
+              {dbTerms ? (
+                <div style={{ whiteSpace: 'pre-wrap' }}>{dbTerms}</div>
+              ) : (
+                <>
+                  <p>Welcome to Aishwaryam. These Terms of Service govern your use of the Aishwaryam Digital Metal Platform and services.</p>
+                  <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>1. Savings Scheme</h4>
+                  <p>Aishwaryam provides metal accumulation chits. Installment savings plan starting at ₹100 allows users to save in pure 24K gold and 99.9% silver. Instalments are calculated at live market gold rates at the time of transaction.</p>
+                  <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>2. Physical Backing</h4>
+                  <p>Every purchase is backed by physical gold/silver stored securely in independent insured third-party vault lockers.</p>
+                  <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>3. Maturity and Redemptions</h4>
+                  <p>Upon scheme maturity, the accumulated metal weight can be exchanged for physical jewelry at designated partner showrooms, or shipped as physical bullion coins, or sold back for cash payouts directly into the user's linked bank account.</p>
+                </>
+              )}
             </div>
             <div style={{ padding: '16px 20px', borderTop: '1px solid #ECECEC', display: 'flex', justifyContent: 'flex-end' }}>
               <button
@@ -1282,13 +1314,19 @@ export const Onboarding: React.FC = () => {
               </button>
             </div>
             <div style={{ padding: '20px', overflowY: 'auto', fontSize: '13px', lineHeight: '20px', color: 'var(--text-secondary)' }}>
-              <p>We values your privacy and is committed to protecting your personal information.</p>
-              <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>1. Data Collection</h4>
-              <p>We collect personal information such as Name, Phone Number, Email, Date of Birth, and Nominee details during registration. For KYC verification, documents like Aadhaar Card and PAN Card are collected.</p>
-              <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>2. Data Encryption and Security</h4>
-              <p>All user profiles, bank account details, and KYC scanned images are encrypted and securely stored. We use industry-standard encryption protocols to protect your transactions and identity data.</p>
-              <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>3. Data Sharing</h4>
-              <p>We do not sell or lease your personal information to third parties. Data is shared with bank transfer partners, custodian vaults, and government regulatory agencies strictly for transactions compliance.</p>
+              {dbPrivacy ? (
+                <div style={{ whiteSpace: 'pre-wrap' }}>{dbPrivacy}</div>
+              ) : (
+                <>
+                  <p>We values your privacy and is committed to protecting your personal information.</p>
+                  <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>1. Data Collection</h4>
+                  <p>We collect personal information such as Name, Phone Number, Email, Date of Birth, and Nominee details during registration. For KYC verification, documents like Aadhaar Card and PAN Card are collected.</p>
+                  <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>2. Data Encryption and Security</h4>
+                  <p>All user profiles, bank account details, and KYC scanned images are encrypted and securely stored. We use industry-standard encryption protocols to protect your transactions and identity data.</p>
+                  <h4 style={{ color: 'var(--brand-dark)', margin: '14px 0 6px 0', fontSize: '14px' }}>3. Data Sharing</h4>
+                  <p>We do not sell or lease your personal information to third parties. Data is shared with bank transfer partners, custodian vaults, and government regulatory agencies strictly for transactions compliance.</p>
+                </>
+              )}
             </div>
             <div style={{ padding: '16px 20px', borderTop: '1px solid #ECECEC', display: 'flex', justifyContent: 'flex-end' }}>
               <button

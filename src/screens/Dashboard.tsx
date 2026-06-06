@@ -430,10 +430,6 @@ export const Dashboard: React.FC = () => {
               }} />
             )}
           </button>
-
-          <button onClick={handleLogout} style={{ background: 'transparent', border: 'none', color: 'var(--error-red)', cursor: 'pointer', display: 'flex' }}>
-            <LogOut size={20} />
-          </button>
         </div>
       </div>
 
@@ -992,6 +988,31 @@ export const Dashboard: React.FC = () => {
                 }}
               >
                 <PhoneCall size={16} /> Contact Support: +91 94430 00000
+              </button>
+            </div>
+
+            {/* Logout button at bottom */}
+            <div style={{ textAlign: 'center', marginTop: '24px' }}>
+              <button
+                onClick={handleLogout}
+                style={{
+                  width: '100%',
+                  height: '48px',
+                  borderRadius: '12px',
+                  background: 'rgba(239, 68, 68, 0.08)',
+                  color: 'var(--error-red)',
+                  border: '1px solid rgba(239, 68, 68, 0.15)',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <LogOut size={16} /> {t('logout')}
               </button>
             </div>
           </div>
