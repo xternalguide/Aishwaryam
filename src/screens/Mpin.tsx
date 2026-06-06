@@ -556,33 +556,17 @@ export const Mpin: React.FC = () => {
               width: '80px',
               height: '80px',
               borderRadius: '50%',
-              background: 'var(--success-light)',
+              background: 'rgba(123, 31, 162, 0.1)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: '16px'
             }}>
-              <CheckCircle size={48} color="var(--success-green)" />
+              <CheckCircle size={48} color="var(--brand-mid)" />
             </div>
             <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text-primary)', textAlign: 'center' }}>
               {successMessage}
             </span>
-            <button
-              onClick={handleSuccessDismiss}
-              style={{
-                marginTop: '12px',
-                background: 'var(--brand-dark)',
-                color: 'white',
-                border: 'none',
-                padding: '6px 16px',
-                borderRadius: '8px',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                cursor: 'pointer'
-              }}
-            >
-              Dismiss
-            </button>
           </div>
         </div>
       )}

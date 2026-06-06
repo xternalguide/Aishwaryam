@@ -98,7 +98,7 @@ export const ProfileSetup: React.FC = () => {
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           <div>
             <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginLeft: '4px' }}>
-              Full Name
+              Full Name <span style={{ color: 'var(--error-red)' }}>*</span>
             </label>
             <input
               type="text"
@@ -126,7 +126,7 @@ export const ProfileSetup: React.FC = () => {
 
           <div>
             <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginLeft: '4px' }}>
-              Email Address
+              Email Address <span style={{ color: 'var(--error-red)' }}>*</span>
             </label>
             <input
               type="email"

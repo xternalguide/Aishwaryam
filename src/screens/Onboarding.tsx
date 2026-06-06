@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { SessionManager, OnboardingStage } from '../utils/SessionManager';
 import { ApiClient } from '../utils/ApiClient';
 import { useApp } from '../context/AppContext';
-import { ArrowLeft, Calendar, ShieldCheck, Landmark, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, ShieldCheck, Landmark, CheckCircle, Upload } from 'lucide-react';
 
 export const Onboarding: React.FC = () => {
   const navigate = useNavigate();
@@ -13,6 +13,26 @@ export const Onboarding: React.FC = () => {
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  // Step 2 base64 document images
+  const [panImage, setPanImage] = useState<string | null>(null);
+  const [aadhaarFrontImage, setAadhaarFrontImage] = useState<string | null>(null);
+  const [aadhaarBackImage, setAadhaarBackImage] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'pan' | 'aadhaar-front' | 'aadhaar-back') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result as string;
+      if (type === 'pan') setPanImage(base64);
+      else if (type === 'aadhaar-front') setAadhaarFrontImage(base64);
+      else if (type === 'aadhaar-back') setAadhaarBackImage(base64);
+    };
+    reader.readAsDataURL(file);
+  };
 
   // --- Step 1 State Variables ---
   const [name, setName] = useState(SessionManager.getPartialName() || '');
@@ -254,14 +274,14 @@ export const Onboarding: React.FC = () => {
           userId,
           documentType: 'PAN',
           documentNumber: panNumber,
-          documentUrl: 'https://placeholder.url/pan.jpg'
+          documentUrl: panImage || 'https://placeholder.url/pan.jpg'
         });
         // Submit Aadhaar
         await ApiClient.post('api/Kyc/submit', {
           userId,
           documentType: 'AADHAAR',
           documentNumber: identityNumber,
-          documentUrl: 'https://placeholder.url/aadhaar.jpg'
+          documentUrl: aadhaarFrontImage || 'https://placeholder.url/aadhaar.jpg'
         });
         // Update user KYC level to FULL
         await ApiClient.post('api/Kyc/update-status', {
@@ -390,7 +410,7 @@ export const Onboarding: React.FC = () => {
               {/* Box 1: Core Details */}
               <div className="glass-card" style={{ borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Full Name</label>
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Full Name <span style={{ color: 'var(--error-red)' }}>*</span></label>
                   <input
                     type="text"
                     placeholder="Enter Full Name"
@@ -414,13 +434,13 @@ export const Onboarding: React.FC = () => {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Date of Birth (DD/MM/YYYY)</label>
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Date of Birth (DD/MM/YYYY) <span style={{ color: 'var(--error-red)' }}>*</span></label>
                   <div style={{ position: 'relative' }}>
                     <input
                       type="date"
                       value={convertToInputDateFormat(dob)}
                       min="1926-06-06"
-                      max="2008-06-06"
+                      max={todayStr}
                       onKeyDown={(e) => e.preventDefault()}
                       onChange={(e) => {
                         const formatted = convertFromInputDateFormat(e.target.value);
@@ -498,7 +518,7 @@ export const Onboarding: React.FC = () => {
                         type="date"
                         value={convertToInputDateFormat(weddingDate)}
                         min={dob ? convertToInputDateFormat(dob) : "1940-01-01"}
-                        max="2026-06-06"
+                        max={todayStr}
                         onKeyDown={(e) => e.preventDefault()}
                         onChange={(e) => {
                           const formatted = convertFromInputDateFormat(e.target.value);
@@ -527,7 +547,7 @@ export const Onboarding: React.FC = () => {
               {/* Box 2: Contact Details */}
               <div className="glass-card" style={{ borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Phone Number</label>
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Phone Number <span style={{ color: 'var(--error-red)' }}>*</span></label>
                   <input
                     type="tel"
                     disabled
@@ -547,7 +567,7 @@ export const Onboarding: React.FC = () => {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Email Address</label>
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Email Address <span style={{ color: 'var(--error-red)' }}>*</span></label>
                   <input
                     type="email"
                     placeholder="Enter Email Address"
@@ -567,7 +587,7 @@ export const Onboarding: React.FC = () => {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Gender</label>
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Gender <span style={{ color: 'var(--error-red)' }}>*</span></label>
                   <div style={{ display: 'flex', gap: '24px', marginTop: '8px' }}>
                     {['Male', 'Female'].map((g) => (
                       <label key={g} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
@@ -589,7 +609,7 @@ export const Onboarding: React.FC = () => {
               {/* Box 3: Address & Pincode */}
               <div className="glass-card" style={{ borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Pincode</label>
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Pincode <span style={{ color: 'var(--error-red)' }}>*</span></label>
                   <input
                     type="tel"
                     placeholder="Enter 6-digit Pincode"
@@ -735,6 +755,39 @@ export const Onboarding: React.FC = () => {
                   />
                 </div>
 
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Upload PAN Card Photo</span>
+                  <label style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '110px',
+                    borderRadius: '12px',
+                    border: '1.5px dashed rgba(74, 14, 78, 0.2)',
+                    background: panImage ? 'rgba(74, 14, 78, 0.02)' : 'white',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'all 0.2s ease'
+                  }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, 'pan')}
+                      style={{ display: 'none' }}
+                    />
+                    {panImage ? (
+                      <img src={panImage} alt="PAN Preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: 'var(--brand-mid)' }}>
+                        <Upload size={24} />
+                        <span style={{ fontSize: '13px', fontWeight: '500' }}>Tap to Scan / Upload PAN</span>
+                      </div>
+                    )}
+                  </label>
+                </div>
+
                 {!isPanOtpSent && !isPanVerified && (
                   <button
                     onClick={() => setIsPanOtpSent(true)}
@@ -831,6 +884,74 @@ export const Onboarding: React.FC = () => {
                       outline: 'none'
                     }}
                   />
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', marginTop: '4px' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Aadhaar Front</span>
+                    <label style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '110px',
+                      borderRadius: '12px',
+                      border: '1.5px dashed rgba(74, 14, 78, 0.2)',
+                      background: aadhaarFrontImage ? 'rgba(74, 14, 78, 0.02)' : 'white',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      transition: 'all 0.2s ease'
+                    }}>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e, 'aadhaar-front')}
+                        style={{ display: 'none' }}
+                      />
+                      {aadhaarFrontImage ? (
+                        <img src={aadhaarFrontImage} alt="Aadhaar Front Preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: 'var(--brand-mid)' }}>
+                          <Upload size={20} />
+                          <span style={{ fontSize: '11px', fontWeight: '500', textAlign: 'center' }}>Upload Front</span>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Aadhaar Back</span>
+                    <label style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '110px',
+                      borderRadius: '12px',
+                      border: '1.5px dashed rgba(74, 14, 78, 0.2)',
+                      background: aadhaarBackImage ? 'rgba(74, 14, 78, 0.02)' : 'white',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      transition: 'all 0.2s ease'
+                    }}>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileChange(e, 'aadhaar-back')}
+                        style={{ display: 'none' }}
+                      />
+                      {aadhaarBackImage ? (
+                        <img src={aadhaarBackImage} alt="Aadhaar Back Preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: 'var(--brand-mid)' }}>
+                          <Upload size={20} />
+                          <span style={{ fontSize: '11px', fontWeight: '500', textAlign: 'center' }}>Upload Back</span>
+                        </div>
+                      )}
+                    </label>
+                  </div>
                 </div>
 
                 {!isIdOtpSent && !isIdVerified && (
