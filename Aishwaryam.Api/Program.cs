@@ -446,6 +446,56 @@ using (var scope = app.Services.CreateScope())
         VALUES ('global_config', 'support@aishwaryamgold.com', '+91-9876543210', 'https://aishwaryamgold.com/terms', 'https://aishwaryamgold.com/privacy', '[{""q"":""How to buy gold?"",""a"":""Go to Market tab and buy.""}]', 'Invite friends and earn 1mg of 24K Gold!', '#01211A', '#E8A83A', 'https://images.unsplash.com/photo-1610652492500-ded49ceeb378?auto=format&fit=crop&q=80&w=800', true, true, 100, 50)
         ON CONFLICT (id) DO NOTHING;", "seed_app_configs");
 
+    // Overwrite default placeholder URLs with the scraped Pothys terms/privacy contents
+    TryExec(@"UPDATE app_configs 
+        SET terms_url = 'Aishwaryam Swarna Mahal - DiGiGOLD Saving Scheme Terms & Conditions
+
+1. Scheme Overview
+- Name: DiGiGOLD Purchase Plan
+- Minimum Investment: ₹100 per installment. Subsequent payments can be made for any amount starting from ₹100.
+- Tenure: The scheme tenure is 300 days from the date of the first payment. No further accumulation is allowed after 300 days.
+- Maturity: The maturity period is 330 days from the date of the first payment. The lock-in period is a minimum of 330 days.
+
+2. Benefits & Bonus Structure
+An instant GOLD weight bonus is calculated and added to the member''s account based on the date of each payment:
+- 0 to 75 days: 7% instant GOLD weight bonus (e.g., Rs. 10,000 paid yields Rs. 700 worth of bonus gold).
+- 76 to 150 days: 5% instant GOLD weight bonus (e.g., Rs. 6,000 paid yields Rs. 300 worth of bonus gold).
+- 151 to 225 days: 3% instant GOLD weight bonus (e.g., Rs. 7,000 paid yields Rs. 210 worth of bonus gold).
+- 226 to 300 days: 1% instant GOLD weight bonus (e.g., Rs. 12,000 paid yields Rs. 120 worth of bonus gold).
+Note: Accumulated instant bonus benefits are redeemable only upon successful completion of 330 days.
+
+3. Redemption Policy
+- The accumulated gold weight can be redeemed after 330 days at any Aishwaryam Swarna Mahal store.
+- The gold weight can be used to purchase Gold, Platinum, Diamond Jewellery, Silver Articles, Gift items, or Coins.
+- No cash refunds are permitted under any circumstances.
+
+4. Pre-closure
+- If the account is closed prior to the 330-day maturity period, members can redeem their accumulated gold weight but will not receive any accumulated bonus gold benefits.
+
+5. Taxes & Other Charges
+- Members shall bear all GST and other government levies applicable at the time of invoice/redemption.
+- Value Addition (V.A.) charges, stone charges, and other making charges are applicable as per store rules and must be borne by the customer.'
+        WHERE id = 'global_config' AND (terms_url = 'https://aishwaryamgold.com/terms' OR terms_url = '');", "update_default_terms");
+
+    TryExec(@"UPDATE app_configs 
+        SET privacy_url = 'Aishwaryam Swarna Mahal - DiGiGOLD Saving Scheme Privacy Policy
+
+1. Information Collection
+We collect personal information necessary to manage your DiGiGOLD account, including your Name, Mobile Number, Email, Date of Birth, PAN Card details, and Bank Account details.
+
+2. Usage of Information
+Your information is used solely to verify your identity, process payments, manage your gold savings account, send transactions and promotional notifications, and process redemption requests at our stores.
+
+3. Security of Data
+We employ industry-standard security measures to safeguard your personal and financial information. All data transmitted between the app and our servers is encrypted.
+
+4. Data Sharing
+We do not sell or share your personal data with third parties, except as required by law or to process financial transactions through verified payment gateways (e.g., Razorpay).
+
+5. User Rights
+You can view and update your personal details in the Profile section of the app. For account deletion or data queries, please contact our support team at support@aishwaryamgold.com.'
+        WHERE id = 'global_config' AND (privacy_url = 'https://aishwaryamgold.com/privacy' OR privacy_url = '');", "update_default_privacy");
+
     // ── ALTER TABLE: financial tables optimistic concurrency ─────────────────
     TryExec("ALTER TABLE gold_holdings ADD COLUMN IF NOT EXISTS row_version bytea;", "gold_holdings.row_version");
     TryExec("ALTER TABLE wallets ADD COLUMN IF NOT EXISTS row_version bytea;", "wallets.row_version");

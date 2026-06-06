@@ -238,6 +238,14 @@ namespace Aishwaryam.Api.Controllers
             }
             config.ReferrerRewardMg = request.ReferrerRewardMg;
             config.RefereeRewardMg = request.RefereeRewardMg;
+            if (request.TermsAndConditionsUrl != null)
+            {
+                config.TermsAndConditionsUrl = request.TermsAndConditionsUrl;
+            }
+            if (request.PrivacyPolicyUrl != null)
+            {
+                config.PrivacyPolicyUrl = request.PrivacyPolicyUrl;
+            }
             config.UpdatedAt = DateTimeOffset.UtcNow;
             _context.SaveChanges();
             return Ok(config);
@@ -333,5 +341,7 @@ namespace Aishwaryam.Api.Controllers
     {
         public long ReferrerRewardMg { get; set; }
         public long RefereeRewardMg { get; set; }
+        public string? TermsAndConditionsUrl { get; set; }
+        public string? PrivacyPolicyUrl { get; set; }
     }
 }
