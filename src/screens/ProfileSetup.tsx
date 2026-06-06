@@ -17,10 +17,11 @@ export const ProfileSetup: React.FC = () => {
       setIsLoading(true);
       setErrorMsg(null);
       try {
-        await ApiClient.post(`api/User/profile`, {
+        const userId = SessionManager.getUserId() || '00000000-0000-0000-0000-000000000000';
+        await ApiClient.put(`api/User/profile/${userId}`, {
           fullName,
           email,
-          referralCode: referralCode.trim() || null
+          referredByCode: referralCode.trim() || null
         });
         
         SessionManager.savePartialProfile(fullName, email);
@@ -29,10 +30,7 @@ export const ProfileSetup: React.FC = () => {
         // Setup done, redirect to KYC onboarding form
         navigate('/onboarding');
       } catch (err: any) {
-        // Fallback for offline testing
-        SessionManager.savePartialProfile(fullName, email);
-        SessionManager.saveOnboardingStage(OnboardingStage.PROFILE_COMPLETED);
-        navigate('/onboarding');
+        setErrorMsg(err.response?.data?.message || err.message || 'Failed to update profile.');
       } finally {
         setIsLoading(false);
       }

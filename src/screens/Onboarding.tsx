@@ -266,17 +266,16 @@ export const Onboarding: React.FC = () => {
       try {
         const parts = dob.split('/');
         const formattedDob = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : null;
-        
-        await ApiClient.post(`api/User/profile`, {
+        const formattedWeddingDate = isMarried && weddingDate && weddingDate.split('/').length === 3 
+          ? `${weddingDate.split('/')[2]}-${weddingDate.split('/')[1]}-${weddingDate.split('/')[0]}` 
+          : null;
+
+        await ApiClient.put(`api/User/profile/${userId}`, {
           fullName: name,
           email,
           dateOfBirth: formattedDob,
-          nomineeName,
-          phoneNumber: phone,
-          state,
-          city,
-          pincode,
-          gender
+          nomineeName: nomineeName.trim() || null,
+          weddingAnniversaryDate: formattedWeddingDate
         });
         await refreshData();
         setCurrentStep(2);
@@ -483,7 +482,7 @@ export const Onboarding: React.FC = () => {
                   </div>
                   {dob && isValidDateString(dob) && dobError === null && (
                     <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--brand-mid)', marginTop: '6px', display: 'block' }}>
-                      Calculated Age: {calculateAge(dob)} years
+                      Age: {calculateAge(dob)} years
                     </span>
                   )}
                   {dobError && <span style={{ fontSize: '11px', color: 'var(--error-red)', marginTop: '4px', display: 'block' }}>{dobError}</span>}
@@ -742,7 +741,7 @@ export const Onboarding: React.FC = () => {
                 />
                 <span>
                   I accept the{' '}
-                  <span 
+                  <span
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -753,7 +752,7 @@ export const Onboarding: React.FC = () => {
                     Terms of Service
                   </span>
                   {' '}and{' '}
-                  <span 
+                  <span
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -1366,7 +1365,7 @@ export const Onboarding: React.FC = () => {
           }}>
             <div style={{ padding: '20px', borderBottom: '1px solid #ECECEC', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--brand-dark)' }}>Terms of Service</h3>
-              <button 
+              <button
                 onClick={() => setShowTermsModal(false)}
                 style={{ background: 'transparent', border: 'none', fontSize: '20px', color: 'var(--text-light)', cursor: 'pointer', fontWeight: 'bold' }}
               >
@@ -1383,7 +1382,7 @@ export const Onboarding: React.FC = () => {
               <p>Upon scheme maturity, the accumulated metal weight can be exchanged for physical jewelry at designated partner showrooms, or shipped as physical bullion coins, or sold back for cash payouts directly into the user's linked bank account.</p>
             </div>
             <div style={{ padding: '16px 20px', borderTop: '1px solid #ECECEC', display: 'flex', justifyContent: 'flex-end' }}>
-              <button 
+              <button
                 onClick={() => setShowTermsModal(false)}
                 style={{
                   padding: '10px 24px',
@@ -1431,7 +1430,7 @@ export const Onboarding: React.FC = () => {
           }}>
             <div style={{ padding: '20px', borderBottom: '1px solid #ECECEC', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--brand-dark)' }}>Privacy Policy</h3>
-              <button 
+              <button
                 onClick={() => setShowPrivacyModal(false)}
                 style={{ background: 'transparent', border: 'none', fontSize: '20px', color: 'var(--text-light)', cursor: 'pointer', fontWeight: 'bold' }}
               >
@@ -1448,7 +1447,7 @@ export const Onboarding: React.FC = () => {
               <p>We do not sell or lease your personal information to third parties. Data is shared with bank transfer partners, custodian vaults, and government regulatory agencies strictly for transactions compliance.</p>
             </div>
             <div style={{ padding: '16px 20px', borderTop: '1px solid #ECECEC', display: 'flex', justifyContent: 'flex-end' }}>
-              <button 
+              <button
                 onClick={() => setShowPrivacyModal(false)}
                 style={{
                   padding: '10px 24px',
