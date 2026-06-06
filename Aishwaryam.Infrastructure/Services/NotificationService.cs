@@ -88,6 +88,29 @@ namespace Aishwaryam.Infrastructure.Services
             {
                 if (FirebaseAdmin.FirebaseApp.DefaultInstance == null) return;
 
+                // Sanitize ImageUrl to make sure relative paths are resolved and invalid URIs don't crash the Firebase Admin SDK.
+                string? fcmImageUrl = null;
+                if (!string.IsNullOrWhiteSpace(imageUrl))
+                {
+                    if (imageUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+                        imageUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    {
+                        fcmImageUrl = imageUrl;
+                    }
+                    else
+                    {
+                        // Prefix relative image path with the backend's base URL
+                        string baseUrl = "https://aishwaryam.blazewing.in";
+                        fcmImageUrl = $"{baseUrl.TrimEnd('/')}/{imageUrl.TrimStart('/')}";
+                    }
+
+                    // Validate that the constructed URL is a well-formed absolute URI. If not, fallback to null rather than crash.
+                    if (!Uri.TryCreate(fcmImageUrl, UriKind.Absolute, out _))
+                    {
+                        fcmImageUrl = null;
+                    }
+                }
+
                 var fcmMessage = new FirebaseAdmin.Messaging.Message()
                 {
                     Token = device.FcmToken,
@@ -95,7 +118,7 @@ namespace Aishwaryam.Infrastructure.Services
                     {
                         Title = title,
                         Body = message,
-                        ImageUrl = imageUrl
+                        ImageUrl = fcmImageUrl
                     },
                     Data = data,
                     Android = new FirebaseAdmin.Messaging.AndroidConfig()
