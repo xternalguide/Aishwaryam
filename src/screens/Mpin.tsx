@@ -137,14 +137,10 @@ export const Mpin: React.FC = () => {
         setOtp('');
         if (otpRef.current[0]) otpRef.current[0].focus();
       }
-    } catch (err) {
-      if (val === '123456') {
-        setFlowState(MpinFlowState.FORGOT_NEW_PIN);
-      } else {
-        setErrorMsg('Invalid code. Please use 123456.');
-        setOtp('');
-        if (otpRef.current[0]) otpRef.current[0].focus();
-      }
+    } catch (err: any) {
+      setErrorMsg(err.response?.data?.message || 'Invalid verification code.');
+      setOtp('');
+      if (otpRef.current[0]) otpRef.current[0].focus();
     } finally {
       setIsLoading(false);
     }
