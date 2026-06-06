@@ -180,7 +180,13 @@ export const Mpin: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Firebase Auth forgot PIN Verify OTP Error:', err);
-      setErrorMsg(err.message || 'Incorrect OTP code. Please try again.');
+      if (err.code === 'auth/invalid-verification-code') {
+        setErrorMsg('Incorrect OTP code. Please check and try again.');
+      } else if (err.code === 'auth/code-expired') {
+        setErrorMsg('This OTP code has expired. Please request a new one.');
+      } else {
+        setErrorMsg(err.message || 'Incorrect OTP code. Please try again.');
+      }
       setOtp('');
       if (otpRef.current[0]) otpRef.current[0].focus();
     } finally {
@@ -241,7 +247,13 @@ export const Mpin: React.FC = () => {
       setOtp('');
     } catch (err: any) {
       console.error('Firebase Auth forgot PIN send OTP Error:', err);
-      setErrorMsg(err.message || 'Failed to send OTP via Firebase.');
+      if (err.code === 'auth/too-many-requests') {
+        setErrorMsg('You have requested OTP too many times. To prevent abuse, this number is temporarily blocked. Please try again later (up to 24 hours).');
+      } else if (err.code === 'auth/invalid-phone-number') {
+        setErrorMsg('Invalid phone number. Please enter a valid 10-digit mobile number.');
+      } else {
+        setErrorMsg(err.message || 'Failed to send OTP via Firebase.');
+      }
     } finally {
       setIsLoading(false);
     }
