@@ -106,7 +106,9 @@ namespace Aishwaryam.Infrastructure.Services
                                    && _gmailAppPassword != PlaceholderPass;
 
             bool brevoConfigured = _provider.Equals("Brevo", StringComparison.OrdinalIgnoreCase)
-                                   && _brevoApiKey != PlaceholderKey;
+                                   && _brevoApiKey != PlaceholderKey
+                                   && _brevoApiKey != "SET_VIA_RAILWAY_ENVIRONMENT_VARIABLE"
+                                   && !string.IsNullOrWhiteSpace(_brevoApiKey);
 
             if (gmailConfigured)
             {

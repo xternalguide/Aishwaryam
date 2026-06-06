@@ -41,7 +41,7 @@ namespace Aishwaryam.Infrastructure.Services
 
                 _logger.LogInformation($"[BREVO-SMS] Attempting to send SMS to {cleanRecipient}");
 
-                if (_apiKey == "FAKE_KEY_FOR_DEV")
+                if (_apiKey == "FAKE_KEY_FOR_DEV" || _apiKey == "SET_VIA_RAILWAY_ENVIRONMENT_VARIABLE" || string.IsNullOrWhiteSpace(_apiKey))
                 {
                     _logger.LogWarning($"[BREVO-SMS-DEV] SMS API Key is missing. Message: {message}");
                     return (true, "Console simulated success");

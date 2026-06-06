@@ -10,6 +10,16 @@ namespace Aishwaryam.Application.DTOs.Kyc
         public string DocumentUrl { get; set; } = string.Empty;
     }
 
+    public class KycDocumentDto
+    {
+        public string DocumentType { get; set; } = string.Empty;
+        public string DocumentNumber { get; set; } = string.Empty;
+        public string DocumentUrl { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string? RejectionReason { get; set; }
+        public DateTimeOffset? UploadedAt { get; set; }
+    }
+
     public class KycStatusResponse
     {
         public bool Success { get; set; }
@@ -20,5 +30,7 @@ namespace Aishwaryam.Application.DTOs.Kyc
         public string? DocumentNumber { get; set; }
         public string? DocumentUrl { get; set; }
         public DateTimeOffset? UploadedAt { get; set; }
+        public System.Collections.Generic.List<KycDocumentDto> Documents { get; set; } = new();
     }
 }
+

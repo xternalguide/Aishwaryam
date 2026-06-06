@@ -61,7 +61,16 @@ namespace Aishwaryam.Application.Services
                 DocumentType = latest.DocumentType,
                 DocumentNumber = latest.DocumentNumber,
                 DocumentUrl = latest.DocumentUrl,
-                UploadedAt = latest.UploadedAt
+                UploadedAt = latest.UploadedAt,
+                Documents = docs.Select(d => new KycDocumentDto
+                {
+                    DocumentType = d.DocumentType,
+                    DocumentNumber = d.DocumentNumber,
+                    DocumentUrl = d.DocumentUrl,
+                    Status = d.Status,
+                    RejectionReason = d.RejectionReason,
+                    UploadedAt = d.UploadedAt
+                }).ToList()
             };
         }
     }

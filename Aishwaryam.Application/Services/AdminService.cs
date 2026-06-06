@@ -92,17 +92,19 @@ namespace Aishwaryam.Application.Services
 
             await _authRepository.UpdateUserAsync(user);
 
-            // Update latest KycDocument if exists
+            // Update all KycDocuments if exist
             var docs = await _kycRepository.GetUserKycDocumentsAsync(request.UserId);
             if (docs != null && docs.Any())
             {
-                var latest = docs.OrderByDescending(d => d.CreatedAt).First();
-                latest.Status = request.IsApproved ? "VERIFIED" : "REJECTED";
-                if (!request.IsApproved)
+                foreach (var doc in docs)
                 {
-                    latest.RejectionReason = request.AdminNotes;
+                    doc.Status = request.IsApproved ? "VERIFIED" : "REJECTED";
+                    if (!request.IsApproved)
+                    {
+                        doc.RejectionReason = request.AdminNotes;
+                    }
+                    await _kycRepository.UpdateKycDocumentAsync(doc);
                 }
-                await _kycRepository.UpdateKycDocumentAsync(latest);
             }
 
             // Send unified notification to user

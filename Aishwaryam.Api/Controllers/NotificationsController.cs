@@ -13,10 +13,12 @@ namespace Aishwaryam.Api.Controllers
     public class NotificationsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly Aishwaryam.Application.Interfaces.Services.INotificationService _notificationService;
 
-        public NotificationsController(ApplicationDbContext context)
+        public NotificationsController(ApplicationDbContext context, Aishwaryam.Application.Interfaces.Services.INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         [HttpPost("send")]
@@ -24,12 +26,8 @@ namespace Aishwaryam.Api.Controllers
         {
             if (request.UserId == Guid.Empty) return BadRequest("Invalid UserId");
             
-            request.Id = Guid.NewGuid();
-            request.CreatedAt = DateTime.UtcNow;
-            
-            _context.UserNotifications.Add(request);
-            await _context.SaveChangesAsync();
-            return Ok(request);
+            await _notificationService.SendNotificationAsync(request.UserId, request.Title, request.Message, request.Type);
+            return Ok(new { success = true, message = "Notification sent successfully." });
         }
 
         [HttpGet("unread/{userId}")]
