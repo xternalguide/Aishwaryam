@@ -297,12 +297,19 @@ export const Onboarding: React.FC = () => {
           documentNumber: 'PAN_UPLOADED',
           documentUrl: panImage || 'https://placeholder.url/pan.jpg'
         });
-        // Submit Aadhaar
+        // Submit Aadhaar Front
         await ApiClient.post('api/Kyc/submit', {
           userId,
-          documentType: 'AADHAAR',
-          documentNumber: 'AADHAAR_UPLOADED',
-          documentUrl: aadhaarFrontImage || 'https://placeholder.url/aadhaar.jpg'
+          documentType: 'AADHAAR_FRONT',
+          documentNumber: 'AADHAAR_FRONT_UPLOADED',
+          documentUrl: aadhaarFrontImage || 'https://placeholder.url/aadhaar-front.jpg'
+        });
+        // Submit Aadhaar Back
+        await ApiClient.post('api/Kyc/submit', {
+          userId,
+          documentType: 'AADHAAR_BACK',
+          documentNumber: 'AADHAAR_BACK_UPLOADED',
+          documentUrl: aadhaarBackImage || 'https://placeholder.url/aadhaar-back.jpg'
         });
         // Update user KYC level to PENDING
         await ApiClient.post('api/Kyc/update-status', {
