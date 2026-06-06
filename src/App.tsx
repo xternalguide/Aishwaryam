@@ -32,6 +32,7 @@ import {
 } from './screens/InfoPages';
 import { AppProvider } from './context/AppContext';
 import { PushNotificationHandler } from './components/PushNotificationHandler';
+import { BackButtonHandler } from './components/BackButtonHandler';
 import './App.css';
 
 const App: React.FC = () => {
@@ -40,6 +41,7 @@ const App: React.FC = () => {
       <AppProvider>
         <Router>
           <PushNotificationHandler />
+          <BackButtonHandler />
           <Routes>
             {/* Auth & Onboarding Flow */}
             <Route path="/" element={<Splash />} />

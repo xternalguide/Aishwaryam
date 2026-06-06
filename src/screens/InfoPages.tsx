@@ -4,6 +4,7 @@ import { SessionManager } from '../utils/SessionManager';
 import { ApiClient } from '../utils/ApiClient';
 import { ArrowLeft, Send, Copy, Share2, Bell, Clock, Headset } from 'lucide-react';
 import { useTranslation } from '../utils/translation';
+import { useApp } from '../context/AppContext';
 
 const Header: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack }) => (
   <div style={{
@@ -650,21 +651,15 @@ export const MyBonuses: React.FC = () => {
 // ── NOTIFICATIONS ──────────────────────────────────────────────────────────
 export const Notifications: React.FC = () => {
   const navigate = useNavigate();
-  const [notifs, setNotifs] = useState<any[]>([]);
+  const { notifications, refreshData } = useApp();
 
   useEffect(() => {
-    const loadNotifs = async () => {
-      try {
-        const res = await ApiClient.get('api/Notification');
-        if (res.data) setNotifs(res.data);
-      } catch (err) {
-        setNotifs([
-          { id: 'n1', title: 'Payment Confirmed', message: 'Your 5th installment of ₹3,000 has been verified. 3.85g of Gold added to your locker.', createdAt: new Date().toISOString() }
-        ]);
-      }
-    };
-    loadNotifs();
+    refreshData().catch(err => console.error("Error refreshing notifications:", err));
   }, []);
+
+  const notifs = notifications && notifications.length > 0 ? notifications : [
+    { id: 'n1', title: 'Payment Confirmed', message: 'Your 5th installment of ₹3,000 has been verified. 3.85g of Gold added to your locker.', createdAt: new Date().toISOString() }
+  ];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>

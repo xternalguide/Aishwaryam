@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { SessionManager, OnboardingStage } from '../utils/SessionManager';
 import { ApiClient } from '../utils/ApiClient';
 import { CheckCircle } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 
 const MpinFlowState = {
   ENTER_PIN: 'ENTER_PIN',
@@ -15,6 +16,7 @@ type MpinFlowState = typeof MpinFlowState[keyof typeof MpinFlowState];
 
 export const Mpin: React.FC = () => {
   const navigate = useNavigate();
+  const { refreshData } = useApp();
   const { mode } = useParams<{ mode: 'setup' | 'verify' }>();
   const isSetupMode = mode === 'setup';
 
@@ -83,6 +85,11 @@ export const Mpin: React.FC = () => {
       if (response.data && response.data.success) {
         SessionManager.saveSession(response.data.userId, response.data.token, response.data.refreshToken);
         SessionManager.saveOnboardingStage(OnboardingStage.FULLY_VERIFIED);
+        try {
+          await refreshData();
+        } catch (err) {
+          console.error("Error pre-fetching app context:", err);
+        }
         navigate('/dashboard');
       } else {
         setErrorMsg(response.data.message || 'Incorrect PIN. Please try again.');
