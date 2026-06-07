@@ -655,6 +655,9 @@ export const Dashboard: React.FC = () => {
                   boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
                   background: '#EAEAEA',
                   gridColumn: 'span 2',
+                  minWidth: 0,
+                  maxWidth: '100%',
+                  boxSizing: 'border-box'
                 }}
               >
                 <div 
