@@ -446,7 +446,7 @@ export const Dashboard: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA', position: 'relative' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', maxWidth: '100%', overflowX: 'hidden', background: '#F8F9FA', position: 'relative' }}>
       
       {/* ── TOP NAV BAR (Universal except splash/wel) ── */}
       <div style={{
@@ -497,7 +497,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* ── MAIN TAB CONTAINER ── */}
-      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: isAndroidApp ? '96px' : '32px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', paddingBottom: isAndroidApp ? '96px' : '32px' }}>
         
         {/* TAB 0: HOME VIEW */}
         {selectedTab === 0 && (
@@ -570,21 +570,21 @@ export const Dashboard: React.FC = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginTop: '4px' }}>
                 {/* Gold Rates (22K) */}
-                <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '14px 16px', borderRadius: '16px', border: '1px solid rgba(255, 215, 0, 0.2)' }}>
+                <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: 'clamp(10px, 3vw, 14px) clamp(8px, 2.5vw, 16px)', borderRadius: '16px', border: '1px solid rgba(255, 215, 0, 0.2)' }}>
                   <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--gold-primary)', display: 'block', marginBottom: '6px' }}>
                     Gold 22K (per g)
                   </span>
-                  <span style={{ fontSize: '20px', fontWeight: '900', color: 'white', fontFamily: 'var(--font-poppins)' }}>
+                  <span style={{ fontSize: 'clamp(14px, 4.5vw, 20px)', fontWeight: '900', color: 'white', fontFamily: 'var(--font-poppins)' }}>
                     ₹{((livePrice?.price22KPaise || 701000) / 100).toFixed(2)}
                   </span>
                 </div>
 
                 {/* Silver Rates (99.9%) */}
-                <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '14px 16px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+                <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: 'clamp(10px, 3vw, 14px) clamp(8px, 2.5vw, 16px)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
                   <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#ECECEC', display: 'block', marginBottom: '6px' }}>
                     Silver 99.9% (per g)
                   </span>
-                  <span style={{ fontSize: '20px', fontWeight: '900', color: 'white', fontFamily: 'var(--font-poppins)' }}>
+                  <span style={{ fontSize: 'clamp(14px, 4.5vw, 20px)', fontWeight: '900', color: 'white', fontFamily: 'var(--font-poppins)' }}>
                     ₹{((livePrice?.priceSilverPaise || 9900) / 100).toFixed(2)}
                   </span>
                 </div>
