@@ -12,6 +12,7 @@ import {
   LogOut,
   AlertTriangle,
   ChevronRight,
+  TrendingUp,
   Gift,
   Award,
   X,
@@ -563,6 +564,32 @@ export const Dashboard: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* View Portfolio Button */}
+            <button
+              onClick={() => navigate('/portfolio-analytics')}
+              style={{
+                width: '100%',
+                height: '50px',
+                borderRadius: '16px',
+                background: 'var(--gradient-brand)',
+                border: 'none',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                fontFamily: 'var(--font-poppins)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(74, 14, 78, 0.15)',
+                transition: 'transform 0.1s ease'
+              }}
+            >
+              <TrendingUp size={16} color="var(--gold-primary)" />
+              <span>{t('view_portfolio')}</span>
+            </button>
 
             {/* Quick Actions Row */}
             <div className="quick-actions-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
