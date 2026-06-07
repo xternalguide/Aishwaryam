@@ -425,16 +425,6 @@ export const Onboarding: React.FC = () => {
           <ArrowLeft size={24} />
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
-          <img
-            src="/logo.png"
-            alt="Logo"
-            style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '6px',
-              objectFit: 'cover'
-            }}
-          />
           <span style={{ fontSize: '16px', fontWeight: 'bold', fontFamily: 'var(--font-poppins)' }}>
             Aishwaryam · Step {currentStep} of 3
           </span>

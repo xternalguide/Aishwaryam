@@ -287,3 +287,31 @@ input, textarea {
   -moz-user-select: text !important;
   user-select: text !important;
 }
+
+/* Transitions & Anim overlays */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes tickSuccess {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+.animate-tick-success {
+  animation: tickSuccess 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}

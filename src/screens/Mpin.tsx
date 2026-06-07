@@ -110,8 +110,9 @@ export const Mpin: React.FC = () => {
   };
 
   // Handle save/create MPIN
-  const handleSaveMpin = async () => {
-    if (newMpin !== confirmMpin) return;
+  const handleSaveMpin = async (overrideConfirm?: string) => {
+    const finalConfirm = overrideConfirm !== undefined ? overrideConfirm : confirmMpin;
+    if (newMpin !== finalConfirm) return;
     setIsLoading(true);
     setErrorMsg(null);
     try {
@@ -261,22 +262,6 @@ export const Mpin: React.FC = () => {
           marginTop: 'auto',
           marginBottom: 'auto'
         }}>
-          {/* Branding Logo */}
-          <div style={{
-            width: '72px',
-            height: '72px',
-            borderRadius: '16px',
-            background: 'var(--gold-soft)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '8px',
-            marginBottom: '20px'
-          }}>
-            <span style={{ color: 'var(--brand-dark)', fontSize: '28px', fontWeight: '900', fontFamily: 'var(--font-playfair)' }}>
-              A
-            </span>
-          </div>
 
           {/* Title */}
           <h2 style={{
@@ -332,7 +317,9 @@ export const Mpin: React.FC = () => {
                       inputMode="numeric"
                       maxLength={1}
                       value={mpin[i] || ''}
-                      onChange={(e) => handlePinBoxChange(i, e.target.value, setMpin, mpin, mpinRef, 4, () => {})}
+                      onChange={(e) => handlePinBoxChange(i, e.target.value, setMpin, mpin, mpinRef, 4, (completedVal) => {
+                        handleVerifyExistingMpin(completedVal);
+                      })}
                       onKeyDown={(e) => handleKeyDown(i, e, mpin, setMpin, mpinRef)}
                       ref={(el) => { if (el) mpinRef.current[i] = el; }}
                       style={{
@@ -442,7 +429,11 @@ export const Mpin: React.FC = () => {
                         maxLength={1}
                         value={confirmMpin[i] || ''}
                         disabled={newMpin.length !== 4}
-                        onChange={(e) => handlePinBoxChange(i, e.target.value, setConfirmMpin, confirmMpin, confirmMpinRef, 4, () => {})}
+                        onChange={(e) => handlePinBoxChange(i, e.target.value, setConfirmMpin, confirmMpin, confirmMpinRef, 4, (completedVal) => {
+                          if (newMpin === completedVal) {
+                            handleSaveMpin(completedVal);
+                          }
+                        })}
                         onKeyDown={(e) => handleKeyDown(i, e, confirmMpin, setConfirmMpin, confirmMpinRef)}
                         ref={(el) => { if (el) confirmMpinRef.current[i] = el; }}
                         style={{
@@ -470,7 +461,7 @@ export const Mpin: React.FC = () => {
               )}
 
               <button
-                onClick={handleSaveMpin}
+                onClick={() => handleSaveMpin()}
                 disabled={newMpin.length !== 4 || confirmMpin.length !== 4 || newMpin !== confirmMpin || isLoading}
                 style={{
                   width: '100%',
@@ -581,7 +572,7 @@ export const Mpin: React.FC = () => {
         </div>
       </div>
 
-      {/* Success tick popup overlay */}
+      {/* Success tick full screen overlay */}
       {showSuccessDialog && (
         <div style={{
           position: 'fixed',
@@ -589,41 +580,76 @@ export const Mpin: React.FC = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
+          background: 'rgba(41, 0, 29, 0.95)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 3000,
+          color: 'white',
+          animation: 'fadeIn 0.3s ease-out'
         }}>
-          <div className="glass-card" style={{
-            width: '200px',
-            height: '200px',
-            borderRadius: '28px',
-            background: 'white',
+          <div className="animate-tick-success" style={{
+            width: '120px',
+            height: '120px',
+            borderRadius: '50%',
+            background: 'rgba(16, 185, 129, 0.15)',
+            border: '2px solid var(--success-green)',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '24px',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
-            animation: 'scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+            marginBottom: '24px',
+            boxShadow: '0 0 40px rgba(16, 185, 129, 0.3)'
           }}>
-            <div style={{
-              width: '80px',
-              height: '80px',
-              borderRadius: '50%',
-              background: 'rgba(123, 31, 162, 0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px'
-            }}>
-              <CheckCircle size={48} color="var(--brand-mid)" />
-            </div>
-            <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text-primary)', textAlign: 'center' }}>
-              {successMessage}
-            </span>
+            <CheckCircle size={72} color="var(--success-green)" />
           </div>
+          <h2 style={{
+            fontSize: '24px',
+            fontWeight: 'bold',
+            fontFamily: 'var(--font-poppins)',
+            color: 'white',
+            textAlign: 'center',
+            margin: 0,
+            letterSpacing: '0.5px'
+          }}>
+            {successMessage}
+          </h2>
+        </div>
+      )}
+
+      {/* Loading full screen overlay */}
+      {isLoading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(41, 0, 29, 0.85)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          color: 'white',
+          animation: 'fadeIn 0.2s ease-out'
+        }}>
+          <div className="spinner" style={{
+            width: '60px',
+            height: '60px',
+            border: '4px solid rgba(255, 255, 255, 0.1)',
+            borderTop: '4px solid var(--gold-primary)',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            marginBottom: '20px'
+          }} />
+          <span style={{ fontSize: '15px', fontWeight: 'bold', fontFamily: 'var(--font-poppins)', color: 'rgba(255, 255, 255, 0.9)', letterSpacing: '0.5px' }}>
+            {flowState === MpinFlowState.ENTER_PIN ? 'Verifying PIN...' : 'Saving PIN...'}
+          </span>
         </div>
       )}
     </div>

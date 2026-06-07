@@ -62,25 +62,14 @@ export const Splash: React.FC = () => {
       color: 'white',
       textAlign: 'center'
     }}>
-      <img
-        src="/logo.png"
-        alt="Aishwaryam Logo"
-        className="splash-logo-animated"
-        style={{
-          width: '120px',
-          height: '120px',
-          borderRadius: '28px',
-          marginBottom: '24px',
-          boxShadow: '0 10px 20px rgba(0,0,0,0.3)',
-          objectFit: 'cover'
-        }}
-      />
-      <h1 style={{ color: 'var(--gold-primary)', fontFamily: 'var(--font-playfair)', fontSize: '36px', marginBottom: '8px' }}>
-        AISHWARYAM
-      </h1>
-      <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', letterSpacing: '2px' }}>
-        DIGITAL GOLD
-      </p>
+      <div className="splash-logo-animated">
+        <h1 style={{ color: 'var(--gold-primary)', fontFamily: 'var(--font-playfair)', fontSize: '36px', marginBottom: '8px' }}>
+          AISHWARYAM
+        </h1>
+        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', letterSpacing: '2px' }}>
+          DIGITAL GOLD
+        </p>
+      </div>
     </div>
   );
 };

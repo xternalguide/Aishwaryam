@@ -168,18 +168,6 @@ export const Login: React.FC = () => {
         {/* Top Section */}
         <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
           {/* Branding Logo */}
-          <img
-            src="/logo.png"
-            alt="Aishwaryam Logo"
-            style={{
-              width: '80px',
-              height: '80px',
-              borderRadius: '24px',
-              boxShadow: '0 8px 16px var(--brand-glow)',
-              marginBottom: '24px',
-              objectFit: 'cover'
-            }}
-          />
 
           <h1 style={{
             fontFamily: 'var(--font-playfair)',
