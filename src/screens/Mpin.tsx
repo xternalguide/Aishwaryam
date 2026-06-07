@@ -140,6 +140,8 @@ export const Mpin: React.FC = () => {
         otp: val
       });
       if (response.data && response.data.success) {
+        const { token, refreshToken, userId } = response.data;
+        SessionManager.saveSession(userId, token, refreshToken);
         setFlowState(MpinFlowState.FORGOT_NEW_PIN);
       } else {
         setErrorMsg(response.data.message || 'Invalid verification code.');
