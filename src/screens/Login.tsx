@@ -68,7 +68,8 @@ export const Login: React.FC = () => {
     try {
       const response = await ApiClient.post('api/Auth/verify-otp', {
         phoneNumber: phone,
-        otp: enteredOtp
+        otp: enteredOtp,
+        deviceFingerprint: ApiClient.getDeviceFingerprint()
       });
       if (response.data && response.data.success) {
         const { token, refreshToken, userId, isNewUser, isMpinSet } = response.data;

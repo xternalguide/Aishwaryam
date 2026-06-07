@@ -6,6 +6,11 @@ const BASE_URL = (window.location.hostname === 'localhost' || window.location.ho
   ? 'http://192.168.1.36:5044/'
   : 'https://aishwaryam.blazewing.in/';
 
+export const getDeviceFingerprint = (): string => {
+  const isCapacitor = !!(window as any).Capacitor;
+  return isCapacitor ? 'android_default' : 'web_default';
+};
+
 const instance: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 15000,
@@ -43,7 +48,7 @@ instance.interceptors.response.use(
         try {
           const res = await axios.post(`${BASE_URL}api/Auth/refresh`, {
             refreshToken,
-            deviceFingerprint: 'web_device_fingerprint'
+            deviceFingerprint: getDeviceFingerprint()
           });
 
           if (res.data && res.data.success) {
@@ -80,6 +85,7 @@ instance.interceptors.response.use(
 );
 
 export const ApiClient = {
+  getDeviceFingerprint,
   // GET wraps Axios request
   get: async <T = any>(url: string): Promise<AxiosResponse<T>> => {
     return await instance.get<T>(url);

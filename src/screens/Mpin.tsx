@@ -81,7 +81,8 @@ export const Mpin: React.FC = () => {
     try {
       const response = await ApiClient.post('api/Auth/verify-mpin', {
         mpin: val,
-        phoneNumber: SessionManager.getPhoneNumber() || ''
+        phoneNumber: SessionManager.getPhoneNumber() || '',
+        deviceFingerprint: ApiClient.getDeviceFingerprint()
       });
       if (response.data && response.data.success) {
         SessionManager.saveSession(response.data.userId, response.data.token, response.data.refreshToken);
