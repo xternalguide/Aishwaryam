@@ -57,7 +57,7 @@ export const SchemeExplorer: React.FC = () => {
       {/* Top Bar */}
       <div style={{
         background: 'var(--gradient-brand)',
-        paddingTop: 'calc(16px + max(env(safe-area-inset-top, 24px), 24px))',
+        paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))',
         paddingLeft: '20px',
         paddingRight: '20px',
         paddingBottom: '16px',
