@@ -243,14 +243,14 @@ export const SchemeDetail: React.FC = () => {
               ? JSON.parse(result.response)
               : result.response;
 
-            // 2. Verify payment order on backend
+            // 2. Verify payment order on backend (with extended 60-second timeout)
             setIsProcessing(true);
             const verifyRes = await ApiClient.post('api/Payment/verify', {
               userId,
               razorpayOrderId: orderData.orderId,
               razorpayPaymentId: rzpResponse.razorpay_payment_id,
               razorpaySignature: rzpResponse.razorpay_signature
-            });
+            }, { timeout: 60000 });
 
             if (verifyRes.data && verifyRes.data.success) {
               const receiptJson = JSON.stringify({
@@ -307,13 +307,13 @@ export const SchemeDetail: React.FC = () => {
             handler: async function (response: any) {
               setIsProcessing(true);
               try {
-                // 3. Verify payment order on backend
+                // 3. Verify payment order on backend (with extended 60-second timeout)
                 const verifyRes = await ApiClient.post('api/Payment/verify', {
                   userId,
                   razorpayOrderId: orderData.orderId,
                   razorpayPaymentId: response.razorpay_payment_id,
                   razorpaySignature: response.razorpay_signature
-                });
+                }, { timeout: 60000 });
 
                 if (verifyRes.data && verifyRes.data.success) {
                   const receiptJson = JSON.stringify({

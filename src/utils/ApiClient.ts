@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AxiosInstance, AxiosResponse } from 'axios';
+import type { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
 import { SessionManager } from './SessionManager';
 
 const isLocalHost = 
@@ -94,17 +94,17 @@ instance.interceptors.response.use(
 export const ApiClient = {
   getDeviceFingerprint,
   // GET wraps Axios request
-  get: async <T = any>(url: string): Promise<AxiosResponse<T>> => {
-    return await instance.get<T>(url);
+  get: async <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+    return await instance.get<T>(url, config);
   },
 
   // POST wraps Axios request
-  post: async <T = any>(url: string, data?: any): Promise<AxiosResponse<T>> => {
-    return await instance.post<T>(url, data);
+  post: async <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+    return await instance.post<T>(url, data, config);
   },
 
   // PUT wraps Axios request
-  put: async <T = any>(url: string, data?: any): Promise<AxiosResponse<T>> => {
-    return await instance.put<T>(url, data);
+  put: async <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+    return await instance.put<T>(url, data, config);
   }
 };
