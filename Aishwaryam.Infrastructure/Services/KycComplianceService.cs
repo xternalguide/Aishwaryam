@@ -27,7 +27,7 @@ namespace Aishwaryam.Infrastructure.Services
             var limits = GetLimitsForLevel(user.KycLevel ?? "BASIC");
 
             // Daily Check
-            var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
+            var today = DateTime.UtcNow.Date; // Unspecified kind to match timestamp without time zone column mapping
             var dailyTotal = await _context.Payments
                 .Where(p => p.UserId == userId && p.Status == "SUCCESS" && p.CreatedAt >= today)
                 .SumAsync(p => p.AmountPaise);
@@ -92,8 +92,8 @@ namespace Aishwaryam.Infrastructure.Services
             var level = user?.KycLevel ?? "BASIC";
             var limits = GetLimitsForLevel(level);
 
-            var today = DateTime.SpecifyKind(DateTime.UtcNow.Date, DateTimeKind.Utc);
-            var monthStart = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+            var today = DateTime.UtcNow.Date; // Unspecified kind to match timestamp without time zone column mapping
+            var monthStart = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Unspecified);
 
             var dailyUsed = await _context.Payments
                 .Where(p => p.UserId == userId && p.Status == "SUCCESS" && p.CreatedAt >= today)

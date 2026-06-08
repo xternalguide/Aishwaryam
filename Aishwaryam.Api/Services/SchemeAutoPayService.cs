@@ -54,10 +54,11 @@ namespace Aishwaryam.Api.Services
             var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
 
             var now = DateTime.UtcNow;
+            var nowUnspecified = DateTime.SpecifyKind(now, DateTimeKind.Unspecified);
 
-            // Find all active schemes where NextDueDate is past or today
+            // Find all active schemes where NextDueDate is past or today (using direct date/time comparison with unspecified kind)
             var dueSchemes = await context.UserSchemes
-                .Where(s => s.Status == "Active" && s.NextDueDate.Date <= now.Date)
+                .Where(s => s.Status == "Active" && s.NextDueDate <= nowUnspecified)
                 .ToListAsync();
 
             foreach (var scheme in dueSchemes)

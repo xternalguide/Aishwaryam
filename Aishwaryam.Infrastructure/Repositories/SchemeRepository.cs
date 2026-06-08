@@ -70,8 +70,9 @@ namespace Aishwaryam.Infrastructure.Repositories
 
         public async Task<List<UserScheme>> GetSchemesPendingMaturityAsync()
         {
+            var nowUnspecified = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
             return await _context.UserSchemes
-                .Where(s => s.Status == "Active" && s.MaturityDate <= DateTime.UtcNow)
+                .Where(s => s.Status == "Active" && s.MaturityDate <= nowUnspecified)
                 .ToListAsync();
         }
 
