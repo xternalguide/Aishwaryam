@@ -1257,7 +1257,7 @@ export const Dashboard: React.FC = () => {
                           {isBuy ? t('added_to_savings') : t('redeemed_metal')}
                         </span>
                         <span style={{ fontSize: '10px', color: 'var(--text-light)', display: 'block', marginTop: '2px' }}>
-                          {new Date(tx.createdAt).toLocaleDateString()}
+                          {new Date(tx.createdAt).toLocaleDateString()} {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                     </div>
@@ -2006,8 +2006,10 @@ export const Dashboard: React.FC = () => {
                 <span style={{ fontWeight: 'bold' }}>{selectedTxDetail.id}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Date</span>
-                <span style={{ fontWeight: 'bold' }}>{new Date(selectedTxDetail.createdAt).toLocaleDateString()}</span>
+                <span style={{ color: 'var(--text-muted)' }}>Date & Time</span>
+                <span style={{ fontWeight: 'bold' }}>
+                  {new Date(selectedTxDetail.createdAt).toLocaleDateString()} {new Date(selectedTxDetail.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Gold Weight</span>

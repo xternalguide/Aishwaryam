@@ -91,7 +91,9 @@ export const PaymentSuccess: React.FC = () => {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
               <span style={{ color: 'var(--text-muted)' }}>Date</span>
-              <span style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>{new Date(createdAt).toLocaleDateString()}</span>
+              <span style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>
+                {new Date(createdAt).toLocaleDateString()} {new Date(createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
               <span style={{ color: 'var(--text-muted)' }}>Metal Weight</span>
