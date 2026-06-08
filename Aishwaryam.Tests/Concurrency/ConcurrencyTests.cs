@@ -29,7 +29,7 @@ namespace Aishwaryam.Tests.Concurrency
     /// </summary>
     public class ConcurrencyTests
     {
-        private const string WebhookSecret = "JBK5ZEwEHDNWaYQDTRLDUgJK";
+        private const string WebhookSecret = "3V9ZmMaZrw0cPjblI63BpE3E";
 
         // ─── SHARED TEST INFRASTRUCTURE ───────────────────────────────────────
         private static TestDbContext GetDb() =>

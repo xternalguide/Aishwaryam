@@ -284,7 +284,7 @@ namespace Aishwaryam.Application.Services
                         GoldRatePerGm = (receipt.PricePerGmPaise / 100.0).ToString("F2"),
                         GstAmount = (receipt.TotalAmountPaise * 0.03 / 100.0).ToString("F2"), // Simplified GST calc for email UI
                         BonusGoldMg = receipt.BonusGoldMg.ToString(),
-                        BonusPercent = receipt.BonusAmountPaise > 0 ? "Bonus Applied" : "0",
+                        BonusPercent = receipt.BonusPercentage.ToString("F1"),
                         NewGoldBalanceMg = "Check Portfolio", // Can't easily pull here without a query, will rely on app.
                         TransactionDate = DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt")
                     }

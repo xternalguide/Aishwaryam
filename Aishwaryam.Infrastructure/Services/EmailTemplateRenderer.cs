@@ -172,7 +172,7 @@ namespace Aishwaryam.Infrastructure.Services
           <td width=""40"" valign=""top"" style=""font-size: 24px;"">🏆</td>
           <td style=""padding-left: 12px;"">
             <h4 style=""margin: 0 0 4px; color: #111827; font-size: 15px; font-weight: 700;"">Earn Loyalty Bonuses</h4>
-            <p style=""margin: 0; color: #4B5563; font-size: 13px; line-height: 1.5;"">Join our saving schemes and earn up to 7.5% bonus gold on every installment paid.</p>
+            <p style=""margin: 0; color: #4B5563; font-size: 13px; line-height: 1.5;"">Join our saving schemes and earn up to 7.5% bonus gold on every purchase made.</p>
           </td>
         </tr>
       </table>
@@ -230,26 +230,26 @@ namespace Aishwaryam.Infrastructure.Services
 </div>
 <table width=""100%"" cellpadding=""0"" cellspacing=""0"">
   {InfoRow("Plan", d.GetValueOrDefault("PlanName", "—"))}
-  {InfoRow("Daily Installment", $"₹{d.GetValueOrDefault("InstallmentAmount", "0")}")}
+  {InfoRow("Daily Contribution", $"₹{d.GetValueOrDefault("InstallmentAmount", "0")}")}
   {InfoRow("Total Duration", $"{d.GetValueOrDefault("TotalInstallments", "0")} days")}
   {InfoRow("Maturity Date", d.GetValueOrDefault("MaturityDate", "—"))}
   {InfoRow("Loyalty Bonus", $"Up to {d.GetValueOrDefault("MaxBonus", "7.5")}%")}
-  {InfoRow("First Installment", $"₹{d.GetValueOrDefault("FirstInstallmentAmount", "0")}")}
+  {InfoRow("First Payment", $"₹{d.GetValueOrDefault("FirstInstallmentAmount", "0")}")}
 </table>
 <p style=""margin:24px 0 0;font-size:14px;color:#374151;line-height:1.7;"">
-  Stay consistent! Every on-time installment increases your loyalty bonus tier.
-  Missing installments may reduce your bonus.
+  Stay consistent! Every on-time purchase increases your loyalty bonus tier.
+  Missing purchases may reduce your bonus.
 </p>
 {ActionButton("View My Scheme", "https://aishwaryam.com/app/schemes")}";
 
         private static string InstallmentSuccess(Dictionary<string, string> d) => $@"
 {Greeting(d.GetValueOrDefault("UserName", "Customer"))}
-<h2 style=""margin:0 0 4px;color:#111827;font-size:20px;font-weight:700;"">Installment Payment Successful 💰</h2>
+<h2 style=""margin:0 0 4px;color:#111827;font-size:20px;font-weight:700;"">Payment Successful 💰</h2>
 <p style=""margin:0 0 24px;color:#6B7280;font-size:14px;"">Scheme: <strong>{d.GetValueOrDefault("PlanName", "—")}</strong></p>
 {GoldBadge(d.GetValueOrDefault("GoldCreditedMg", "0"))}
 <table width=""100%"" cellpadding=""0"" cellspacing=""0"">
-  {InfoRow("Installment Amount", $"₹{d.GetValueOrDefault("AmountPaid", "0")}")}
-  {InfoRow("Installment Number", $"{d.GetValueOrDefault("InstallmentNumber", "0")} of {d.GetValueOrDefault("TotalInstallments", "0")}")}
+  {InfoRow("Payment Amount", $"₹{d.GetValueOrDefault("AmountPaid", "0")}")}
+  {InfoRow("Payment Number", $"{d.GetValueOrDefault("InstallmentNumber", "0")} of {d.GetValueOrDefault("TotalInstallments", "0")}")}
   {InfoRow("Bonus Earned", $"{d.GetValueOrDefault("BonusGoldMg", "0")} mg ({d.GetValueOrDefault("BonusPercent", "0")}%)")}
   {InfoRow("Total Accumulated Gold", $"{d.GetValueOrDefault("TotalGoldMg", "0")} mg")}
   {InfoRow("Next Due Date", d.GetValueOrDefault("NextDueDate", "—"))}

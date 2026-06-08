@@ -29,7 +29,7 @@ namespace Aishwaryam.Infrastructure.Repositories
         public async Task<List<UserScheme>> GetActiveUserSchemesAsync(Guid userId)
         {
             return await _context.UserSchemes
-                .Where(s => s.UserId == userId && (s.Status == "Active" || s.Status == "Matured"))
+                .Where(s => s.UserId == userId && (s.Status == "Active" || s.Status == "Matured" || s.Status == "Claimed"))
                 .OrderByDescending(s => s.CreatedAt)
                 .ToListAsync();
         }

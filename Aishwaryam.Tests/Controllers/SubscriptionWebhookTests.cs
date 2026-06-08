@@ -20,7 +20,7 @@ namespace Aishwaryam.Tests.Controllers
     /// </summary>
     public class SubscriptionWebhookTests
     {
-        private const string WebhookSecret = "JBK5ZEwEHDNWaYQDTRLDUgJK";
+        private const string WebhookSecret = "3V9ZmMaZrw0cPjblI63BpE3E";
 
         // ─── HELPERS ──────────────────────────────────────────────────────────
         private static ApplicationDbContext GetInMemoryDbContext()

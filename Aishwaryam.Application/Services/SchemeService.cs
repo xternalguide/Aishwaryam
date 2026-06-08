@@ -60,7 +60,7 @@ namespace Aishwaryam.Application.Services
             // Real-time automatic maturity check for all schemes
             foreach (var s in activeSchemes.Where(sch => sch.Status == "Active"))
             {
-                if (s.MaturityDate <= DateTime.UtcNow || s.InstallmentsPaid >= s.TotalInstallments)
+                if (s.MaturityDate <= DateTime.UtcNow)
                 {
                     s.Status = "Matured";
                     s.UpdatedAt = DateTime.UtcNow;
@@ -354,162 +354,9 @@ namespace Aishwaryam.Application.Services
             // ────────────────────────────────────────────────────────────────────────
             // PROCESS ACTIVE SCHEMES MILESTONE LOYALTY BONUSES
             // ────────────────────────────────────────────────────────────────────────
-            try
-            {
-                _logger.LogInformation("Starting Milestone Loyalty Bonus Processing...");
-                var activeSchemes = await _schemeRepository.GetSchemesByStatusAsync("Active");
-                
-                foreach (var scheme in activeSchemes)
-                {
-                    try
-                    {
-                        int dayNumber = (int)(DateTime.UtcNow - scheme.CreatedAt).TotalDays;
-                        if (dayNumber < 0) dayNumber = 0;
-
-                        // Retrieve the master scheme to get frequency and total installments
-                        var master = await _schemeRepository.GetSchemeMasterByPlanNameAsync(scheme.PlanName);
-                        if (master == null) continue;
-
-                        // Fetch tiers. If none, define standard default tiers.
-                        var dbTiers = await _schemeRepository.GetBonusTiersAsync(master.Id);
-                        var tiers = new List<SchemeBonusTier>();
-                        if (dbTiers != null && dbTiers.Count > 0)
-                        {
-                            tiers.AddRange(dbTiers);
-                        }
-                        else
-                        {
-                            // Standard 330-day default tiers
-                            tiers.Add(new SchemeBonusTier { StartDay = 0, EndDay = 75, BonusPercentage = 7.5m });
-                            tiers.Add(new SchemeBonusTier { StartDay = 76, EndDay = 150, BonusPercentage = 5.5m });
-                            tiers.Add(new SchemeBonusTier { StartDay = 151, EndDay = 225, BonusPercentage = 3.5m });
-                            tiers.Add(new SchemeBonusTier { StartDay = 226, EndDay = 330, BonusPercentage = 1.5m });
-                        }
-
-                        var ledger = await _schemeRepository.GetSchemeLedgerAsync(scheme.Id);
-                        
-                        foreach (var tier in tiers)
-                        {
-                            // Check if scheme has completed this tier window
-                            if (dayNumber > tier.EndDay)
-                            {
-                                // Check if this tier bonus has already been awarded
-                                bool alreadyAwarded = ledger.Any(x => x.TransactionType == "BONUS" && x.InstallmentNumber == tier.EndDay);
-                                if (!alreadyAwarded)
-                                {
-                                    // Sum all regular INSTALLMENT investments made during this tier's window
-                                    var tierInvestments = ledger.Where(x => 
-                                        x.TransactionType == "INSTALLMENT" && 
-                                        x.CreatedAt >= scheme.CreatedAt.AddDays(tier.StartDay) && 
-                                        x.CreatedAt <= scheme.CreatedAt.AddDays(tier.EndDay)
-                                    ).ToList();
-
-                                    long tierTotalAmountPaise = tierInvestments.Sum(x => x.AmountPaise);
-
-                                    if (tierTotalAmountPaise > 0)
-                                    {
-                                        long bonusAmountPaise = (long)(tierTotalAmountPaise * (tier.BonusPercentage / 100m));
-                                        
-                                        // Get live gold price or fixed silver rate
-                                        bool isSilverScheme = scheme.PlanName.Contains("silver", StringComparison.OrdinalIgnoreCase);
-                                        var currentPrice = await _goldService.GetCurrentPriceAsync();
-                                        long effectiveRate = isSilverScheme ? 9500L : (currentPrice != null ? currentPrice.BuyPricePaise : 0L);
-                                        if (effectiveRate > 0)
-                                        {
-                                            long bonusGoldMg = (bonusAmountPaise * 1000) / effectiveRate;
-                                            
-                                            if (bonusGoldMg > 0)
-                                            {
-                                                _logger.LogInformation($"Awarding milestone bonus for Scheme: {scheme.Id}, Tier: {tier.StartDay}-{tier.EndDay} ({tier.BonusPercentage}%). Bonus: {bonusGoldMg}mg (Worth: {bonusAmountPaise} paise).");
-
-                                                // 1. Record Gold/Silver Transaction
-                                                var bonusTxId = Guid.NewGuid();
-                                                var goldTx = new GoldTransaction
-                                                {
-                                                    Id = bonusTxId,
-                                                    UserId = scheme.UserId,
-                                                    TransactionType = "BONUS",
-                                                    GoldWeightMg = bonusGoldMg,
-                                                    PricePerGmPaise = effectiveRate,
-                                                    TotalAmountPaise = 0,
-                                                    IpAddress = "127.0.0.1",
-                                                    DeviceFingerprint = "BACKEND_SYSTEM",
-                                                    RateSource = "SCHEME_REWARD",
-                                                    RateTimestamp = currentPrice != null ? currentPrice.UpdatedAt : DateTimeOffset.UtcNow,
-                                                    UserSchemeId = scheme.Id
-                                                };
-                                                await _goldRepository.RecordGoldTransactionAsync(goldTx);
-
-                                                // 2. Record Scheme Investment Ledger Record
-                                                var bonusInv = new SchemeInvestment
-                                                {
-                                                    Id = Guid.NewGuid(),
-                                                    UserSchemeId = scheme.Id,
-                                                    UserId = scheme.UserId,
-                                                    TransactionType = "BONUS",
-                                                    InstallmentNumber = tier.EndDay, // Key identifier for milestone day
-                                                    AmountPaise = 0,
-                                                    BaseAmountPaise = 0,
-                                                    GstAmountPaise = 0,
-                                                    GoldWeightMg = bonusGoldMg,
-                                                    PricePerGmPaise = effectiveRate,
-                                                    BonusPercentage = tier.BonusPercentage,
-                                                    BonusAmountPaise = bonusAmountPaise,
-                                                    BonusGoldMg = bonusGoldMg,
-                                                    Status = "COMPLETED",
-                                                    CreatedAt = DateTime.UtcNow
-                                                };
-                                                await _schemeRepository.RecordSchemeInvestmentAsync(bonusInv);
-
-                                                // 3. Update User Scheme accumulated balance
-                                                scheme.AccumulatedGoldMg += bonusGoldMg;
-                                                scheme.UpdatedAt = DateTime.UtcNow;
-                                                await _schemeRepository.UpdateUserSchemeAsync(scheme);
-
-                                                // 4. Send User Notification
-                                                var user = await _authRepository.GetUserByIdAsync(scheme.UserId);
-                                                if (user != null)
-                                                {
-                                                    string metalName = isSilverScheme ? "silver" : "gold";
-                                                    string metalNameTitle = isSilverScheme ? "Silver" : "Gold";
-                                                    string bonusGrams = string.Format("{0:F4}g", bonusGoldMg / 1000.0);
-                                                    await _dispatcher.DispatchAsync(new NotificationPayload
-                                                    {
-                                                        UserId = scheme.UserId,
-                                                        ToPhone = user.PhoneNumber,
-                                                        ToEmail = user.Email,
-                                                        ToName = user.FullName,
-                                                        Title = $"Milestone {metalNameTitle} Bonus Credited! 🎁",
-                                                        Body = $"Congratulations! You've received a loyalty bonus of {bonusGrams} {metalName} for completing the {tier.EndDay}-day milestone under scheme '{scheme.PlanName}'!",
-                                                        Type = "INSTALLMENT_SUCCESS",
-                                                        SendPush = true,
-                                                        PushData = new Dictionary<string, string>
-                                                        {
-                                                            { "screen", "scheme_detail" },
-                                                            { "entityId", scheme.Id.ToString() }
-                                                        },
-                                                        SendSms = true,
-                                                        SmsText = $"Aishwaryam: Loyalty {metalName} bonus of {bonusGrams} credited for completing the {tier.EndDay}-day milestone!",
-                                                        SendEmail = false
-                                                    });
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error processing milestone bonuses for Scheme {SchemeId}", scheme.Id);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to run Milestone Loyalty Bonus Processing.");
-            }
+            // Milestone Loyalty Bonuses are disabled to avoid double crediting.
+            // Bonuses are calculated and credited immediately upon each individual purchase in GoldService.BuyGoldAsync.
+            _logger.LogInformation("Milestone Loyalty Bonus Processing is disabled (processed instantly on purchase).");
         }
 
         private string mgToGrams(long mg) => string.Format("{0:F4}g", mg / 1000.0);

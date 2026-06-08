@@ -165,6 +165,9 @@ namespace Aishwaryam.Tests.Services
             _kycComplianceServiceMock.Setup(c => c.ValidateRedemptionAsync(userId, 100000, "DELIVERY"))
                 .ReturnsAsync(new ComplianceCheckResult { IsAllowed = false, Message = "KYC incomplete for physical delivery" });
 
+            _goldServiceMock.Setup(s => s.GetCurrentPriceAsync())
+                .ReturnsAsync(new CurrentGoldPriceResponse { SellPricePaise = 700000 });
+
             // Act
             var resultObj = await _schemeService.RequestRedemptionAsync(userId, schemeId, "DELIVERY", "123 Main St");
             var json = System.Text.Json.JsonSerializer.Serialize(resultObj);
