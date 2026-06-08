@@ -1290,7 +1290,7 @@ export const Dashboard: React.FC = () => {
         {selectedTab === 2 && (
           <div className="dashboard-profile-container" style={{
             minHeight: 'calc(100vh - 64px)',
-            background: '#FFF9E6', // soft cream background at the top
+            background: 'white',
             display: 'flex',
             flexDirection: 'column',
             position: 'relative',
@@ -1304,9 +1304,7 @@ export const Dashboard: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '16px 20px',
-              background: '#FFF9E6',
-              position: 'sticky',
-              top: 0,
+              background: 'white',
               zIndex: 10
             }}>
               <button 
@@ -1344,7 +1342,7 @@ export const Dashboard: React.FC = () => {
               flexDirection: 'column',
               alignItems: 'center',
               padding: '10px 20px 24px 20px',
-              background: '#FFF9E6',
+              background: 'white',
             }}>
               {/* Circle Avatar Wrapper */}
               <div style={{
