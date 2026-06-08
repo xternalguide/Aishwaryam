@@ -4,7 +4,7 @@ import { SessionManager } from '../utils/SessionManager';
 import { ApiClient } from '../utils/ApiClient';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from '../utils/translation';
-import { ArrowLeft, Landmark, ShieldCheck, MapPin, PlusCircle } from 'lucide-react';
+import { ArrowLeft, Landmark, ShieldCheck, MapPin, PlusCircle, User } from 'lucide-react';
 
 const ProfileHeader: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack }) => (
   <div style={{
@@ -379,6 +379,155 @@ export const ProfileBankAccounts: React.FC = () => {
           {t('add_bank')}
         </button>
 
+      </div>
+    </div>
+  );
+};
+
+// ── PROFILE PERSONAL DETAILS PAGE ──────────────────────────────────────────
+export const ProfilePersonalDetails: React.FC = () => {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { profile, refreshData } = useApp();
+
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [nomineeName, setNomineeName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.fullName || '');
+      setEmail(profile.email || '');
+      setNomineeName(profile.nomineeName || SessionManager.getNomineeName() || '');
+      setPhone(profile.phoneNumber || '');
+    }
+  }, [profile]);
+
+  const handleBack = () => {
+    localStorage.setItem('DASHBOARD_ACTIVE_TAB', '2');
+    navigate('/dashboard');
+  };
+
+  const handleSave = async () => {
+    if (!fullName.trim()) {
+      alert("Name cannot be empty");
+      return;
+    }
+    if (!email.trim() || !email.includes('@')) {
+      alert("Please enter a valid email address");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const userId = SessionManager.getUserId();
+      if (userId) {
+        await ApiClient.put(`api/User/profile/${userId}`, {
+          fullName: fullName.trim(),
+          email: email.trim(),
+          nomineeName: nomineeName.trim() || null
+        });
+        
+        SessionManager.savePartialProfile(fullName.trim(), email.trim());
+        if (nomineeName.trim()) {
+          SessionManager.saveNomineeName(nomineeName.trim());
+        }
+        
+        await refreshData();
+        alert("Personal details updated successfully!");
+        handleBack();
+      }
+    } catch (err: any) {
+      alert(err.message || "Failed to update profile.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
+      <ProfileHeader title={t('personal_details')} onBack={handleBack} />
+      
+      <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', borderLeft: '4.5px solid var(--brand-accent)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+            <User size={22} color="var(--brand-accent)" />
+            <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>Edit Personal Details</h4>
+          </div>
+
+          <div>
+            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Full Name</label>
+            <input
+              type="text"
+              placeholder="Enter your full name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              style={{
+                width: '100%', height: '44px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)',
+                padding: '0 12px', fontSize: '14px', outline: 'none', marginTop: '6px'
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Email Address</label>
+            <input
+              type="email"
+              placeholder="e.g. name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{
+                width: '100%', height: '44px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)',
+                padding: '0 12px', fontSize: '14px', outline: 'none', marginTop: '6px'
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Phone Number</label>
+            <input
+              type="text"
+              value={phone ? `+91 ${phone}` : ''}
+              disabled
+              style={{
+                width: '100%', height: '44px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.05)',
+                padding: '0 12px', fontSize: '14px', outline: 'none', marginTop: '6px', background: '#F5F5F5', color: 'var(--text-muted)'
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Nominee Name</label>
+            <input
+              type="text"
+              placeholder="Enter Nominee Name"
+              value={nomineeName}
+              onChange={(e) => setNomineeName(e.target.value)}
+              style={{
+                width: '100%', height: '44px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)',
+                padding: '0 12px', fontSize: '14px', outline: 'none', marginTop: '6px'
+              }}
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={handleSave}
+          disabled={isSaving}
+          style={{
+            width: '100%', height: '52px', borderRadius: '14px', background: 'var(--gradient-brand)',
+            color: 'white', border: 'none', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer',
+            boxShadow: '0 8px 16px var(--brand-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}
+        >
+          {isSaving ? (
+            <div className="spinner" style={{ width: '20px', height: '20px', border: '2px solid white', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          ) : (
+            "Save Changes"
+          )}
+        </button>
       </div>
     </div>
   );

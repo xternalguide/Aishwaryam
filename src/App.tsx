@@ -17,7 +17,7 @@ import { PortfolioAnalytics } from './screens/PortfolioAnalytics';
 import { PaymentSuccess } from './screens/PaymentSuccess';
 import { PrivacyPolicy } from './screens/PrivacyPolicy';
 import { TermsConditions } from './screens/TermsConditions';
-import { ProfileAddress, ProfileKyc, ProfileBankAccounts } from './screens/ProfilePages';
+import { ProfileAddress, ProfileKyc, ProfileBankAccounts, ProfilePersonalDetails } from './screens/ProfilePages';
 import { ChangeMpin } from './screens/ChangeMpin';
 import { PriceCalculatorPage } from './screens/PriceCalculatorPage';
 import { CompletedSchemesPage } from './screens/CompletedSchemesPage';
@@ -211,6 +211,7 @@ const App: React.FC = () => {
             <Route path="/profile/address" element={<ProfileAddress />} />
             <Route path="/profile/kyc" element={<ProfileKyc />} />
             <Route path="/profile/bank-accounts" element={<ProfileBankAccounts />} />
+            <Route path="/profile/personal-details" element={<ProfilePersonalDetails />} />
             <Route path="/profile/price-calculator" element={<PriceCalculatorPage />} />
             <Route path="/profile/completed-schemes" element={<CompletedSchemesPage />} />
 

@@ -480,49 +480,268 @@ export const Dashboard: React.FC = () => {
       
       {/* ── TOP NAV BAR (Universal except splash/wel) ── */}
       <div style={{
-        background: 'white',
-        borderBottom: '1px solid #ECECEC',
+        background: selectedTab === 2 ? '#FFF9E6' : 'white',
+        borderBottom: selectedTab === 2 ? 'none' : '1px solid #ECECEC',
         paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))',
         paddingLeft: '20px',
         paddingRight: '20px',
-        paddingBottom: '16px',
+        paddingBottom: selectedTab === 2 ? '10px' : '16px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
-        zIndex: 10
+        boxShadow: selectedTab === 2 ? 'none' : '0 2px 4px rgba(0,0,0,0.02)',
+        zIndex: 10,
+        height: '68px',
+        boxSizing: 'border-box',
+        transition: 'all 0.4s ease-in-out'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Avatar circle */}
-          <div style={{
-            width: '36px', height: '36px', borderRadius: '50%', background: 'var(--brand-glow)',
-            color: 'var(--brand-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 'bold', fontSize: '15px'
-          }}>
-            {userName.slice(0, 1).toUpperCase()}
-          </div>
-          <div>
-            <h4 style={{ margin: 0, fontSize: '13px', fontWeight: 'bold' }}>{t('hello')}, {userName}</h4>
-            <span style={{ fontSize: '10px', color: 'var(--text-light)', display: 'block' }}>{t('verified_client')}</span>
-          </div>
+        {/* Left spacer / Back button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '200px', height: '36px' }}>
+          {selectedTab === 2 && (
+            <button
+              onClick={() => setSelectedTab(0)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--brand-deep)'
+              }}
+            >
+              <ChevronLeft size={24} />
+            </button>
+          )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button
-            onClick={() => {
-              setUnreadNotifCount(0);
-              navigate('/notifications');
-            }}
-            style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', position: 'relative', display: 'flex' }}
-          >
-            <Bell size={20} />
-            {unreadNotifCount > 0 && (
-              <span style={{
-                position: 'absolute', top: '-4px', right: '-4px', width: '8px', height: '8px',
-                background: 'var(--error-red)', borderRadius: '50%'
-              }} />
-            )}
-          </button>
+        {/* Center title (visible only on Profile Tab) */}
+        {selectedTab === 2 && (
+          <h2 style={{
+            fontSize: '18px',
+            fontWeight: 'bold',
+            color: 'var(--brand-deep)',
+            margin: 0,
+            fontFamily: 'var(--font-poppins)',
+            textAlign: 'center',
+            flex: 1
+          }}>
+            {t('my_profile')}
+          </h2>
+        )}
+
+        {/* Right item */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', width: '200px', height: '36px' }}>
+          {selectedTab !== 2 && (
+            <button
+              onClick={() => {
+                setUnreadNotifCount(0);
+                navigate('/notifications');
+              }}
+              style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', position: 'relative', display: 'flex' }}
+            >
+              <Bell size={20} />
+              {unreadNotifCount > 0 && (
+                <span style={{
+                  position: 'absolute', top: '-4px', right: '-4px', width: '8px', height: '8px',
+                  background: 'var(--error-red)', borderRadius: '50%'
+                }} />
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ── SHARED PROFILE ANIMATING OVERLAY ── */}
+      {/* Floating Avatar */}
+      <div 
+        style={{
+          position: 'absolute',
+          top: selectedTab === 2 
+            ? 'calc(130px + env(safe-area-inset-top, 0px))' 
+            : 'calc(16px + env(safe-area-inset-top, 0px))',
+          left: selectedTab === 2 ? '50%' : '20px',
+          width: selectedTab === 2 ? '90px' : '36px',
+          height: selectedTab === 2 ? '90px' : '36px',
+          transform: selectedTab === 2 ? 'translateX(-50%)' : 'none',
+          borderRadius: '50%',
+          overflow: 'hidden',
+          background: selectedTab === 2 ? '#ECEFF1' : 'var(--brand-glow)',
+          border: selectedTab === 2 ? '3px solid white' : 'none',
+          boxShadow: selectedTab === 2 ? '0 4px 10px rgba(0,0,0,0.06)' : 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+          zIndex: 15,
+          cursor: 'pointer'
+        }}
+      >
+        {/* Text Avatar (Initials) */}
+        <span style={{
+          position: 'absolute',
+          fontSize: selectedTab === 2 ? '36px' : '15px',
+          fontWeight: 'bold',
+          color: 'var(--brand-dark)',
+          opacity: selectedTab === 2 ? 0 : 1,
+          transition: 'all 0.4s ease-in-out'
+        }}>
+          {userName ? userName.slice(0, 1).toUpperCase() : ''}
+        </span>
+
+        {/* Cute SVG Avatar */}
+        <div style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          opacity: selectedTab === 2 ? 1 : 0,
+          transition: 'all 0.4s ease-in-out',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <svg viewBox="0 0 100 100" width="100%" height="100%">
+            <circle cx="50" cy="50" r="48" fill="#E8EAF6" />
+            <path d="M25,50 C25,30 35,22 50,22 C65,22 75,30 75,50 C75,55 70,55 70,50 C70,35 62,30 50,30 C38,30 30,35 30,50 C30,55 25,55 25,50 Z" fill="#6D4C41" />
+            <circle cx="32" cy="52" r="5" fill="#FFCC80" />
+            <circle cx="68" cy="52" r="5" fill="#FFCC80" />
+            <circle cx="50" cy="50" r="18" fill="#FFE0B2" />
+            <path d="M32,45 C35,32 45,34 50,38 C55,34 65,32 68,45 C62,38 55,40 50,42 C45,40 38,38 32,45 Z" fill="#5D4037" />
+            <path d="M32,40 C35,28 65,28 68,40" fill="none" stroke="#5D4037" strokeWidth="4" strokeLinecap="round" />
+            <circle cx="44" cy="48" r="1.5" fill="#212121" />
+            <circle cx="56" cy="48" r="1.5" fill="#212121" />
+            <rect x="38" y="44" width="12" height="8" rx="3" fill="none" stroke="#37474F" strokeWidth="1.5" />
+            <rect x="50" y="44" width="12" height="8" rx="3" fill="none" stroke="#37474F" strokeWidth="1.5" />
+            <line x1="48" y1="47" x2="52" y2="47" stroke="#37474F" strokeWidth="1.5" />
+            <path d="M47,54 Q50,56 53,54" fill="none" stroke="#E53935" strokeWidth="1" strokeLinecap="round" />
+            <rect x="47" y="59" width="6" height="8" fill="#FFE0B2" />
+            <path d="M30,85 L70,85 L65,65 C60,61 40,61 35,65 Z" fill="#1565C0" />
+            <path d="M43,62 L50,72 L57,62 Z" fill="#FFFFFF" />
+            <path d="M36,65 L44,78 L50,85 L56,78 L64,65 Z" fill="#0D47A1" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Floating Edit pencil button overlay */}
+      <button 
+        onClick={() => {
+          const newName = prompt("Enter new full name:", userName);
+          if (newName && newName.trim()) {
+            setUserName(newName.trim());
+            const userId = SessionManager.getUserId();
+            if (userId) {
+              ApiClient.put(`api/User/profile/${userId}`, { fullName: newName.trim() });
+            }
+          }
+        }}
+        style={{
+          position: 'absolute',
+          top: selectedTab === 2 
+            ? 'calc(192px + env(safe-area-inset-top, 0px))' 
+            : 'calc(16px + env(safe-area-inset-top, 0px))',
+          left: selectedTab === 2 ? 'calc(50% + 30px)' : '20px',
+          width: '28px',
+          height: '28px',
+          borderRadius: '50%',
+          background: 'white',
+          border: '1.5px solid rgba(0,0,0,0.08)',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          padding: 0,
+          opacity: selectedTab === 2 ? 1 : 0,
+          pointerEvents: selectedTab === 2 ? 'auto' : 'none',
+          transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+          zIndex: 16
+        }}
+      >
+        <Pencil size={12} color="var(--text-secondary)" />
+      </button>
+
+      {/* Floating Text Block */}
+      <div 
+        style={{
+          position: 'absolute',
+          top: selectedTab === 2 
+            ? 'calc(236px + env(safe-area-inset-top, 0px))' 
+            : 'calc(16px + env(safe-area-inset-top, 0px))',
+          left: selectedTab === 2 ? '50%' : '66px',
+          transform: selectedTab === 2 ? 'translateX(-50%)' : 'none',
+          width: selectedTab === 2 ? '300px' : '180px',
+          height: '40px',
+          transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+          zIndex: 15,
+          pointerEvents: 'none'
+        }}
+      >
+        {/* Title/Hello */}
+        <div style={{ position: 'relative', height: '22px', width: '100%' }}>
+          <h4 style={{
+            position: 'absolute',
+            left: selectedTab === 2 ? '50%' : '0',
+            transform: selectedTab === 2 ? 'translateX(-50%)' : 'none',
+            opacity: selectedTab === 2 ? 0 : 1,
+            transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+            margin: 0,
+            fontSize: '13px',
+            fontWeight: 'bold',
+            whiteSpace: 'nowrap',
+            color: 'var(--text-primary)',
+            textAlign: selectedTab === 2 ? 'center' : 'left'
+          }}>
+            {t('hello')}, {userName}
+          </h4>
+          <h3 style={{
+            position: 'absolute',
+            left: selectedTab === 2 ? '50%' : '0',
+            transform: selectedTab === 2 ? 'translateX(-50%)' : 'none',
+            opacity: selectedTab === 2 ? 1 : 0,
+            transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+            margin: 0,
+            fontSize: '18px',
+            fontWeight: '800',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            color: 'var(--brand-deep)',
+            whiteSpace: 'nowrap',
+            textAlign: selectedTab === 2 ? 'center' : 'left'
+          }}>
+            {userName}
+          </h3>
+        </div>
+
+        {/* Subtitle/Email */}
+        <div style={{ position: 'relative', height: '18px', width: '100%', marginTop: selectedTab === 2 ? '2px' : '0px' }}>
+          <span style={{
+            position: 'absolute',
+            left: selectedTab === 2 ? '50%' : '0',
+            transform: selectedTab === 2 ? 'translateX(-50%)' : 'none',
+            opacity: selectedTab === 2 ? 0 : 1,
+            transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+            fontSize: '10px',
+            color: 'var(--text-light)',
+            whiteSpace: 'nowrap',
+            textAlign: selectedTab === 2 ? 'center' : 'left'
+          }}>
+            {t('verified_client')}
+          </span>
+          <span style={{
+            position: 'absolute',
+            left: selectedTab === 2 ? '50%' : '0',
+            transform: selectedTab === 2 ? 'translateX(-50%)' : 'none',
+            opacity: selectedTab === 2 ? 1 : 0,
+            transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+            fontSize: '13px',
+            color: 'var(--text-muted)',
+            whiteSpace: 'nowrap',
+            fontWeight: '500',
+            textAlign: selectedTab === 2 ? 'center' : 'left'
+          }}>
+            {profile?.email || 'srivenkatesh118@gmail.com'}
+          </span>
         </div>
       </div>
 
@@ -1298,145 +1517,11 @@ export const Dashboard: React.FC = () => {
             maxWidth: '100%',
             padding: 0
           }}>
-            {/* HEADER BAR */}
+            {/* AVATAR & USER DETAILS SECTION SPACER */}
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '16px 20px',
+              height: '180px',
               background: '#FFF9E6',
-              position: 'sticky',
-              top: 0,
-              zIndex: 10
-            }}>
-              <button 
-                onClick={() => setSelectedTab(0)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--brand-deep)'
-                }}
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <h2 style={{
-                fontSize: '18px',
-                fontWeight: 'bold',
-                color: 'var(--brand-deep)',
-                margin: 0,
-                fontFamily: 'var(--font-poppins)',
-                textAlign: 'center',
-                flex: 1,
-                marginRight: '40px' // offset the back arrow to center the text
-              }}>
-                {t('my_profile')}
-              </h2>
-            </div>
-
-            {/* AVATAR & USER DETAILS SECTION */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              padding: '10px 20px 24px 20px',
-              background: '#FFF9E6',
-            }}>
-              {/* Circle Avatar Wrapper */}
-              <div style={{
-                position: 'relative',
-                width: '90px',
-                height: '90px',
-                marginBottom: '16px'
-              }}>
-                <div style={{
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: '50%',
-                  overflow: 'hidden',
-                  background: '#ECEFF1',
-                  border: '3px solid white',
-                  boxShadow: '0 4px 10px rgba(0,0,0,0.06)'
-                }}>
-                  {/* Custom SVG Cute Avatar */}
-                  <svg viewBox="0 0 100 100" width="100%" height="100%">
-                    <circle cx="50" cy="50" r="48" fill="#E8EAF6" />
-                    <path d="M25,50 C25,30 35,22 50,22 C65,22 75,30 75,50 C75,55 70,55 70,50 C70,35 62,30 50,30 C38,30 30,35 30,50 C30,55 25,55 25,50 Z" fill="#6D4C41" />
-                    <circle cx="32" cy="52" r="5" fill="#FFCC80" />
-                    <circle cx="68" cy="52" r="5" fill="#FFCC80" />
-                    <circle cx="50" cy="50" r="18" fill="#FFE0B2" />
-                    <path d="M32,45 C35,32 45,34 50,38 C55,34 65,32 68,45 C62,38 55,40 50,42 C45,40 38,38 32,45 Z" fill="#5D4037" />
-                    <path d="M32,40 C35,28 65,28 68,40" fill="none" stroke="#5D4037" strokeWidth="4" strokeLinecap="round" />
-                    <circle cx="44" cy="48" r="1.5" fill="#212121" />
-                    <circle cx="56" cy="48" r="1.5" fill="#212121" />
-                    <rect x="38" y="44" width="12" height="8" rx="3" fill="none" stroke="#37474F" strokeWidth="1.5" />
-                    <rect x="50" y="44" width="12" height="8" rx="3" fill="none" stroke="#37474F" strokeWidth="1.5" />
-                    <line x1="48" y1="47" x2="52" y2="47" stroke="#37474F" strokeWidth="1.5" />
-                    <path d="M47,54 Q50,56 53,54" fill="none" stroke="#E53935" strokeWidth="1" strokeLinecap="round" />
-                    <rect x="47" y="59" width="6" height="8" fill="#FFE0B2" />
-                    <path d="M30,85 L70,85 L65,65 C60,61 40,61 35,65 Z" fill="#1565C0" />
-                    <path d="M43,62 L50,72 L57,62 Z" fill="#FFFFFF" />
-                    <path d="M36,65 L44,78 L50,85 L56,78 L64,65 Z" fill="#0D47A1" />
-                  </svg>
-                </div>
-                {/* Floating Edit Icon Overlay */}
-                <button 
-                  onClick={() => {
-                    const newName = prompt("Enter new full name:", userName);
-                    if (newName && newName.trim()) {
-                      setUserName(newName.trim());
-                      const userId = SessionManager.getUserId();
-                      if (userId) {
-                        ApiClient.put(`api/User/profile/${userId}`, { fullName: newName.trim() });
-                      }
-                    }
-                  }}
-                  style={{
-                    position: 'absolute',
-                    bottom: '0px',
-                    right: '0px',
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '50%',
-                    background: 'white',
-                    border: '1.5px solid rgba(0,0,0,0.08)',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    padding: 0
-                  }}
-                >
-                  <Pencil size={12} color="var(--text-secondary)" />
-                </button>
-              </div>
-
-              {/* Name and Email */}
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '800',
-                color: 'var(--brand-deep)',
-                margin: '0 0 4px 0',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                fontFamily: 'var(--font-poppins)'
-              }}>
-                {userName}
-              </h3>
-              <span style={{
-                fontSize: '13px',
-                color: 'var(--text-muted)',
-                fontFamily: 'var(--font-poppins)',
-                fontWeight: '500'
-              }}>
-                {profile?.email || 'srivenkatesh118@gmail.com'}
-              </span>
-            </div>
+            }} />
 
             {/* LOWER MENU CARDS CONTAINER (White Background Overlay) */}
             <div style={{
@@ -1540,6 +1625,42 @@ export const Dashboard: React.FC = () => {
                 }}>
                   {t('general_settings')}
                 </h4>
+
+                {/* Card 4.5: Personal Details */}
+                <div 
+                  onClick={() => navigate('/profile/personal-details')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    background: 'white',
+                    borderRadius: '16px',
+                    padding: '16px 20px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                    border: '1px solid rgba(74, 14, 78, 0.04)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '12px',
+                      background: '#EAE5FF',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'var(--brand-mid)'
+                    }}>
+                      <User size={20} />
+                    </div>
+                    <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+                      {t('personal_details')}
+                    </span>
+                  </div>
+                  <ChevronRight size={18} color="var(--text-light)" />
+                </div>
 
                 {/* Card 5: Address */}
                 <div 
