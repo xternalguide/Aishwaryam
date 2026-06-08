@@ -240,7 +240,7 @@ const App: React.FC = () => {
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-conditions" element={<TermsConditions />} />
             <Route path="/gold_rate_alerts" element={<GoldRateAlerts />} />
-            <Route path="/my_bonuses" element={<MyBonuses />} />
+            <Route path="/my-bonuses" element={<MyBonuses />} />
             <Route path="/notifications" element={<Notifications />} />
 
             {/* Fallback route */}

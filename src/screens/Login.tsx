@@ -275,6 +275,8 @@ export const Login: React.FC = () => {
                 </span>
                 <input
                   type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   placeholder="10 digit mobile number"
                   value={phone}
                   onChange={(e) => {

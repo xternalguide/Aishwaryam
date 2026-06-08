@@ -105,6 +105,42 @@ export const Onboarding: React.FC = () => {
   // --- Step 2 State Variables ---
   const [fetchedPanName, setFetchedPanName] = useState('');
   const [showKycPendingModal, setShowKycPendingModal] = useState(false);
+  const [panNumber, setPanNumber] = useState('');
+  const [panError, setPanError] = useState<string | null>(null);
+  const [aadhaarNumber, setAadhaarNumber] = useState('');
+  const [aadhaarError, setAadhaarError] = useState<string | null>(null);
+
+  const handlePanNumberChange = (val: string) => {
+    const uppercaseVal = val.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+    
+    // Check character position rules
+    let isValidChar = true;
+    for (let i = 0; i < uppercaseVal.length; i++) {
+      const char = uppercaseVal[i];
+      if (i < 5 && !/[A-Z]/.test(char)) isValidChar = false;
+      if (i >= 5 && i < 9 && !/[0-9]/.test(char)) isValidChar = false;
+      if (i === 9 && !/[A-Z]/.test(char)) isValidChar = false;
+    }
+
+    if (isValidChar || uppercaseVal === '') {
+      setPanNumber(uppercaseVal);
+      if (uppercaseVal.length === 10) {
+        setPanError(null);
+      } else {
+        setPanError('PAN must be exactly 10 characters (e.g. ABCDE1234F)');
+      }
+    } else {
+      // Show position-specific errors
+      const index = uppercaseVal.length - 1;
+      if (index < 5) {
+        setPanError(`Character at position ${index + 1} must be an alphabet (A-Z)`);
+      } else if (index >= 5 && index < 9) {
+        setPanError(`Character at position ${index + 1} must be a number (0-9)`);
+      } else if (index === 9) {
+        setPanError(`Character at position 10 must be an alphabet (A-Z)`);
+      }
+    }
+  };
 
   // Sync KYC name & Bank account holder name defaults from Profile Name
   useEffect(() => {
@@ -331,21 +367,21 @@ export const Onboarding: React.FC = () => {
         await ApiClient.post('api/Kyc/submit', {
           userId,
           documentType: 'PAN',
-          documentNumber: 'PAN_UPLOADED',
+          documentNumber: panNumber,
           documentUrl: panImage || 'https://placeholder.url/pan.jpg'
         });
         // Submit Aadhaar Front
         await ApiClient.post('api/Kyc/submit', {
           userId,
           documentType: 'AADHAAR_FRONT',
-          documentNumber: 'AADHAAR_FRONT_UPLOADED',
+          documentNumber: aadhaarNumber,
           documentUrl: aadhaarFrontImage || 'https://placeholder.url/aadhaar-front.jpg'
         });
         // Submit Aadhaar Back
         await ApiClient.post('api/Kyc/submit', {
           userId,
           documentType: 'AADHAAR_BACK',
-          documentNumber: 'AADHAAR_BACK_UPLOADED',
+          documentNumber: aadhaarNumber,
           documentUrl: aadhaarBackImage || 'https://placeholder.url/aadhaar-back.jpg'
         });
         // Update user KYC level to PENDING
@@ -682,6 +718,8 @@ export const Onboarding: React.FC = () => {
                   <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Pincode <span style={{ color: 'var(--error-red)' }}>*</span></label>
                   <input
                     type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     placeholder="Enter 6-digit Pincode"
                     value={pincode}
                     onChange={(e) => handlePincodeChange(e.target.value)}
@@ -814,6 +852,34 @@ export const Onboarding: React.FC = () => {
               <div className="glass-card" style={{ borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>PAN Verification</h3>
 
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>PAN Card Number <span style={{ color: 'var(--error-red)' }}>*</span></label>
+                  <input
+                    type="text"
+                    placeholder="Enter 10-digit PAN (e.g. ABCDE1234F)"
+                    value={panNumber}
+                    onChange={(e) => handlePanNumberChange(e.target.value)}
+                    maxLength={10}
+                    style={{
+                      width: '100%',
+                      height: '44px',
+                      borderRadius: '8px',
+                      border: panError ? '1px solid var(--error-red)' : '1px solid rgba(0,0,0,0.1)',
+                      padding: '0 12px',
+                      fontSize: '14px',
+                      outline: 'none',
+                      marginTop: '6px',
+                      background: 'white',
+                      fontFamily: 'var(--font-poppins)',
+                      textTransform: 'uppercase'
+                    }}
+                  />
+                  {panError && (
+                    <span style={{ fontSize: '11px', color: 'var(--error-red)', marginTop: '4px', display: 'block', fontWeight: '500' }}>
+                      {panError}
+                    </span>
+                  )}
+                </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
                   <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Upload PAN Card Photo <span style={{ color: 'var(--error-red)' }}>*</span></span>
@@ -853,6 +919,43 @@ export const Onboarding: React.FC = () => {
               <div className="glass-card" style={{ borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>Identity Verification (Aadhaar)</h3>
 
+                <div>
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Aadhaar Card Number <span style={{ color: 'var(--error-red)' }}>*</span></label>
+                  <input
+                    type="text"
+                    pattern="[0-9]*"
+                    inputMode="numeric"
+                    placeholder="Enter 12-digit Aadhaar Number"
+                    value={aadhaarNumber}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 12);
+                      setAadhaarNumber(val);
+                      if (val.length === 12) {
+                        setAadhaarError(null);
+                      } else {
+                        setAadhaarError('Aadhaar number must be exactly 12 digits');
+                      }
+                    }}
+                    maxLength={12}
+                    style={{
+                      width: '100%',
+                      height: '44px',
+                      borderRadius: '8px',
+                      border: aadhaarError ? '1px solid var(--error-red)' : '1px solid rgba(0,0,0,0.1)',
+                      padding: '0 12px',
+                      fontSize: '14px',
+                      outline: 'none',
+                      marginTop: '6px',
+                      background: 'white',
+                      fontFamily: 'var(--font-poppins)'
+                    }}
+                  />
+                  {aadhaarError && (
+                    <span style={{ fontSize: '11px', color: 'var(--error-red)', marginTop: '4px', display: 'block', fontWeight: '500' }}>
+                      {aadhaarError}
+                    </span>
+                  )}
+                </div>
 
                 <div style={{ display: 'flex', gap: '12px', marginTop: '4px' }}>
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -1123,7 +1226,9 @@ export const Onboarding: React.FC = () => {
                 weddingDateError !== null ||
                 (currentStep === 1 && !isStep1Valid()) ||
                 (currentStep === 2 && (
-                  !panImage || !aadhaarFrontImage || !aadhaarBackImage
+                  !panImage || !aadhaarFrontImage || !aadhaarBackImage ||
+                  panNumber.length !== 10 || panError !== null ||
+                  aadhaarNumber.length !== 12 || aadhaarError !== null
                 )) ||
                 (currentStep === 3 &&
                   (!accountName ||
@@ -1153,7 +1258,9 @@ export const Onboarding: React.FC = () => {
                   weddingDateError !== null ||
                   (currentStep === 1 && !isStep1Valid()) ||
                   (currentStep === 2 && (
-                    !panImage || !aadhaarFrontImage || !aadhaarBackImage
+                    !panImage || !aadhaarFrontImage || !aadhaarBackImage ||
+                    panNumber.length !== 10 || panError !== null ||
+                    aadhaarNumber.length !== 12 || aadhaarError !== null
                   )) ||
                   (currentStep === 3 &&
                     (!accountName ||

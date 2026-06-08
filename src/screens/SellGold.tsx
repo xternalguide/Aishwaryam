@@ -245,6 +245,8 @@ export const SellGold: React.FC = () => {
             <div style={{ position: 'relative', marginTop: '4px' }}>
               <input
                 type="text"
+                inputMode="decimal"
+                pattern="[0-9]*\.?[0-9]*"
                 placeholder="Enter Weight"
                 value={weightInput}
                 onChange={(e) => onWeightChanged(e.target.value)}
@@ -273,6 +275,8 @@ export const SellGold: React.FC = () => {
               <span style={{ position: 'absolute', left: '16px', top: '14px', fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)' }}>₹</span>
               <input
                 type="text"
+                inputMode="decimal"
+                pattern="[0-9]*\.?[0-9]*"
                 placeholder="Enter Amount"
                 value={amountInput}
                 onChange={(e) => onAmountChanged(e.target.value)}

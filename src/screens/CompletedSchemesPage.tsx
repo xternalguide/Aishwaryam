@@ -14,7 +14,11 @@ export const CompletedSchemesPage: React.FC = () => {
     navigate('/dashboard');
   };
 
-  const completed = activeSchemes?.filter(s => s.status === 'MATURED' || s.status === 'COMPLETED') || [];
+  const completed = activeSchemes?.filter(s => 
+    s.status?.toLowerCase() === 'matured' || 
+    s.status?.toLowerCase() === 'claimed' || 
+    s.status?.toLowerCase() === 'completed'
+  ) || [];
 
   const formatRupees = (paise: number) => {
     const rupees = paise / 100;
@@ -74,7 +78,7 @@ export const CompletedSchemesPage: React.FC = () => {
             <div>
               <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>No Completed Schemes Yet</h4>
               <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0, lineHeight: '18px' }}>
-                Keep making your monthly chit installments to complete a scheme and claim your loyalty gold bonus!
+                Keep saving to complete a scheme and claim your loyalty gold bonus!
               </p>
             </div>
             <button
@@ -132,16 +136,41 @@ export const CompletedSchemesPage: React.FC = () => {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => navigate(`/scheme-redemption/${sch.schemeId}`)}
-                  style={{
-                    width: '100%', height: '42px', borderRadius: '10px',
-                    background: 'var(--gradient-brand)', color: 'white', border: 'none',
-                    fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', marginTop: '6px'
-                  }}
-                >
-                  Proceed to Redeem Metal
-                </button>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                  <button
+                    onClick={() => navigate(`/scheme-detail/${sch.schemeId}`)}
+                    style={{
+                      flex: 1, height: '42px', borderRadius: '10px',
+                      background: 'var(--brand-dark)', color: 'white', border: 'none',
+                      fontWeight: 'bold', fontSize: '12px', cursor: 'pointer'
+                    }}
+                  >
+                    View History
+                  </button>
+                  {sch.status?.toLowerCase() !== 'claimed' ? (
+                    <button
+                      onClick={() => navigate(`/scheme-redemption/${sch.schemeId}`)}
+                      style={{
+                        flex: 1, height: '42px', borderRadius: '10px',
+                        background: 'var(--gradient-gold)', color: '#1A1200', border: 'none',
+                        fontWeight: 'bold', fontSize: '12px', cursor: 'pointer'
+                      }}
+                    >
+                      Redeem Plan
+                    </button>
+                  ) : (
+                    <button
+                      disabled
+                      style={{
+                        flex: 1, height: '42px', borderRadius: '10px',
+                        background: '#ECECEC', color: 'var(--text-muted)', border: 'none',
+                        fontWeight: 'bold', fontSize: '12px', cursor: 'default'
+                      }}
+                    >
+                      Redeemed
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>

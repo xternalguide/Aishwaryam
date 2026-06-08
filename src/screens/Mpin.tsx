@@ -632,6 +632,23 @@ export const Mpin: React.FC = () => {
               </button>
             </div>
           )}
+
+          {/* Security Notice */}
+          <div style={{
+            background: 'rgba(74, 14, 78, 0.04)',
+            border: '1px solid rgba(74, 14, 78, 0.1)',
+            borderRadius: '12px',
+            padding: '12px 16px',
+            fontSize: '11px',
+            color: 'var(--brand-deep)',
+            lineHeight: '16px',
+            textAlign: 'center',
+            marginTop: '20px',
+            width: '100%',
+            boxSizing: 'border-box'
+          }}>
+            🔐 <strong>For your security:</strong> Do not share your PIN with anyone. Aishwaryam @ Your Home will never ask for your PIN.
+          </div>
         </div>
       </div>
 

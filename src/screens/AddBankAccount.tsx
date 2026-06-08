@@ -224,6 +224,8 @@ export const AddBankAccount: React.FC = () => {
             <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Account Number</label>
             <input
               type="password"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="Enter Account Number"
               value={accountNumber}
               onChange={(e) => handleAccountNumberChange(e.target.value)}
@@ -250,6 +252,8 @@ export const AddBankAccount: React.FC = () => {
             <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Confirm Account Number</label>
             <input
               type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="Re-enter Account Number"
               value={confirmAccountNumber}
               onChange={(e) => setConfirmAccountNumber(e.target.value.replace(/\D/g, ''))}

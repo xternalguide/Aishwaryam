@@ -4,7 +4,7 @@ import { SessionManager } from '../utils/SessionManager';
 import { ApiClient } from '../utils/ApiClient';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from '../utils/translation';
-import { ArrowLeft, ShieldAlert, Award, X, Calculator } from 'lucide-react';
+import { ArrowLeft, ShieldAlert, Award, X, Calculator, CheckCircle2 } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { Checkout } from 'capacitor-razorpay';
 
@@ -42,17 +42,35 @@ export const SchemeDetail: React.FC = () => {
 
   // Active chit progress states
   const [installmentsPaid, setInstallmentsPaid] = useState(0);
-  const [schemeDayNumber, setSchemeDayNumber] = useState(0);
-  const [nextDueDate, setNextDueDate] = useState('');
   const [accumulatedGoldMg, setAccumulatedGoldMg] = useState(0);
   const [totalSavingsAddedPaise, setTotalSavingsAddedPaise] = useState(0);
   const [totalBonusEarnedPaise, setTotalBonusEarnedPaise] = useState(0);
   const [totalBonusGoldMg, setTotalBonusGoldMg] = useState(0);
   const [milestones, setMilestones] = useState<MilestoneItem[]>([]);
   const [autoPayEnabled, setAutoPayEnabled] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [remainingDaysForScheme, setRemainingDaysForScheme] = useState(0);
+  const [ledger, setLedger] = useState<any[]>([]);
+  const [joinedAt, setJoinedAt] = useState<string>('');
+  const [maturityDate, setMaturityDate] = useState<string>('');
+  const [schemeStatus, setSchemeStatus] = useState<string>('');
 
   // UI Interactive States
   const [openTabs, setOpenTabs] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    if (userSchemeId) {
+      ApiClient.get(`api/Scheme/${userSchemeId}/ledger`)
+        .then(res => {
+          if (res.data) {
+            setLedger(res.data);
+          }
+        })
+        .catch(err => console.error('Error fetching scheme ledger:', err));
+    } else {
+      setLedger([]);
+    }
+  }, [userSchemeId]);
 
   // General configuration/metadata
   const [kycLevel, setKycLevel] = useState('BASIC');
@@ -162,13 +180,15 @@ export const SchemeDetail: React.FC = () => {
       setIsActive(true);
       setUserSchemeId(userActiveScheme.schemeId);
       setInstallmentsPaid(userActiveScheme.installmentsPaid);
-      setSchemeDayNumber(userActiveScheme.schemeDayNumber);
-      setNextDueDate(userActiveScheme.nextDueDate || '');
       setAccumulatedGoldMg(userActiveScheme.accumulatedGoldMg || 0);
       setTotalSavingsAddedPaise(userActiveScheme.totalSavingsAddedPaise || 0);
       setTotalBonusEarnedPaise(userActiveScheme.totalBonusEarnedPaise || 0);
       setTotalBonusGoldMg(userActiveScheme.totalBonusGoldMg || 0);
       setAutoPayEnabled(userActiveScheme.autoPayEnabled || false);
+      setRemainingDaysForScheme(userActiveScheme.remainingDaysForScheme || 0);
+      setJoinedAt(userActiveScheme.joinedAt || userActiveScheme.JoinedAt || '');
+      setMaturityDate(userActiveScheme.maturityDate || userActiveScheme.MaturityDate || '');
+      setSchemeStatus(userActiveScheme.status || userActiveScheme.Status || '');
 
       // Setup milestones
       setMilestones(parseMilestones(
@@ -396,23 +416,35 @@ export const SchemeDetail: React.FC = () => {
     }
   };
 
-  const handlePayInstallment = async () => {
-    if (!scheme) return;
-    const goldPrice22K = livePrice?.price22KPaise || 701000;
-    const fallbackGrams = (scheme.installmentAmountPaise / 1.03) / goldPrice22K;
-    launchRazorpayCheckout(scheme.installmentAmountPaise, false, fallbackGrams, userSchemeId);
-  };
-
   const handleJoinScheme = async () => {
+    if (!scheme) return;
     if (kycLevel === 'BASIC') {
       alert(t('kyc_required_desc'));
       navigate('/onboarding');
       return;
     }
-    setJoinAmount(scheme ? (scheme.installmentAmountPaise / 100).toString() : '100');
-    setJoinType('RUPEES');
-    setValidationError(null);
-    setShowJoinSheet(true);
+    setIsProcessing(true);
+    try {
+      const userId = SessionManager.getUserId() || 'user-id-999';
+      const joinRes = await ApiClient.post('api/Scheme/join', {
+        userId,
+        schemeMasterId: scheme.id
+      });
+
+      if (joinRes.data && (joinRes.data.success || joinRes.data.Success)) {
+        const newSchemeId = joinRes.data.schemeId || joinRes.data.SchemeId;
+        setUserSchemeId(newSchemeId);
+        await refreshData();
+        // Show success popup with options
+        setShowSuccessPopup(true);
+      } else {
+        alert(joinRes.data?.message || 'Failed to join scheme.');
+      }
+    } catch (err: any) {
+      alert('Failed to join scheme: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handlePayJoinPlan = async () => {
@@ -442,22 +474,28 @@ export const SchemeDetail: React.FC = () => {
     try {
       const userId = SessionManager.getUserId() || 'user-id-999';
 
-      // 1. Enroll user in the scheme first
-      const joinRes = await ApiClient.post('api/Scheme/join', {
-        userId,
-        schemeMasterId: scheme.id
-      });
-
-      if (joinRes.data && (joinRes.data.success || joinRes.data.Success)) {
-        const newSchemeId = joinRes.data.schemeId || joinRes.data.SchemeId;
-        // 2. Launch Razorpay with this new userSchemeId
-        await launchRazorpayCheckout(amountPaise, true, fallbackGrams, newSchemeId);
+      if (userSchemeId) {
+        // Already enrolled! Just pay directly
+        await launchRazorpayCheckout(amountPaise, false, fallbackGrams, userSchemeId);
       } else {
-        alert(joinRes.data?.message || 'Failed to join scheme.');
-        setIsProcessing(false);
+        // Fallback: enroll and pay
+        const joinRes = await ApiClient.post('api/Scheme/join', {
+          userId,
+          schemeMasterId: scheme.id
+        });
+
+        if (joinRes.data && (joinRes.data.success || joinRes.data.Success)) {
+          const newSchemeId = joinRes.data.schemeId || joinRes.data.SchemeId;
+          setUserSchemeId(newSchemeId);
+          setIsActive(true);
+          await launchRazorpayCheckout(amountPaise, true, fallbackGrams, newSchemeId);
+        } else {
+          alert(joinRes.data?.message || 'Failed to join scheme.');
+          setIsProcessing(false);
+        }
       }
     } catch (err: any) {
-      alert('Failed to join scheme: ' + (err.response?.data?.message || err.message));
+      alert('Failed to process payment: ' + (err.response?.data?.message || err.message));
       setIsProcessing(false);
     }
   };
@@ -740,6 +778,25 @@ export const SchemeDetail: React.FC = () => {
     joinAmountRupees = (baseMetalVal * 1.03) / 100;
   }
   const isJoinAmountValid = parsedJoinVal > 0 && joinAmountRupees >= 100;
+
+  // Helper to calculate days-based progress
+  const getDaysProgress = () => {
+    if (!joinedAt || !maturityDate) return { totalDays: 75, elapsedDays: 0, progressPct: 0 };
+    const start = new Date(joinedAt).getTime();
+    const end = new Date(maturityDate).getTime();
+    const totalMs = end - start;
+    if (totalMs <= 0) return { totalDays: 75, elapsedDays: 75, progressPct: 100 };
+    const totalDays = Math.ceil(totalMs / (1000 * 60 * 60 * 24));
+    const elapsedDays = Math.max(0, totalDays - remainingDaysForScheme);
+    const progressPct = Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100));
+    return {
+      totalDays,
+      elapsedDays,
+      progressPct
+    };
+  };
+
+  const { progressPct } = getDaysProgress();
  
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
@@ -792,32 +849,34 @@ export const SchemeDetail: React.FC = () => {
         {/* Dynamic Section: Renders details if Joined */}
         {isActive ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* Progress Card */}
+            {/* Days-Based Progress Card */}
             <div className="glass-card" style={{ borderRadius: '16px', padding: '20px', background: 'white', display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>{t('installments_paid')}</span>
+                <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
+                  Scheme Duration Progress / திட்ட சேமிப்பு காலம்
+                </span>
                 <span style={{ fontSize: '14px', fontWeight: '900', color: 'var(--brand-accent)' }}>
-                  {installmentsPaid} / {scheme.totalInstallments}
+                  {remainingDaysForScheme} {remainingDaysForScheme === 1 ? 'day' : 'days'} remaining / {remainingDaysForScheme} நாட்கள் மீதமுள்ளன
                 </span>
               </div>
- 
+  
               {/* Progress Line */}
               <div style={{ width: '100%', height: '8px', background: '#E5E7EB', borderRadius: '4px', overflow: 'hidden' }}>
                 <div style={{
-                  width: `${(installmentsPaid / scheme.totalInstallments) * 100}%`,
+                  width: `${progressPct}%`,
                   height: '100%',
                   background: 'var(--gradient-accent)',
                   borderRadius: '4px',
                   transition: 'width 0.5s ease'
                 }} />
               </div>
- 
+  
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)' }}>
-                <span>{t('next_due_date')}: {nextDueDate ? new Date(nextDueDate).toLocaleDateString() : '—'}</span>
-                <span>{t('day_number')}: {schemeDayNumber}</span>
+                <span>Start Date / தொடங்கிய நாள்: {joinedAt ? new Date(joinedAt).toLocaleDateString() : '—'}</span>
+                <span>Maturity Date / முதிர்வு நாள்: {maturityDate ? new Date(maturityDate).toLocaleDateString() : '—'}</span>
               </div>
             </div>
- 
+
             {/* Loyalty Milestones Timeline */}
             {milestones.length > 0 && (
               <div className="glass-card" style={{ borderRadius: '16px', padding: '20px', background: 'white', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -871,7 +930,7 @@ export const SchemeDetail: React.FC = () => {
                 </div>
               </div>
             )}
- 
+  
             {/* Plan Summary Table (Bilingual simplified breakdown for accessibility) */}
             <div className="glass-card" style={{ borderRadius: '16px', padding: '0', background: 'white', overflow: 'hidden', border: '1.5px solid #FFD700', boxShadow: '0 4px 16px rgba(255, 215, 0, 0.06)' }}>
               <div style={{ background: 'linear-gradient(135deg, #FFFDF9 0%, #FFF9F0 100%)', padding: '12px 16px', borderBottom: '1px solid #ECECEC' }}>
@@ -882,9 +941,15 @@ export const SchemeDetail: React.FC = () => {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
                 <tbody>
                   <tr style={{ borderBottom: '1px solid #ECECEC' }}>
-                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>Installments Paid / தவணைகள்</td>
-                    <td style={{ padding: '10px 16px', fontWeight: 'bold', textAlign: 'right', color: 'var(--brand-dark)' }}>
-                      {installmentsPaid} / {scheme.totalInstallments}
+                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>Total Gold Purchased / வாங்கிய தங்கம்</td>
+                    <td style={{ padding: '10px 16px', fontWeight: 'bold', textAlign: 'right', color: '#FFB300' }}>
+                      {mgToGrams(accumulatedGoldMg)}
+                    </td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid #ECECEC' }}>
+                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>Total Bonus Gold Earned / போனஸ் தங்கம்</td>
+                    <td style={{ padding: '10px 16px', fontWeight: 'bold', textAlign: 'right', color: 'var(--brand-accent)' }}>
+                      {mgToGrams(totalBonusGoldMg)}
                     </td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #ECECEC' }}>
@@ -894,15 +959,21 @@ export const SchemeDetail: React.FC = () => {
                     </td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #ECECEC' }}>
-                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>Gold Accumulated / சேமித்த தங்கம்</td>
-                    <td style={{ padding: '10px 16px', fontWeight: 'bold', textAlign: 'right', color: '#FFB300' }}>
-                      {mgToGrams(accumulatedGoldMg)}
+                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>Start Date / தொடங்கிய நாள்</td>
+                    <td style={{ padding: '10px 16px', fontWeight: 'bold', textAlign: 'right', color: 'var(--brand-dark)' }}>
+                      {joinedAt ? new Date(joinedAt).toLocaleDateString() : '—'}
                     </td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #ECECEC' }}>
-                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>Bonus Gold / போனஸ் தங்கம்</td>
-                    <td style={{ padding: '10px 16px', fontWeight: 'bold', textAlign: 'right', color: 'var(--brand-accent)' }}>
-                      {mgToGrams(totalBonusGoldMg)}
+                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>Maturity Date / முதிர்வு நாள்</td>
+                    <td style={{ padding: '10px 16px', fontWeight: 'bold', textAlign: 'right', color: 'var(--brand-dark)' }}>
+                      {maturityDate ? new Date(maturityDate).toLocaleDateString() : '—'}
+                    </td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid #ECECEC' }}>
+                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>Days Remaining / மீதமுள்ள நாட்கள்</td>
+                    <td style={{ padding: '10px 16px', fontWeight: 'bold', textAlign: 'right', color: 'var(--brand-dark)' }}>
+                      {remainingDaysForScheme} {remainingDaysForScheme === 1 ? 'day' : 'days'}
                     </td>
                   </tr>
                   <tr style={{ background: '#FFFDF9', fontWeight: 'bold' }}>
@@ -914,7 +985,7 @@ export const SchemeDetail: React.FC = () => {
                 </tbody>
               </table>
             </div>
- 
+  
             {/* Balances Grid Card */}
             <div className="glass-card" style={{ borderRadius: '16px', padding: '20px', background: 'white', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>{t('accumulated_balances')}</h3>
@@ -938,7 +1009,69 @@ export const SchemeDetail: React.FC = () => {
                 </div>
               </div>
             </div>
- 
+
+            {/* Transaction History Ledger */}
+            <div className="glass-card" style={{ borderRadius: '16px', padding: '0', background: 'white', overflow: 'hidden', border: '1px solid #ECECEC', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.02)' }}>
+              <div style={{ background: '#F9FAFB', padding: '12px 16px', borderBottom: '1px solid #ECECEC' }}>
+                <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', display: 'block' }}>
+                  Transaction History / பரிவர்த்தனை வரலாறு
+                </span>
+              </div>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', textAlign: 'left', minWidth: '340px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1.5px solid #ECECEC', background: '#F3F4F6' }}>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Date & Time</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>Amount</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>Gold Purchased</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>Bonus Gold</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ledger && ledger.filter(item => (item.transactionType || item.TransactionType) === 'INSTALLMENT').length > 0 ? (
+                      ledger
+                        .filter(item => (item.transactionType || item.TransactionType) === 'INSTALLMENT')
+                        .map((item, index) => {
+                          const dateStr = item.createdAt || item.CreatedAt || '';
+                          const formattedDate = dateStr ? new Date(dateStr).toLocaleString('en-IN', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                          }) : '—';
+                          const amt = item.amountPaise ?? item.AmountPaise ?? 0;
+                          const goldMg = item.goldWeightMg ?? item.GoldWeightMg ?? 0;
+                          const bonusMg = item.bonusGoldMg ?? item.BonusGoldMg ?? 0;
+
+                          return (
+                            <tr key={item.id || index} style={{ borderBottom: '1px solid #ECECEC' }}>
+                              <td style={{ padding: '10px 12px', color: 'var(--brand-dark)', whiteSpace: 'nowrap' }}>{formattedDate}</td>
+                              <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+                                {formatRupeesFull(amt)}
+                              </td>
+                              <td style={{ padding: '10px 12px', textAlign: 'right', color: '#FFB300', fontWeight: 'bold' }}>
+                                {mgToGrams(goldMg)}
+                              </td>
+                              <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--brand-accent)', fontWeight: 'bold' }}>
+                                {mgToGrams(bonusMg)}
+                              </td>
+                            </tr>
+                          );
+                        })
+                    ) : (
+                      <tr>
+                        <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                          No transactions found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+  
             {/* Autopay Subscription config */}
             <div className="glass-card" style={{
               borderRadius: '16px', padding: '16px', background: 'white',
@@ -1018,33 +1151,58 @@ export const SchemeDetail: React.FC = () => {
       }}>
         {isActive ? (
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button
-              onClick={handlePayInstallment}
-              disabled={isProcessing}
-              style={{
-                flex: 1, height: '52px', borderRadius: '14px', background: 'var(--gradient-accent)',
-                color: 'white', border: 'none', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 16px var(--brand-glow)'
-              }}
-            >
-              {isProcessing ? (
-                <div className="spinner" style={{ width: '20px', height: '20px', border: '2px solid white', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-              ) : (
-                t('pay_installment')
-              )}
-            </button>
- 
-            {installmentsPaid >= scheme.totalInstallments && (
+            {schemeStatus.toLowerCase() === 'claimed' ? (
               <button
-                onClick={() => navigate(`/scheme-redemption/${scheme.id}`)}
+                disabled
+                style={{
+                  flex: 1, height: '52px', borderRadius: '14px', background: '#ECECEC',
+                  color: 'var(--text-muted)', border: 'none', fontWeight: 'bold', fontSize: '15px', cursor: 'default',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}
+              >
+                Redeemed / பெறப்பட்டது
+              </button>
+            ) : schemeStatus.toLowerCase() === 'matured' ? (
+              <button
+                onClick={() => navigate(`/scheme-redemption/${userSchemeId}`)}
                 style={{
                   flex: 1, height: '52px', borderRadius: '14px', background: 'var(--gradient-gold)',
                   color: '#1A1200', border: 'none', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer',
-                  boxShadow: '0 8px 16px var(--gold-glow)'
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 16px var(--gold-glow)'
                 }}
               >
-                {t('redeem')} Plan 🎁
+                Proceed to Redeem / மீட்டெடுக்க தொடரவும் 🎁
               </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => setShowJoinSheet(true)}
+                  disabled={isProcessing}
+                  style={{
+                    flex: 1, height: '52px', borderRadius: '14px', background: 'var(--gradient-accent)',
+                    color: 'white', border: 'none', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 16px var(--brand-glow)'
+                  }}
+                >
+                  {isProcessing ? (
+                    <div className="spinner" style={{ width: '20px', height: '20px', border: '2px solid white', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                  ) : (
+                    t('pay_installment') || 'Make Payment'
+                  )}
+                </button>
+                {remainingDaysForScheme <= 0 && (
+                  <button
+                    onClick={() => navigate(`/scheme-redemption/${userSchemeId}`)}
+                    style={{
+                      flex: 1, height: '52px', borderRadius: '14px', background: 'var(--gradient-gold)',
+                      color: '#1A1200', border: 'none', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 16px var(--gold-glow)'
+                    }}
+                  >
+                    Proceed to Redeem / மீட்டெடுக்க தொடரவும் 🎁
+                  </button>
+                )}
+              </>
             )}
           </div>
         ) : (
@@ -1065,7 +1223,63 @@ export const SchemeDetail: React.FC = () => {
           </button>
         )}
       </div>
- 
+
+      {/* Success Popup Modal */}
+      {showSuccessPopup && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1001,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div className="glass-card" style={{
+            width: '90%', maxWidth: '380px', background: 'white', borderRadius: '24px', padding: '24px',
+            display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', textAlign: 'center',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.15)'
+          }}>
+            <CheckCircle2 size={56} color="var(--success-green)" style={{ margin: '8px 0' }} />
+            
+            <div>
+              <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 8px 0' }}>
+                Scheme Joined Successfully! / திட்டம் வெற்றிகரமாக இணைக்கப்பட்டது!
+              </h3>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '18px', margin: 0 }}>
+                Your savings plan is now active. Start investing to earn your 7.5% Tier 1 Loyalty Bonus! / உங்களது சேமிப்புத் திட்டம் இப்போது செயல்படுத்தப்பட்டுள்ளது. உங்களது 7.5% போனஸை பெற சேமிக்கத் தொடங்குங்கள்!
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '10px', marginTop: '8px' }}>
+              <button
+                onClick={() => {
+                  setShowSuccessPopup(false);
+                  setShowJoinSheet(true);
+                }}
+                style={{
+                  width: '100%', height: '48px', borderRadius: '12px', background: 'var(--gradient-accent)',
+                  color: 'white', border: 'none', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 12px var(--brand-glow)'
+                }}
+              >
+                Start Investing Now / இப்பொழுதே முதலீடு செய்க
+              </button>
+              <button
+                onClick={() => {
+                  setShowSuccessPopup(false);
+                  setIsActive(true);
+                }}
+                style={{
+                  width: '100%', height: '48px', borderRadius: '12px', background: 'transparent',
+                  color: 'var(--text-secondary)', border: '1px solid rgba(0,0,0,0.1)', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}
+              >
+                Invest Later / பிறகு முதலீடு செய்க
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Join Popup Sheet */}
       {showJoinSheet && (
         <div style={{
@@ -1079,7 +1293,9 @@ export const SchemeDetail: React.FC = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Calculator size={20} color="var(--brand-dark)" />
-                <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>Join Savings Plan</h3>
+                <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>
+                  {userSchemeId ? 'Make Payment / சேமிப்புத் தொகை செலுத்துக' : 'Join Savings Plan / சேமிப்புத் திட்டத்தில் சேர்க'}
+                </h3>
               </div>
               <button onClick={() => setShowJoinSheet(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 <X size={20} />
@@ -1127,6 +1343,8 @@ export const SchemeDetail: React.FC = () => {
                 </span>
                 <input
                   type="text"
+                  inputMode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
                   value={joinAmount}
                   onChange={(e) => setJoinAmount(e.target.value.replace(/[^0-9.]/g, ''))}
                   style={{
@@ -1226,7 +1444,7 @@ export const SchemeDetail: React.FC = () => {
               {isProcessing ? (
                 <div className="spinner" style={{ width: '20px', height: '20px', border: '2px solid white', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
               ) : (
-                'Pay & Join Plan'
+                userSchemeId ? 'Make Payment / சேமிப்புத் தொகை செலுத்துக' : 'Pay & Join Plan / செலுத்தி திட்டத்தில் சேர்க'
               )}
             </button>
           </div>
