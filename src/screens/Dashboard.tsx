@@ -125,11 +125,7 @@ export const Dashboard: React.FC = () => {
   const [customAmountText, setCustomAmountText] = useState('');
   const [isProcessingAddSavings, setIsProcessingAddSavings] = useState(false);
 
-  // Profile Interactive Modals & Sub-states
-  const [showCalculatorModal, setShowCalculatorModal] = useState(false);
-  const [calcAmount, setCalcAmount] = useState('');
-  const [calcType, setCalcType] = useState<'RUPEES' | 'GRAMS'>('RUPEES');
-  const [showCompletedModal, setShowCompletedModal] = useState(false);
+  // Profile Interactive Modals & Sub-states (moved to separate pages)
 
   // Manual banner swiping/dragging states & handlers
   const dragStartPosRef = useRef({ x: 0, y: 0 });
@@ -1460,7 +1456,7 @@ export const Dashboard: React.FC = () => {
                 
                 {/* Card 2: Price Calculator */}
                 <div 
-                  onClick={() => setShowCalculatorModal(true)}
+                  onClick={() => navigate('/profile/price-calculator')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -1496,7 +1492,7 @@ export const Dashboard: React.FC = () => {
 
                 {/* Card 4: Completed Schemes */}
                 <div 
-                  onClick={() => setShowCompletedModal(true)}
+                  onClick={() => navigate('/profile/completed-schemes')}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -1880,166 +1876,7 @@ export const Dashboard: React.FC = () => {
 
             </div>
 
-            {/* ── PROFILE MODALS (RENDERED CONDITIONALLY) ── */}
-
-
-
-            {/* 2. PRICE CALCULATOR MODAL */}
-            {showCalculatorModal && (
-              <div style={{
-                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)',
-                display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 1000
-              }}>
-                <div className="glass-card" style={{
-                  width: '100%', maxWidth: '480px', background: 'white', borderTopLeftRadius: '24px', borderTopRightRadius: '24px',
-                  padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ fontSize: '17px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>
-                      {t('price_calculator')}
-                    </h3>
-                    <button onClick={() => { setShowCalculatorModal(false); setCalcAmount(''); }} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                      <X size={20} />
-                    </button>
-                  </div>
-
-                  {/* Calculator toggle type */}
-                  <div style={{ display: 'flex', background: '#F5F5F5', padding: '4px', borderRadius: '10px' }}>
-                    <button 
-                      onClick={() => { setCalcType('RUPEES'); setCalcAmount(''); }}
-                      style={{
-                        flex: 1, padding: '8px 0', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold',
-                        background: calcType === 'RUPEES' ? 'white' : 'transparent',
-                        color: calcType === 'RUPEES' ? 'var(--brand-dark)' : 'var(--text-muted)',
-                        boxShadow: calcType === 'RUPEES' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', cursor: 'pointer'
-                      }}
-                    >
-                      Amount (₹) to Gold (g)
-                    </button>
-                    <button 
-                      onClick={() => { setCalcType('GRAMS'); setCalcAmount(''); }}
-                      style={{
-                        flex: 1, padding: '8px 0', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold',
-                        background: calcType === 'GRAMS' ? 'white' : 'transparent',
-                        color: calcType === 'GRAMS' ? 'var(--brand-dark)' : 'var(--text-muted)',
-                        boxShadow: calcType === 'GRAMS' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none', cursor: 'pointer'
-                      }}
-                    >
-                      Gold (g) to Amount (₹)
-                    </button>
-                  </div>
-
-                  <div>
-                    <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>
-                      {calcType === 'RUPEES' ? 'Enter Savings Amount' : 'Enter Gold Weight (grams)'}
-                    </label>
-                    <div style={{ position: 'relative', marginTop: '4px' }}>
-                      <span style={{ position: 'absolute', left: '12px', top: '13px', fontSize: '15px', fontWeight: 'bold' }}>
-                        {calcType === 'RUPEES' ? '₹' : 'g'}
-                      </span>
-                      <input
-                        type="text"
-                        placeholder={calcType === 'RUPEES' ? 'e.g. 5000' : 'e.g. 1'}
-                        value={calcAmount}
-                        onChange={(e) => setCalcAmount(e.target.value.replace(/[^0-9.]/g, ''))}
-                        style={{
-                          width: '100%', height: '44px', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.1)',
-                          padding: '0 12px 0 28px', fontSize: '15px', fontWeight: 'bold', outline: 'none'
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Calculator breakdown logic */}
-                  {parseFloat(calcAmount) > 0 && (
-                    <div style={{ background: '#FFF9F0', padding: '16px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      {calcType === 'RUPEES' ? (
-                        <>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                            <span>Entered Savings Amount</span>
-                            <span style={{ fontWeight: 'bold', color: 'var(--text-primary)' }}>₹{calcAmount}</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                            <span>GST (3% Included)</span>
-                            <span>₹{(parseFloat(calcAmount) - (parseFloat(calcAmount) / 1.03)).toFixed(2)}</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--brand-mid)', fontWeight: 'bold' }}>
-                            <span>Loyalty Bonus (7.5%)</span>
-                            <span>+ ₹{(parseFloat(calcAmount) / 1.03 * 0.075).toFixed(2)}</span>
-                          </div>
-                          <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)' }} />
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
-                            <span>Effective Gold Added</span>
-                            <span style={{ color: '#FFB300' }}>
-                              {((parseFloat(calcAmount) / 1.03 * 1.075 * 100) / (goldPrice22K || 700000)).toFixed(4)} grams
-                            </span>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                            <span>Base Gold Value (22K)</span>
-                            <span>₹{(parseFloat(calcAmount) * (goldPrice22K || 700000) / 100).toFixed(2)}</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                            <span>GST (3%)</span>
-                            <span>₹{(parseFloat(calcAmount) * (goldPrice22K || 700000) / 100 * 0.03).toFixed(2)}</span>
-                          </div>
-                          <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)' }} />
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
-                            <span>Total Amount to Pay</span>
-                            <span style={{ color: 'var(--brand-accent)' }}>
-                              ₹{(parseFloat(calcAmount) * (goldPrice22K || 700000) / 100 * 1.03).toFixed(2)}
-                            </span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* 3. COMPLETED SCHEMES MODAL */}
-            {showCompletedModal && (
-              <div style={{
-                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)',
-                display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 1000
-              }}>
-                <div className="glass-card" style={{
-                  width: '100%', maxWidth: '480px', background: 'white', borderTopLeftRadius: '24px', borderTopRightRadius: '24px',
-                  padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '80vh', overflowY: 'auto'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>
-                      {t('completed_schemes')}
-                    </h3>
-                    <button onClick={() => setShowCompletedModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                      <X size={20} />
-                    </button>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
-                    {activeSchemes.filter(s => s.status === 'MATURED' || s.status === 'COMPLETED').length === 0 ? (
-                      <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)' }}>
-                        <Award size={48} color="var(--text-light)" style={{ marginBottom: '12px' }} />
-                        <p style={{ fontSize: '13px', margin: 0 }}>No completed schemes yet. Keep saving to complete a scheme!</p>
-                      </div>
-                    ) : (
-                      activeSchemes.filter(s => s.status === 'MATURED' || s.status === 'COMPLETED').map(sch => (
-                        <div key={sch.schemeId} style={{ padding: '16px', borderRadius: '12px', background: '#ECEFF1', border: '1px solid rgba(0,0,0,0.05)' }}>
-                          <h4 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 6px 0' }}>{sch.planName}</h4>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-muted)' }}>
-                            <span>Accumulated Gold: <b>{mgToGrams(sch.accumulatedGoldMg)}</b></span>
-                            <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>COMPLETED</span>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Modals removed (migrated to dedicated pages) */}
 
 
 

@@ -57,42 +57,45 @@ export const TermsConditions: React.FC = () => {
       
       {/* Header */}
       <div style={{
-        background: '#FFF4D4',
-        borderBottom: '1px solid #ECECEC',
-        padding: '16px 20px',
+        background: 'var(--gradient-brand)',
+        paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))',
+        paddingLeft: '20px',
+        paddingRight: '20px',
+        paddingBottom: '16px',
         display: 'flex',
         alignItems: 'center',
         gap: '16px',
         position: 'sticky',
         top: 0,
-        zIndex: 10
+        zIndex: 10,
+        boxShadow: '0 4px 12px rgba(41, 0, 29, 0.15)'
       }}>
-        <button onClick={handleBack} style={{ background: 'transparent', border: 'none', color: '#1A1200', display: 'flex', alignItems: 'center', cursor: 'pointer', padding: 0 }}>
-          <ArrowLeft size={24} />
+        <button onClick={handleBack} style={{ background: 'transparent', border: 'none', color: 'var(--gold-primary)', display: 'flex', alignItems: 'center', cursor: 'pointer', padding: 0 }}>
+          <ArrowLeft size={24} color="var(--gold-primary)" />
         </button>
-        <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#1A1200', fontFamily: 'var(--font-poppins)', textAlign: 'center', flex: 1, marginRight: '40px' }}>
+        <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'white', fontFamily: 'var(--font-poppins)', textAlign: 'center', flex: 1, marginRight: '40px', letterSpacing: '0.5px' }}>
           Terms & Conditions
         </span>
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '20px', boxSizing: 'border-box' }}>
-        <p style={{ fontSize: '13px', color: '#666666', margin: '0 0 10px 0', lineHeight: '20px', fontStyle: 'italic', fontFamily: 'var(--font-poppins)' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: '22px', boxSizing: 'border-box' }}>
+        <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', margin: '0 0 10px 0', lineHeight: '20px', fontStyle: 'italic', fontFamily: 'var(--font-poppins)' }}>
           Please read these Terms and Conditions carefully before enrolling in our saving schemes.
         </p>
 
         {sections.map((section, idx) => (
-          <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <h3 style={{ fontSize: '14.5px', fontWeight: 'bold', color: '#1A1200', margin: 0, fontFamily: 'var(--font-poppins)' }}>
+          <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '6px', borderLeft: '3.5px solid var(--brand-accent)', paddingLeft: '14px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0, fontFamily: 'var(--font-poppins)' }}>
               {section.title}
             </h3>
-            <p style={{ fontSize: '12.5px', color: '#333333', margin: 0, lineHeight: '18px', fontFamily: 'var(--font-poppins)' }}>
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: '18px', fontFamily: 'var(--font-poppins)' }}>
               {section.text}
             </p>
             {section.bullets && (
               <ul style={{ margin: '4px 0 0 0', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {section.bullets.map((bullet, bIdx) => (
-                  <li key={bIdx} style={{ fontSize: '12.5px', color: '#333333', lineHeight: '18px', fontFamily: 'var(--font-poppins)' }}>
+                  <li key={bIdx} style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '18px', fontFamily: 'var(--font-poppins)' }}>
                     {bullet}
                   </li>
                 ))}

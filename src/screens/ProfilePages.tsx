@@ -8,17 +8,21 @@ import { ArrowLeft, Landmark, ShieldCheck, MapPin, PlusCircle } from 'lucide-rea
 
 const ProfileHeader: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack }) => (
   <div style={{
-    background: 'white',
-    borderBottom: '1px solid #ECECEC',
-    padding: '16px 20px',
+    background: 'var(--gradient-brand)',
+    paddingTop: 'calc(16px + env(safe-area-inset-top, 0px))',
+    paddingLeft: '20px',
+    paddingRight: '20px',
+    paddingBottom: '16px',
     display: 'flex',
     alignItems: 'center',
-    gap: '16px'
+    gap: '16px',
+    boxShadow: '0 4px 12px rgba(41, 0, 29, 0.15)',
+    zIndex: 10
   }}>
-    <button onClick={onBack} style={{ background: 'transparent', border: 'none', color: 'var(--brand-dark)', display: 'flex', alignItems: 'center', cursor: 'pointer', padding: 0 }}>
-      <ArrowLeft size={24} />
+    <button onClick={onBack} style={{ background: 'transparent', border: 'none', color: 'var(--gold-primary)', display: 'flex', alignItems: 'center', cursor: 'pointer', padding: 0 }}>
+      <ArrowLeft size={24} color="var(--gold-primary)" />
     </button>
-    <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--brand-dark)', fontFamily: 'var(--font-poppins)' }}>
+    <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'white', fontFamily: 'var(--font-poppins)', letterSpacing: '0.5px' }}>
       {title}
     </span>
   </div>
@@ -55,7 +59,7 @@ export const ProfileAddress: React.FC = () => {
       <ProfileHeader title={t('address_label')} onBack={handleBack} />
       
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+        <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', borderLeft: '4.5px solid var(--brand-accent)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
             <MapPin size={22} color="var(--brand-accent)" />
             <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>Edit Your Address</h4>
@@ -121,7 +125,7 @@ export const ProfileAddress: React.FC = () => {
         <button
           onClick={handleSave}
           style={{
-            width: '100%', height: '52px', borderRadius: '14px', background: 'var(--brand-dark)',
+            width: '100%', height: '52px', borderRadius: '14px', background: 'var(--gradient-brand)',
             color: 'white', border: 'none', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer',
             boxShadow: '0 8px 16px var(--brand-glow)'
           }}
@@ -210,7 +214,7 @@ export const ProfileKyc: React.FC = () => {
         </div>
 
         {/* Details card */}
-        <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+        <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', borderLeft: '4.5px solid var(--brand-accent)' }}>
           <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>Personal Details</h4>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13px' }}>
@@ -248,11 +252,11 @@ export const ProfileKyc: React.FC = () => {
               />
               <button 
                 onClick={handleUpdateNominee} 
-                style={{ background: 'var(--brand-dark)', color: 'white', border: 'none', padding: '0 16px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}
+                style={{ background: 'var(--gradient-brand)', color: 'white', border: 'none', padding: '0 16px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 2px 6px var(--brand-glow)' }}
               >
                 Save
               </button>
-              <button onClick={() => setIsEditingNominee(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', padding: '0 8px', fontSize: '12px', cursor: 'pointer' }}>
+              <button onClick={() => setIsEditingNominee(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', padding: '0 8px', fontSize: '12px', cursor: 'pointer' }}>
                 {t('cancel')}
               </button>
             </div>
@@ -280,7 +284,7 @@ export const ProfileKyc: React.FC = () => {
               <button
                 onClick={() => navigate('/onboarding')}
                 style={{
-                  padding: '10px 20px', borderRadius: '10px', background: 'var(--brand-dark)', color: 'white',
+                  padding: '10px 20px', borderRadius: '10px', background: 'var(--gradient-brand)', color: 'white',
                   border: 'none', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 10px var(--brand-glow)'
                 }}
               >
@@ -334,7 +338,7 @@ export const ProfileBankAccounts: React.FC = () => {
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         
-        <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+        <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', borderLeft: '4.5px solid var(--brand-accent)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
             <Landmark size={22} color="var(--brand-accent)" />
             <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>Your Linked Accounts</h4>
@@ -365,7 +369,7 @@ export const ProfileBankAccounts: React.FC = () => {
         <button
           onClick={() => navigate('/add-bank-account')}
           style={{
-            width: '100%', height: '52px', borderRadius: '14px', background: 'var(--brand-dark)',
+            width: '100%', height: '52px', borderRadius: '14px', background: 'var(--gradient-brand)',
             color: 'white', border: 'none', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
             boxShadow: '0 8px 16px var(--brand-glow)', marginTop: '8px'

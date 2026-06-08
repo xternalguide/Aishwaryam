@@ -18,6 +18,9 @@ import { PaymentSuccess } from './screens/PaymentSuccess';
 import { PrivacyPolicy } from './screens/PrivacyPolicy';
 import { TermsConditions } from './screens/TermsConditions';
 import { ProfileAddress, ProfileKyc, ProfileBankAccounts } from './screens/ProfilePages';
+import { ChangeMpin } from './screens/ChangeMpin';
+import { PriceCalculatorPage } from './screens/PriceCalculatorPage';
+import { CompletedSchemesPage } from './screens/CompletedSchemesPage';
 import {
   HowItWorks,
   Faq,
@@ -188,6 +191,7 @@ const App: React.FC = () => {
             <Route path="/" element={<Splash />} />
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/mpin/change" element={<ChangeMpin />} />
             <Route path="/mpin/:mode" element={<Mpin />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="/onboarding" element={<Onboarding />} />
@@ -207,6 +211,8 @@ const App: React.FC = () => {
             <Route path="/profile/address" element={<ProfileAddress />} />
             <Route path="/profile/kyc" element={<ProfileKyc />} />
             <Route path="/profile/bank-accounts" element={<ProfileBankAccounts />} />
+            <Route path="/profile/price-calculator" element={<PriceCalculatorPage />} />
+            <Route path="/profile/completed-schemes" element={<CompletedSchemesPage />} />
 
             {/* Informational Guides & Alerts */}
             <Route path="/how_it_works" element={<HowItWorks />} />
