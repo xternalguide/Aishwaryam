@@ -16,8 +16,8 @@ namespace Aishwaryam.Api.Controllers
     public class SubscriptionController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private const string RazorpayKey    = "rzp_test_SnX8ee1l5TbaTV";
-        private const string RazorpaySecret = "JBK5ZEwEHDNWaYQDTRLDUgJK";
+        private const string RazorpayKey    = "rzp_test_Sz22U47uxaLIxF";
+        private const string RazorpaySecret = "3V9ZmMaZrw0cPjblI63BpE3E";
 
         public SubscriptionController(ApplicationDbContext context)
         {
