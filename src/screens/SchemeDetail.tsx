@@ -35,6 +35,8 @@ export const SchemeDetail: React.FC = () => {
   const [showJoinSheet, setShowJoinSheet] = useState(false);
   const [joinAmount, setJoinAmount] = useState('100');
   const [joinType, setJoinType] = useState<'RUPEES' | 'GRAMS'>('RUPEES');
+  const [userSchemeId, setUserSchemeId] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   // Active chit progress states
   const [installmentsPaid, setInstallmentsPaid] = useState(0);
@@ -138,13 +140,13 @@ export const SchemeDetail: React.FC = () => {
     
     setIsLoading(true);
     
-    // 2. Fetch scheme dashboards to look for active chits
-    const userActiveScheme = activeSchemes.find(
-      (s: any) => s.schemeId === schemeId || schemeId === 'active'
-    );
-
     // 3. Find available master chit
     let matching = availableSchemes.find((s) => s.id === schemeId);
+
+    // 2. Fetch scheme dashboards to look for active chits
+    const userActiveScheme = activeSchemes.find(
+      (s: any) => s.schemeId === schemeId || s.planName === matching?.planName || schemeId === 'active'
+    );
 
     if (!matching && userActiveScheme) {
       matching = availableSchemes.find((s) => s.planName === userActiveScheme.planName);
@@ -156,6 +158,7 @@ export const SchemeDetail: React.FC = () => {
 
     if (userActiveScheme) {
       setIsActive(true);
+      setUserSchemeId(userActiveScheme.schemeId);
       setInstallmentsPaid(userActiveScheme.installmentsPaid);
       setSchemeDayNumber(userActiveScheme.schemeDayNumber);
       setNextDueDate(userActiveScheme.nextDueDate || '');
@@ -172,6 +175,7 @@ export const SchemeDetail: React.FC = () => {
       ));
     } else {
       setIsActive(false);
+      setUserSchemeId(null);
     }
 
     // 4. Fetch profile for KYC verification checks
@@ -197,7 +201,7 @@ export const SchemeDetail: React.FC = () => {
     });
   };
 
-  const launchRazorpayCheckout = async (amountPaise: number, isJoiningFlow: boolean, goldWeightGrams: number) => {
+  const launchRazorpayCheckout = async (amountPaise: number, isJoiningFlow: boolean, goldWeightGrams: number, customSchemeId?: string | null) => {
     if (!scheme) return;
     setIsProcessing(true);
     try {
@@ -215,7 +219,7 @@ export const SchemeDetail: React.FC = () => {
       const res = await ApiClient.post('api/Payment/create-order', {
         userId,
         amountPaise,
-        schemeId: scheme.id
+        userSchemeId: customSchemeId || userSchemeId || null
       });
 
       if (res.data) {
@@ -271,11 +275,53 @@ export const SchemeDetail: React.FC = () => {
           modal: {
             ondismiss: function () {
               setIsProcessing(false);
+              const errorJson = JSON.stringify({
+                schemeName: scheme.planName,
+                amountPaise,
+                errorMessage: 'Payment was cancelled by the user.',
+                orderId: orderData.orderId
+              });
+              // Log failure to DB asynchronously
+              ApiClient.post('api/Payment/log-failure', {
+                userId,
+                orderId: orderData.orderId,
+                paymentId: '',
+                amountPaise,
+                errorCode: 'BAD_REQUEST_ERROR',
+                errorMessage: 'Payment dismissed by user'
+              }).catch(() => {});
+              
+              navigate(`/payment-failed/${encodeURIComponent(errorJson)}`);
             }
           }
         };
 
         const rzp = new (window as any).Razorpay(options);
+        
+        rzp.on('payment.failed', async function (response: any) {
+          setIsProcessing(false);
+          try {
+            await ApiClient.post('api/Payment/log-failure', {
+              userId,
+              orderId: orderData.orderId,
+              paymentId: response.error?.metadata?.payment_id || '',
+              amountPaise,
+              errorCode: response.error?.code || 'PAYMENT_FAILED',
+              errorMessage: response.error?.description || 'Payment failed or cancelled'
+            });
+          } catch (e) {
+            console.error('Error logging payment failure:', e);
+          }
+
+          const errorJson = JSON.stringify({
+            schemeName: scheme.planName,
+            amountPaise,
+            errorMessage: response.error?.description || 'Payment was cancelled or failed.',
+            orderId: orderData.orderId
+          });
+          navigate(`/payment-failed/${encodeURIComponent(errorJson)}`);
+        });
+
         rzp.open();
       }
     } catch (err: any) {
@@ -288,7 +334,7 @@ export const SchemeDetail: React.FC = () => {
     if (!scheme) return;
     const goldPrice22K = livePrice?.price22KPaise || 701000;
     const fallbackGrams = (scheme.installmentAmountPaise / 1.03) / goldPrice22K;
-    launchRazorpayCheckout(scheme.installmentAmountPaise, false, fallbackGrams);
+    launchRazorpayCheckout(scheme.installmentAmountPaise, false, fallbackGrams, userSchemeId);
   };
 
   const handleJoinScheme = async () => {
@@ -299,6 +345,7 @@ export const SchemeDetail: React.FC = () => {
     }
     setJoinAmount(scheme ? (scheme.installmentAmountPaise / 100).toString() : '100');
     setJoinType('RUPEES');
+    setValidationError(null);
     setShowJoinSheet(true);
   };
 
@@ -313,17 +360,40 @@ export const SchemeDetail: React.FC = () => {
 
     if (joinType === 'RUPEES') {
       amountPaise = Math.round(parsedVal * 100);
-      // Rupees-to-gold with 7.5% loyalty bonus
       fallbackGrams = (parsedVal / 1.03 * 1.075 * 100) / goldPrice22K;
     } else {
-      // Grams-to-Rupees (metal value + 3% GST)
       const baseMetalVal = (parsedVal * goldPrice22K) / 100;
       amountPaise = Math.round(baseMetalVal * 1.03);
-      // Grams with 7.5% loyalty bonus
       fallbackGrams = parsedVal * 1.075;
     }
 
-    launchRazorpayCheckout(amountPaise, true, fallbackGrams);
+    if (amountPaise < 10000) {
+      setValidationError('Minimum investment amount is ₹100.');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const userId = SessionManager.getUserId() || 'user-id-999';
+
+      // 1. Enroll user in the scheme first
+      const joinRes = await ApiClient.post('api/Scheme/join', {
+        userId,
+        schemeMasterId: scheme.id
+      });
+
+      if (joinRes.data && (joinRes.data.success || joinRes.data.Success)) {
+        const newSchemeId = joinRes.data.schemeId || joinRes.data.SchemeId;
+        // 2. Launch Razorpay with this new userSchemeId
+        await launchRazorpayCheckout(amountPaise, true, fallbackGrams, newSchemeId);
+      } else {
+        alert(joinRes.data?.message || 'Failed to join scheme.');
+        setIsProcessing(false);
+      }
+    } catch (err: any) {
+      alert('Failed to join scheme: ' + (err.response?.data?.message || err.message));
+      setIsProcessing(false);
+    }
   };
 
   const formatRupees = (paise: number) => {
@@ -593,6 +663,17 @@ export const SchemeDetail: React.FC = () => {
   }
 
   const goldPrice22K = livePrice?.price22KPaise || 701000;
+  
+  // Real-time Join Sheet Validations
+  const parsedJoinVal = parseFloat(joinAmount) || 0;
+  let joinAmountRupees = 0;
+  if (joinType === 'RUPEES') {
+    joinAmountRupees = parsedJoinVal;
+  } else {
+    const baseMetalVal = (parsedJoinVal * goldPrice22K) / 100;
+    joinAmountRupees = (baseMetalVal * 1.03) / 100;
+  }
+  const isJoinAmountValid = parsedJoinVal > 0 && joinAmountRupees >= 100;
  
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
@@ -1059,14 +1140,21 @@ export const SchemeDetail: React.FC = () => {
               </div>
             )}
  
+            {/* Validation warning */}
+            {(validationError || (parsedJoinVal > 0 && !isJoinAmountValid)) && (
+              <span style={{ fontSize: '11px', color: 'var(--error-red)', fontWeight: 'bold', textAlign: 'center', display: 'block', marginTop: '-4px' }}>
+                {validationError || `Minimum investment amount is ₹100. (Current: ₹${joinAmountRupees.toFixed(2)})`}
+              </span>
+            )}
+
             <button
               onClick={handlePayJoinPlan}
-              disabled={parseFloat(joinAmount) <= 0 || isProcessing}
+              disabled={parsedJoinVal <= 0 || !isJoinAmountValid || isProcessing}
               style={{
                 width: '100%', height: '48px', borderRadius: '12px', background: 'var(--brand-dark)',
                 color: 'white', border: 'none', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                opacity: (parseFloat(joinAmount) <= 0 || isProcessing) ? 0.5 : 1
+                opacity: (parsedJoinVal <= 0 || !isJoinAmountValid || isProcessing) ? 0.5 : 1
               }}
             >
               {isProcessing ? (

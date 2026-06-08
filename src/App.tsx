@@ -15,6 +15,7 @@ import { SchemeRedemption } from './screens/SchemeRedemption';
 import { AddBankAccount } from './screens/AddBankAccount';
 import { PortfolioAnalytics } from './screens/PortfolioAnalytics';
 import { PaymentSuccess } from './screens/PaymentSuccess';
+import { PaymentFailed } from './screens/PaymentFailed';
 import { PrivacyPolicy } from './screens/PrivacyPolicy';
 import { TermsConditions } from './screens/TermsConditions';
 import { ProfileAddress, ProfileKyc, ProfileBankAccounts } from './screens/ProfilePages';
@@ -216,6 +217,7 @@ const App: React.FC = () => {
             <Route path="/add-bank-account" element={<AddBankAccount />} />
             <Route path="/portfolio-analytics" element={<PortfolioAnalytics />} />
             <Route path="/payment-success/:receiptJson" element={<PaymentSuccess />} />
+            <Route path="/payment-failed/:errorJson" element={<PaymentFailed />} />
 
             {/* Profile Sub Pages */}
             <Route path="/profile/address" element={<ProfileAddress />} />

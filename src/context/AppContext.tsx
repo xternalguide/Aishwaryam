@@ -73,7 +73,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ApiClient.get(`api/Scheme/dashboard/${userId}`),
         ApiClient.get(`api/Dashboard/portfolio/${userId}`),
         ApiClient.get('api/Scheme/list'),
-        ApiClient.get(`api/Scheme/ledger/${userId}`),
+        ApiClient.get('api/Gold/transactions?page=1&pageSize=100'),
         ApiClient.get(`api/Offers/active/${userId}`),
         ApiClient.get(`api/Banking/accounts/${userId}`),
         ApiClient.get('api/Notification')
@@ -115,8 +115,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem('CACHE_AVAILABLE_SCHEMES', JSON.stringify(listRes.value.data));
       }
       if (ledgerRes.status === 'fulfilled' && ledgerRes.value.data) {
-        setTransactions(ledgerRes.value.data);
-        localStorage.setItem('CACHE_TRANSACTIONS', JSON.stringify(ledgerRes.value.data));
+        const rawTxs = ledgerRes.value.data.transactions || [];
+        const txList = rawTxs.map((t: any) => ({
+          ...t,
+          id: t.transactionId || t.id,
+          transactionType: t.type || t.transactionType || 'BUY'
+        }));
+        setTransactions(txList);
+        localStorage.setItem('CACHE_TRANSACTIONS', JSON.stringify(txList));
       }
       if (offersRes.status === 'fulfilled' && offersRes.value.data) {
         setOffers(offersRes.value.data);

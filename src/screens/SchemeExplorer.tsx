@@ -34,7 +34,7 @@ export const SchemeExplorer: React.FC = () => {
         const dashRes = await ApiClient.get(`api/Scheme/dashboard/${userId}`);
         if (dashRes.data && dashRes.data.activeSchemes) {
           const names = dashRes.data.activeSchemes
-            .filter((s: any) => s.status === 'ACTIVE')
+            .filter((s: any) => s.status?.toUpperCase() === 'ACTIVE')
             .map((s: any) => s.planName);
           setActiveNames(names);
         }
