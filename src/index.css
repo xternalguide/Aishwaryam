@@ -332,6 +332,6 @@ input, textarea {
 .razorpay-checkout-frame,
 iframe.razorpay-checkout-frame,
 iframe[src*="razorpay"] {
-  top: env(safe-area-inset-top, 32px) !important;
-  height: calc(100% - env(safe-area-inset-top, 32px)) !important;
+  top: env(safe-area-inset-top, 0px) !important;
+  height: calc(100% - env(safe-area-inset-top, 0px)) !important;
 }
