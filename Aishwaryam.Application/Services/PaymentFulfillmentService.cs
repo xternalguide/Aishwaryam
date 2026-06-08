@@ -274,7 +274,7 @@ namespace Aishwaryam.Application.Services
                     PushData = pushData,
                     SendSms = true, // Configured for fallback Fast2SMS currently
                     SmsText = body,
-                    SendEmail = false,
+                    SendEmail = true,
                     EmailTemplate = EmailTemplate.GoldPurchaseReceipt,
                     EmailData = new {
                         UserName = user?.FullName ?? "Customer",
