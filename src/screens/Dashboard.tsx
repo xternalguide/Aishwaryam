@@ -1774,9 +1774,10 @@ export const Dashboard: React.FC = () => {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
                   padding: '16px 20px',
                   background: 'white',
+                  position: 'relative',
                   zIndex: 10
                 }}>
                   <button 
@@ -1789,7 +1790,10 @@ export const Dashboard: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: 'var(--brand-deep)'
+                      color: 'var(--brand-deep)',
+                      position: 'absolute',
+                      left: '12px',
+                      zIndex: 11
                     }}
                   >
                     <ChevronLeft size={24} />
@@ -1801,8 +1805,7 @@ export const Dashboard: React.FC = () => {
                     margin: 0,
                     fontFamily: 'var(--font-poppins)',
                     textAlign: 'center',
-                    flex: 1,
-                    marginRight: '40px'
+                    padding: '10px'
                   }}>
                     {t('my_profile')}
                   </h2>
