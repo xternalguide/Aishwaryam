@@ -129,7 +129,7 @@ namespace Aishwaryam.Api.Controllers
                     goldWeightMg = 0L,
                     amountPaise = s.InstallmentAmountPaise,
                     createdAt = s.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                    rawCreatedAt = s.CreatedAt,
+                    rawCreatedAt = new DateTimeOffset(s.CreatedAt, TimeSpan.Zero),
                     rateSource = "SYSTEM",
                     schemeName = s.PlanName,
                     bonusAmountPaise = 0L,
