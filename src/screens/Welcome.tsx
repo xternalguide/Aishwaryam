@@ -96,11 +96,11 @@ export const Welcome: React.FC = () => {
         boxSizing: 'border-box'
       }}>
         {/* Top Header Row with Language Selector & Skip */}
-          {/* Language Toggle EN/தமிழ் */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', width: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {/* Language Toggle EN/தமிழ் */}
+          {/* <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ fontSize: '11px', fontWeight: 'bold', color: lang === 'en' ? 'white' : 'rgba(255,255,255,0.6)' }}>EN</span>
-            {/* <button
+            <button
               onClick={() => changeLanguage(lang === 'en' ? 'ta' : 'en')}
               style={{
                 width: '40px', height: '20px', borderRadius: '10px',
@@ -108,16 +108,15 @@ export const Welcome: React.FC = () => {
                 border: 'none', position: 'relative', cursor: 'pointer',
                 transition: 'background-color 0.2s ease', padding: 0
               }}
-            > */}
-              {/* <div style={{
+            >
+              <div style={{
                 width: '14px', height: '14px', borderRadius: '50%', background: lang === 'ta' ? '#1A1200' : 'white',
                 position: 'absolute', top: '3px', left: lang === 'ta' ? '23px' : '3px',
                 transition: 'left 0.2s ease'
               }} />
-            </button> */}
+            </button>
             <span style={{ fontSize: '11px', fontWeight: 'bold', color: lang === 'ta' ? 'var(--gold-warm)' : 'rgba(255,255,255,0.6)' }}>தமிழ்</span>
-          </div>
-
+          </div> */}
           {!isLast && (
             <button
               onClick={handleSkip}
