@@ -95,6 +95,8 @@ namespace Aishwaryam.Api.Controllers
                 DateOfBirth = user.DateOfBirth?.ToString("yyyy-MM-dd"),
                 WeddingAnniversaryDate = user.WeddingAnniversaryDate?.ToString("yyyy-MM-dd"),
                 user.NomineeName,
+                user.NomineePhoneNumber,
+                user.NomineeRelationship,
                 user.PreferredLanguage
             });
         }
@@ -141,6 +143,8 @@ namespace Aishwaryam.Api.Controllers
             }
 
             if (!string.IsNullOrEmpty(updateObj.NomineeName)) user.NomineeName = updateObj.NomineeName;
+            if (updateObj.NomineePhoneNumber != null) user.NomineePhoneNumber = updateObj.NomineePhoneNumber;
+            if (updateObj.NomineeRelationship != null) user.NomineeRelationship = updateObj.NomineeRelationship;
             if (!string.IsNullOrEmpty(updateObj.PreferredLanguage)) user.PreferredLanguage = updateObj.PreferredLanguage;
             if (updateObj.DateOfBirth.HasValue) user.DateOfBirth = updateObj.DateOfBirth.Value;
             if (updateObj.WeddingAnniversaryDate.HasValue) user.WeddingAnniversaryDate = updateObj.WeddingAnniversaryDate.Value;
@@ -330,6 +334,8 @@ namespace Aishwaryam.Api.Controllers
         public string? FullName { get; set; }
         public string? Email { get; set; }
         public string? NomineeName { get; set; }
+        public string? NomineePhoneNumber { get; set; }
+        public string? NomineeRelationship { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public DateTime? WeddingAnniversaryDate { get; set; }
         public bool? BiometricEnabled { get; set; }

@@ -11,6 +11,7 @@ namespace Aishwaryam.Infrastructure.Data
 
         // Auth
         public DbSet<User> Users { get; set; }
+        public DbSet<Address> Addresses { get; set; }
         public DbSet<AuthSession> AuthSessions { get; set; }
         public DbSet<OtpLog> OtpLogs { get; set; }
         
@@ -98,12 +99,35 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.DateOfBirth).HasColumnName("date_of_birth").HasColumnType("date");
                 entity.Property(e => e.WeddingAnniversaryDate).HasColumnName("wedding_anniversary_date").HasColumnType("date");
                 entity.Property(e => e.NomineeName).HasColumnName("nominee_name").HasMaxLength(100);
+                entity.Property(e => e.NomineePhoneNumber).HasColumnName("nominee_phone_number").HasMaxLength(20);
+                entity.Property(e => e.NomineeRelationship).HasColumnName("nominee_relationship").HasMaxLength(50);
                 entity.Property(e => e.PreferredLanguage).HasColumnName("preferred_language").HasMaxLength(10).HasDefaultValue("en");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
                 
                 entity.HasIndex(e => e.PhoneNumber).IsUnique();
                 entity.HasIndex(e => e.Email).IsUnique();
+            });
+
+            // Addresses
+            modelBuilder.Entity<Address>(entity =>
+            {
+                entity.ToTable("user_addresses");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity.Property(e => e.State).HasColumnName("state").IsRequired().HasMaxLength(100);
+                entity.Property(e => e.City).HasColumnName("city").IsRequired().HasMaxLength(100);
+                entity.Property(e => e.StreetAddress).HasColumnName("street_address").IsRequired();
+                entity.Property(e => e.Pincode).HasColumnName("pincode").IsRequired().HasMaxLength(20);
+                entity.Property(e => e.IsDefault).HasColumnName("is_default").HasDefaultValue(false);
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasOne(d => d.User)
+                    .WithMany()
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // AuthSessions

@@ -16,6 +16,8 @@ namespace Aishwaryam.Domain.Entities
         public DateTime? DateOfBirth { get; set; }
         public DateTime? WeddingAnniversaryDate { get; set; }
         public string? NomineeName { get; set; }
+        public string? NomineePhoneNumber { get; set; }
+        public string? NomineeRelationship { get; set; }
         public string PreferredLanguage { get; set; } = "en";
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
         public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
