@@ -647,7 +647,7 @@ export const Mpin: React.FC = () => {
             width: '100%',
             boxSizing: 'border-box'
           }}>
-            🔐 <strong>For your security:</strong> Do not share your PIN with anyone. Aishwaryam @ Your Home will never ask for your PIN.
+          <strong>For your security:</strong> Do not share your PIN with anyone. Aishwaryam @ Your Home will never ask for your PIN.
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SessionManager } from '../utils/SessionManager';
+import { useTranslation } from '../utils/translation';
 import { ApiClient } from '../utils/ApiClient';
 import { useApp } from '../context/AppContext';
 import { ArrowLeft, AlertTriangle } from 'lucide-react';
@@ -8,6 +9,7 @@ import { ArrowLeft, AlertTriangle } from 'lucide-react';
 export const SellGold: React.FC = () => {
   const navigate = useNavigate();
   const { portfolio, livePrice, refreshData } = useApp();
+  const { t, lang } = useTranslation();
 
   const [goldBalanceMg, setGoldBalanceMg] = useState(19800); // 19.8 grams
   const [redeemableGoldMg, setRedeemableGoldMg] = useState(19800);
@@ -71,7 +73,10 @@ export const SellGold: React.FC = () => {
       // Validate weight limits
       const wtMg = parsedWt * 1000;
       if (wtMg > redeemableGoldMg) {
-        setErrorMsg(`Insufficient sellable balance. Maximum sellable is ${mgToGrams(redeemableGoldMg)}.`);
+        setErrorMsg(lang === 'en'
+          ? `Insufficient sellable balance. Maximum sellable is ${mgToGrams(redeemableGoldMg)}.`
+          : `உங்களிடம் போதிய இருப்பு இல்லை. அதிகபட்சமாக விற்கக்கூடியது ${mgToGrams(redeemableGoldMg)}.`
+        );
       } else {
         setErrorMsg(null);
       }
@@ -99,7 +104,10 @@ export const SellGold: React.FC = () => {
 
         // Validate limits
         if (wt * 1000 > redeemableGoldMg) {
-          setErrorMsg(`Insufficient sellable balance. Maximum sellable is ${mgToGrams(redeemableGoldMg)}.`);
+          setErrorMsg(lang === 'en'
+            ? `Insufficient sellable balance. Maximum sellable is ${mgToGrams(redeemableGoldMg)}.`
+            : `உங்களிடம் போதிய இருப்பு இல்லை. அதிகபட்சமாக விற்கக்கூடியது ${mgToGrams(redeemableGoldMg)}.`
+          );
         } else {
           setErrorMsg(null);
         }
@@ -125,7 +133,10 @@ export const SellGold: React.FC = () => {
       });
 
       await refreshData();
-      alert('Gold sold successfully! Money will be credited to your linked bank account.');
+      alert(lang === 'en' 
+        ? 'Gold sold successfully! Money will be credited to your linked bank account.' 
+        : 'தங்கம் வெற்றிகரமாக விற்கப்பட்டது! பணம் உங்கள் வங்கி கணக்கில் செலுத்தப்படும்.'
+      );
       navigate(-1);
     } catch (err: any) {
       setErrorMsg(err.message || 'Sell transaction failed. Please try again.');
@@ -170,7 +181,7 @@ export const SellGold: React.FC = () => {
           <ArrowLeft size={24} />
         </button>
         <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--brand-dark)', fontFamily: 'var(--font-poppins)' }}>
-          Claim Physical Gold
+          {t('sell_gold_silver')}
         </span>
       </div>
 
@@ -186,10 +197,12 @@ export const SellGold: React.FC = () => {
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', margin: '0 0 10px 0' }}>
-              Visit our store to claim your physical gold. Festival and Birthday bonuses will be applied by the admin upon redemption.
+              {lang === 'en'
+                ? 'Visit our store to claim your physical gold. Festival and Birthday bonuses will be applied by the admin upon redemption.'
+                : 'உங்களது சேமிப்பு தங்கத்தைப் பெற எங்கள் கடைக்கு வரவும். திருவிழா மற்றும் பிறந்தநாள் போனஸ்கள் நிர்வாகியால் சரிபார்க்கப்பட்டு பின்னர் வழங்கப்படும்.'}
             </p>
             <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', letterSpacing: '1px', textTransform: 'uppercase' }}>
-              Available Balance
+              {t('available_balance')}
             </span>
             <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', fontFamily: 'var(--font-poppins)', margin: '4px 0 12px 0' }}>
               {mgToGrams(goldBalanceMg)}
@@ -197,12 +210,12 @@ export const SellGold: React.FC = () => {
 
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
               <div>
-                <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'rgba(255,255,255,0.5)' }}>SELLABLE</span>
+                <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'rgba(255,255,255,0.5)' }}>{lang === 'en' ? 'SELLABLE' : 'விற்கக்கூடியது'}</span>
                 <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--success-green)' }}>{mgToGrams(redeemableGoldMg)}</div>
               </div>
               <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.2)' }} />
               <div>
-                <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'rgba(255,255,255,0.5)' }}>LOCKED</span>
+                <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'rgba(255,255,255,0.5)' }}>{t('locked').toUpperCase()}</span>
                 <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'white' }}>{mgToGrams(lockedGoldMg)}</div>
               </div>
             </div>
@@ -212,12 +225,12 @@ export const SellGold: React.FC = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '4px' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)' }}>Matured Gold Value (Live)</span>
+                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)' }}>{t('current_sell_price')}</span>
                   {timeLeft && (
                     <span style={{
                       fontSize: '9px', fontWeight: 'bold', color: '#FFB300', background: 'rgba(255, 179, 0, 0.15)',
                       padding: '1px 4px', borderRadius: '4px'
-                    }}>LOCKED</span>
+                    }}>{t('locked_status')}</span>
                   )}
                 </div>
                 <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--brand-accent)' }}>
@@ -225,7 +238,7 @@ export const SellGold: React.FC = () => {
                 </div>
                 {priceUpdatedAt && (
                   <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.5)' }}>
-                    Last updated: {formatDate(priceUpdatedAt)}
+                    {t('last_updated')}: {formatDate(priceUpdatedAt)}
                   </span>
                 )}
               </div>
@@ -238,16 +251,16 @@ export const SellGold: React.FC = () => {
 
         {/* Form Inputs */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>How much gold to sell?</span>
+          <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>{t('enter_redemption_amount')}</span>
 
           <div>
-            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginLeft: '4px' }}>Weight (Grams)</label>
+            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginLeft: '4px' }}>{t('redemption_weight_grams')}</label>
             <div style={{ position: 'relative', marginTop: '4px' }}>
               <input
                 type="text"
                 inputMode="decimal"
-                pattern="[0-9]*\.?[0-9]*"
-                placeholder="Enter Weight"
+                pattern="[0-9]*\\.?[0-9]*"
+                placeholder={t('enter_weight')}
                 value={weightInput}
                 onChange={(e) => onWeightChanged(e.target.value)}
                 style={{
@@ -266,18 +279,18 @@ export const SellGold: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>OR</span>
+            <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('or').toUpperCase()}</span>
           </div>
 
           <div>
-            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginLeft: '4px' }}>Amount to Receive</label>
+            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginLeft: '4px' }}>{t('redemption_amount_rupees')}</label>
             <div style={{ position: 'relative', marginTop: '4px' }}>
               <span style={{ position: 'absolute', left: '16px', top: '14px', fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)' }}>₹</span>
               <input
                 type="text"
                 inputMode="decimal"
-                pattern="[0-9]*\.?[0-9]*"
-                placeholder="Enter Amount"
+                pattern="[0-9]*\\.?[0-9]*"
+                placeholder={t('enter_amount')}
                 value={amountInput}
                 onChange={(e) => onAmountChanged(e.target.value)}
                 style={{
@@ -306,12 +319,12 @@ export const SellGold: React.FC = () => {
             border: '1px solid #ECECEC'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-secondary)' }}>
-              <span>Selling Amount</span>
+              <span>{lang === 'en' ? 'Selling Amount' : 'விற்பனைத் தொகை'}</span>
               <span style={{ fontWeight: '500' }}>{formatRupees(amountToReceivePaise)}</span>
             </div>
             <div style={{ height: '1px', background: '#F3F4F6', margin: '4px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
-              <span>Total Payout (Store Claim)</span>
+              <span>{lang === 'en' ? 'Total Payout (Store Claim)' : 'மொத்த தொகை (கடையில் பெறுவது)'}</span>
               <span style={{ fontSize: '18px', color: 'var(--success-green)' }}>{formatRupees(amountToReceivePaise)}</span>
             </div>
           </div>
@@ -352,12 +365,14 @@ export const SellGold: React.FC = () => {
           {isLoading ? (
             <div className="spinner" style={{ width: '24px', height: '24px', border: '3px solid white', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           ) : (
-            'Sell Gold'
+            t('redeem_now')
           )}
         </button>
 
         <span style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', display: 'block', paddingBottom: '8px' }}>
-          Money will be credited directly to your verified bank account.
+          {lang === 'en'
+            ? 'Money will be credited directly to your verified bank account.'
+            : 'பணம் உங்கள் சரிபார்க்கப்பட்ட வங்கி கணக்கில் நேரடியாக செலுத்தப்படும்.'}
         </span>
       </div>
     </div>

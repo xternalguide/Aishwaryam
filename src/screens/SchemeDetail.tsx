@@ -29,7 +29,7 @@ interface MilestoneItem {
 export const SchemeDetail: React.FC = () => {
   const navigate = useNavigate();
   const { schemeId } = useParams<{ schemeId: string }>();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
 
   const [isLoading, setIsLoading] = useState(true);
   const [scheme, setScheme] = useState<AvailableScheme | null>(null);
@@ -1023,10 +1023,10 @@ export const SchemeDetail: React.FC = () => {
             <div className="glass-card" style={{ borderRadius: '16px', padding: '20px', background: 'white', display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
-                  Scheme Duration Progress / திட்ட சேமிப்பு காலம்
+                  {t('scheme_duration_progress')}
                 </span>
                 <span style={{ fontSize: '14px', fontWeight: '900', color: 'var(--brand-accent)' }}>
-                  {remainingDaysForScheme} {remainingDaysForScheme === 1 ? 'day' : 'days'} remaining / {remainingDaysForScheme} நாட்கள் மீதமுள்ளன
+                  {remainingDaysForScheme} {remainingDaysForScheme === 1 ? t('days_remaining_singular') : t('days_remaining_plural')}
                 </span>
               </div>
   
@@ -1042,8 +1042,8 @@ export const SchemeDetail: React.FC = () => {
               </div>
   
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)' }}>
-                <span>Start Date / தொடங்கிய நாள்: {joinedAt ? new Date(joinedAt).toLocaleDateString() : '—'}</span>
-                <span>Maturity Date / முதிர்வு நாள்: {maturityDate ? new Date(maturityDate).toLocaleDateString() : '—'}</span>
+                <span>{t('start_date')}: {joinedAt ? new Date(joinedAt).toLocaleDateString() : '—'}</span>
+                <span>{t('maturity_date')}: {maturityDate ? new Date(maturityDate).toLocaleDateString() : '—'}</span>
               </div>
             </div>
 
@@ -1105,49 +1105,49 @@ export const SchemeDetail: React.FC = () => {
             <div className="glass-card" style={{ borderRadius: '16px', padding: '0', background: 'white', overflow: 'hidden', border: '1.5px solid #FFD700', boxShadow: '0 4px 16px rgba(255, 215, 0, 0.06)' }}>
               <div style={{ background: 'linear-gradient(135deg, #FFFDF9 0%, #FFF9F0 100%)', padding: '12px 16px', borderBottom: '1px solid #ECECEC' }}>
                 <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', display: 'block' }}>
-                  Plan Summary Table / சேமிப்பு விவர அட்டவணை
+                  {t('plan_summary_table')}
                 </span>
               </div>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px', textAlign: 'left' }}>
                 <tbody>
                   <tr style={{ borderBottom: '1px solid #ECECEC' }}>
-                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>Total Gold Purchased / வாங்கிய தங்கம்</td>
+                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>{t('total_gold_purchased')}</td>
                     <td style={{ padding: '10px 16px', fontWeight: 'bold', textAlign: 'right', color: '#FFB300' }}>
                       {mgToGrams(accumulatedGoldMg)}
                     </td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #ECECEC' }}>
-                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>Total Bonus Gold Earned / போனஸ் தங்கம்</td>
+                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>{t('total_bonus_gold_earned')}</td>
                     <td style={{ padding: '10px 16px', fontWeight: 'bold', textAlign: 'right', color: 'var(--brand-accent)' }}>
                       {mgToGrams(totalBonusGoldMg)}
                     </td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #ECECEC' }}>
-                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>Total Deposited / சேமிப்பு தொகை</td>
+                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>{t('total_deposited')}</td>
                     <td style={{ padding: '10px 16px', fontWeight: 'bold', textAlign: 'right', color: 'var(--brand-dark)' }}>
                       {formatRupeesFull(totalSavingsAddedPaise)}
                     </td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #ECECEC' }}>
-                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>Start Date / தொடங்கிய நாள்</td>
+                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>{t('start_date')}</td>
                     <td style={{ padding: '10px 16px', fontWeight: 'bold', textAlign: 'right', color: 'var(--brand-dark)' }}>
                       {joinedAt ? new Date(joinedAt).toLocaleDateString() : '—'}
                     </td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #ECECEC' }}>
-                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>Maturity Date / முதிர்வு நாள்</td>
+                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>{t('maturity_date')}</td>
                     <td style={{ padding: '10px 16px', fontWeight: 'bold', textAlign: 'right', color: 'var(--brand-dark)' }}>
                       {maturityDate ? new Date(maturityDate).toLocaleDateString() : '—'}
                     </td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #ECECEC' }}>
-                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>Days Remaining / மீதமுள்ள நாட்கள்</td>
+                    <td style={{ padding: '10px 16px', color: 'var(--text-secondary)' }}>{t('days_remaining')}</td>
                     <td style={{ padding: '10px 16px', fontWeight: 'bold', textAlign: 'right', color: 'var(--brand-dark)' }}>
-                      {remainingDaysForScheme} {remainingDaysForScheme === 1 ? 'day' : 'days'}
+                      {remainingDaysForScheme} {remainingDaysForScheme === 1 ? t('days_remaining_singular') : t('days_remaining_plural')}
                     </td>
                   </tr>
                   <tr style={{ background: '#FFFDF9', fontWeight: 'bold' }}>
-                    <td style={{ padding: '12px 16px', color: 'var(--brand-dark)' }}>Total Weight / மொத்த தங்கம் (Vault)</td>
+                    <td style={{ padding: '12px 16px', color: 'var(--brand-dark)' }}>{t('total_weight_vault')}</td>
                     <td style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--brand-accent)', fontSize: '14px' }}>
                       {mgToGrams(accumulatedGoldMg + totalBonusGoldMg)}
                     </td>
@@ -1184,17 +1184,17 @@ export const SchemeDetail: React.FC = () => {
             <div className="glass-card" style={{ borderRadius: '16px', padding: '0', background: 'white', overflow: 'hidden', border: '1px solid #ECECEC', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.02)' }}>
               <div style={{ background: '#F9FAFB', padding: '12px 16px', borderBottom: '1px solid #ECECEC' }}>
                 <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', display: 'block' }}>
-                  Transaction History / பரிவர்த்தனை வரலாறு
+                  {t('transaction_history')}
                 </span>
               </div>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', textAlign: 'left', minWidth: '340px' }}>
                   <thead>
                     <tr style={{ borderBottom: '1.5px solid #ECECEC', background: '#F3F4F6' }}>
-                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Date & Time</th>
-                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>Amount</th>
-                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>Gold Purchased</th>
-                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>Bonus Gold</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>{t('date_and_time')}</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>{t('amount')}</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>{t('gold_purchased')}</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>{t('bonus_gold')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1233,7 +1233,7 @@ export const SchemeDetail: React.FC = () => {
                     ) : (
                       <tr>
                         <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                          No transactions found
+                          {t('no_transactions_found')}
                         </td>
                       </tr>
                     )}
@@ -1330,7 +1330,7 @@ export const SchemeDetail: React.FC = () => {
                   display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}
               >
-                Redeemed / பெறப்பட்டது
+                {t('redeemed')}
               </button>
             ) : schemeStatus.toLowerCase() === 'matured' ? (
               <div style={{
@@ -1347,13 +1347,10 @@ export const SchemeDetail: React.FC = () => {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--brand-dark)', fontWeight: 'bold', fontSize: '14.5px' }}>
                   <Award size={18} color="#FFB300" />
-                  <span>Scheme Matured / திட்டம் முதிர்வடைந்தது! 🎉</span>
+                  <span>{t('scheme_matured')}</span>
                 </div>
                 <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: 0, lineHeight: '17px' }}>
-                  To redeem your accumulated gold/silver or cash equivalent, please contact your nearest branch or call customer support at <strong>+91 94430 00000</strong>. Physical verification is required for security.
-                </p>
-                <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '2px 0 0 0', lineHeight: '16px', fontStyle: 'italic' }}>
-                  உங்களது சேமிப்பை தங்கம்/வெள்ளி அல்லது பணமாகப் பெற, தயவுசெய்து தங்களது அருகில் உள்ள ஐஸ்வர்யம் கிளையை அணுகவும் அல்லது <strong>+91 94430 00000</strong> என்ற எண்ணில் வாடிக்கையாளர் சேவையை அழைக்கவும்.
+                  {lang === 'en' ? t('matured_redemption_instruction_en') : t('matured_redemption_instruction_ta')}
                 </p>
               </div>
             ) : (
@@ -1590,10 +1587,10 @@ export const SchemeDetail: React.FC = () => {
             
             <div>
               <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 8px 0' }}>
-                Scheme Joined Successfully! / திட்டம் வெற்றிகரமாக இணைக்கப்பட்டது!
+                {t('scheme_joined_successfully')}
               </h3>
               <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '18px', margin: 0 }}>
-                Your savings plan is now active. Start investing to earn your 7.5% Tier 1 Loyalty Bonus! / உங்களது சேமிப்புத் திட்டம் இப்போது செயல்படுத்தப்பட்டுள்ளது. உங்களது 7.5% போனஸை பெற சேமிக்கத் தொடங்குங்கள்!
+                {t('scheme_joined_successfully_desc')}
               </p>
             </div>
 
@@ -1610,7 +1607,7 @@ export const SchemeDetail: React.FC = () => {
                   boxShadow: '0 4px 12px var(--brand-glow)'
                 }}
               >
-                Start Investing Now / இப்பொழுதே முதலீடு செய்க
+                {t('start_investing_now')}
               </button>
               <button
                 onClick={() => {
@@ -1623,7 +1620,7 @@ export const SchemeDetail: React.FC = () => {
                   display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}
               >
-                Invest Later / பிறகு முதலீடு செய்க
+                {t('invest_later')}
               </button>
             </div>
           </div>
@@ -1644,7 +1641,7 @@ export const SchemeDetail: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Calculator size={20} color="var(--brand-dark)" />
                 <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>
-                  {userSchemeId ? 'Make Payment / சேமிப்புத் தொகை செலுத்துக' : 'Join Savings Plan / சேமிப்புத் திட்டத்தில் சேர்க'}
+                  {userSchemeId ? t('make_payment') : t('join_savings_plan')}
                 </h3>
               </div>
               <button onClick={() => setShowJoinSheet(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
@@ -1794,7 +1791,7 @@ export const SchemeDetail: React.FC = () => {
               {isProcessing ? (
                 <div className="spinner" style={{ width: '20px', height: '20px', border: '2px solid white', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
               ) : (
-                userSchemeId ? 'Make Payment / சேமிப்புத் தொகை செலுத்துக' : 'Pay & Join Plan / செலுத்தி திட்டத்தில் சேர்க'
+                userSchemeId ? t('make_payment') : t('pay_and_join_plan')
               )}
             </button>
           </div>

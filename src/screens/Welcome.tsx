@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SessionManager } from '../utils/SessionManager';
+import { useTranslation } from '../utils/translation';
 import { Star, Shield, Award } from 'lucide-react';
 
 interface Slide {
@@ -15,45 +16,46 @@ interface Slide {
   accent: string;
 }
 
-const slides: Slide[] = [
-  {
-    icon: <Star size={48} color="white" fill="white" />,
-    iconBg: 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)',
-    badge: 'TRUSTED GOLD PLATFORM',
-    title: 'Save for your Future',
-    subtitle: 'Start with small steps',
-    body: 'Accumulate certified 24K gold regularly to protect your family\'s financial future.',
-    stat: '₹100',
-    statLabel: 'Min Starting Savings',
-    accent: 'var(--gold-warm)'
-  },
-  {
-    icon: <Shield size={48} color="white" fill="white" />,
-    iconBg: 'linear-gradient(135deg, #10B981 0%, #047857 100%)',
-    badge: '100% SECURED VAULT',
-    title: 'Safe and Certified',
-    subtitle: 'Pure gold guaranteed',
-    body: 'Your gold is saved in secure vault lockers with fully certified authenticity.',
-    stat: '99.9%',
-    statLabel: 'Purity Guarantee',
-    accent: 'var(--success-green)'
-  },
-  {
-    icon: <Award size={48} color="white" fill="white" />,
-    iconBg: 'linear-gradient(135deg, #C2185B 0%, #4A0E4E 100%)',
-    badge: 'EXTRA BONUS BENEFITS',
-    title: 'Loyalty Bonus Rewards',
-    subtitle: 'Up to 7.5% Bonus',
-    body: 'Get additional weight credited directly to your account based on your saving milestone tiers.',
-    stat: '7.5%',
-    statLabel: 'Max Loyalty Bonus',
-    accent: 'var(--brand-accent)'
-  }
-];
-
 export const Welcome: React.FC = () => {
   const navigate = useNavigate();
+  const { t, lang, changeLanguage } = useTranslation();
   const [current, setCurrent] = useState(0);
+
+  const slides: Slide[] = [
+    {
+      icon: <Star size={48} color="white" fill="white" />,
+      iconBg: 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)',
+      badge: t('trusted_gold_platform'),
+      title: t('save_for_future'),
+      subtitle: t('start_with_small_steps'),
+      body: t('save_for_future_body'),
+      stat: '₹100',
+      statLabel: t('min_starting_savings'),
+      accent: 'var(--gold-warm)'
+    },
+    {
+      icon: <Shield size={48} color="white" fill="white" />,
+      iconBg: 'linear-gradient(135deg, #10B981 0%, #047857 100%)',
+      badge: t('secured_vault'),
+      title: t('safe_and_certified'),
+      subtitle: t('pure_gold_guaranteed'),
+      body: t('safe_and_certified_body'),
+      stat: '99.9%',
+      statLabel: t('purity_guarantee'),
+      accent: 'var(--success-green)'
+    },
+    {
+      icon: <Award size={48} color="white" fill="white" />,
+      iconBg: 'linear-gradient(135deg, #C2185B 0%, #4A0E4E 100%)',
+      badge: t('extra_bonus_benefits'),
+      title: t('loyalty_bonus_rewards'),
+      subtitle: t('up_to_bonus'),
+      body: t('loyalty_bonus_rewards_body'),
+      stat: '7.5%',
+      statLabel: t('max_loyalty_bonus'),
+      accent: 'var(--brand-accent)'
+    }
+  ];
 
   const isLast = current === slides.length - 1;
 
@@ -93,9 +95,30 @@ export const Welcome: React.FC = () => {
         justifyContent: 'space-between',
         boxSizing: 'border-box'
       }}>
-        {/* Skip Button */}
-        {!isLast && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '16px' }}>
+        {/* Top Header Row with Language Selector & Skip */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', width: '100%' }}>
+          {/* Language Toggle EN/தமிழ் */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 'bold', color: lang === 'en' ? 'white' : 'rgba(255,255,255,0.6)' }}>EN</span>
+            <button
+              onClick={() => changeLanguage(lang === 'en' ? 'ta' : 'en')}
+              style={{
+                width: '40px', height: '20px', borderRadius: '10px',
+                background: lang === 'ta' ? 'var(--gold-warm)' : 'rgba(255,255,255,0.2)',
+                border: 'none', position: 'relative', cursor: 'pointer',
+                transition: 'background-color 0.2s ease', padding: 0
+              }}
+            >
+              <div style={{
+                width: '14px', height: '14px', borderRadius: '50%', background: lang === 'ta' ? '#1A1200' : 'white',
+                position: 'absolute', top: '3px', left: lang === 'ta' ? '23px' : '3px',
+                transition: 'left 0.2s ease'
+              }} />
+            </button>
+            <span style={{ fontSize: '11px', fontWeight: 'bold', color: lang === 'ta' ? 'var(--gold-warm)' : 'rgba(255,255,255,0.6)' }}>தமிழ்</span>
+          </div>
+
+          {!isLast && (
             <button
               onClick={handleSkip}
               style={{
@@ -108,10 +131,10 @@ export const Welcome: React.FC = () => {
                 cursor: 'pointer'
               }}
             >
-              Skip
+              {t('skip')}
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Slide Content */}
         <div style={{
@@ -262,7 +285,7 @@ export const Welcome: React.FC = () => {
               transition: 'background-color 0.3s ease'
             }}
           >
-            {isLast ? 'Start Saving Gold ✨' : 'Next'}
+            {isLast ? t('start_saving_gold_cta') : t('next')}
           </button>
 
           {/* Already have an account nudging */}
@@ -278,7 +301,7 @@ export const Welcome: React.FC = () => {
               cursor: 'pointer'
             }}
           >
-            Already have an account? Login
+            {t('already_have_account_login')}
           </button>
         </div>
       </div>

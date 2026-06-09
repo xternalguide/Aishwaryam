@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SessionManager, OnboardingStage } from '../utils/SessionManager';
+import { useTranslation } from '../utils/translation';
 import { ApiClient } from '../utils/ApiClient';
 import { Phone, CheckCircle } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { t, lang, changeLanguage } = useTranslation();
   const [phone, setPhone] = useState('');
   const [isOtpFlow, setIsOtpFlow] = useState(false);
   const [otp, setOtp] = useState('');
@@ -32,11 +34,11 @@ export const Login: React.FC = () => {
   const handleSendOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (phone.length === 0) {
-      setErrorMsg('Mobile number cannot be empty.');
+      setErrorMsg(t('empty_phone_err'));
       return;
     }
     if (phone.length !== 10 || !/^[6-9]\d{9}$/.test(phone)) {
-      setErrorMsg('Please enter a valid 10-digit mobile number.');
+      setErrorMsg(t('invalid_phone_err'));
       return;
     }
     setIsLoading(true);
@@ -146,8 +148,6 @@ export const Login: React.FC = () => {
     }
   }, [showSuccessDialog, successData]);
 
-
-
   return (
     <div style={{
       display: 'flex',
@@ -165,6 +165,30 @@ export const Login: React.FC = () => {
         flexDirection: 'column',
         boxSizing: 'border-box'
       }}>
+        {/* Top Header Row with Language Selector */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingTop: '8px', width: '100%', marginBottom: '16px' }}>
+          {/* Language Toggle EN/தமிழ் */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 'bold', color: lang === 'en' ? 'var(--brand-dark)' : 'var(--text-light)' }}>EN</span>
+            <button
+              onClick={() => changeLanguage(lang === 'en' ? 'ta' : 'en')}
+              style={{
+                width: '40px', height: '20px', borderRadius: '10px',
+                background: lang === 'ta' ? 'var(--brand-dark)' : '#ECECEC',
+                border: 'none', position: 'relative', cursor: 'pointer',
+                transition: 'background-color 0.2s ease', padding: 0
+              }}
+            >
+              <div style={{
+                width: '14px', height: '14px', borderRadius: '50%', background: 'white',
+                position: 'absolute', top: '3px', left: lang === 'ta' ? '23px' : '3px',
+                transition: 'left 0.2s ease'
+              }} />
+            </button>
+            <span style={{ fontSize: '11px', fontWeight: 'bold', color: lang === 'ta' ? 'var(--brand-dark)' : 'var(--text-light)' }}>தமிழ்</span>
+          </div>
+        </div>
+
         {/* Top Section */}
         <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
           {/* Branding Logo */}
@@ -176,7 +200,7 @@ export const Login: React.FC = () => {
             marginBottom: '8px',
             textAlign: 'center'
           }}>
-            {isOtpFlow ? 'Verify OTP' : 'Enter Mobile Number'}
+            {isOtpFlow ? t('verify_otp') : t('enter_mobile_number')}
           </h1>
           <p style={{
             color: 'var(--text-secondary)',
@@ -184,7 +208,7 @@ export const Login: React.FC = () => {
             marginBottom: '32px',
             textAlign: 'center'
           }}>
-            {isOtpFlow ? `OTP sent to +91 ${phone}. Check your SMS inbox.` : 'We will send a 6-digit OTP to verify your number.'}
+            {isOtpFlow ? t('otp_sent_to').replace('{phone}', phone) : t('send_otp_instruction')}
           </p>
 
           {errorMsg && (
@@ -237,7 +261,7 @@ export const Login: React.FC = () => {
 
               {secondsRemaining > 0 ? (
                 <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 'bold' }}>
-                  Resend OTP in {secondsRemaining}s
+                  {t('resend_otp_in').replace('{seconds}', String(secondsRemaining))}
                 </span>
               ) : (
                 <button
@@ -251,7 +275,7 @@ export const Login: React.FC = () => {
                     cursor: 'pointer'
                   }}
                 >
-                  Resend OTP
+                  {t('resend_otp')}
                 </button>
               )}
             </div>
@@ -277,7 +301,7 @@ export const Login: React.FC = () => {
                   type="tel"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  placeholder="10 digit mobile number"
+                  placeholder={t('phone_placeholder')}
                   value={phone}
                   onChange={(e) => {
                     const val = e.target.value.replace(/\D/g, '').slice(0, 10);
@@ -296,7 +320,7 @@ export const Login: React.FC = () => {
                 />
               </div>
               <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px', textAlign: 'center' }}>
-                You will receive an SMS with a 6-digit OTP
+                {t('phone_hint')}
               </p>
             </form>
           )}
@@ -329,7 +353,7 @@ export const Login: React.FC = () => {
               {isLoading ? (
                 <div className="spinner" style={{ width: '24px', height: '24px', border: '3px solid white', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
               ) : (
-                'Get OTP'
+                t('get_otp')
               )}
             </button>
           )}
@@ -359,7 +383,7 @@ export const Login: React.FC = () => {
               {isLoading ? (
                 <div className="spinner" style={{ width: '24px', height: '24px', border: '3px solid white', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
               ) : (
-                'Verify & Continue'
+                t('verify_and_continue')
               )}
             </button>
           )}
@@ -378,7 +402,7 @@ export const Login: React.FC = () => {
               textDecoration: 'underline'
             }}
           >
-            Need Help? Contact Customer Support
+            {t('contact_support_login')}
           </button>
         </div>
       </div>
@@ -423,7 +447,7 @@ export const Login: React.FC = () => {
               <CheckCircle size={48} color="var(--brand-mid)" />
             </div>
             <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text-primary)', textAlign: 'center' }}>
-              Login Successful
+              {t('login_successful')}
             </span>
           </div>
         </div>

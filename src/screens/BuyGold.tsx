@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SessionManager } from '../utils/SessionManager';
+import { useTranslation } from '../utils/translation';
 import { ApiClient } from '../utils/ApiClient';
 import { useApp } from '../context/AppContext';
 import { ArrowLeft, Info } from 'lucide-react';
@@ -8,6 +9,7 @@ import { ArrowLeft, Info } from 'lucide-react';
 export const BuyGold: React.FC = () => {
   const navigate = useNavigate();
   const { livePrice, refreshData } = useApp();
+  const { t } = useTranslation();
 
   const [buyPricePaise, setBuyPricePaise] = useState(754200); // ₹7,542.00 paise fallback
   const [priceUpdatedAt, setPriceUpdatedAt] = useState<string | null>(null);
@@ -176,7 +178,7 @@ export const BuyGold: React.FC = () => {
           <ArrowLeft size={24} />
         </button>
         <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--brand-dark)', fontFamily: 'var(--font-poppins)' }}>
-          Buy Gold / Silver
+          {t('buy_gold_silver')}
         </span>
       </div>
 
@@ -193,12 +195,12 @@ export const BuyGold: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', fontWeight: '500' }}>Current Gold Price</span>
+                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', fontWeight: '500' }}>{t('current_gold_price')}</span>
                 <span style={{
                   fontSize: '9px', fontWeight: 'bold', color: '#FFB300', background: 'rgba(255, 179, 0, 0.15)',
                   padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(255, 179, 0, 0.3)'
                 }}>
-                  LOCKED
+                  {t('locked_status')}
                 </span>
               </div>
               <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--gold-primary)', fontFamily: 'var(--font-poppins)', margin: 0 }}>
@@ -206,7 +208,7 @@ export const BuyGold: React.FC = () => {
               </h2>
               {priceUpdatedAt && (
                 <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)' }}>
-                  Last updated: {formatDate(priceUpdatedAt)}
+                  {t('last_updated')}: {formatDate(priceUpdatedAt)}
                 </span>
               )}
             </div>
@@ -224,17 +226,17 @@ export const BuyGold: React.FC = () => {
 
         {/* Inputs */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>Enter investment amount</span>
+          <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>{t('enter_investment_amount')}</span>
 
           <div>
-            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginLeft: '4px' }}>Amount (Rupees)</label>
+            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginLeft: '4px' }}>{t('amount_rupees')}</label>
             <div style={{ position: 'relative', marginTop: '4px' }}>
               <span style={{ position: 'absolute', left: '16px', top: '14px', fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)' }}>₹</span>
               <input
                 type="text"
                 inputMode="decimal"
-                pattern="[0-9]*\.?[0-9]*"
-                placeholder="Enter Amount"
+                pattern="[0-9]*\\.?[0-9]*"
+                placeholder={t('enter_amount')}
                 value={amountInput}
                 onChange={(e) => onAmountChanged(e.target.value)}
                 style={{
@@ -252,17 +254,17 @@ export const BuyGold: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>OR</span>
+            <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('or').toUpperCase()}</span>
           </div>
 
           <div>
-            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginLeft: '4px' }}>Weight (Grams)</label>
+            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginLeft: '4px' }}>{t('weight_grams')}</label>
             <div style={{ position: 'relative', marginTop: '4px' }}>
               <input
                 type="text"
                 inputMode="decimal"
-                pattern="[0-9]*\.?[0-9]*"
-                placeholder="Enter Weight"
+                pattern="[0-9]*\\.?[0-9]*"
+                placeholder={t('enter_weight')}
                 value={weightInput}
                 onChange={(e) => onWeightChanged(e.target.value)}
                 style={{
@@ -292,16 +294,16 @@ export const BuyGold: React.FC = () => {
             border: '1px solid #ECECEC'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-secondary)' }}>
-              <span>Installment Value</span>
+              <span>{t('installment_value')}</span>
               <span style={{ fontWeight: '500' }}>{formatRupees(totalToPayPaise - gstPaise)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-secondary)' }}>
-              <span>GST (3%)</span>
+              <span>{t('gst_label')}</span>
               <span style={{ fontWeight: '500' }}>{formatRupees(gstPaise)}</span>
             </div>
             <div style={{ height: '1px', background: '#F3F4F6', margin: '4px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
-              <span>Total to Pay</span>
+              <span>{t('total_to_pay')}</span>
               <span style={{ fontSize: '16px', color: 'var(--brand-accent)' }}>{formatRupees(totalToPayPaise)}</span>
             </div>
           </div>
@@ -339,7 +341,7 @@ export const BuyGold: React.FC = () => {
           {isLoading ? (
             <div className="spinner" style={{ width: '24px', height: '24px', border: '3px solid white', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           ) : (
-            'Pay Now'
+            t('pay_now')
           )}
         </button>
       </div>

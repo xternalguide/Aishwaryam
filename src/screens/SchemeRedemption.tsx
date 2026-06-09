@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SessionManager } from '../utils/SessionManager';
+import { useTranslation } from '../utils/translation';
 import { ApiClient } from '../utils/ApiClient';
 import { useApp } from '../context/AppContext';
 import { ArrowLeft, Landmark, AlertTriangle } from 'lucide-react';
@@ -9,6 +10,7 @@ export const SchemeRedemption: React.FC = () => {
   const navigate = useNavigate();
   const { schemeId } = useParams<{ schemeId: string }>();
   const { bankAccounts, activeSchemes, refreshData, isLoading } = useApp();
+  const { t } = useTranslation();
   
   // Scheme stats
   const [accumulatedGoldMg, setAccumulatedGoldMg] = useState(0);
@@ -46,11 +48,11 @@ export const SchemeRedemption: React.FC = () => {
       });
 
       await refreshData();
-      alert('Redemption request submitted successfully!');
+      alert(t('redemption_success'));
       navigate('/dashboard');
     } catch (err: any) {
       await refreshData();
-      alert('Redemption request submitted successfully!');
+      alert(t('redemption_success'));
       navigate('/dashboard');
     } finally {
       setIsSubmitting(false);
@@ -93,7 +95,7 @@ export const SchemeRedemption: React.FC = () => {
           <ArrowLeft size={24} />
         </button>
         <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--brand-dark)', fontFamily: 'var(--font-poppins)' }}>
-          Redeem Matured Plan
+          {t('redeem_matured_plan')}
         </span>
       </div>
 
@@ -109,28 +111,28 @@ export const SchemeRedemption: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
             <span style={{ fontSize: '20px' }}>🎉</span>
             <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: 'white', margin: 0, fontFamily: 'var(--font-poppins)' }}>
-              Matured Gold Summary
+              {t('matured_gold_summary')}
             </h3>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#A0A0AB' }}>
-              <span>Base Gold Saved</span>
+              <span>{t('base_gold_saved')}</span>
               <span style={{ color: 'white', fontWeight: 'bold' }}>{mgToGrams(baseSavings)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#A0A0AB' }}>
-              <span>Scheme Loyalty Bonus</span>
+              <span>{t('scheme_loyalty_bonus')}</span>
               <span style={{ color: 'white', fontWeight: 'bold' }}>+ {mgToGrams(totalBonusGoldMg)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#A0A0AB' }}>
-              <span>Special Birthday & Admin Bonus</span>
+              <span>{t('special_birthday_admin_bonus')}</span>
               <span style={{ color: 'white', fontWeight: 'bold' }}>+ {mgToGrams(specialEventBonus)}</span>
             </div>
 
             <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '8px 0' }} />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '14px', fontWeight: 'bold' }}>Total Redeeming Gold</span>
+              <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{t('total_redeeming_gold')}</span>
               <span style={{ fontSize: '18px', fontWeight: '900', color: 'var(--gold-primary)' }}>
                 {mgToGrams(totalRedeemingGold)}
               </span>
@@ -139,7 +141,7 @@ export const SchemeRedemption: React.FC = () => {
         </div>
 
         <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
-          Select Redemption Method:
+          {t('select_redemption_method')}
         </span>
 
         {/* Option 1: Cash to bank */}
@@ -165,8 +167,8 @@ export const SchemeRedemption: React.FC = () => {
             style={{ accentColor: 'var(--brand-dark)' }}
           />
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Cash Payout to Bank Account</span>
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Liquidate gold at the live market price and transfer money.</span>
+            <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{t('cash_payout_to_bank')}</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('liquidate_gold_desc')}</span>
           </div>
         </div>
 
@@ -176,8 +178,8 @@ export const SchemeRedemption: React.FC = () => {
             {bankAccounts.length === 0 ? (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--error-red)', display: 'block' }}>No Bank Account Linked</span>
-                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Please link a bank account to receive the cash payout.</span>
+                  <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--error-red)', display: 'block' }}>{t('no_bank_account_linked')}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('link_bank_instruction')}</span>
                 </div>
                 <button
                   onClick={() => navigate('/add-bank-account')}
@@ -186,7 +188,7 @@ export const SchemeRedemption: React.FC = () => {
                     padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer'
                   }}
                 >
-                  Link Account
+                  {t('link_account')}
                 </button>
               </div>
             ) : (
@@ -226,8 +228,8 @@ export const SchemeRedemption: React.FC = () => {
             style={{ accentColor: 'var(--brand-dark)' }}
           />
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Showroom Jewelry Collection</span>
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Collect physical jewelry at partner showrooms with 0% wastage.</span>
+            <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{t('showroom_jewelry_collection')}</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('collect_physical_jewelry_desc')}</span>
           </div>
         </div>
 
@@ -254,17 +256,17 @@ export const SchemeRedemption: React.FC = () => {
             style={{ accentColor: 'var(--brand-dark)' }}
           />
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>Secure Doorstep Gold Delivery</span>
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Receive insured physical gold coins delivered securely to your doorstep.</span>
+            <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{t('secure_doorstep_delivery')}</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('receive_insured_delivery_desc')}</span>
           </div>
         </div>
 
         {/* Address input for door delivery */}
         {redemptionType === 'DELIVERY' && (
           <div>
-            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Delivery Address</label>
+            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>{t('delivery_address')}</label>
             <textarea
-              placeholder="Enter complete shipping address"
+              placeholder={t('enter_shipping_address')}
               value={deliveryAddress}
               onChange={(e) => setDeliveryAddress(e.target.value)}
               style={{
@@ -317,7 +319,7 @@ export const SchemeRedemption: React.FC = () => {
           {isSubmitting ? (
             <div className="spinner" style={{ width: '24px', height: '24px', border: '3px solid white', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           ) : (
-            'Confirm & Submit Redemption'
+            t('confirm_submit_redemption')
           )}
         </button>
       </div>
