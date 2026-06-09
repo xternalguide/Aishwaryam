@@ -7,7 +7,7 @@ import { Phone, CheckCircle } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { t, lang, changeLanguage } = useTranslation();
+  const { t } = useTranslation();
   const [phone, setPhone] = useState('');
   const [isOtpFlow, setIsOtpFlow] = useState(false);
   const [otp, setOtp] = useState('');
@@ -166,8 +166,8 @@ export const Login: React.FC = () => {
         boxSizing: 'border-box'
       }}>
         {/* Top Header Row with Language Selector */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingTop: '8px', width: '100%', marginBottom: '16px' }}>
           {/* Language Toggle EN/தமிழ் */}
+        {/* <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingTop: '8px', width: '100%', marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ fontSize: '11px', fontWeight: 'bold', color: lang === 'en' ? 'var(--brand-dark)' : 'var(--text-light)' }}>EN</span>
             <button
@@ -187,7 +187,7 @@ export const Login: React.FC = () => {
             </button>
             <span style={{ fontSize: '11px', fontWeight: 'bold', color: lang === 'ta' ? 'var(--brand-dark)' : 'var(--text-light)' }}>தமிழ்</span>
           </div>
-        </div>
+        </div> */}
 
         {/* Top Section */}
         <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>

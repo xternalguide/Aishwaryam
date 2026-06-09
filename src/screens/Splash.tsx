@@ -39,14 +39,13 @@ export const Splash: React.FC = () => {
         navigate('/welcome');
       } else if (!hasToken) {
         navigate('/login');
-      } else if (stage === OnboardingStage.FULLY_VERIFIED) {
-        navigate('/mpin/verify');
       } else if (stage === OnboardingStage.OTP_VERIFIED) {
         navigate('/mpin/setup');
       } else if (stage === OnboardingStage.MPIN_CREATED) {
         navigate('/profile-setup');
       } else {
-        navigate('/mpin/verify');
+        // Already logged in: directly route to dashboard and keep session active
+        navigate('/dashboard');
       }
     }
   }, [minTimeElapsed, maxTimeReached, isLoading, navigate]);

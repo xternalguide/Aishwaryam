@@ -1632,7 +1632,7 @@ export const Dashboard: React.FC = () => {
           <div className="app-header-bar" style={{
             background: 'white',
             borderBottom: '1px solid #ECECEC',
-            paddingTop: isDesktop ? '16px' : 'calc(10px + env(safe-area-inset-top, 0px))',
+            paddingTop: isDesktop ? '16px' : 'calc(0px + env(safe-area-inset-top, 0px))',
             paddingLeft: '20px',
             paddingRight: '20px',
             paddingBottom: isDesktop ? '16px' : '12px',

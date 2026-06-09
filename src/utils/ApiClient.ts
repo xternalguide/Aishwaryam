@@ -40,6 +40,18 @@ instance.interceptors.request.use(
   }
 );
 
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+const subscribeTokenRefresh = (cb: (token: string) => void) => {
+  refreshSubscribers.push(cb);
+};
+
+const onRefreshed = (token: string) => {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+};
+
 // Response interceptor: automatically handles JWT expiration and refresh token rotation
 instance.interceptors.response.use(
   (response) => response,
@@ -49,6 +61,19 @@ instance.interceptors.response.use(
     // Attempt token refresh rotation on 401
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
+
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          subscribeTokenRefresh((token) => {
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            resolve(instance(originalRequest));
+          });
+        });
+      }
+
+      isRefreshing = true;
       const refreshToken = SessionManager.getRefreshToken();
       
       if (refreshToken) {
@@ -61,19 +86,27 @@ instance.interceptors.response.use(
           if (res.data && res.data.success) {
             const { token, refreshToken: newRefresh, userId } = res.data;
             SessionManager.saveSession(userId, token, newRefresh);
+            isRefreshing = false;
+            onRefreshed(token);
             
             // Retry the original request
             if (originalRequest.headers) {
               originalRequest.headers.Authorization = `Bearer ${token}`;
             }
             return instance(originalRequest);
+          } else {
+            isRefreshing = false;
+            SessionManager.clearSession();
+            window.location.hash = '#/login';
           }
         } catch (refreshErr) {
+          isRefreshing = false;
           // Refresh failed, clear session and redirect
           SessionManager.clearSession();
           window.location.hash = '#/login';
         }
       } else {
+        isRefreshing = false;
         SessionManager.clearSession();
         window.location.hash = '#/login';
       }
