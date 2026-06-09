@@ -304,6 +304,23 @@ namespace Aishwaryam.Api.Controllers
             await _db.Database.ExecuteSqlRawAsync("DELETE FROM schemes_master;");
             return Ok(new { message = "All scheme data wiped successfully. Users and gold wallets are untouched." });
         }
+
+        [HttpPost("{id:guid}/submit-form")]
+        public async Task<IActionResult> SubmitJoinForm(Guid id, [FromBody] SubmitJoinFormRequest request)
+        {
+            var result = await _schemeService.SubmitJoinFormAsync(
+                id,
+                request.UserId,
+                request.NomineeName,
+                request.NomineePhone,
+                request.NomineeRelationship,
+                request.State,
+                request.City,
+                request.StreetAddress,
+                request.Pincode
+            );
+            return Ok(result);
+        }
     }
 
     public class JoinSchemeRequest
@@ -368,5 +385,17 @@ namespace Aishwaryam.Api.Controllers
         public int StartDay { get; set; }
         public int EndDay { get; set; }
         public decimal BonusPercentage { get; set; }
+    }
+
+    public class SubmitJoinFormRequest
+    {
+        public Guid UserId { get; set; }
+        public string NomineeName { get; set; } = string.Empty;
+        public string NomineePhone { get; set; } = string.Empty;
+        public string NomineeRelationship { get; set; } = string.Empty;
+        public string State { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public string StreetAddress { get; set; } = string.Empty;
+        public string Pincode { get; set; } = string.Empty;
     }
 }

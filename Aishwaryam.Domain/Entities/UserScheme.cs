@@ -23,6 +23,8 @@ namespace Aishwaryam.Domain.Entities
 
         public Guid? SchemeMasterId { get; set; }
         public string? SubmittedFormDetails { get; set; }
+        public bool IsJoinFormCompleted { get; set; } = false;
+        public DateTime? FormSubmittedAt { get; set; }
 
         // Navigation property
         public User User { get; set; } = null!;

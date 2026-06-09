@@ -386,6 +386,8 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.RedeemedGoldMg).HasColumnName("RedeemedGoldMg").HasDefaultValue(0);
                 entity.Property(e => e.SchemeMasterId).HasColumnName("scheme_master_id");
                 entity.Property(e => e.SubmittedFormDetails).HasColumnName("submitted_form_details");
+                entity.Property(e => e.IsJoinFormCompleted).HasColumnName("is_join_form_completed").HasDefaultValue(false);
+                entity.Property(e => e.FormSubmittedAt).HasColumnName("form_submitted_at");
 
                 entity.HasOne(d => d.User)
                     .WithMany()

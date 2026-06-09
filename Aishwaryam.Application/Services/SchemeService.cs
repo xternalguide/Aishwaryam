@@ -140,7 +140,9 @@ namespace Aishwaryam.Application.Services
                     SchemeDayNumber = dayNumber,
                     CurrentBonusTierPercent = (double)currentBonusPercent,
                     RemainingDaysForCurrentTier = remainingDaysForCurrentTier,
-                    RemainingDaysForScheme = remainingDaysForScheme
+                    RemainingDaysForScheme = remainingDaysForScheme,
+                    IsJoinFormCompleted = activeScheme.IsJoinFormCompleted,
+                    SubmittedFormDetails = activeScheme.SubmittedFormDetails
                 });
             }
 
@@ -195,7 +197,9 @@ namespace Aishwaryam.Application.Services
                 SchemeDayNumber = primaryDayNumber,
                 CurrentBonusTierPercent = (double)primaryCurrentBonusPercent,
                 RemainingDaysForCurrentTier = primaryRemainingDaysForCurrentTier,
-                RemainingDaysForScheme = primaryRemainingDaysForScheme
+                RemainingDaysForScheme = primaryRemainingDaysForScheme,
+                IsJoinFormCompleted = primary.IsJoinFormCompleted,
+                SubmittedFormDetails = primary.SubmittedFormDetails
             };
         }
 
@@ -286,7 +290,8 @@ namespace Aishwaryam.Application.Services
                 MaturityDate = maturityDate,
                 Status = "Active",
                 SchemeMasterId = schemeMasterId,
-                SubmittedFormDetails = submittedFormDetailsJson
+                SubmittedFormDetails = submittedFormDetailsJson,
+                IsJoinFormCompleted = !string.IsNullOrEmpty(nomineeName)
             };
 
             await _schemeRepository.JoinSchemeAsync(userScheme);
@@ -366,6 +371,8 @@ namespace Aishwaryam.Application.Services
                     maturityDate = s.MaturityDate.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                     schemeMasterId = s.SchemeMasterId?.ToString() ?? string.Empty,
                     submittedFormDetails = s.SubmittedFormDetails ?? string.Empty,
+                    isJoinFormCompleted = s.IsJoinFormCompleted,
+                    formSubmittedAt = s.FormSubmittedAt?.ToString("yyyy-MM-ddTHH:mm:ssZ") ?? string.Empty,
                     totalInvestmentPaise = totalSavings,
                     totalBonusGoldMg = totalBonusGoldMg,
                     totalBonusEarnedPaise = totalBonusEarned
@@ -1057,6 +1064,70 @@ namespace Aishwaryam.Application.Services
                 r.CreatedAt,
                 r.UpdatedAt
             });
+        }
+
+        public async Task<object> SubmitJoinFormAsync(
+            Guid userSchemeId,
+            Guid userId,
+            string nomineeName,
+            string nomineePhone,
+            string nomineeRelationship,
+            string state,
+            string city,
+            string streetAddress,
+            string pincode)
+        {
+            var scheme = await _schemeRepository.GetUserSchemeByIdAsync(userSchemeId);
+            if (scheme == null || scheme.UserId != userId)
+            {
+                return new { Success = false, Message = "Scheme enrollment not found." };
+            }
+
+            var formDetails = new Dictionary<string, string?>();
+            formDetails["nomineeName"] = nomineeName;
+            formDetails["nomineePhone"] = nomineePhone;
+            formDetails["nomineeRelationship"] = nomineeRelationship;
+            formDetails["state"] = state;
+            formDetails["city"] = city;
+            formDetails["streetAddress"] = streetAddress;
+            formDetails["pincode"] = pincode;
+
+            scheme.SubmittedFormDetails = System.Text.Json.JsonSerializer.Serialize(formDetails);
+            scheme.IsJoinFormCompleted = true;
+            scheme.FormSubmittedAt = DateTime.UtcNow;
+            scheme.UpdatedAt = DateTime.UtcNow;
+
+            await _schemeRepository.UpdateUserSchemeAsync(scheme);
+
+            // Also update user profile globally for profile completeness
+            var user = await _authRepository.GetUserByIdAsync(userId);
+            if (user != null)
+            {
+                user.NomineeName = nomineeName;
+                user.NomineePhoneNumber = nomineePhone;
+                user.NomineeRelationship = nomineeRelationship;
+                await _authRepository.UpdateUserAsync(user);
+            }
+
+            // Also add address globally if not existing
+            var existingDefaultAddress = await _schemeRepository.GetUserDefaultAddressAsync(userId);
+            if (existingDefaultAddress == null)
+            {
+                var newAddress = new Address
+                {
+                    UserId = userId,
+                    StreetAddress = streetAddress,
+                    City = city,
+                    State = state,
+                    Pincode = pincode,
+                    IsDefault = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                await _schemeRepository.AddUserAddressAsync(newAddress);
+            }
+
+            return new { Success = true, Message = "Form submitted successfully." };
         }
     }
 }
