@@ -370,7 +370,7 @@ namespace Aishwaryam.Application.Services
                 issuer: jwtIssuer,
                 audience: jwtIssuer,
                 claims: claims,
-                expires: DateTime.Now.AddHours(2), // 2-hour session
+                expires: DateTime.UtcNow.AddHours(2), // 2-hour session
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -427,11 +427,10 @@ namespace Aishwaryam.Application.Services
 
             if (session.IsRevoked)
             {
-                // Grace period logic: If the latest active session was created less than 20 seconds ago,
-                // it is highly likely a concurrent mobile/web request hit 401 at the same time.
-                // In this case, we safely rotate the session again to return a valid active session.
+                // Grace/Recovery logic: If the latest active session is valid and not expired,
+                // rotate it safely instead of aggressively logging the user out.
                 var activeSession = await _authRepository.GetLatestActiveSessionByUserIdAsync(session.UserId);
-                if (activeSession != null && activeSession.CreatedAt.AddSeconds(20) >= DateTimeOffset.UtcNow)
+                if (activeSession != null && activeSession.ExpiresAt >= DateTimeOffset.UtcNow)
                 {
                     var userEntity = await _authRepository.GetUserByIdAsync(session.UserId);
                     if (userEntity != null && userEntity.IsActive)
@@ -458,7 +457,7 @@ namespace Aishwaryam.Application.Services
                         return new AuthResponse
                         {
                             Success = true,
-                            Message = "Token refreshed successfully (race condition handled).",
+                            Message = "Token refreshed successfully (grace session recovery).",
                             Token = reIssuedJwt,
                             RefreshToken = reIssuedRawRefresh,
                             UserId = userEntity.Id,
@@ -468,9 +467,8 @@ namespace Aishwaryam.Application.Services
                     }
                 }
 
-                // Replay attack detected. Revoke all user sessions.
-                await _authRepository.RevokeAllUserSessionsAsync(session.UserId);
-                return new AuthResponse { Success = false, Message = "Compromised session detected. All sessions revoked." };
+                // If no active session could be recovered, reject the refresh.
+                return new AuthResponse { Success = false, Message = "Session expired or invalid." };
             }
 
             if (session.ExpiresAt < DateTimeOffset.UtcNow)
@@ -478,9 +476,10 @@ namespace Aishwaryam.Application.Services
                 return new AuthResponse { Success = false, Message = "Refresh token expired." };
             }
 
-            if (session.DeviceFingerprint != request.DeviceFingerprint)
+            if (!string.IsNullOrEmpty(request.DeviceFingerprint) && session.DeviceFingerprint != request.DeviceFingerprint)
             {
-                return new AuthResponse { Success = false, Message = "Device binding mismatch." };
+                // Relaxed for session continuity: update the fingerprint instead of failing
+                session.DeviceFingerprint = request.DeviceFingerprint;
             }
 
             var user = await _authRepository.GetUserByIdAsync(session.UserId);
