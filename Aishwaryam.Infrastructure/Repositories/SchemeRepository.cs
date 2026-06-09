@@ -215,7 +215,7 @@ namespace Aishwaryam.Infrastructure.Repositories
 
         public async Task<(List<UserScheme> Enrollments, int Total)> GetEnrollmentsPaginatedAsync(int page, int pageSize)
         {
-            var query = _context.UserSchemes;
+            var query = _context.UserSchemes.Include(s => s.User);
             var total = await query.CountAsync();
             var enrollments = await query
                 .OrderByDescending(s => s.CreatedAt)
@@ -223,6 +223,20 @@ namespace Aishwaryam.Infrastructure.Repositories
                 .Take(pageSize)
                 .ToListAsync();
             return (enrollments, total);
+        }
+
+        public async Task<Address?> GetUserDefaultAddressAsync(Guid userId)
+        {
+            return await _context.Addresses
+                .Where(a => a.UserId == userId && a.IsDefault)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Address> AddUserAddressAsync(Address address)
+        {
+            _context.Addresses.Add(address);
+            await _context.SaveChangesAsync();
+            return address;
         }
     }
 }

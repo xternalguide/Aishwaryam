@@ -199,7 +199,16 @@ namespace Aishwaryam.Application.Services
             };
         }
 
-        public async Task<object> JoinSchemeAsync(Guid userId, Guid schemeMasterId)
+        public async Task<object> JoinSchemeAsync(
+            Guid userId, 
+            Guid schemeMasterId, 
+            string? nomineeName = null, 
+            string? nomineePhone = null, 
+            string? nomineeRelationship = null, 
+            string? state = null, 
+            string? city = null, 
+            string? streetAddress = null, 
+            string? pincode = null)
         {
             var master = await _schemeRepository.GetSchemeMasterByIdAsync(schemeMasterId);
             if (master == null) return new { Success = false, Message = "Scheme plan not found." };
@@ -208,6 +217,59 @@ namespace Aishwaryam.Application.Services
             if (existingSchemes.Any(s => s.PlanName == master.PlanName && s.Status == "Active"))
             {
                 return new { Success = false, Message = $"Already enrolled in an active '{master.PlanName}' scheme." };
+            }
+
+            string? submittedFormDetailsJson = null;
+            if (!string.IsNullOrEmpty(nomineeName) || !string.IsNullOrEmpty(streetAddress))
+            {
+                var formDetails = new Dictionary<string, string?>();
+                if (!string.IsNullOrEmpty(nomineeName)) formDetails["nomineeName"] = nomineeName;
+                if (!string.IsNullOrEmpty(nomineePhone)) formDetails["nomineePhone"] = nomineePhone;
+                if (!string.IsNullOrEmpty(nomineeRelationship)) formDetails["nomineeRelationship"] = nomineeRelationship;
+                if (!string.IsNullOrEmpty(state)) formDetails["state"] = state;
+                if (!string.IsNullOrEmpty(city)) formDetails["city"] = city;
+                if (!string.IsNullOrEmpty(streetAddress)) formDetails["streetAddress"] = streetAddress;
+                if (!string.IsNullOrEmpty(pincode)) formDetails["pincode"] = pincode;
+
+                submittedFormDetailsJson = System.Text.Json.JsonSerializer.Serialize(formDetails);
+            }
+
+            var user = await _authRepository.GetUserByIdAsync(userId);
+            if (user != null)
+            {
+                bool userUpdated = false;
+                if (!string.IsNullOrEmpty(nomineeName))
+                {
+                    user.NomineeName = nomineeName;
+                    user.NomineePhoneNumber = nomineePhone;
+                    user.NomineeRelationship = nomineeRelationship;
+                    userUpdated = true;
+                }
+
+                if (userUpdated)
+                {
+                    await _authRepository.UpdateUserAsync(user);
+                }
+
+                if (!string.IsNullOrEmpty(streetAddress) && !string.IsNullOrEmpty(city) && !string.IsNullOrEmpty(state) && !string.IsNullOrEmpty(pincode))
+                {
+                    var existingDefaultAddress = await _schemeRepository.GetUserDefaultAddressAsync(userId);
+                    if (existingDefaultAddress == null)
+                    {
+                        var newAddress = new Address
+                        {
+                            UserId = userId,
+                            StreetAddress = streetAddress,
+                            City = city,
+                            State = state,
+                            Pincode = pincode,
+                            IsDefault = true,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow
+                        };
+                        await _schemeRepository.AddUserAddressAsync(newAddress);
+                    }
+                }
             }
 
             DateTime maturityDate = CalculateMaturityDate(master.Frequency, master.TotalInstallments);
@@ -222,12 +284,13 @@ namespace Aishwaryam.Application.Services
                 InstallmentsPaid = 0, // Set to 0! Payment verifier will fulfill payment and advance it to 1
                 NextDueDate = DateTime.UtcNow, // Due immediately for the first installment payment!
                 MaturityDate = maturityDate,
-                Status = "Active"
+                Status = "Active",
+                SchemeMasterId = schemeMasterId,
+                SubmittedFormDetails = submittedFormDetailsJson
             };
 
             await _schemeRepository.JoinSchemeAsync(userScheme);
 
-            var user = await _authRepository.GetUserByIdAsync(userId);
             if (user != null)
             {
                 var installmentAmountFormatted = (master.InstallmentAmountPaise / 100.0).ToString("N0");
@@ -283,20 +346,33 @@ namespace Aishwaryam.Application.Services
         {
             var (enrollments, total) = await _schemeRepository.GetEnrollmentsPaginatedAsync(page, pageSize);
             
-            var result = enrollments.Select(s => new {
-                id = s.Id.ToString(),
-                userId = s.UserId.ToString(),
-                planName = s.PlanName,
-                installmentAmountPaise = s.InstallmentAmountPaise,
-                installmentsPaid = s.InstallmentsPaid,
-                totalInstallments = s.TotalInstallments,
-                accumulatedGoldMg = s.AccumulatedGoldMg,
-                status = s.Status,
-                createdAt = s.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                maturityDate = s.MaturityDate.ToString("yyyy-MM-ddTHH:mm:ssZ")
-            });
+            var resultList = new List<object>();
+            foreach (var s in enrollments)
+            {
+                var (totalSavings, totalBonusEarned, totalBonusGoldMg) = await _schemeRepository.GetSchemeSavingsSummaryAsync(s.Id);
+                resultList.Add(new {
+                    id = s.Id.ToString(),
+                    userId = s.UserId.ToString(),
+                    userName = s.User?.FullName ?? "Customer",
+                    userPhone = s.User?.PhoneNumber ?? string.Empty,
+                    userEmail = s.User?.Email ?? string.Empty,
+                    planName = s.PlanName,
+                    installmentAmountPaise = s.InstallmentAmountPaise,
+                    installmentsPaid = s.InstallmentsPaid,
+                    totalInstallments = s.TotalInstallments,
+                    accumulatedGoldMg = s.AccumulatedGoldMg,
+                    status = s.Status,
+                    createdAt = s.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    maturityDate = s.MaturityDate.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    schemeMasterId = s.SchemeMasterId?.ToString() ?? string.Empty,
+                    submittedFormDetails = s.SubmittedFormDetails ?? string.Empty,
+                    totalInvestmentPaise = totalSavings,
+                    totalBonusGoldMg = totalBonusGoldMg,
+                    totalBonusEarnedPaise = totalBonusEarned
+                });
+            }
 
-            return (result, total);
+            return (resultList, total);
         }
 
         public async Task ProcessMaturityAsync()

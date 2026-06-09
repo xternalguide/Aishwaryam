@@ -33,5 +33,7 @@ namespace Aishwaryam.Application.Interfaces.Repositories
         Task<List<SchemeBonusTier>> GetBonusTiersAsync(Guid schemeMasterId);
         Task<List<SchemeRedemption>> GetPendingRedemptionsAsync();
         Task<(List<UserScheme> Enrollments, int Total)> GetEnrollmentsPaginatedAsync(int page, int pageSize);
+        Task<Address?> GetUserDefaultAddressAsync(Guid userId);
+        Task<Address> AddUserAddressAsync(Address address);
     }
 }

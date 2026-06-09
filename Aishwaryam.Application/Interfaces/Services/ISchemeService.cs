@@ -9,7 +9,7 @@ namespace Aishwaryam.Application.Interfaces.Services
     {
         Task<IEnumerable<SchemeMaster>> GetAvailableSchemesAsync();
         Task<object> GetUserSchemeDashboardAsync(Guid userId);
-        Task<object> JoinSchemeAsync(Guid userId, Guid schemeMasterId);
+        Task<object> JoinSchemeAsync(Guid userId, Guid schemeMasterId, string? nomineeName = null, string? nomineePhone = null, string? nomineeRelationship = null, string? state = null, string? city = null, string? streetAddress = null, string? pincode = null);
         Task<bool> ToggleAutoPayAsync(Guid userId, Guid schemeId, bool enableAutoPay);
         Task<(IEnumerable<object> Enrollments, int Total)> GetAllEnrollmentsAsync(int page, int pageSize);
         Task ProcessMaturityAsync(); // Background job entry point

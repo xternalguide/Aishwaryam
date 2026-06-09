@@ -383,11 +383,18 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.MaturityDate).HasColumnName("MaturityDate").IsRequired();
                 entity.Property(e => e.RedeemedGoldMg).HasColumnName("RedeemedGoldMg").HasDefaultValue(0);
+                entity.Property(e => e.SchemeMasterId).HasColumnName("scheme_master_id");
+                entity.Property(e => e.SubmittedFormDetails).HasColumnName("submitted_form_details");
 
                 entity.HasOne(d => d.User)
                     .WithMany()
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.SchemeMaster)
+                    .WithMany()
+                    .HasForeignKey(d => d.SchemeMasterId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             // AdminAlerts

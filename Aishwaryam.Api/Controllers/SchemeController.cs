@@ -160,7 +160,17 @@ namespace Aishwaryam.Api.Controllers
         [HttpPost("join")]
         public async Task<IActionResult> JoinScheme([FromBody] JoinSchemeRequest request)
         {
-            var result = await _schemeService.JoinSchemeAsync(request.UserId, request.SchemeMasterId);
+            var result = await _schemeService.JoinSchemeAsync(
+                request.UserId, 
+                request.SchemeMasterId,
+                request.NomineeName,
+                request.NomineePhone,
+                request.NomineeRelationship,
+                request.State,
+                request.City,
+                request.StreetAddress,
+                request.Pincode
+            );
             return Ok(result);
         }
 
@@ -300,6 +310,13 @@ namespace Aishwaryam.Api.Controllers
     {
         public Guid UserId { get; set; }
         public Guid SchemeMasterId { get; set; }
+        public string? NomineeName { get; set; }
+        public string? NomineePhone { get; set; }
+        public string? NomineeRelationship { get; set; }
+        public string? State { get; set; }
+        public string? City { get; set; }
+        public string? StreetAddress { get; set; }
+        public string? Pincode { get; set; }
     }
 
     public class ToggleAutoPayRequest

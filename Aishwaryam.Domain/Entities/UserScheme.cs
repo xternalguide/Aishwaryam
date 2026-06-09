@@ -21,7 +21,11 @@ namespace Aishwaryam.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+        public Guid? SchemeMasterId { get; set; }
+        public string? SubmittedFormDetails { get; set; }
+
         // Navigation property
         public User User { get; set; } = null!;
+        public SchemeMaster? SchemeMaster { get; set; }
     }
 }
