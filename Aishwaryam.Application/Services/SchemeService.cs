@@ -543,6 +543,7 @@ namespace Aishwaryam.Application.Services
                 existing.InstallmentAmountPaise = scheme.InstallmentAmountPaise;
                 existing.TotalInstallments = scheme.TotalInstallments;
                 existing.Frequency = scheme.Frequency;
+                existing.DurationUnit = scheme.DurationUnit;
                 existing.IsActive = scheme.IsActive;
                 existing.BonusConfigJson = scheme.BonusConfigJson;
                 existing.CustomSectionsJson = scheme.CustomSectionsJson;

@@ -77,6 +77,7 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.PaymentRulesJson).HasColumnName("payment_rules_json");
                 entity.Property(e => e.KeywordsJson).HasColumnName("keywords_json");
                 entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+                entity.Property(e => e.DurationUnit).HasColumnName("duration_unit").HasMaxLength(20).HasDefaultValue("Days");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 

@@ -152,7 +152,18 @@ namespace Aishwaryam.Api.Controllers
             if (updateObj.WeddingAnniversaryDate.HasValue) user.WeddingAnniversaryDate = updateObj.WeddingAnniversaryDate.Value;
             if (updateObj.BiometricEnabled.HasValue) user.BiometricEnabled = updateObj.BiometricEnabled.Value;
             if (updateObj.ProfilePictureBase64 != null) user.ProfilePictureBase64 = updateObj.ProfilePictureBase64;
-            if (updateObj.Gender != null) user.Gender = updateObj.Gender;
+            if (updateObj.Gender != null)
+            {
+                var genderClean = updateObj.Gender.Trim();
+                if (!string.IsNullOrEmpty(genderClean))
+                {
+                    user.Gender = char.ToUpper(genderClean[0]) + genderClean.Substring(1).ToLower();
+                }
+                else
+                {
+                    user.Gender = null;
+                }
+            }
 
             // Handle Referral Registration
             if (!string.IsNullOrEmpty(updateObj.ReferredByCode))

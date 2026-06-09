@@ -17,6 +17,7 @@ namespace Aishwaryam.Domain.Entities
         public string? PosterImageBase64 { get; set; }   // Admin-uploaded card poster image
         public string? PaymentRulesJson { get; set; }     // JSON: {minAmountPaise, maxAmountPaise, multiplePerDay, earlyExitAfterDays}
         public string? KeywordsJson { get; set; }         // JSON array of strings e.g. ["Flexible","7.5% Bonus"]
+        public string DurationUnit { get; set; } = "Days"; // e.g. "Days" or "Months"
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

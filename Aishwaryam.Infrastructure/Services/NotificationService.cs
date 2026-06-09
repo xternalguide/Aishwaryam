@@ -200,8 +200,9 @@ namespace Aishwaryam.Infrastructure.Services
 
         public async Task<List<UserNotification>> GetUserNotificationsAsync(Guid userId)
         {
+            var cutoff = DateTime.UtcNow.AddDays(-1);
             return await _context.UserNotifications
-                .Where(n => n.UserId == userId && !n.IsDeleted)
+                .Where(n => n.UserId == userId && !n.IsDeleted && n.CreatedAt >= cutoff)
                 .OrderByDescending(n => n.CreatedAt)
                 .Take(50) // Limit to latest 50 for performance
                 .ToListAsync();
@@ -235,8 +236,9 @@ namespace Aishwaryam.Infrastructure.Services
 
         public async Task<int> GetUnreadCountAsync(Guid userId)
         {
+            var cutoff = DateTime.UtcNow.AddDays(-1);
             return await _context.UserNotifications
-                .CountAsync(n => n.UserId == userId && !n.IsRead && !n.IsDeleted);
+                .CountAsync(n => n.UserId == userId && !n.IsRead && !n.IsDeleted && n.CreatedAt >= cutoff);
         }
 
         public async Task BroadcastNotificationAsync(string title, string message, string type = "GENERAL", System.Collections.Generic.Dictionary<string, string>? pushData = null, string? imageUrl = null)
