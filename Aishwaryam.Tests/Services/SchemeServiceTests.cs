@@ -194,7 +194,8 @@ namespace Aishwaryam.Tests.Services
                 Status = "Active",
                 CreatedAt = DateTime.UtcNow.AddDays(-5), // 5 days ago
                 TotalInstallments = 30,
-                PaymentFrequency = "Daily"
+                PaymentFrequency = "Daily",
+                MaturityDate = DateTime.UtcNow.AddDays(25)
             };
 
             var masterScheme = new SchemeMaster

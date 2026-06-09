@@ -204,9 +204,36 @@ namespace Aishwaryam.Application.Services
 
         public async Task<byte[]> GenerateDailyReconciliationReportAsync(DateTime date)
         {
-            // Placeholder for CSV/PDF generation
-            var csv = $"Date,TotalUsers,TotalGoldLiabilityMg\n{date:yyyy-MM-dd},{await _adminRepository.GetTotalUsersCountAsync()},{await _adminRepository.GetTotalGoldLiabilityMgAsync()}";
-            return System.Text.Encoding.UTF8.GetBytes(csv);
+            var payments = await _adminRepository.GetDailyPaymentsReportAsync(date);
+            
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("PaymentID,OrderID,CreatedAt,UserName,UserEmail,SchemeName,AmountRupees,Status");
+            
+            foreach (var p in payments)
+            {
+                var paymentId = EscapeCsvField(p.PaymentId);
+                var orderId = EscapeCsvField(p.OrderId);
+                var createdAt = EscapeCsvField(p.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"));
+                var userName = EscapeCsvField(p.UserName);
+                var userEmail = EscapeCsvField(p.UserEmail);
+                var schemeName = EscapeCsvField(p.SchemeName);
+                var amount = (p.AmountPaise / 100.0).ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                var status = EscapeCsvField(p.Status);
+                
+                sb.AppendLine($"{paymentId},{orderId},{createdAt},{userName},{userEmail},{schemeName},{amount},{status}");
+            }
+            
+            return System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+        }
+
+        private static string EscapeCsvField(string field)
+        {
+            if (string.IsNullOrEmpty(field)) return string.Empty;
+            if (field.Contains(",") || field.Contains("\"") || field.Contains("\n") || field.Contains("\r"))
+            {
+                return $"\"{field.Replace("\"", "\"\"")}\"";
+            }
+            return field;
         }
     }
 }

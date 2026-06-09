@@ -95,5 +95,27 @@ namespace Aishwaryam.Infrastructure.Repositories
             var connection = _context.Database.GetDbConnection();
             return await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM scheme_redemptions WHERE status = 'PENDING'");
         }
+
+        public async Task<IEnumerable<Aishwaryam.Application.DTOs.Admin.PaymentReportItem>> GetDailyPaymentsReportAsync(DateTime date)
+        {
+            var connection = _context.Database.GetDbConnection();
+            var query = @"
+                SELECT 
+                    p.provider_payment_id AS PaymentId,
+                    p.provider_order_id AS OrderId,
+                    p.created_at AS CreatedAt,
+                    u.full_name AS UserName,
+                    u.email AS UserEmail,
+                    COALESCE(s.plan_name, 'Direct Purchase') AS SchemeName,
+                    p.amount_paise AS AmountPaise,
+                    p.status AS Status
+                FROM payments p
+                INNER JOIN users u ON p.user_id = u.id
+                LEFT JOIN user_schemes s ON p.user_scheme_id = s.id
+                WHERE p.created_at::date = @Date::date
+                ORDER BY p.created_at DESC";
+            
+            return await connection.QueryAsync<Aishwaryam.Application.DTOs.Admin.PaymentReportItem>(query, new { Date = date });
+        }
     }
 }

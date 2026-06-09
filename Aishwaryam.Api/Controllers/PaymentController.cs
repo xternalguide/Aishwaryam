@@ -70,15 +70,38 @@ namespace Aishwaryam.Api.Controllers
                     });
                 }
 
-                // 2. Initialize Razorpay Client
+                // 2. Query scheme name if userSchemeId is present
+                string schemeName = "Direct Purchase";
+                if (request.UserSchemeId.HasValue)
+                {
+                    var scheme = await _context.UserSchemes.FindAsync(request.UserSchemeId.Value);
+                    if (scheme != null)
+                    {
+                        schemeName = scheme.PlanName;
+                    }
+                }
+
+                // 3. Initialize Razorpay Client
                 RazorpayClient client = new RazorpayClient(_razorpayKey, _razorpaySecret);
 
-                // 3. Create Order Options
+                // 4. Create Order Options
+                string receiptId = Guid.NewGuid().ToString();
                 Dictionary<string, object> options = new Dictionary<string, object>();
                 options.Add("amount", request.AmountPaise); // Amount in paise (e.g. ₹500 = 50000)
                 options.Add("currency", "INR");
-                options.Add("receipt", Guid.NewGuid().ToString());
+                options.Add("receipt", receiptId);
                 options.Add("payment_capture", 1); // Auto capture
+
+                var notes = new Dictionary<string, string>
+                {
+                    { "userId", request.UserId.ToString() },
+                    { "userName", user.FullName ?? string.Empty },
+                    { "schemeId", request.UserSchemeId?.ToString() ?? string.Empty },
+                    { "schemeName", schemeName },
+                    { "investmentAmount", (request.AmountPaise / 100.0).ToString("F2", System.Globalization.CultureInfo.InvariantCulture) },
+                    { "transactionReference", receiptId }
+                };
+                options.Add("notes", notes);
 
                 Order order = client.Order.Create(options);
                 string razorpayOrderId = order["id"].ToString();

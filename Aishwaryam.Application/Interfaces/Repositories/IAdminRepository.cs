@@ -18,5 +18,6 @@ namespace Aishwaryam.Application.Interfaces.Repositories
         Task<int> GetActiveSchemesCountAsync();
         Task<int> GetFailedPayments24hCountAsync();
         Task<int> GetPendingRedemptionsCountAsync();
+        Task<IEnumerable<Aishwaryam.Application.DTOs.Admin.PaymentReportItem>> GetDailyPaymentsReportAsync(DateTime date);
     }
 }

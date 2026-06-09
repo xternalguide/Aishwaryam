@@ -42,4 +42,16 @@ namespace Aishwaryam.Application.DTOs.Admin
         public int ActiveSchemesCount { get; set; }
         public int SuspiciousActivityAlerts { get; set; } // E.g., rapid buy/sell, high volume without KYC
     }
+
+    public class PaymentReportItem
+    {
+        public string PaymentId { get; set; } = string.Empty;
+        public string OrderId { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
+        public string UserName { get; set; } = string.Empty;
+        public string UserEmail { get; set; } = string.Empty;
+        public string SchemeName { get; set; } = string.Empty;
+        public long AmountPaise { get; set; }
+        public string Status { get; set; } = string.Empty;
+    }
 }
