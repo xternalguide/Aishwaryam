@@ -370,7 +370,7 @@ namespace Aishwaryam.Application.Services
                 issuer: jwtIssuer,
                 audience: jwtIssuer,
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(2), // 2-hour session
+                expires: DateTime.UtcNow.AddDays(365), // 365-day session for mobile continuity
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
