@@ -194,7 +194,7 @@ namespace Aishwaryam.Application.Services
 
                     if (bonusPercentage > 0)
                     {
-                        bonusAmountPaise = (long)(baseAmountPaise * (bonusPercentage / 100m));
+                        bonusAmountPaise = (long)(totalAmountPaise * (bonusPercentage / 100m));
                         bonusGoldMg = (bonusAmountPaise * 1000) / effectiveRate;
                     }
 

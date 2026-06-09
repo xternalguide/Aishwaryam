@@ -112,10 +112,8 @@ namespace Aishwaryam.Infrastructure.Repositories
                 .ToListAsync();
 
             long totalSavings = txs.Where(t => t.TransactionType == "BUY").Sum(t => t.TotalAmountPaise);
-            long totalBonusEarned = txs.Where(t => t.TransactionType == "BUY").Sum(t => t.BonusAmountPaise)
-                                   + txs.Where(t => t.TransactionType == "BONUS").Sum(t => (t.GoldWeightMg * t.PricePerGmPaise) / 1000);
-            long totalBonusGoldMg = txs.Where(t => t.TransactionType == "BUY").Sum(t => t.BonusGoldMg)
-                                    + txs.Where(t => t.TransactionType == "BONUS").Sum(t => t.GoldWeightMg);
+            long totalBonusEarned = txs.Where(t => t.TransactionType == "BONUS").Sum(t => (t.GoldWeightMg * t.PricePerGmPaise) / 1000);
+            long totalBonusGoldMg = txs.Where(t => t.TransactionType == "BONUS").Sum(t => t.GoldWeightMg);
 
             return (totalSavings, totalBonusEarned, totalBonusGoldMg);
         }

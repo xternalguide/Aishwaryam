@@ -64,7 +64,10 @@ namespace Aishwaryam.Api.Controllers
                                  amountPaise = (long)t.TotalAmountPaise,
                                  createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                                  rateSource = t.RateSource,
-                                 schemeName = s != null ? s.PlanName : null
+                                 schemeName = s != null ? s.PlanName : null,
+                                 bonusAmountPaise = t.BonusAmountPaise,
+                                 bonusGoldMg = t.BonusGoldMg,
+                                 bonusPercentage = t.Invoice != null ? t.Invoice.BonusPercentage : 0
                              })
                              .ToListAsync();
 
@@ -150,6 +153,10 @@ namespace Aishwaryam.Api.Controllers
                 returnPercentage = ((double)currentValuePaise - investedAmountPaise) / investedAmountPaise * 100;
             }
 
+            long totalBonusGoldMg = await _context.GoldTransactions
+                .Where(t => t.UserId == userId && (t.TransactionType == "BONUS" || t.TransactionType == "EVENT_BONUS"))
+                .SumAsync(t => (long?)t.GoldWeightMg) ?? 0L;
+
             var status = await _goldService.GetGoldStatusAsync(userId);
 
             // 2. Reconstruct monthly balances over the last 6 months for real graph data
@@ -183,6 +190,7 @@ namespace Aishwaryam.Api.Controllers
                 maturedRedeemableGoldMg = status.MaturedRedeemableMg,
                 redeemableGoldMg = status.RedeemableMg,
                 redeemedGoldMg = status.RedeemedMg,
+                totalBonusGoldMg,
                 monthlyBalances
             });
         }
@@ -204,7 +212,10 @@ namespace Aishwaryam.Api.Controllers
                                  amountPaise = (long)t.TotalAmountPaise,
                                  createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                                  rateSource = t.RateSource,
-                                 schemeName = s != null ? s.PlanName : null
+                                 schemeName = s != null ? s.PlanName : null,
+                                 bonusAmountPaise = t.BonusAmountPaise,
+                                 bonusGoldMg = t.BonusGoldMg,
+                                 bonusPercentage = t.Invoice != null ? t.Invoice.BonusPercentage : 0
                              })
                              .ToListAsync();
 

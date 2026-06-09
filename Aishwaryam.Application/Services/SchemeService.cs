@@ -112,7 +112,7 @@ namespace Aishwaryam.Application.Services
             {
                 var (totalSavings, totalBonusEarned, totalBonusGoldMg) = await _schemeRepository.GetSchemeSavingsSummaryAsync(activeScheme.Id);
                 var (currentBonusPercent, remainingDaysForCurrentTier, remainingDaysForScheme, _) = await GetDynamicBonusDetailsAsync(
-                    activeScheme.PlanName, activeScheme.CreatedAt, activeScheme.TotalInstallments, activeScheme.PaymentFrequency
+                    activeScheme.PlanName, activeScheme.CreatedAt, activeScheme.MaturityDate
                 );
                 int dayNumber = (int)(DateTime.UtcNow - activeScheme.CreatedAt).TotalDays;
                 if (dayNumber < 0) dayNumber = 0;
@@ -161,7 +161,7 @@ namespace Aishwaryam.Application.Services
             // Extract primary details for backward compatibility
             var (primaryTotalSavings, primaryTotalBonusEarned, primaryTotalBonusGoldMg) = await _schemeRepository.GetSchemeSavingsSummaryAsync(primary.Id);
             var (primaryCurrentBonusPercent, primaryRemainingDaysForCurrentTier, primaryRemainingDaysForScheme, _) = await GetDynamicBonusDetailsAsync(
-                primary.PlanName, primary.CreatedAt, primary.TotalInstallments, primary.PaymentFrequency
+                primary.PlanName, primary.CreatedAt, primary.MaturityDate
             );
             int primaryDayNumber = (int)(DateTime.UtcNow - primary.CreatedAt).TotalDays;
             if (primaryDayNumber < 0) primaryDayNumber = 0;
@@ -554,7 +554,7 @@ namespace Aishwaryam.Application.Services
             var (totalSavings, totalBonusEarned, totalBonusGoldMg) = await _schemeRepository.GetSchemeSavingsSummaryAsync(schemeId);
 
             var (currentBonusPercent, remainingDaysForCurrentTier, remainingDaysForScheme, milestones) = await GetDynamicBonusDetailsAsync(
-                scheme.PlanName, scheme.CreatedAt, scheme.TotalInstallments, scheme.PaymentFrequency
+                scheme.PlanName, scheme.CreatedAt, scheme.MaturityDate
             );
             int dayNumber = (int)(DateTime.UtcNow - scheme.CreatedAt).TotalDays;
             if (dayNumber < 0) dayNumber = 0;
@@ -879,7 +879,7 @@ namespace Aishwaryam.Application.Services
             }
         }
 
-        private async Task<(decimal CurrentBonusPercent, int RemainingDaysForCurrentTier, int RemainingDaysForScheme, List<object> Milestones)> GetDynamicBonusDetailsAsync(string planName, DateTime createdAt, int totalInstallments, string paymentFrequency)
+        private async Task<(decimal CurrentBonusPercent, int RemainingDaysForCurrentTier, int RemainingDaysForScheme, List<object> Milestones)> GetDynamicBonusDetailsAsync(string planName, DateTime createdAt, DateTime maturityDate)
         {
             int dayNumber = (int)(DateTime.UtcNow - createdAt).TotalDays;
             if (dayNumber < 0) dayNumber = 0;
@@ -894,14 +894,6 @@ namespace Aishwaryam.Application.Services
 
             decimal currentBonusPercent = 0;
             int remainingDaysForCurrentTier = 0;
-            int schemeMaturityDays = 330; // Default fallback
-
-            if (master != null)
-            {
-                if (master.Frequency == "Daily") schemeMaturityDays = master.TotalInstallments;
-                else if (master.Frequency == "Weekly") schemeMaturityDays = master.TotalInstallments * 7;
-                else if (master.Frequency == "Monthly") schemeMaturityDays = master.TotalInstallments * 30;
-            }
 
             var milestones = new List<object>();
 
@@ -965,8 +957,7 @@ namespace Aishwaryam.Application.Services
                 milestones.Add(new { Name = "Tier 4 (1.5%)", TargetDay = 330, BonusPercentage = 1.5, IsAchieved = dayNumber >= 330 });
             }
 
-            int remainingDaysForScheme = schemeMaturityDays - dayNumber;
-            if (remainingDaysForScheme < 0) remainingDaysForScheme = 0;
+            int remainingDaysForScheme = (int)Math.Max(0, Math.Ceiling((maturityDate - DateTime.UtcNow).TotalDays));
 
             return (currentBonusPercent, remainingDaysForCurrentTier, remainingDaysForScheme, milestones);
         }

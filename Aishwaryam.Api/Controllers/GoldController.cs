@@ -99,7 +99,10 @@ namespace Aishwaryam.Api.Controllers
                                       amountPaise = t.TotalAmountPaise,
                                       createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                                       rateSource = t.RateSource,
-                                      schemeName = s != null ? s.PlanName : null
+                                      schemeName = s != null ? s.PlanName : null,
+                                      bonusAmountPaise = t.BonusAmountPaise,
+                                      bonusGoldMg = t.BonusGoldMg,
+                                      bonusPercentage = t.Invoice != null ? t.Invoice.BonusPercentage : 0
                                   };
 
             var txs = await queryWithScheme.ToListAsync();
@@ -148,7 +151,10 @@ namespace Aishwaryam.Api.Controllers
                                       amountPaise = t.TotalAmountPaise,
                                       createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                                       rateSource = t.RateSource,
-                                      schemeName = s != null ? s.PlanName : null
+                                      schemeName = s != null ? s.PlanName : null,
+                                      bonusAmountPaise = t.BonusAmountPaise,
+                                      bonusGoldMg = t.BonusGoldMg,
+                                      bonusPercentage = t.Invoice != null ? t.Invoice.BonusPercentage : 0
                                   };
 
             var txs = await queryWithScheme.ToListAsync();
