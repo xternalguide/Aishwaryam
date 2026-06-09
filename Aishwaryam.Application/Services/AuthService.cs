@@ -427,47 +427,44 @@ namespace Aishwaryam.Application.Services
 
             if (session.IsRevoked)
             {
-                // Grace period logic: If the session was created/revoked less than 10 seconds ago, 
-                // it is highly likely a concurrent mobile polling request hit 401 at the same time.
+                // Grace period logic: If the latest active session was created less than 20 seconds ago,
+                // it is highly likely a concurrent mobile/web request hit 401 at the same time.
                 // In this case, we safely rotate the session again to return a valid active session.
-                if (session.CreatedAt.AddSeconds(10) >= DateTimeOffset.UtcNow)
+                var activeSession = await _authRepository.GetLatestActiveSessionByUserIdAsync(session.UserId);
+                if (activeSession != null && activeSession.CreatedAt.AddSeconds(20) >= DateTimeOffset.UtcNow)
                 {
                     var userEntity = await _authRepository.GetUserByIdAsync(session.UserId);
                     if (userEntity != null && userEntity.IsActive)
                     {
-                        var activeSession = await _authRepository.GetLatestActiveSessionByUserIdAsync(session.UserId);
-                        if (activeSession != null)
+                        activeSession.IsRevoked = true;
+                        await _authRepository.UpdateAuthSessionAsync(activeSession);
+
+                        string reIssuedJwt = GenerateJwt(userEntity);
+                        string reIssuedRawRefresh = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
+                        string reIssuedHashedRefresh = ComputeSha256Hash(reIssuedRawRefresh);
+
+                        var graceSession = new AuthSession
                         {
-                            activeSession.IsRevoked = true;
-                            await _authRepository.UpdateAuthSessionAsync(activeSession);
+                            UserId = userEntity.Id,
+                            RefreshToken = reIssuedHashedRefresh,
+                            IpAddress = ipAddress,
+                            DeviceFingerprint = request.DeviceFingerprint,
+                            UserAgent = userAgent,
+                            ExpiresAt = DateTimeOffset.UtcNow.AddDays(365),
+                            IsRevoked = false
+                        };
+                        await _authRepository.CreateAuthSessionAsync(graceSession);
 
-                            string reIssuedJwt = GenerateJwt(userEntity);
-                            string reIssuedRawRefresh = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
-                            string reIssuedHashedRefresh = ComputeSha256Hash(reIssuedRawRefresh);
-
-                            var graceSession = new AuthSession
-                            {
-                                UserId = userEntity.Id,
-                                RefreshToken = reIssuedHashedRefresh,
-                                IpAddress = ipAddress,
-                                DeviceFingerprint = request.DeviceFingerprint,
-                                UserAgent = userAgent,
-                                ExpiresAt = DateTimeOffset.UtcNow.AddDays(365),
-                                IsRevoked = false
-                            };
-                            await _authRepository.CreateAuthSessionAsync(graceSession);
-
-                            return new AuthResponse
-                            {
-                                Success = true,
-                                Message = "Token refreshed successfully (race condition handled).",
-                                Token = reIssuedJwt,
-                                RefreshToken = reIssuedRawRefresh,
-                                UserId = userEntity.Id,
-                                IsNewUser = string.IsNullOrEmpty(userEntity.MpinHash),
-                                IsMpinSet = !string.IsNullOrEmpty(userEntity.MpinHash)
-                            };
-                        }
+                        return new AuthResponse
+                        {
+                            Success = true,
+                            Message = "Token refreshed successfully (race condition handled).",
+                            Token = reIssuedJwt,
+                            RefreshToken = reIssuedRawRefresh,
+                            UserId = userEntity.Id,
+                            IsNewUser = string.IsNullOrEmpty(userEntity.MpinHash),
+                            IsMpinSet = !string.IsNullOrEmpty(userEntity.MpinHash)
+                        };
                     }
                 }
 
