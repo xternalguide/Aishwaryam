@@ -1778,7 +1778,8 @@ export const Dashboard: React.FC = () => {
                   padding: '16px 20px',
                   background: 'white',
                   position: 'relative',
-                  zIndex: 10
+                  zIndex: 10,
+                  marginTop:'30px',
                 }}>
                   <button 
                     onClick={() => setSelectedTab(0)}
