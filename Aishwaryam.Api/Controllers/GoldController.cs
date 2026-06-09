@@ -81,36 +81,112 @@ namespace Aishwaryam.Api.Controllers
             if (pageSize < 1) pageSize = 10;
             if (pageSize > 100) pageSize = 100;
 
-            var baseQuery = _context.GoldTransactions.Where(t => t.UserId == userId);
-            var total = await baseQuery.CountAsync();
+            // 1. Fetch Gold Transactions
+            var goldTransactions = await _context.GoldTransactions
+                .Where(t => t.UserId == userId)
+                .Include(t => t.Invoice)
+                .ToListAsync();
 
-            var paginatedQuery = baseQuery
-                .OrderByDescending(t => t.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize);
+            // 2. Fetch User Schemes (joins)
+            var userSchemes = await _context.UserSchemes
+                .Where(s => s.UserId == userId)
+                .ToListAsync();
 
-            var queryWithScheme = from t in paginatedQuery
-                                  join s in _context.UserSchemes on t.UserSchemeId equals s.Id into sj
-                                  from s in sj.DefaultIfEmpty()
-                                  select new {
-                                      transactionId = t.Id.ToString(),
-                                      type = t.TransactionType,
-                                      goldWeightMg = t.GoldWeightMg,
-                                      amountPaise = t.TotalAmountPaise,
-                                      createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                                      rateSource = t.RateSource,
-                                      schemeName = s != null ? s.PlanName : null,
-                                      bonusAmountPaise = t.BonusAmountPaise,
-                                      bonusGoldMg = t.BonusGoldMg,
-                                      bonusPercentage = t.Invoice != null ? t.Invoice.BonusPercentage : 0
-                                  };
+            // 3. Fetch Pending Scheme Redemptions
+            var pendingRedemptions = await _context.SchemeRedemptions
+                .Where(r => r.UserId == userId && r.Status == "PENDING")
+                .ToListAsync();
 
-            var txs = await queryWithScheme.ToListAsync();
+            var schemesMap = userSchemes.ToDictionary(s => s.Id, s => s.PlanName);
 
+            var activities = new List<object>();
+
+            // Add Gold Transactions
+            foreach (var t in goldTransactions)
+            {
+                activities.Add(new {
+                    transactionId = t.Id.ToString(),
+                    type = t.TransactionType,
+                    goldWeightMg = t.GoldWeightMg,
+                    amountPaise = t.TotalAmountPaise,
+                    createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    rawCreatedAt = t.CreatedAt,
+                    rateSource = t.RateSource,
+                    schemeName = t.UserSchemeId.HasValue && schemesMap.TryGetValue(t.UserSchemeId.Value, out var name) ? name : null,
+                    bonusAmountPaise = t.BonusAmountPaise,
+                    bonusGoldMg = t.BonusGoldMg,
+                    bonusPercentage = (decimal)(t.Invoice != null ? t.Invoice.BonusPercentage : 0),
+                    status = "COMPLETED"
+                });
+            }
+
+            // Add Scheme Joins
+            foreach (var s in userSchemes)
+            {
+                activities.Add(new {
+                    transactionId = s.Id.ToString(),
+                    type = "SCHEME_JOIN",
+                    goldWeightMg = 0L,
+                    amountPaise = s.InstallmentAmountPaise,
+                    createdAt = s.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    rawCreatedAt = s.CreatedAt,
+                    rateSource = "SYSTEM",
+                    schemeName = s.PlanName,
+                    bonusAmountPaise = 0L,
+                    bonusGoldMg = 0L,
+                    bonusPercentage = 0m,
+                    status = s.Status
+                });
+            }
+
+            // Add Pending Redemptions
+            foreach (var r in pendingRedemptions)
+            {
+                activities.Add(new {
+                    transactionId = r.Id.ToString(),
+                    type = "REDEMPTION_REQUEST",
+                    goldWeightMg = r.GoldWeightMg,
+                    amountPaise = r.TotalAmountPaise,
+                    createdAt = r.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    rawCreatedAt = new DateTimeOffset(r.CreatedAt, TimeSpan.Zero),
+                    rateSource = "SYSTEM",
+                    schemeName = schemesMap.TryGetValue(r.UserSchemeId, out var name) ? name : "Scheme",
+                    bonusAmountPaise = 0L,
+                    bonusGoldMg = 0L,
+                    bonusPercentage = 0m,
+                    status = r.Status
+                });
+            }
+
+            // Sort by rawCreatedAt descending
+            var sortedActivities = activities
+                .Cast<dynamic>()
+                .OrderByDescending(a => a.rawCreatedAt)
+                .ToList();
+
+            var total = sortedActivities.Count;
             var totalPages = (int)Math.Ceiling((double)total / pageSize);
-                
+
+            var paginated = sortedActivities
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(a => new {
+                    transactionId = a.transactionId,
+                    type = a.type,
+                    goldWeightMg = a.goldWeightMg,
+                    amountPaise = a.amountPaise,
+                    createdAt = a.createdAt,
+                    rateSource = a.rateSource,
+                    schemeName = a.schemeName,
+                    bonusAmountPaise = a.bonusAmountPaise,
+                    bonusGoldMg = a.bonusGoldMg,
+                    bonusPercentage = a.bonusPercentage,
+                    status = a.status
+                })
+                .ToList();
+
             return Ok(new {
-                transactions = txs,
+                transactions = paginated,
                 total = total,
                 page = page,
                 pageSize = pageSize,

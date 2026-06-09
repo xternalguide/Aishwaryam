@@ -97,7 +97,9 @@ namespace Aishwaryam.Api.Controllers
                 user.NomineeName,
                 user.NomineePhoneNumber,
                 user.NomineeRelationship,
-                user.PreferredLanguage
+                user.PreferredLanguage,
+                user.ProfilePictureBase64,
+                user.Gender
             });
         }
 
@@ -149,6 +151,8 @@ namespace Aishwaryam.Api.Controllers
             if (updateObj.DateOfBirth.HasValue) user.DateOfBirth = updateObj.DateOfBirth.Value;
             if (updateObj.WeddingAnniversaryDate.HasValue) user.WeddingAnniversaryDate = updateObj.WeddingAnniversaryDate.Value;
             if (updateObj.BiometricEnabled.HasValue) user.BiometricEnabled = updateObj.BiometricEnabled.Value;
+            if (updateObj.ProfilePictureBase64 != null) user.ProfilePictureBase64 = updateObj.ProfilePictureBase64;
+            if (updateObj.Gender != null) user.Gender = updateObj.Gender;
 
             // Handle Referral Registration
             if (!string.IsNullOrEmpty(updateObj.ReferredByCode))
@@ -341,6 +345,8 @@ namespace Aishwaryam.Api.Controllers
         public bool? BiometricEnabled { get; set; }
         public string? PreferredLanguage { get; set; }
         public string? ReferredByCode { get; set; }
+        public string? ProfilePictureBase64 { get; set; }
+        public string? Gender { get; set; }
     }
 
     public class UpdateConfigRequest

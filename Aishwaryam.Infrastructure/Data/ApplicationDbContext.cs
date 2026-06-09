@@ -101,6 +101,8 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.NomineeName).HasColumnName("nominee_name").HasMaxLength(100);
                 entity.Property(e => e.NomineePhoneNumber).HasColumnName("nominee_phone_number").HasMaxLength(20);
                 entity.Property(e => e.NomineeRelationship).HasColumnName("nominee_relationship").HasMaxLength(50);
+                entity.Property(e => e.ProfilePictureBase64).HasColumnName("profile_picture_base64");
+                entity.Property(e => e.Gender).HasColumnName("gender").HasMaxLength(20);
                 entity.Property(e => e.PreferredLanguage).HasColumnName("preferred_language").HasMaxLength(10).HasDefaultValue("en");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
