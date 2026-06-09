@@ -734,9 +734,7 @@ export const Notifications: React.FC = () => {
     }
   };
 
-  const displayNotifs = localNotifs.length > 0 ? localNotifs : (notifications && notifications.length > 0 ? notifications : [
-    { id: 'n1', title: 'Payment Confirmed', message: 'Your 5th installment of ₹3,000 has been verified. 3.85g of Gold added to your locker.', createdAt: new Date().toISOString(), isRead: false }
-  ]);
+  const displayNotifs = localNotifs;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>

@@ -379,10 +379,8 @@ export const Dashboard: React.FC = () => {
       return;
     }
 
-    // Perform initial fetch if profile data is empty
-    if (!profile) {
-      refreshData();
-    }
+    // Perform initial fetch (silent background refresh if profile is already cached)
+    refreshData(!profile);
 
     const fetchBanners = async () => {
       try {
@@ -410,6 +408,10 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     localStorage.setItem('DASHBOARD_ACTIVE_TAB', String(selectedTab));
+    if (selectedTab === 1) {
+      // Silently refresh data to ensure transactions list is populated and fresh
+      refreshData(true);
+    }
   }, [selectedTab]);
 
   useEffect(() => {
@@ -884,7 +886,7 @@ export const Dashboard: React.FC = () => {
                 key={scheme.id}
                 onClick={() => navigate(`/scheme-detail/${scheme.id}`)}
                 style={{
-                  flex: '0 0 280px', // Fixed card width for horizontal swiper
+                  flex: isDesktop ? '0 0 280px' : '0 0 100%', // Full width on mobile, fixed width on desktop
                   scrollSnapAlign: 'start',
                   borderRadius: '20px',
                   background: 'linear-gradient(135deg, #FFFDF9 0%, #FFF9EC 100%)',
