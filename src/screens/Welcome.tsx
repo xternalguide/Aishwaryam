@@ -18,7 +18,7 @@ interface Slide {
 
 export const Welcome: React.FC = () => {
   const navigate = useNavigate();
-  const { t, lang, changeLanguage } = useTranslation();
+  const { t } = useTranslation();
   const [current, setCurrent] = useState(0);
 
   const slides: Slide[] = [
