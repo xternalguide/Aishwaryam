@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SessionManager } from '../utils/SessionManager';
-import { ApiClient } from '../utils/ApiClient';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from '../utils/translation';
+import { useApp } from '../context/AppContext';
 
 interface AvailableScheme {
   id: string;
@@ -19,41 +18,49 @@ interface AvailableScheme {
 export const SchemeExplorer: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [schemes, setSchemes] = useState<AvailableScheme[]>([]);
-  const [activeNames, setActiveNames] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { availableSchemes, activeSchemes, refreshData } = useApp();
+
+  const [schemes, setSchemes] = useState<AvailableScheme[]>(availableSchemes);
+  const [activeNames, setActiveNames] = useState<string[]>(() =>
+    activeSchemes
+      .filter((s: any) => s.status?.toUpperCase() === 'ACTIVE')
+      .map((s: any) => s.planName)
+  );
+  const [isLoading, setIsLoading] = useState(availableSchemes.length === 0);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const userId = SessionManager.getUserId() || 'user-id-999';
-        // 1. Fetch available chits
-        const schemesRes = await ApiClient.get('api/Scheme/list');
-        if (schemesRes.data) {
-          setSchemes(schemesRes.data);
-        }
-
-        // 2. Fetch active dashboards to mark already joined
-        const dashRes = await ApiClient.get(`api/Scheme/dashboard/${userId}`);
-        if (dashRes.data && dashRes.data.activeSchemes) {
-          const names = dashRes.data.activeSchemes
-            .filter((s: any) => s.status?.toUpperCase() === 'ACTIVE')
-            .map((s: any) => s.planName);
-          setActiveNames(names);
+        if (availableSchemes.length === 0) {
+          setIsLoading(true);
+          await refreshData(false);
+        } else {
+          refreshData(true); // background silent update
         }
       } catch (err) {
         console.error(err);
-      } finally {
-        setIsLoading(false);
       }
     };
     loadData();
-  }, []);
+  }, [availableSchemes.length]);
+
+  useEffect(() => {
+    setSchemes(availableSchemes);
+    setActiveNames(
+      activeSchemes
+        .filter((s: any) => s.status?.toUpperCase() === 'ACTIVE')
+        .map((s: any) => s.planName)
+    );
+    if (availableSchemes.length > 0) {
+      setIsLoading(false);
+    }
+  }, [availableSchemes, activeSchemes]);
 
   const formatRupees = (paise: number) => {
     const rupees = paise / 100;
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(rupees);
   };
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F5F5F5' }}>
@@ -153,9 +160,9 @@ export const SchemeExplorer: React.FC = () => {
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>INSTALLMENT</span>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>MIN. INVESTMENT</span>
                       <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
-                        {formatRupees(scheme.installmentAmountPaise)} <span style={{ fontSize: '11px', fontWeight: '500', color: 'var(--text-muted)' }}>/ {scheme.frequency === 'Daily' ? 'day' : 'month'}</span>
+                        Start from {formatRupees(scheme.installmentAmountPaise)}
                       </span>
                     </div>
                     <div>

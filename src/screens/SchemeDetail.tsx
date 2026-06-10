@@ -1091,8 +1091,8 @@ export const SchemeDetail: React.FC = () => {
             </div>
             <div style={{ width: '1px', height: '20px', background: 'rgba(0,0,0,0.1)' }} />
             <div>
-              <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('installment').toUpperCase()}</span>
-              <div style={{ fontSize: '13px', fontWeight: 'bold' }}>{formatRupees(scheme.installmentAmountPaise)} / {scheme.frequency === 'Daily' ? 'day' : 'month'}</div>
+              <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--text-muted)' }}>MIN. INVESTMENT</span>
+              <div style={{ fontSize: '13px', fontWeight: 'bold' }}>Start from {formatRupees(scheme.installmentAmountPaise)}</div>
             </div>
             <div style={{ width: '1px', height: '20px', background: 'rgba(0,0,0,0.1)' }} />
             <div>
