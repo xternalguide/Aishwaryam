@@ -107,6 +107,13 @@ namespace Aishwaryam.Infrastructure.Services
                  <p style=""margin:4px 0 0;font-size:36px;font-weight:800;color:#78350F;"">✦ {goldMg} mg</p>
                </div>";
 
+        private static string SilverBadge(string silverMg) =>
+            $@"<div style=""background:linear-gradient(135deg,#E5E7EB,#F3F4F6);border:1px solid #9CA3AF;
+                           border-radius:12px;padding:20px;text-align:center;margin:24px 0;"">
+                 <p style=""margin:0;font-size:13px;color:#4B5563;letter-spacing:1px;text-transform:uppercase;"">SILVER CREDITED</p>
+                 <p style=""margin:4px 0 0;font-size:36px;font-weight:800;color:#1F2937;"">✦ {silverMg} mg</p>
+               </div>";
+
         private static string AmountBadge(string amount) =>
             $@"<div style=""background:#F0FDF4;border:1px solid #86EFAC;border-radius:12px;
                            padding:20px;text-align:center;margin:24px 0;"">
@@ -202,36 +209,59 @@ namespace Aishwaryam.Infrastructure.Services
 
 {ActionButton("Open App & Buy Gold Now", "https://aishwaryam.com/app")}";
 
-        private static string GoldPurchaseReceipt(Dictionary<string, string> d) => $@"
+        private static string GoldPurchaseReceipt(Dictionary<string, string> d)
+        {
+            var metalType = d.GetValueOrDefault("MetalType", "Gold");
+            bool isSilver = string.Equals(metalType, "Silver", StringComparison.OrdinalIgnoreCase);
+            
+            var title = isSilver ? "Silver Purchase Confirmed ✅" : "Gold Purchase Confirmed ✅";
+            var badgeHtml = isSilver ? SilverBadge(d.GetValueOrDefault("GoldWeightMg", "0")) : GoldBadge(d.GetValueOrDefault("GoldWeightMg", "0"));
+            var rateLabel = isSilver ? "Silver Rate" : "Gold Rate (22K)";
+            var bonusLabel = isSilver ? "Bonus Silver" : "Bonus Gold";
+            var balanceLabel = isSilver ? "Total Silver Balance" : "Total Gold Balance";
+            var description = isSilver 
+                ? "Your silver is safely stored in an audited vault. View your portfolio anytime in the app."
+                : "Your gold is safely stored in an audited vault. View your portfolio anytime in the app.";
+            
+            var downloadUrl = d.GetValueOrDefault("DownloadUrl", "https://aishwaryam.com/app/portfolio");
+
+            return $@"
 {Greeting(d.GetValueOrDefault("UserName", "Customer"))}
-<h2 style=""margin:0 0 4px;color:#111827;font-size:20px;font-weight:700;"">Gold Purchase Confirmed ✅</h2>
+<h2 style=""margin:0 0 4px;color:#111827;font-size:20px;font-weight:700;"">{title}</h2>
 <p style=""margin:0 0 24px;color:#6B7280;font-size:14px;"">Transaction ID: <code style=""background:#F3F4F6;padding:2px 8px;border-radius:4px;"">{d.GetValueOrDefault("TransactionId", "—")}</code></p>
-{GoldBadge(d.GetValueOrDefault("GoldWeightMg", "0"))}
+{badgeHtml}
 <table width=""100%"" cellpadding=""0"" cellspacing=""0"">
   {InfoRow("Amount Paid", $"₹{d.GetValueOrDefault("AmountPaid", "0")}")}
-  {InfoRow("Gold Rate (22K)", $"₹{d.GetValueOrDefault("GoldRatePerGm", "0")}/gm")}
+  {InfoRow(rateLabel, $"₹{d.GetValueOrDefault("GoldRatePerGm", "0")}/gm")}
   {InfoRow("GST (3%)", $"₹{d.GetValueOrDefault("GstAmount", "0")}")}
-  {InfoRow("Bonus Gold", $"{d.GetValueOrDefault("BonusGoldMg", "0")} mg ({d.GetValueOrDefault("BonusPercent", "0")}%)")}
-  {InfoRow("Total Gold Balance", $"{d.GetValueOrDefault("NewGoldBalanceMg", "0")} mg")}
+  {InfoRow(bonusLabel, $"{d.GetValueOrDefault("BonusGoldMg", "0")} mg ({d.GetValueOrDefault("BonusPercent", "0")}%)")}
+  {InfoRow(balanceLabel, $"{d.GetValueOrDefault("NewGoldBalanceMg", "0")} mg")}
   {InfoRow("Date", d.GetValueOrDefault("TransactionDate", DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt")))}
 </table>
 <p style=""margin:24px 0 0;font-size:13px;color:#9CA3AF;"">
-  Your gold is safely stored in an audited vault. View your portfolio anytime in the app.
+  {description}
 </p>
-{ActionButton("View Portfolio", "https://aishwaryam.com/app/portfolio")}";
+{ActionButton("Download Receipt", downloadUrl)}";
+        }
 
-        private static string SchemeJoined(Dictionary<string, string> d) => $@"
+        private static string SchemeJoined(Dictionary<string, string> d)
+        {
+            var planName = d.GetValueOrDefault("PlanName", "");
+            bool isSilver = planName.Contains("silver", StringComparison.OrdinalIgnoreCase);
+            var schemeLabel = isSilver ? "Silver Savings Scheme" : "Gold Savings Scheme";
+            
+            return $@"
 {Greeting(d.GetValueOrDefault("UserName", "Customer"))}
 <div style=""background:linear-gradient(135deg,{BrandColor}15,{BrandColor}08);border:1px solid {BrandColor}30;
              border-radius:16px;padding:28px;text-align:center;margin:0 0 28px;"">
   <p style=""margin:0;font-size:36px;"">🏆</p>
-  <h2 style=""margin:8px 0;color:{BrandColor};font-size:20px;"">You've Joined a Gold Savings Scheme!</h2>
-  <p style=""margin:4px 0 0;color:#4B5563;font-size:15px;"">{d.GetValueOrDefault("PlanName", "Gold Savings Plan")}</p>
+  <h2 style=""margin:8px 0;color:{BrandColor};font-size:20px;"">You've Joined a {schemeLabel}!</h2>
+  <p style=""margin:4px 0 0;color:#4B5563;font-size:15px;"">{d.GetValueOrDefault("PlanName", "Savings Plan")}</p>
 </div>
 <table width=""100%"" cellpadding=""0"" cellspacing=""0"">
   {InfoRow("Plan", d.GetValueOrDefault("PlanName", "—"))}
   {InfoRow("Daily Contribution", $"₹{d.GetValueOrDefault("InstallmentAmount", "0")}")}
-  {InfoRow("Total Duration", $"{d.GetValueOrDefault("TotalInstallments", "0")} days")}
+  {InfoRow("Total Contribution", $"{d.GetValueOrDefault("TotalInstallments", "0")} days")}
   {InfoRow("Maturity Date", d.GetValueOrDefault("MaturityDate", "—"))}
   {InfoRow("Loyalty Bonus", $"Up to {d.GetValueOrDefault("MaxBonus", "7.5")}%")}
   {InfoRow("First Payment", $"₹{d.GetValueOrDefault("FirstInstallmentAmount", "0")}")}
@@ -241,21 +271,31 @@ namespace Aishwaryam.Infrastructure.Services
   Missing purchases may reduce your bonus.
 </p>
 {ActionButton("View My Scheme", "https://aishwaryam.com/app/schemes")}";
+        }
 
-        private static string InstallmentSuccess(Dictionary<string, string> d) => $@"
+        private static string InstallmentSuccess(Dictionary<string, string> d)
+        {
+            var planName = d.GetValueOrDefault("PlanName", "");
+            bool isSilver = planName.Contains("silver", StringComparison.OrdinalIgnoreCase);
+            var badgeHtml = isSilver ? SilverBadge(d.GetValueOrDefault("GoldCreditedMg", "0")) : GoldBadge(d.GetValueOrDefault("GoldCreditedMg", "0"));
+            var bonusLabel = isSilver ? "Bonus Silver Earned" : "Bonus Gold Earned";
+            var balanceLabel = isSilver ? "Total Accumulated Silver" : "Total Accumulated Gold";
+
+            return $@"
 {Greeting(d.GetValueOrDefault("UserName", "Customer"))}
 <h2 style=""margin:0 0 4px;color:#111827;font-size:20px;font-weight:700;"">Payment Successful 💰</h2>
 <p style=""margin:0 0 24px;color:#6B7280;font-size:14px;"">Scheme: <strong>{d.GetValueOrDefault("PlanName", "—")}</strong></p>
-{GoldBadge(d.GetValueOrDefault("GoldCreditedMg", "0"))}
+{badgeHtml}
 <table width=""100%"" cellpadding=""0"" cellspacing=""0"">
   {InfoRow("Payment Amount", $"₹{d.GetValueOrDefault("AmountPaid", "0")}")}
   {InfoRow("Payment Number", $"{d.GetValueOrDefault("InstallmentNumber", "0")} of {d.GetValueOrDefault("TotalInstallments", "0")}")}
-  {InfoRow("Bonus Earned", $"{d.GetValueOrDefault("BonusGoldMg", "0")} mg ({d.GetValueOrDefault("BonusPercent", "0")}%)")}
-  {InfoRow("Total Accumulated Gold", $"{d.GetValueOrDefault("TotalGoldMg", "0")} mg")}
+  {InfoRow(bonusLabel, $"{d.GetValueOrDefault("BonusGoldMg", "0")} mg ({d.GetValueOrDefault("BonusPercent", "0")}%)")}
+  {InfoRow(balanceLabel, $"{d.GetValueOrDefault("TotalGoldMg", "0")} mg")}
   {InfoRow("Next Due Date", d.GetValueOrDefault("NextDueDate", "—"))}
   {InfoRow("Payment Date", d.GetValueOrDefault("PaymentDate", DateTime.UtcNow.ToString("dd MMM yyyy")))}
 </table>
 {ActionButton("View Scheme Progress", "https://aishwaryam.com/app/schemes")}";
+        }
 
         private static string GoldRedeemed(Dictionary<string, string> d) => $@"
 {Greeting(d.GetValueOrDefault("UserName", "Customer"))}

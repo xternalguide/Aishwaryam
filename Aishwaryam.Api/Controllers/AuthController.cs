@@ -114,18 +114,15 @@ namespace Aishwaryam.Api.Controllers
         }
 
         [HttpPost("verify-mpin")]
-        [Authorize]
+        [AllowAnonymous]
         [EnableRateLimiting("auth_policy")]
         public async Task<IActionResult> VerifyMpin([FromBody] VerifyMpinRequest request)
         {
-            var userId = GetAuthenticatedUserId();
-            if (userId == Guid.Empty) return Unauthorized();
-            
-            // Force authenticated userId to prevent IDOR
-            request.UserId = userId;
-
             if (string.IsNullOrEmpty(request.Mpin))
                 return BadRequest(new { Message = "MPIN is required." });
+
+            if (string.IsNullOrEmpty(request.PhoneNumber))
+                return BadRequest(new { Message = "Phone number is required." });
 
             request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
             
@@ -140,7 +137,9 @@ namespace Aishwaryam.Api.Controllers
             if (response.Success)
                 return Ok(response);
 
-            return Unauthorized(response);
+            // Return 400 (not 401) so the client does NOT try to refresh the token
+            // A 401 would trigger the ApiClient interceptor which mistakes it for an expired token
+            return BadRequest(response);
         }
 
         [HttpPost("change-mpin")]

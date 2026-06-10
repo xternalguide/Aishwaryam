@@ -499,28 +499,44 @@ namespace Aishwaryam.Application.Services
                     $"Successfully purchased {(goldWeightMg / 1000.0):F4}g of {(isSilverScheme ? "silver" : "gold")}.", 
                     isSilverScheme ? "SILVER_BUY" : "GOLD_BUY");
 
-                try
+                if (!request.SkipEmail)
                 {
-                    var user = await _authRepository.GetUserByIdAsync(request.UserId);
-                    if (user != null && !string.IsNullOrEmpty(user.Email))
+                    try
                     {
-                        var receiptData = new
+                        var user = await _authRepository.GetUserByIdAsync(request.UserId);
+                        if (user != null && !string.IsNullOrEmpty(user.Email))
                         {
-                            UserName = user.FullName ?? "Customer",
-                            TransactionId = txId.ToString(),
-                            GoldWeightMg = (totalGoldCreditedMg + promotionalBonusGoldMg).ToString(),
-                            AmountPaid = (totalAmountPaise / 100.0).ToString("F2"),
-                            GoldRatePerGm = (effectiveRate / 100.0).ToString("F2"),
-                            GstAmount = (gstAmountPaise / 100.0).ToString("F2"),
-                            BonusGoldMg = (bonusGoldMg + promotionalBonusGoldMg).ToString(),
-                            BonusPercent = (bonusPercentage + (activeScheme == null && promotionalBonusGoldMg > 0 ? (promotionalBonusAmountPaise * 100m / totalAmountPaise) : 0m)).ToString("F1"),
-                            NewGoldBalanceMg = updatedGoldBalance.ToString(),
-                            TransactionDate = DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt")
-                        };
-                        await _emailService.SendTemplatedAsync(user.Email, user.FullName ?? "Customer", EmailTemplate.GoldPurchaseReceipt, receiptData);
+                            var bUrl = request.BaseUrl;
+                            if (string.IsNullOrEmpty(bUrl))
+                            {
+                                bUrl = "https://aishwaryam.blazewing.in/";
+                            }
+                            if (!bUrl.EndsWith("/"))
+                            {
+                                bUrl += "/";
+                            }
+                            var downloadUrl = $"{bUrl}api/Gold/receipt/download/{txId}";
+
+                            var receiptData = new
+                            {
+                                UserName = user.FullName ?? "Customer",
+                                TransactionId = txId.ToString(),
+                                GoldWeightMg = (totalGoldCreditedMg + promotionalBonusGoldMg).ToString(),
+                                AmountPaid = (totalAmountPaise / 100.0).ToString("F2"),
+                                GoldRatePerGm = (effectiveRate / 100.0).ToString("F2"),
+                                GstAmount = (gstAmountPaise / 100.0).ToString("F2"),
+                                BonusGoldMg = (bonusGoldMg + promotionalBonusGoldMg).ToString(),
+                                BonusPercent = (bonusPercentage + (activeScheme == null && promotionalBonusGoldMg > 0 ? (promotionalBonusAmountPaise * 100m / totalAmountPaise) : 0m)).ToString("F1"),
+                                NewGoldBalanceMg = updatedGoldBalance.ToString(),
+                                TransactionDate = DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt"),
+                                MetalType = isSilverScheme ? "Silver" : "Gold",
+                                DownloadUrl = downloadUrl
+                            };
+                            await _emailService.SendTemplatedAsync(user.Email, user.FullName ?? "Customer", EmailTemplate.GoldPurchaseReceipt, receiptData);
+                        }
                     }
+                    catch { /* ignore email error */ }
                 }
-                catch { /* ignore email error */ }
 
                 var status = await _goldRepository.GetGoldStatusAsync(request.UserId);
                 return new GoldTransactionResponse

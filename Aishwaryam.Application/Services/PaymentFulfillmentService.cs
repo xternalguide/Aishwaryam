@@ -238,7 +238,8 @@ namespace Aishwaryam.Application.Services
                     TotalAmountPaise = paymentRecord.AmountPaise,
                     IpAddress = paymentRecord.IpAddress,
                     DeviceFingerprint = paymentRecord.DeviceFingerprint,
-                    RazorpayPaymentId = razorpayPaymentId
+                    RazorpayPaymentId = razorpayPaymentId,
+                    SkipEmail = true
                 });
 
                 if (!receipt.Success)
@@ -251,9 +252,31 @@ namespace Aishwaryam.Application.Services
                 // Fetch User Details to send Email/SMS
                 var user = await _authRepository.GetUserByIdAsync(paymentRecord.UserId);
                 
+                // Determine metal type
+                bool isSilver = false;
+                if (paymentRecord.UserSchemeId.HasValue && paymentRecord.UserSchemeId.Value != Guid.Empty && _schemeRepository != null)
+                {
+                    var userScheme = await _schemeRepository.GetUserSchemeByIdAsync(paymentRecord.UserSchemeId.Value);
+                    if (userScheme != null && !string.IsNullOrEmpty(userScheme.PlanName) && userScheme.PlanName.Contains("silver", StringComparison.OrdinalIgnoreCase))
+                    {
+                        isSilver = true;
+                    }
+                }
+
+                var baseUrl = _configuration != null ? _configuration["Api:BaseUrl"] : null;
+                if (string.IsNullOrEmpty(baseUrl))
+                {
+                    baseUrl = "https://aishwaryam.blazewing.in/";
+                }
+                if (!baseUrl.EndsWith("/"))
+                {
+                    baseUrl += "/";
+                }
+                var downloadUrl = $"{baseUrl}api/Gold/receipt/download/{receipt.TransactionId}";
+
                 // 5. User Communication - Dispatch via Push, SMS and Email!
                 var title = "Payment Successful! ✅";
-                var body = $"Your payment of ₹{paymentRecord.AmountPaise / 100.0} was successful. {(receipt.GoldWeightMg / 1000.0):F4}g of gold added to your portfolio.";
+                var body = $"Your payment of ₹{paymentRecord.AmountPaise / 100.0} was successful. {(receipt.GoldWeightMg / 1000.0):F4}g of {(isSilver ? "silver" : "gold")} added to your portfolio.";
                 var pushData = new Dictionary<string, string>
                 {
                     { "screen", "history" },
@@ -286,7 +309,9 @@ namespace Aishwaryam.Application.Services
                         BonusGoldMg = receipt.BonusGoldMg.ToString(),
                         BonusPercent = receipt.BonusPercentage.ToString("F1"),
                         NewGoldBalanceMg = "Check Portfolio", // Can't easily pull here without a query, will rely on app.
-                        TransactionDate = DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt")
+                        TransactionDate = DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt"),
+                        MetalType = isSilver ? "Silver" : "Gold",
+                        DownloadUrl = downloadUrl
                     }
                 });
 

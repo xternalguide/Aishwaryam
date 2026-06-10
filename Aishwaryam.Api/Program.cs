@@ -17,6 +17,7 @@ using Serilog;
 using Serilog.Events;
 
 System.AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -148,6 +149,7 @@ builder.Services.AddSingleton<IGoldPriceProvider, Aishwaryam.Infrastructure.Serv
 builder.Services.AddSingleton<IGoldPriceProvider, Aishwaryam.Infrastructure.Services.PriceProviders.StaticFallbackProvider>();
 builder.Services.AddSingleton<IGoldPriceManager, Aishwaryam.Infrastructure.Services.GoldPriceManager>();
 builder.Services.AddScoped<Aishwaryam.Infrastructure.Services.GoldScraperService>();
+builder.Services.AddScoped<Aishwaryam.Application.Interfaces.Services.IReceiptPdfGenerator, Aishwaryam.Infrastructure.Services.ReceiptPdfGenerator>();
 
 // Register Hosted Services
 builder.Services.AddHostedService<Aishwaryam.Api.Services.SchemeAutoPayService>();

@@ -463,6 +463,25 @@ namespace Aishwaryam.Api.Controllers
             return Ok(new { message = "Admin price override applied and logged.", snapshot.Id });
         }
 
+        [HttpGet("receipt/download/{transactionId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DownloadReceipt(Guid transactionId, [FromServices] IReceiptPdfGenerator pdfGenerator)
+        {
+            try
+            {
+                var pdfBytes = await pdfGenerator.GenerateReceiptPdfAsync(transactionId);
+                return File(pdfBytes, "application/pdf", $"Receipt_{transactionId.ToString()[..8].ToUpper()}.pdf");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "An error occurred generating receipt.", Details = ex.Message });
+            }
+        }
+
         [HttpPost("buy")]
         public async Task<IActionResult> BuyGold([FromBody] BuyGoldRequest request)
         {
@@ -478,6 +497,9 @@ namespace Aishwaryam.Api.Controllers
             request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
             request.DeviceFingerprint = Request.Headers["X-Device-Fingerprint"].ToString();
             if (string.IsNullOrEmpty(request.DeviceFingerprint)) request.DeviceFingerprint = "web_default";
+
+            // Pass BaseUrl for receipt download link generation
+            request.BaseUrl = $"{Request.Scheme}://{Request.Host}/";
 
             try
             {

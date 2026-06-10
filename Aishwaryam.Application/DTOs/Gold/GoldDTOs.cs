@@ -11,6 +11,8 @@ namespace Aishwaryam.Application.DTOs.Gold
         public string DeviceFingerprint { get; set; } = string.Empty;
         public string? PriceLockId { get; set; }
         public string? RazorpayPaymentId { get; set; }
+        public bool SkipEmail { get; set; }
+        public string? BaseUrl { get; set; }
     }
 
     public class SellGoldRequest
