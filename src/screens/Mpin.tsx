@@ -87,7 +87,7 @@ export const Mpin: React.FC = () => {
             clearInterval(interval);
             return prev;
           }
-          const next = prev + Math.floor(Math.random() * 8) + 3; // increment by 3-10%
+          const next = prev + Math.floor(Math.random() * 8) + 3;
           return next > 95 ? 95 : next;
         });
       }, 50);
@@ -96,6 +96,21 @@ export const Mpin: React.FC = () => {
     }
     return () => clearInterval(interval);
   }, [isLoading]);
+
+  // ── BULLETPROOF ERROR CLEARING ──────────────────────────────────────────
+  // Layer 1: Reactively clear error whenever ANY pin input value changes.
+  // This catches typing, autofill, paste, and programmatic resets.
+  useEffect(() => {
+    if (errorMsg) setErrorMsg(null);
+  }, [mpin, newMpin, confirmMpin, otp]);
+
+  // Layer 2: Auto-dismiss error after 4 seconds as an absolute safety net.
+  useEffect(() => {
+    if (!errorMsg) return;
+    const timer = setTimeout(() => setErrorMsg(null), 4000);
+    return () => clearTimeout(timer);
+  }, [errorMsg]);
+  // ────────────────────────────────────────────────────────────────────────
 
   // Handle verify existing MPIN
   const handleVerifyExistingMpin = async (val: string) => {
@@ -202,8 +217,8 @@ export const Mpin: React.FC = () => {
     length: number,
     onComplete: (completedVal: string) => void
   ) => {
-    // Clear any stale error as soon as the user starts typing
-    setErrorMsg(null);
+    // Layer 3: Clear error immediately on any digit change
+    if (errorMsg) setErrorMsg(null);
 
     const clean = val.replace(/\D/g, '').slice(0, 1);
     const pinArray = currentState.split('');
@@ -215,15 +230,17 @@ export const Mpin: React.FC = () => {
       if (inputsRef.current[index + 1]) inputsRef.current[index + 1].focus();
     }
 
-    // Only fire onComplete when ALL slots are filled with digits
+    // Only fire onComplete when ALL slots have a digit AND not mid-request
     const allFilled = pinArray.length === length && pinArray.every((ch) => ch !== '' && ch !== undefined);
-    if (allFilled) {
-      // Auto blur to dismiss keyboard
-      if (inputsRef.current[index]) {
-        inputsRef.current[index].blur();
-      }
+    if (allFilled && !isLoading) {
+      if (inputsRef.current[index]) inputsRef.current[index].blur();
       onComplete(nextVal);
     }
+  };
+
+  // Layer 4: Clear error when user taps/focuses any pin box
+  const handlePinFocus = () => {
+    if (errorMsg) setErrorMsg(null);
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>, currentState: string, stateSetter: React.Dispatch<React.SetStateAction<string>>, inputsRef: React.MutableRefObject<HTMLInputElement[]>) => {
@@ -390,6 +407,7 @@ export const Mpin: React.FC = () => {
                       inputMode="numeric"
                       maxLength={1}
                       value={mpin[i] || ''}
+                      onFocus={handlePinFocus}
                       onChange={(e) => handlePinBoxChange(i, e.target.value, setMpin, mpin, mpinRef, 4, (completedVal) => {
                         handleVerifyExistingMpin(completedVal);
                       })}
@@ -467,6 +485,7 @@ export const Mpin: React.FC = () => {
                         inputMode="numeric"
                         maxLength={1}
                         value={newMpin[i] || ''}
+                        onFocus={handlePinFocus}
                         onChange={(e) => handlePinBoxChange(i, e.target.value, setNewMpin, newMpin, newMpinRef, 4, () => {
                           if (confirmMpinRef.current[0]) confirmMpinRef.current[0].focus();
                         })}
@@ -502,6 +521,7 @@ export const Mpin: React.FC = () => {
                         maxLength={1}
                         value={confirmMpin[i] || ''}
                         disabled={newMpin.length !== 4}
+                        onFocus={handlePinFocus}
                         onChange={(e) => handlePinBoxChange(i, e.target.value, setConfirmMpin, confirmMpin, confirmMpinRef, 4, (completedVal) => {
                           if (newMpin === completedVal) {
                             handleSaveMpin(completedVal);
