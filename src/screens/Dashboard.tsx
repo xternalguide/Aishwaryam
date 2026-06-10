@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SessionManager, OnboardingStage } from '../utils/SessionManager';
-import { ApiClient, BASE_URL } from '../utils/ApiClient';
+import { ApiClient } from '../utils/ApiClient';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from '../utils/translation';
 import {
@@ -210,6 +210,7 @@ export const Dashboard: React.FC = () => {
   const [offerDesc, setOfferDesc] = useState<string | null>(null);
   const [activeBannerIdx, setActiveBannerIdx] = useState(0);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const [isDownloadingReceipt, setIsDownloadingReceipt] = useState(false);
 
   const dragStartPosRef = useRef({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
@@ -1257,20 +1258,36 @@ export const Dashboard: React.FC = () => {
             )}
 
             <button
-              onClick={()=>{ 
-                if(selectedTxDetail&&selectedTxDetail.transactionId) {
-                  const url = `${BASE_URL}api/Gold/receipt/download/${selectedTxDetail.transactionId}`;
-                  const isCapacitor = !!(window as any).Capacitor;
-                  if (isCapacitor) {
-                    window.open(url, '_system');
-                  } else {
-                    window.open(url, '_blank');
+              disabled={isDownloadingReceipt}
+              onClick={async () => { 
+                if (selectedTxDetail && selectedTxDetail.transactionId) {
+                  setIsDownloadingReceipt(true);
+                  try {
+                    const url = `api/Gold/receipt/download/${selectedTxDetail.transactionId}`;
+                    const response = await ApiClient.get(url, { responseType: 'blob' });
+                    
+                    const blob = new Blob([response.data], { type: 'application/pdf' });
+                    const href = URL.createObjectURL(blob);
+                    
+                    const link = document.createElement('a');
+                    link.href = href;
+                    link.setAttribute('download', `Receipt_${selectedTxDetail.transactionId.substring(0, 8).toUpperCase()}.pdf`);
+                    document.body.appendChild(link);
+                    link.click();
+                    
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(href);
+                  } catch (err) {
+                    console.error("Receipt download failed:", err);
+                    alert("Failed to download receipt. Please try again.");
+                  } finally {
+                    setIsDownloadingReceipt(false);
                   }
                 }
               }}
-              style={{ width:'100%', height:'44px', borderRadius:'12px', background:'linear-gradient(135deg,#29001D,#C2185B)', color:'white', border:'none', fontFamily:DS.font, fontWeight:'800', fontSize:'13px', cursor:'pointer', boxShadow:'0 4px 16px rgba(194,24,91,0.35)' }}
+              style={{ width:'100%', height:'44px', borderRadius:'12px', background: isDownloadingReceipt ? '#cccccc' : 'linear-gradient(135deg,#29001D,#C2185B)', color:'white', border:'none', fontFamily:DS.font, fontWeight:'800', fontSize:'13px', cursor: isDownloadingReceipt ? 'not-allowed' : 'pointer', boxShadow:'0 4px 16px rgba(194,24,91,0.35)' }}
             >
-              Download Receipt
+              {isDownloadingReceipt ? 'Downloading...' : 'Download Receipt'}
             </button>
           </div>
         </div>
