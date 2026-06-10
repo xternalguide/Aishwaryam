@@ -176,8 +176,6 @@ export const Dashboard: React.FC = () => {
 
   const dragStartPosRef = useRef({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
-  // Ref for the shared tab scroll container — reset on every tab switch
-  const tabScrollRef = useRef<HTMLDivElement>(null);
   const minSwipeDistance = 50;
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -346,10 +344,6 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('DASHBOARD_ACTIVE_TAB', String(selectedTab));
     if (selectedTab === 1) refreshData(true);
-    // Reset scroll to top whenever the user switches tabs
-    if (tabScrollRef.current) {
-      tabScrollRef.current.scrollTop = 0;
-    }
   }, [selectedTab]);
 
   useEffect(() => {
@@ -912,7 +906,7 @@ export const Dashboard: React.FC = () => {
       )}
 
       {/* ── MAIN CONTENT ── */}
-      <div ref={tabScrollRef} style={{ flex:1, display:'flex', flexDirection:'column', height:'100%', overflowY:'auto', overflowX:'hidden' }}>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', height:'100%', overflowY:'auto', overflowX:'hidden' }}>
 
         {/* TOP NAVBAR */}
         {selectedTab !== 2 && (

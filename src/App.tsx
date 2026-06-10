@@ -36,7 +36,6 @@ import {
 import { AppProvider } from './context/AppContext';
 import { PushNotificationHandler } from './components/PushNotificationHandler';
 import { BackButtonHandler } from './components/BackButtonHandler';
-import { ScrollToTop } from './components/ScrollToTop';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
 import './App.css';
@@ -192,7 +191,6 @@ const App: React.FC = () => {
     <div className="app-container">
       <AppProvider>
         <Router>
-          <ScrollToTop />
           <PushNotificationHandler />
           <BackButtonHandler />
           <Routes>
