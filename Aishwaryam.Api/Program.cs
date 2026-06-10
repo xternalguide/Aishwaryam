@@ -373,6 +373,7 @@ using (var scope = app.Services.CreateScope())
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
         price_24k_per_gram numeric(14,4) NOT NULL,
         price_22k_per_gram numeric(14,4) NOT NULL,
+        price_silver_per_gram numeric(14,4) DEFAULT 0 NOT NULL,
         buy_price_per_gram numeric(14,4) NOT NULL,
         sell_price_per_gram numeric(14,4) NOT NULL,
         source varchar(50) NOT NULL,
@@ -501,6 +502,7 @@ You can view and update your personal details in the Profile section of the app.
     TryExec("ALTER TABLE wallets ADD COLUMN IF NOT EXISTS row_version bytea;", "wallets.row_version");
     TryExec("ALTER TABLE app_configs ADD COLUMN IF NOT EXISTS referrer_reward_mg bigint DEFAULT 100 NOT NULL;", "app_configs.referrer_reward_mg");
     TryExec("ALTER TABLE app_configs ADD COLUMN IF NOT EXISTS referee_reward_mg bigint DEFAULT 50 NOT NULL;", "app_configs.referee_reward_mg");
+    TryExec("ALTER TABLE gold_price_snapshots ADD COLUMN IF NOT EXISTS price_silver_per_gram numeric(14,4) DEFAULT 0 NOT NULL;", "gold_price_snapshots.price_silver_per_gram");
 
     // ── ALTER TABLE: gold_transactions idempotency & new columns ─────────────
     TryExec("ALTER TABLE gold_transactions ADD COLUMN IF NOT EXISTS razorpay_payment_id varchar(100);",

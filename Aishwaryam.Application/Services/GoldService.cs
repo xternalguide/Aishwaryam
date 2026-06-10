@@ -61,6 +61,7 @@ namespace Aishwaryam.Application.Services
                 SellPricePaise = (long)(price.SellPrice * 100),
                 Price24KPaise = (long)(price.Price24K * 100),
                 Price22KPaise = (long)(price.Price22K * 100),
+                PriceSilverPaise = (long)(price.PriceSilver * 100),
                 UpdatedAt = price.Timestamp,
                 Source = price.Source,
                 IsFallback = price.Source == "StaticFallback"
@@ -81,6 +82,7 @@ namespace Aishwaryam.Application.Services
 
                 // 2. Check Price Lock
                 long effectiveBuyPricePaise;
+                long effectiveSilverPricePaise = 0L;
                 DateTimeOffset effectiveUpdatedAt;
                 string effectiveSource;
                 
@@ -91,6 +93,7 @@ namespace Aishwaryam.Application.Services
                         return new GoldTransactionResponse { Success = false, Message = "Price lock expired or invalid." };
                     
                     effectiveBuyPricePaise = (long)(lockedPrice.BuyPrice * 100);
+                    effectiveSilverPricePaise = (long)(lockedPrice.PriceSilver * 100);
                     effectiveUpdatedAt = lockedPrice.Timestamp;
                     effectiveSource = "LOCKED_" + lockedPrice.Source;
                 }
@@ -98,6 +101,7 @@ namespace Aishwaryam.Application.Services
                 {
                     var currentPrice = await GetCurrentPriceAsync();
                     effectiveBuyPricePaise = currentPrice.BuyPricePaise;
+                    effectiveSilverPricePaise = currentPrice.PriceSilverPaise;
                     effectiveUpdatedAt = currentPrice.UpdatedAt;
                     effectiveSource = currentPrice.Source;
                 }
@@ -126,7 +130,9 @@ namespace Aishwaryam.Application.Services
                 }
 
                 bool isSilverScheme = activeScheme != null && activeScheme.PlanName.Contains("silver", StringComparison.OrdinalIgnoreCase);
-                long effectiveRate = isSilverScheme ? 9500L : effectiveBuyPricePaise;
+                long effectiveRate = isSilverScheme 
+                    ? (effectiveSilverPricePaise > 0L ? effectiveSilverPricePaise : 9500L) 
+                    : effectiveBuyPricePaise;
 
                 Console.WriteLine($"[LOYALTY_AUDIT] isSilverScheme: {isSilverScheme}, effectiveRate: {effectiveRate}");
 

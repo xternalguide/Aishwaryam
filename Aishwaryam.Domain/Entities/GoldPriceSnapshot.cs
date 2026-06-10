@@ -10,6 +10,7 @@ namespace Aishwaryam.Domain.Entities
         public decimal BuyPricePerGram { get; set; }
         public decimal SellPricePerGram { get; set; }
         public string Source { get; set; } = string.Empty;
+        public decimal PriceSilverPerGram { get; set; } = 0;
         public string? AdminNote { get; set; }
         public bool IsAdminOverride { get; set; } = false;
         public DateTime FetchedAt { get; set; } = DateTime.UtcNow;

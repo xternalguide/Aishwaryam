@@ -31,6 +31,7 @@ namespace Aishwaryam.Infrastructure.Services.PriceProviders
             {
                 Price24K = FallbackPrice24K,
                 Price22K = price22K,
+                PriceSilver = 99.00m,
                 BuyPrice = price22K,
                 SellPrice = price22K * 0.97m,
                 Source = ProviderName,

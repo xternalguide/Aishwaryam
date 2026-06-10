@@ -577,6 +577,7 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
                 entity.Property(e => e.Price24KPerGram).HasColumnName("price_24k_per_gram").IsRequired();
                 entity.Property(e => e.Price22KPerGram).HasColumnName("price_22k_per_gram").IsRequired();
+                entity.Property(e => e.PriceSilverPerGram).HasColumnName("price_silver_per_gram").IsRequired().HasDefaultValue(0m);
                 entity.Property(e => e.BuyPricePerGram).HasColumnName("buy_price_per_gram").IsRequired();
                 entity.Property(e => e.SellPricePerGram).HasColumnName("sell_price_per_gram").IsRequired();
                 entity.Property(e => e.Source).HasColumnName("source").IsRequired().HasMaxLength(50);

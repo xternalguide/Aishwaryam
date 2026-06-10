@@ -50,6 +50,7 @@ namespace Aishwaryam.Application.DTOs.Gold
         public long SellPricePaise { get; set; }
         public long Price24KPaise { get; set; }
         public long Price22KPaise { get; set; }
+        public long PriceSilverPaise { get; set; }
         public DateTimeOffset UpdatedAt { get; set; }
         public string Source { get; set; } = "Live";
         public bool IsFallback { get; set; } = false;

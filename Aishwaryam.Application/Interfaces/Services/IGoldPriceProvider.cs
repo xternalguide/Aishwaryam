@@ -13,6 +13,7 @@ namespace Aishwaryam.Application.Interfaces.Services
     {
         public decimal Price24K { get; set; }
         public decimal Price22K { get; set; }
+        public decimal PriceSilver { get; set; }
         public decimal BuyPrice { get; set; }
         public decimal SellPrice { get; set; }
         public string Source { get; set; } = string.Empty;

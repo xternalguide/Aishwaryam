@@ -51,11 +51,37 @@ namespace Aishwaryam.Infrastructure.Services
                         if (decimal.TryParse(price22Str, out decimal price22) && price22 > 0)
                         {
                             decimal price24 = price22 / 0.916m; // Calculate 24K from 22K
-                            _logger.LogInformation("Successfully scraped primary gold rates: 22K = {Price22}, Calculated 24K = {Price24}", price22, price24);
+                            
+                            // Parse Silver
+                            decimal priceSilver = 99.00m; // Default fallback for silver
+                            var matchSilver = Regex.Match(html, @"1\s+Gm\s+Silver.*?class=""silver_rate"">([\d.]+?)</span>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                            if (matchSilver.Success)
+                            {
+                                var priceSilverStr = matchSilver.Groups[1].Value.Replace(",", "");
+                                if (decimal.TryParse(priceSilverStr, out decimal parsedSilver) && parsedSilver > 0)
+                                {
+                                    priceSilver = parsedSilver;
+                                }
+                            }
+                            else
+                            {
+                                var matchSilverJs = Regex.Match(html, @"\$\('#silverrate_1gm'\)\.html\(""([\d.]+?)""\);", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                                if (matchSilverJs.Success)
+                                {
+                                    var priceSilverStr = matchSilverJs.Groups[1].Value.Replace(",", "");
+                                    if (decimal.TryParse(priceSilverStr, out decimal parsedSilver) && parsedSilver > 0)
+                                    {
+                                        priceSilver = parsedSilver;
+                                    }
+                                }
+                            }
+
+                            _logger.LogInformation("Successfully scraped primary gold/silver rates: 22K = {Price22}, Calculated 24K = {Price24}, Silver = {PriceSilver}", price22, price24, priceSilver);
                             return new GoldPriceResult
                             {
                                 Price24K = price24,
                                 Price22K = price22,
+                                PriceSilver = priceSilver,
                                 BuyPrice = price22, // BuyPrice is standard 22K per gram
                                 SellPrice = price22 * 0.97m, // SellPrice with 3% margin
                                 Source = "JewellersAssociationScraper",
@@ -101,6 +127,7 @@ namespace Aishwaryam.Infrastructure.Services
                             {
                                 Price24K = price24,
                                 Price22K = price22,
+                                PriceSilver = 99.00m,
                                 BuyPrice = price22,
                                 SellPrice = price22 * 0.97m,
                                 Source = "LiveChennaiScraper",

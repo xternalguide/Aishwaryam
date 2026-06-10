@@ -690,7 +690,9 @@ namespace Aishwaryam.Application.Services
                 long redemptionWeightMg = scheme.AccumulatedGoldMg;
                 bool isSilverScheme = scheme.PlanName.Contains("silver", StringComparison.OrdinalIgnoreCase);
                 var price = await _goldService.GetCurrentPriceAsync();
-                long effectiveRate = isSilverScheme ? 9500L : price.SellPricePaise;
+                long effectiveRate = isSilverScheme 
+                    ? (price.PriceSilverPaise > 0L ? price.PriceSilverPaise : 9500L) 
+                    : price.SellPricePaise;
 
                 if (includeBonusGold)
                 {

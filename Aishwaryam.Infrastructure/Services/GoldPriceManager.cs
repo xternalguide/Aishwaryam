@@ -56,6 +56,7 @@ namespace Aishwaryam.Infrastructure.Services
                     {
                         Price24K = latestSnapshot.Price24KPerGram,
                         Price22K = latestSnapshot.Price22KPerGram,
+                        PriceSilver = latestSnapshot.PriceSilverPerGram,
                         BuyPrice = latestSnapshot.BuyPricePerGram,
                         SellPrice = latestSnapshot.SellPricePerGram,
                         Timestamp = latestSnapshot.FetchedAt,

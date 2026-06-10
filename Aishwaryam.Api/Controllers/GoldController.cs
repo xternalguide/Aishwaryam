@@ -336,6 +336,7 @@ namespace Aishwaryam.Api.Controllers
             return Ok(new {
                 price24KPaise = (long)(price.Price24K * 100),
                 price22KPaise = (long)(price.Price22K * 100),
+                priceSilverPaise = (long)(price.PriceSilver * 100),
                 buyPricePaise = (long)(price.BuyPrice * 100),
                 sellPricePaise = (long)(price.SellPrice * 100),
                 source = price.Source,
