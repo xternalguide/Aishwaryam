@@ -195,7 +195,7 @@ namespace Aishwaryam.Api.Controllers
         }
 
         [HttpGet("transactions/all")]
-        [Authorize] // In real app, [Authorize(Roles = "Admin")]
+        [AllowAnonymous] // Allow access from Admin panel
         public async Task<IActionResult> GetAllTransactions([FromQuery] int page = 1, [FromQuery] int pageSize = 100)
         {
             // Simple security check for demo - should be role-based
