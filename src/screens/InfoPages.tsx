@@ -480,8 +480,8 @@ export const Referral: React.FC = () => {
   const navigate = useNavigate();
   const { profile } = useApp();
   const [refCode, setRefCode] = useState(profile?.referralCode || 'AISH987');
-  const [totalReferrals, setTotalReferrals] = useState(4);
-  const [totalBonusMg, setTotalBonusMg] = useState(400);
+  const [totalReferrals, setTotalReferrals] = useState(0);
+  const [totalBonusMg, setTotalBonusMg] = useState(0);
 
   useEffect(() => {
     if (profile?.referralCode) {
@@ -508,6 +508,24 @@ export const Referral: React.FC = () => {
   const handleCopy = () => {
     navigator.clipboard.writeText(refCode);
     alert('Referral code copied to clipboard!');
+  };
+
+  const handleShare = async () => {
+    const shareText = `Start saving in gold or silver on Aishwaryam! Use my referral code: ${refCode} to get a bonus on your first chit payment.`;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Aishwaryam Referral',
+          text: shareText,
+          url: window.location.origin
+        });
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    } else {
+      navigator.clipboard.writeText(shareText);
+      alert('Referral message copied to clipboard! Share it with your friends.');
+    }
   };
 
   return (
@@ -540,7 +558,7 @@ export const Referral: React.FC = () => {
             <button onClick={handleCopy} style={{ flex: 1, height: '44px', borderRadius: '10px', background: 'var(--gold-soft)', color: 'var(--gold-deep)', border: '1px solid rgba(184, 134, 11, 0.2)', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
               <Copy size={16} /> Copy
             </button>
-            <button onClick={handleCopy} style={{ flex: 1, height: '44px', borderRadius: '10px', background: 'var(--brand-dark)', color: 'white', border: 'none', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <button onClick={handleShare} style={{ flex: 1, height: '44px', borderRadius: '10px', background: 'var(--brand-dark)', color: 'white', border: 'none', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
               <Share2 size={16} /> Share
             </button>
           </div>
