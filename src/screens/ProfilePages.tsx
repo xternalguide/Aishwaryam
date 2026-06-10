@@ -493,6 +493,8 @@ export const ProfileKyc: React.FC = () => {
   const [newNomineeRelationship, setNewNomineeRelationship] = useState('');
 
   const [isEditingNominee, setIsEditingNominee] = useState(false);
+  const [isSavingNominee, setIsSavingNominee] = useState(false);
+  const [nomineeError, setNomineeError] = useState<string | null>(null);
   const [kycDocs, setKycDocs] = useState<any[]>([]);
   const [kycStatusMsg, setKycStatusMsg] = useState('PENDING');
 
@@ -537,21 +539,26 @@ export const ProfileKyc: React.FC = () => {
   }, [profile]);
 
   const handleUpdateNominee = async () => {
+    setNomineeError(null);
     if (!newNomineeInput.trim()) {
-      alert("Nominee Name is required.");
+      setNomineeError('Nominee Name is required.');
       return;
     }
     if (!newNomineePhone.trim() || !/^\d{10}$/.test(newNomineePhone)) {
-      alert("Valid 10-digit Nominee Mobile Number is required.");
+      setNomineeError('Valid 10-digit Nominee Mobile Number is required.');
       return;
     }
     if (!newNomineeRelationship) {
-      alert("Nominee Relationship is required.");
+      setNomineeError('Nominee Relationship is required.');
       return;
     }
 
     const userId = SessionManager.getUserId();
     if (!userId) return;
+
+    // Guard: prevent double-clicks
+    if (isSavingNominee) return;
+    setIsSavingNominee(true);
 
     try {
       await ApiClient.put(`api/User/profile/${userId}`, {
@@ -565,10 +572,11 @@ export const ProfileKyc: React.FC = () => {
       setNomineePhone(newNomineePhone);
       setNomineeRelationship(newNomineeRelationship);
       setIsEditingNominee(false);
-      alert('Nominee details updated successfully!');
       refreshData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to update nominee details.');
+      setNomineeError(err.response?.data?.message || 'Failed to update nominee details. Please try again.');
+    } finally {
+      setIsSavingNominee(false);
     }
   };
 
@@ -672,14 +680,29 @@ export const ProfileKyc: React.FC = () => {
                 </select>
               </div>
 
+              {/* Inline error */}
+              {nomineeError && (
+                <span style={{ fontSize: '12px', color: 'var(--error-red)', fontWeight: '600', display: 'block', background: 'var(--error-light)', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.2)' }}>
+                  ⚠ {nomineeError}
+                </span>
+              )}
+
               <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
                 <button 
-                  onClick={handleUpdateNominee} 
-                  style={{ background: 'var(--gradient-brand)', color: 'white', border: 'none', padding: '0 16px', height: '36px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 2px 6px var(--brand-glow)' }}
+                  onClick={handleUpdateNominee}
+                  disabled={isSavingNominee}
+                  style={{ background: isSavingNominee ? 'rgba(74,14,78,0.5)' : 'var(--gradient-brand)', color: 'white', border: 'none', padding: '0 20px', height: '40px', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: isSavingNominee ? 'not-allowed' : 'pointer', boxShadow: '0 2px 6px var(--brand-glow)', display: 'flex', alignItems: 'center', gap: '8px', minWidth: '130px', justifyContent: 'center', transition: 'all 0.2s ease' }}
                 >
-                  Save Nominee
+                  {isSavingNominee ? (
+                    <>
+                      <div style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.4)', borderTop: '2px solid white', borderRadius: '50%', animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Nominee'
+                  )}
                 </button>
-                <button onClick={() => setIsEditingNominee(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', padding: '0 8px', fontSize: '12px', cursor: 'pointer' }}>
+                <button onClick={() => { setIsEditingNominee(false); setNomineeError(null); }} style={{ background: 'transparent', border: '1px solid rgba(0,0,0,0.1)', color: 'var(--text-secondary)', padding: '0 16px', height: '40px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' }}>
                   {t('cancel')}
                 </button>
               </div>

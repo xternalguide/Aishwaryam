@@ -513,10 +513,8 @@ export const Mpin: React.FC = () => {
                         disabled={newMpin.length !== 4}
                         onFocus={() => { handlePinFocus(); setFocusedBoxIdx(200 + i); }}
                         onBlur={() => setFocusedBoxIdx(null)}
-                        onChange={(e) => handlePinBoxChange(i, e.target.value, setConfirmMpin, confirmMpin, confirmMpinRef, 4, (completedVal) => {
-                          if (newMpin === completedVal) {
-                            handleSaveMpin(completedVal);
-                          }
+                        onChange={(e) => handlePinBoxChange(i, e.target.value, setConfirmMpin, confirmMpin, confirmMpinRef, 4, () => {
+                          // No auto-save: user must press the Save button explicitly
                         })}
                         onKeyDown={(e) => handleKeyDown(i, e, confirmMpin, setConfirmMpin, confirmMpinRef)}
                         ref={(el) => { if (el) confirmMpinRef.current[i] = el; }}
