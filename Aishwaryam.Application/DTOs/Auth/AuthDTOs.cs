@@ -46,7 +46,6 @@ namespace Aishwaryam.Application.DTOs.Auth
     public class VerifyMpinRequest
     {
         public Guid UserId { get; set; }
-        public string PhoneNumber { get; set; } = string.Empty;
         public string Mpin { get; set; } = string.Empty;
         public string IpAddress { get; set; } = string.Empty;
         public string DeviceFingerprint { get; set; } = string.Empty;

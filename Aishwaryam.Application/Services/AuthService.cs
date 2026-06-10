@@ -310,25 +310,7 @@ namespace Aishwaryam.Application.Services
 
         public async Task<AuthResponse> VerifyMpinAsync(VerifyMpinRequest request)
         {
-            // Clean phone number (strip +91 prefix if present)
-            var phone = request.PhoneNumber ?? string.Empty;
-            if (phone.StartsWith("+91")) phone = phone.Substring(3);
-            phone = phone.Trim();
-
-            User? user = null;
-
-            // Look up by phone number (sent by all clients)
-            if (!string.IsNullOrEmpty(phone))
-            {
-                user = await _authRepository.GetUserByPhoneAsync(phone);
-            }
-
-            // Fallback: if phone not provided but UserId is (future-proofing)
-            if (user == null && request.UserId != Guid.Empty)
-            {
-                user = await _authRepository.GetUserByIdAsync(request.UserId);
-            }
-
+            var user = await _authRepository.GetUserByIdAsync(request.UserId);
             if (user == null || string.IsNullOrEmpty(user.MpinHash))
             {
                 return new AuthResponse { Success = false, Message = "User or MPIN not found." };
@@ -337,7 +319,8 @@ namespace Aishwaryam.Application.Services
             // Verify BCrypt hash
             if (!BCrypt.Net.BCrypt.Verify(request.Mpin, user.MpinHash))
             {
-                return new AuthResponse { Success = false, Message = "Incorrect PIN. Please try again." };
+                // In a real app, track failed attempts here for lockout
+                return new AuthResponse { Success = false, Message = "Invalid MPIN." };
             }
 
             // Generate real token and record the session
@@ -365,7 +348,6 @@ namespace Aishwaryam.Application.Services
                 UserId = user.Id
             };
         }
-
 
         private string GenerateJwt(User user)
         {

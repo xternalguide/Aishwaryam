@@ -284,6 +284,7 @@ namespace Aishwaryam.Api.Controllers
                         extension = ".gif";
                 }
 
+                cleanBase64 = cleanBase64.Replace(" ", "+");
                 var imageBytes = Convert.FromBase64String(cleanBase64);
 
                 // Ensure directories exist in wwwroot
