@@ -170,7 +170,8 @@ export const Mpin: React.FC = () => {
     try {
       const response = await ApiClient.post('api/Auth/verify-otp', {
         phoneNumber: SessionManager.getPhoneNumber() || '',
-        otp: val
+        otp: val,
+        deviceFingerprint: ApiClient.getDeviceFingerprint()
       });
       if (response.data && response.data.success) {
         const { token, refreshToken, userId } = response.data;

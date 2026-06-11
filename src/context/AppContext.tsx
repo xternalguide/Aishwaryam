@@ -51,7 +51,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const refreshData = async (silent: boolean = false) => {
     const userId = SessionManager.getUserId();
-    if (!userId) return;
+    const stage = SessionManager.getOnboardingStage();
+    if (!userId || stage !== OnboardingStage.FULLY_VERIFIED) return;
     if (!silent) {
       setIsLoading(true);
     }
@@ -193,7 +194,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     const userId = SessionManager.getUserId();
-    if (userId) {
+    const stage = SessionManager.getOnboardingStage();
+    if (userId && stage === OnboardingStage.FULLY_VERIFIED) {
       refreshData();
     } else {
       clearData();
@@ -202,7 +204,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Set up silent polling every 8 seconds to fetch database changes immediately in the background
     const interval = setInterval(() => {
       const currentUserId = SessionManager.getUserId();
-      if (currentUserId) {
+      const currentStage = SessionManager.getOnboardingStage();
+      if (currentUserId && currentStage === OnboardingStage.FULLY_VERIFIED) {
         refreshData(true);
       }
     }, 8000);
