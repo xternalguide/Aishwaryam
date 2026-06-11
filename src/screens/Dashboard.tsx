@@ -407,7 +407,7 @@ export const Dashboard: React.FC = () => {
   const getImageUrl = (url: string) => {
     if (!url) return '';
     if (url.startsWith('data:')) return url;
-    const activeBaseUrl = 'https://aishwaryam.blazewing.in/';
+    const activeBaseUrl = 'https://aishwaryam-production.up.railway.app/';
     const activeBase = activeBaseUrl.endsWith('/') ? activeBaseUrl : activeBaseUrl + '/';
     if (url.includes('/uploads/')) { const parts = url.split('/uploads/'); return activeBase + 'uploads/' + parts[1]; }
     if (url.startsWith('http://') || url.startsWith('https://')) return url;

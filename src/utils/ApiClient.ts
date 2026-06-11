@@ -2,7 +2,7 @@ import axios from 'axios';
 import type { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
 import { SessionManager } from './SessionManager';
 
-export const BASE_URL = 'https://aishwaryam.blazewing.in/';
+export const BASE_URL = 'https://aishwaryam-production.up.railway.app/';
 
 export const getDeviceFingerprint = (): string => {
   const isCapacitor = !!(window as any).Capacitor;
