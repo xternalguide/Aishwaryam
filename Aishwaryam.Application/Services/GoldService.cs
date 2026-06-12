@@ -535,7 +535,10 @@ namespace Aishwaryam.Application.Services
                             await _emailService.SendTemplatedAsync(user.Email, user.FullName ?? "Customer", EmailTemplate.GoldPurchaseReceipt, receiptData);
                         }
                     }
-                    catch { /* ignore email error */ }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[EMAIL_ERROR] Failed to send gold purchase receipt email: {ex.Message} \n {ex.StackTrace}");
+                    }
                 }
 
                 var status = await _goldRepository.GetGoldStatusAsync(request.UserId);
@@ -660,7 +663,10 @@ namespace Aishwaryam.Application.Services
                         await _emailService.SendTemplatedAsync(user.Email, user.FullName ?? "Customer", EmailTemplate.GoldRedeemed, receiptData);
                     }
                 }
-                catch { /* ignore email error */ }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[EMAIL_ERROR] Failed to send gold redemption email: {ex.Message} \n {ex.StackTrace}");
+                }
 
                 var newStatus = await _goldRepository.GetGoldStatusAsync(request.UserId);
                 return new GoldTransactionResponse
