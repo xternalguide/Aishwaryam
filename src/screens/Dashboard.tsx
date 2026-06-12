@@ -525,7 +525,7 @@ export const Dashboard: React.FC = () => {
   const renderMobileQuickActions = () => {
     const actions = [
       { label: t('action_schemes'), icon: <TrendingUp size={20} color="#C2185B" />, bg: 'rgba(194, 24, 91, 0.12)', onClick: () => navigate('/scheme-explorer') },
-      { label: t('action_history'), icon: <History size={20} color="#FFB300" />, bg: 'rgba(255, 179, 0, 0.12)', onClick: () => setSelectedTab(1) },
+      { label: t('my_bonuses'), icon: <Award size={20} color="#FFB300" />, bg: 'rgba(255, 179, 0, 0.12)', onClick: () => navigate('/my-bonuses') },
       { label: t('action_referral'), icon: <Gift size={20} color="#10B981" />, bg: 'rgba(16, 185, 129, 0.12)', onClick: () => navigate('/referral') },
       { label: t('action_calculator'), icon: <Calculator size={20} color="#0288D1" />, bg: 'rgba(2, 136, 209, 0.12)', onClick: () => navigate('/profile/price-calculator') },
     ];
