@@ -98,7 +98,10 @@ namespace Aishwaryam.Infrastructure.Services
                                 logoRow.RelativeItem().AlignMiddle().Column(col =>
                                 {
                                     col.Item().Text(config.ReceiptCompanyName).FontSize(20).Bold().FontColor(config.ReceiptColorPrimary);
-                                    col.Item().Text(config.ReceiptSubtitle).FontSize(8.5f).Italic().FontColor(config.ReceiptColorSecondary).Bold();
+                                    if (!string.IsNullOrWhiteSpace(config.ReceiptSubtitle))
+                                    {
+                                        col.Item().Text(config.ReceiptSubtitle).FontSize(8.5f).Italic().FontColor(config.ReceiptColorSecondary).Bold();
+                                    }
                                 });
                             });
 
