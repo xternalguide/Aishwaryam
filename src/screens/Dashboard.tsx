@@ -210,7 +210,7 @@ export const Dashboard: React.FC = () => {
   const [offerDesc, setOfferDesc] = useState<string | null>(null);
   const [activeBannerIdx, setActiveBannerIdx] = useState(0);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
-  const [isDownloadingReceipt, setIsDownloadingReceipt] = useState(false);
+
 
   const dragStartPosRef = useRef({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
