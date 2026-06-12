@@ -31,6 +31,8 @@ import {
   PlusCircle,
   Clock,
   Loader2,
+  AlertCircle,
+  CheckCircle2,
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────
@@ -276,6 +278,7 @@ export const Dashboard: React.FC = () => {
   const [editImageBase64, setEditImageBase64] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [customAlert, setCustomAlert] = useState<{ message: string; isError?: boolean } | null>(null);
 
   const calculateAge = (dobString: string) => {
     if (!dobString) return 0;
@@ -326,24 +329,28 @@ export const Dashboard: React.FC = () => {
   };
 
   const handleSaveProfile = async () => {
-    if (!editName.trim()) { alert('Full Name is required.'); return; }
-    if (editEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmail.trim())) { alert('Please enter a valid email address.'); return; }
-    if (editNomineePhone.trim() && !/^\d{10}$/.test(editNomineePhone.trim())) { alert('Nominee mobile number must be exactly 10 digits.'); return; }
+    if (!editName.trim()) { setCustomAlert({ message: 'Full Name is required.', isError: true }); return; }
+    if (editEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmail.trim())) { setCustomAlert({ message: 'Please enter a valid email address.', isError: true }); return; }
+    if (editNomineePhone.trim() && !/^\d{10}$/.test(editNomineePhone.trim())) { setCustomAlert({ message: 'Nominee mobile number must be exactly 10 digits.', isError: true }); return; }
     setIsSavingProfile(true);
     try {
       const userId = SessionManager.getUserId();
       if (!userId) return;
+      
+      // Close modal and refresh immediately so the transition is instant
+      setShowEditProfileModal(false);
+      
       await ApiClient.put(`api/User/profile/${userId}`, {
         fullName: editName.trim(), email: editEmail.trim() || null, dateOfBirth: editDob ? editDob : null,
         weddingAnniversaryDate: editWeddingDate ? editWeddingDate : null, gender: editGender || null,
         nomineeName: editNomineeName.trim() || null, nomineePhoneNumber: editNomineePhone.trim() || null,
         nomineeRelationship: editNomineeRelation || null, profilePictureBase64: editImageBase64
       });
-      alert('Profile updated successfully!');
-      setShowEditProfileModal(false);
+      
       refreshData();
+      setCustomAlert({ message: 'Profile updated successfully!', isError: false });
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to update profile.');
+      setCustomAlert({ message: err.response?.data?.message || 'Failed to update profile.', isError: true });
     } finally { setIsSavingProfile(false); }
   };
 
@@ -1656,6 +1663,48 @@ export const Dashboard: React.FC = () => {
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── CUSTOM ALERT POPUP ── */}
+      {customAlert && (
+        <div style={{ position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(0,0,0,0.6)', backdropFilter:'blur(4px)', WebkitBackdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:200 }}>
+          <div className="dash-fade-in" style={{ width:'85%', maxWidth:'320px', background: isDark ? '#1A1A2E' : '#FFFFFF', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.1)', borderRadius:'20px', padding:'24px', display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', gap:'16px', boxShadow:'0 15px 45px rgba(0,0,0,0.35)' }}>
+            <div style={{ width:'48px', height:'48px', borderRadius:'50%', background: customAlert.isError ? 'rgba(239,68,68,0.12)' : 'rgba(16,185,129,0.12)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              {customAlert.isError ? (
+                <AlertCircle size={24} color="#EF4444" />
+              ) : (
+                <CheckCircle2 size={24} color="#10B981" />
+              )}
+            </div>
+            <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
+              <span style={{ fontFamily:DS.font, fontSize:'16px', fontWeight:'900', color:DS.textWhite }}>
+                {customAlert.isError ? 'Error' : 'Success'}
+              </span>
+              <span style={{ fontFamily:DS.font, fontSize:'13px', color:DS.textSub, lineHeight:1.4 }}>
+                {customAlert.message}
+              </span>
+            </div>
+            <button
+              onClick={() => setCustomAlert(null)}
+              style={{
+                width:'100%',
+                height:'38px',
+                borderRadius:'10px',
+                background: customAlert.isError ? '#EF4444' : 'linear-gradient(135deg,#29001D,#C2185B)',
+                color:'white',
+                border:'none',
+                fontFamily:DS.font,
+                fontWeight:'800',
+                fontSize:'12.5px',
+                cursor:'pointer',
+                marginTop:'4px',
+                boxShadow: customAlert.isError ? '0 4px 12px rgba(239,68,68,0.2)' : '0 4px 12px rgba(194,24,91,0.2)'
+              }}
+            >
+              OK
+            </button>
           </div>
         </div>
       )}
