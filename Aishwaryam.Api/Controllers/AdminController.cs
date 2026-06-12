@@ -7,9 +7,26 @@ using Aishwaryam.Application.DTOs.Admin;
 using Aishwaryam.Application.Interfaces.Services;
 using Microsoft.EntityFrameworkCore;
 using Aishwaryam.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Aishwaryam.Api.Controllers
 {
+    public class ReceiptConfigRequest
+    {
+        public string ReceiptCompanyName { get; set; }
+        public string ReceiptSubtitle { get; set; }
+        public string ReceiptCorpName { get; set; }
+        public string ReceiptAddress1 { get; set; }
+        public string ReceiptAddress2 { get; set; }
+        public string ReceiptPhone { get; set; }
+        public string ReceiptEmail { get; set; }
+        public string ReceiptColorPrimary { get; set; }
+        public string ReceiptColorSecondary { get; set; }
+        public string ReceiptDisclaimerGold { get; set; }
+        public string ReceiptDisclaimerSilver { get; set; }
+        public string ReceiptRegisteredOffice { get; set; }
+    }
+
     [ApiController]
     [Route("api/[controller]")]
     // [Authorize(Roles = "Admin")] // Uncomment when auth is fully hooked up
@@ -134,6 +151,54 @@ namespace Aishwaryam.Api.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Error toggling daily price notification setting", error = ex.Message });
+            }
+        }
+
+        [HttpGet("receipt-config")]
+        [AllowAnonymous] // Allow access from Admin panel
+        public async Task<IActionResult> GetReceiptConfig([FromServices] ApplicationDbContext db)
+        {
+            try
+            {
+                var config = await db.AppConfigs.FirstOrDefaultAsync();
+                if (config == null) return NotFound("App configuration not found.");
+                return Ok(config);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error fetching receipt config", error = ex.Message });
+            }
+        }
+
+        [HttpPost("receipt-config")]
+        [AllowAnonymous] // Allow access from Admin panel
+        public async Task<IActionResult> UpdateReceiptConfig([FromBody] ReceiptConfigRequest request, [FromServices] ApplicationDbContext db)
+        {
+            try
+            {
+                var config = await db.AppConfigs.FirstOrDefaultAsync();
+                if (config == null) return NotFound("App configuration not found.");
+
+                config.ReceiptCompanyName = request.ReceiptCompanyName ?? config.ReceiptCompanyName;
+                config.ReceiptSubtitle = request.ReceiptSubtitle ?? config.ReceiptSubtitle;
+                config.ReceiptCorpName = request.ReceiptCorpName ?? config.ReceiptCorpName;
+                config.ReceiptAddress1 = request.ReceiptAddress1 ?? config.ReceiptAddress1;
+                config.ReceiptAddress2 = request.ReceiptAddress2 ?? config.ReceiptAddress2;
+                config.ReceiptPhone = request.ReceiptPhone ?? config.ReceiptPhone;
+                config.ReceiptEmail = request.ReceiptEmail ?? config.ReceiptEmail;
+                config.ReceiptColorPrimary = request.ReceiptColorPrimary ?? config.ReceiptColorPrimary;
+                config.ReceiptColorSecondary = request.ReceiptColorSecondary ?? config.ReceiptColorSecondary;
+                config.ReceiptDisclaimerGold = request.ReceiptDisclaimerGold ?? config.ReceiptDisclaimerGold;
+                config.ReceiptDisclaimerSilver = request.ReceiptDisclaimerSilver ?? config.ReceiptDisclaimerSilver;
+                config.ReceiptRegisteredOffice = request.ReceiptRegisteredOffice ?? config.ReceiptRegisteredOffice;
+                config.UpdatedAt = DateTimeOffset.UtcNow;
+
+                await db.SaveChangesAsync();
+                return Ok(new { success = true, message = "Receipt configuration updated successfully.", config });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error updating receipt config", error = ex.Message });
             }
         }
 

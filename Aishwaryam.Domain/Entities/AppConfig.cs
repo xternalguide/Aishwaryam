@@ -24,6 +24,20 @@ namespace Aishwaryam.Domain.Entities
         public bool IsDailyPriceNotificationEnabled { get; set; } = false;
         public DateTimeOffset? LastDailyPriceNotificationSent { get; set; }
 
+        // Receipt Template Configurations
+        public string ReceiptCompanyName { get; set; } = "AISHWARYAM @ YOUR HOME";
+        public string ReceiptSubtitle { get; set; } = "Official Digital Gold Savings Investment Receipt";
+        public string ReceiptCorpName { get; set; } = "Aishwaryam @ Home Private Limited";
+        public string ReceiptAddress1 { get; set; } = "45, Palace Road, Vasanth Nagar,";
+        public string ReceiptAddress2 { get; set; } = "Chennai, Tamil Nadu - 600001";
+        public string ReceiptPhone { get; set; } = "+91 94430 00000";
+        public string ReceiptEmail { get; set; } = "support@aishwaryam.com";
+        public string ReceiptColorPrimary { get; set; } = "#6B21A8"; // Purple
+        public string ReceiptColorSecondary { get; set; } = "#D4AF37"; // Gold
+        public string ReceiptDisclaimerGold { get; set; } = "* Gold credited is subject to the terms and rules of the locked scheme plan.";
+        public string ReceiptDisclaimerSilver { get; set; } = "* Silver credited is subject to the terms and rules of the locked scheme plan.";
+        public string ReceiptRegisteredOffice { get; set; } = "Registered Office: No. 123, Gandhi Road, Chennai, Tamil Nadu - 600001";
+
         public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
     }
 }

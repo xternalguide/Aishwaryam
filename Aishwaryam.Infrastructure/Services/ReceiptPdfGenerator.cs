@@ -38,6 +38,8 @@ namespace Aishwaryam.Infrastructure.Services
                 throw new KeyNotFoundException($"Transaction with ID {transactionId} not found.");
             }
 
+            var config = await _context.AppConfigs.FirstOrDefaultAsync() ?? new AppConfig();
+
             string schemePlanName = "";
             if (tx.UserSchemeId.HasValue)
             {
@@ -89,28 +91,28 @@ namespace Aishwaryam.Infrastructure.Services
                                 else
                                 {
                                     // Circular logo placeholder matching the image "A" inside a circle
-                                    logoRow.ConstantItem(40).Height(40).Border(2f).BorderColor("#6B21A8").AlignMiddle().AlignCenter().Text("A").FontSize(22).Bold().FontColor("#6B21A8");
+                                    logoRow.ConstantItem(40).Height(40).Border(2f).BorderColor(config.ReceiptColorPrimary).AlignMiddle().AlignCenter().Text("A").FontSize(22).Bold().FontColor(config.ReceiptColorPrimary);
                                     logoRow.ConstantItem(10);
                                 }
 
                                 logoRow.RelativeItem().AlignMiddle().Column(col =>
                                 {
-                                    col.Item().Text("AISHWARYAM @ YOUR HOME").FontSize(20).Bold().FontColor("#6B21A8");
-                                    col.Item().Text("Official Digital Gold Savings Investment Receipt").FontSize(8.5f).Italic().FontColor("#D4AF37").Bold();
+                                    col.Item().Text(config.ReceiptCompanyName).FontSize(20).Bold().FontColor(config.ReceiptColorPrimary);
+                                    col.Item().Text(config.ReceiptSubtitle).FontSize(8.5f).Italic().FontColor(config.ReceiptColorSecondary).Bold();
                                 });
                             });
 
                             row.ConstantItem(200).AlignRight().Column(col =>
                             {
-                                col.Item().Text("Aishwaryam @ Home Private Limited").FontSize(9).Bold().FontColor("#1F2937");
-                                col.Item().Text("45, Palace Road, Vasanth Nagar,").FontSize(8).FontColor("#4B5563");
-                                col.Item().Text("Chennai, Tamil Nadu - 600001").FontSize(8).FontColor("#4B5563");
-                                col.Item().Text("Mobile: +91 94430 00000").FontSize(8).FontColor("#4B5563");
-                                col.Item().Text("Email: support@aishwaryam.com").FontSize(8).FontColor("#4B5563");
+                                col.Item().Text(config.ReceiptCorpName).FontSize(9).Bold().FontColor("#1F2937");
+                                col.Item().Text(config.ReceiptAddress1).FontSize(8).FontColor("#4B5563");
+                                col.Item().Text(config.ReceiptAddress2).FontSize(8).FontColor("#4B5563");
+                                col.Item().Text($"Mobile: {config.ReceiptPhone}").FontSize(8).FontColor("#4B5563");
+                                col.Item().Text($"Email: {config.ReceiptEmail}").FontSize(8).FontColor("#4B5563");
                             });
                         });
                         
-                        header.Item().PaddingTop(10).LineHorizontal(3f).LineColor("#6B21A8");
+                        header.Item().PaddingTop(10).LineHorizontal(3f).LineColor(config.ReceiptColorPrimary);
                     });
 
                     // Content section
@@ -158,10 +160,10 @@ namespace Aishwaryam.Infrastructure.Services
                             // Header
                             table.Header(header =>
                             {
-                                header.Cell().Background("#6B21A8").Padding(6).Text("Description").Bold().FontColor(Colors.White).FontSize(9);
-                                header.Cell().Background("#6B21A8").Padding(6).Text("Rate / Gram").Bold().FontColor(Colors.White).FontSize(9);
-                                header.Cell().Background("#6B21A8").Padding(6).AlignRight().Text(isSilver ? "Silver Weight" : "Gold Weight").Bold().FontColor(Colors.White).FontSize(9);
-                                header.Cell().Background("#6B21A8").Padding(6).AlignRight().Text("Amount (INR)").Bold().FontColor(Colors.White).FontSize(9);
+                                header.Cell().Background(config.ReceiptColorPrimary).Padding(6).Text("Description").Bold().FontColor(Colors.White).FontSize(9);
+                                header.Cell().Background(config.ReceiptColorPrimary).Padding(6).Text("Rate / Gram").Bold().FontColor(Colors.White).FontSize(9);
+                                header.Cell().Background(config.ReceiptColorPrimary).Padding(6).AlignRight().Text(isSilver ? "Silver Weight" : "Gold Weight").Bold().FontColor(Colors.White).FontSize(9);
+                                header.Cell().Background(config.ReceiptColorPrimary).Padding(6).AlignRight().Text("Amount (INR)").Bold().FontColor(Colors.White).FontSize(9);
                             });
 
                             // Row 1: Base Purchase
@@ -213,8 +215,8 @@ namespace Aishwaryam.Infrastructure.Services
 
                         // Disclaimer
                         string disclaimer = isSilver 
-                            ? "* Silver credited is subject to the terms and rules of the locked scheme plan."
-                            : "* Gold credited is subject to the terms and rules of the locked scheme plan.";
+                            ? config.ReceiptDisclaimerSilver
+                            : config.ReceiptDisclaimerGold;
                         col.Item().PaddingTop(10).Text(disclaimer).FontSize(8).Italic().FontColor("#9CA3AF");
                     });
 
@@ -226,9 +228,9 @@ namespace Aishwaryam.Infrastructure.Services
                         {
                             row.RelativeItem().Column(contactCol =>
                             {
-                                contactCol.Item().Text("Aishwaryam Swarna Mahal (Aishwaryam @ your home)").FontSize(7.5f).Bold().FontColor("#4B5563");
-                                contactCol.Item().Text("Registered Office: No. 123, Gandhi Road, Chennai, Tamil Nadu - 600001").FontSize(7f).FontColor("#6B7280");
-                                contactCol.Item().Text("Support Desk: +91-9876543210 | Email: support@aishwaryamgold.com").FontSize(7f).FontColor("#6B7280");
+                                contactCol.Item().Text(config.ReceiptCompanyName).FontSize(7.5f).Bold().FontColor("#4B5563");
+                                contactCol.Item().Text(config.ReceiptRegisteredOffice).FontSize(7f).FontColor("#6B7280");
+                                contactCol.Item().Text($"Support Desk: {config.ReceiptPhone} | Email: {config.ReceiptEmail}").FontSize(7f).FontColor("#6B7280");
                             });
 
                             row.ConstantItem(80).AlignRight().AlignBottom().Text(x =>

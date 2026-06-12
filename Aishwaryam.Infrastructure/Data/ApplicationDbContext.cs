@@ -342,6 +342,21 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.RefereeRewardMg).HasColumnName("referee_reward_mg").HasDefaultValue(50L);
                 entity.Property(e => e.IsDailyPriceNotificationEnabled).HasColumnName("is_daily_price_notification_enabled").HasDefaultValue(false);
                 entity.Property(e => e.LastDailyPriceNotificationSent).HasColumnName("last_daily_price_notification_sent");
+                
+                // Receipt Config Column Mappings
+                entity.Property(e => e.ReceiptCompanyName).HasColumnName("receipt_company_name").HasDefaultValue("AISHWARYAM @ YOUR HOME");
+                entity.Property(e => e.ReceiptSubtitle).HasColumnName("receipt_subtitle").HasDefaultValue("Official Digital Gold Savings Investment Receipt");
+                entity.Property(e => e.ReceiptCorpName).HasColumnName("receipt_corp_name").HasDefaultValue("Aishwaryam @ Home Private Limited");
+                entity.Property(e => e.ReceiptAddress1).HasColumnName("receipt_address1").HasDefaultValue("45, Palace Road, Vasanth Nagar,");
+                entity.Property(e => e.ReceiptAddress2).HasColumnName("receipt_address2").HasDefaultValue("Chennai, Tamil Nadu - 600001");
+                entity.Property(e => e.ReceiptPhone).HasColumnName("receipt_phone").HasDefaultValue("+91 94430 00000");
+                entity.Property(e => e.ReceiptEmail).HasColumnName("receipt_email").HasDefaultValue("support@aishwaryam.com");
+                entity.Property(e => e.ReceiptColorPrimary).HasColumnName("receipt_color_primary").HasDefaultValue("#6B21A8");
+                entity.Property(e => e.ReceiptColorSecondary).HasColumnName("receipt_color_secondary").HasDefaultValue("#D4AF37");
+                entity.Property(e => e.ReceiptDisclaimerGold).HasColumnName("receipt_disclaimer_gold").HasDefaultValue("* Gold credited is subject to the terms and rules of the locked scheme plan.");
+                entity.Property(e => e.ReceiptDisclaimerSilver).HasColumnName("receipt_disclaimer_silver").HasDefaultValue("* Silver credited is subject to the terms and rules of the locked scheme plan.");
+                entity.Property(e => e.ReceiptRegisteredOffice).HasColumnName("receipt_registered_office").HasDefaultValue("Registered Office: No. 123, Gandhi Road, Chennai, Tamil Nadu - 600001");
+
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 
