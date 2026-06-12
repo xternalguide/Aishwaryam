@@ -30,6 +30,7 @@ import {
   ShieldCheck,
   PlusCircle,
   Clock,
+  Loader2,
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────
@@ -189,6 +190,8 @@ export const Dashboard: React.FC = () => {
     .dash-fade-in { animation: dash-fade-in 0.35s ease forwards; }
     .sidebar-nav-btn:hover { background: rgba(74,14,78,0.08) !important; }
     @keyframes theme-toggle-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .animate-spin { animation: spin 1s linear infinite; }
   `;
   const toggleTheme = () => {
     setIsDark(prev => {
@@ -1290,12 +1293,37 @@ export const Dashboard: React.FC = () => {
                   }
                   setTimeout(() => {
                     setIsDownloading(false);
+                    setSelectedTxDetail(null);
                   }, 2500);
                 }
               }}
-              style={{ width:'100%', height:'44px', borderRadius:'12px', background: isDownloading ? '#cccccc' : 'linear-gradient(135deg,#29001D,#C2185B)', color:'white', border:'none', fontFamily:DS.font, fontWeight:'800', fontSize:'13px', cursor: isDownloading ? 'not-allowed' : 'pointer', boxShadow:'0 4px 16px rgba(194,24,91,0.35)' }}
+              style={{ 
+                width:'100%', 
+                height:'44px', 
+                borderRadius:'12px', 
+                background: isDownloading ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(74,14,78,0.1)') : 'linear-gradient(135deg,#29001D,#C2185B)', 
+                color: isDownloading ? DS.textSub : 'white', 
+                border: isDownloading ? (isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.15)') : 'none', 
+                fontFamily:DS.font, 
+                fontWeight:'800', 
+                fontSize:'13px', 
+                cursor: isDownloading ? 'not-allowed' : 'pointer', 
+                boxShadow: isDownloading ? 'none' : '0 4px 16px rgba(194,24,91,0.35)',
+                display:'flex',
+                alignItems:'center',
+                justifyContent:'center',
+                gap:'8px',
+                transition:'all 0.3s ease'
+              }}
             >
-              {isDownloading ? 'Downloading...' : 'Download Receipt'}
+              {isDownloading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>Downloading...</span>
+                </>
+              ) : (
+                'Download Receipt'
+              )}
             </button>
           </div>
         </div>
