@@ -48,6 +48,18 @@ public class MainActivity extends BridgeActivity {
                 webView.getSettings().setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
             }
             
+            webView.setDownloadListener(new android.webkit.DownloadListener() {
+                @Override
+                public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+                    try {
+                        android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
+                        MainActivity.this.startActivity(intent);
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                }
+            });
+            
             webView.setWebViewClient(new BridgeWebViewClient(this.getBridge()) {
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -146,6 +158,19 @@ public class MainActivity extends BridgeActivity {
                         @Override
                         public void onCloseWindow(WebView window) {
                             dialog.dismiss();
+                        }
+                    });
+                    
+                    newWebView.setDownloadListener(new android.webkit.DownloadListener() {
+                        @Override
+                        public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+                            try {
+                                android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url));
+                                MainActivity.this.startActivity(intent);
+                                dialog.dismiss();
+                            } catch (Exception e) {
+                                // ignore
+                            }
                         }
                     });
                     
