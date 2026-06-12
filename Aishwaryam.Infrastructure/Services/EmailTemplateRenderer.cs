@@ -225,18 +225,27 @@ namespace Aishwaryam.Infrastructure.Services
             
             var downloadUrl = d.GetValueOrDefault("DownloadUrl", "https://aishwaryam.com/app/portfolio");
 
+            long.TryParse(d.GetValueOrDefault("BonusGoldMg", "0"), out long bonusMg);
+            decimal.TryParse(d.GetValueOrDefault("BonusPercent", "0"), out decimal bonusPct);
+
+            var rowsHtml = new StringBuilder();
+            rowsHtml.AppendLine(InfoRow("Amount Paid", $"₹{d.GetValueOrDefault("AmountPaid", "0")}"));
+            rowsHtml.AppendLine(InfoRow(rateLabel, $"₹{d.GetValueOrDefault("GoldRatePerGm", "0")}/gm"));
+            rowsHtml.AppendLine(InfoRow("GST (3%)", $"₹{d.GetValueOrDefault("GstAmount", "0")}"));
+            if (bonusMg > 0)
+            {
+                rowsHtml.AppendLine(InfoRow(bonusLabel, $"{bonusMg} mg ({bonusPct.ToString("F1")}%)"));
+            }
+            rowsHtml.AppendLine(InfoRow(balanceLabel, $"{d.GetValueOrDefault("NewGoldBalanceMg", "0")} mg"));
+            rowsHtml.AppendLine(InfoRow("Date", d.GetValueOrDefault("TransactionDate", DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt"))));
+
             return $@"
 {Greeting(d.GetValueOrDefault("UserName", "Customer"))}
 <h2 style=""margin:0 0 4px;color:#111827;font-size:20px;font-weight:700;"">{title}</h2>
 <p style=""margin:0 0 24px;color:#6B7280;font-size:14px;"">Transaction ID: <code style=""background:#F3F4F6;padding:2px 8px;border-radius:4px;"">{d.GetValueOrDefault("TransactionId", "—")}</code></p>
 {badgeHtml}
 <table width=""100%"" cellpadding=""0"" cellspacing=""0"">
-  {InfoRow("Amount Paid", $"₹{d.GetValueOrDefault("AmountPaid", "0")}")}
-  {InfoRow(rateLabel, $"₹{d.GetValueOrDefault("GoldRatePerGm", "0")}/gm")}
-  {InfoRow("GST (3%)", $"₹{d.GetValueOrDefault("GstAmount", "0")}")}
-  {InfoRow(bonusLabel, $"{d.GetValueOrDefault("BonusGoldMg", "0")} mg ({d.GetValueOrDefault("BonusPercent", "0")}%)")}
-  {InfoRow(balanceLabel, $"{d.GetValueOrDefault("NewGoldBalanceMg", "0")} mg")}
-  {InfoRow("Date", d.GetValueOrDefault("TransactionDate", DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt")))}
+  {rowsHtml.ToString()}
 </table>
 <p style=""margin:24px 0 0;font-size:13px;color:#9CA3AF;"">
   {description}

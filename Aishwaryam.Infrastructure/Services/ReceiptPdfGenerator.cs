@@ -56,6 +56,16 @@ namespace Aishwaryam.Infrastructure.Services
             var logoPath = Path.Combine(_env.ContentRootPath, "wwwroot", "logo.png");
             bool logoExists = File.Exists(logoPath);
 
+            // Calculation variables matching standard layout values
+            double pricePerGm = tx.PricePerGmPaise / 100.0;
+            double baseAmount = (tx.Invoice?.BaseAmountPaise ?? (tx.TotalAmountPaise * 100 / 103)) / 100.0;
+            double gstAmount = (tx.Invoice?.GstAmountPaise ?? (tx.TotalAmountPaise - (tx.TotalAmountPaise * 100 / 103))) / 100.0;
+            double bonusAmount = (tx.Invoice?.BonusAmountPaise ?? tx.BonusAmountPaise) / 100.0;
+
+            double baseWeightG = tx.GoldWeightMg / 1000.0;
+            double bonusWeightG = tx.BonusGoldMg / 1000.0;
+            double totalWeightG = (tx.GoldWeightMg + tx.BonusGoldMg) / 1000.0;
+
             byte[] pdfBytes = Document.Create(container =>
             {
                 container.Page(page =>
@@ -70,137 +80,142 @@ namespace Aishwaryam.Infrastructure.Services
                     {
                         header.Item().Row(row =>
                         {
-                            if (logoExists)
+                            row.RelativeItem().Row(logoRow =>
                             {
-                                row.ConstantItem(45).PaddingRight(10).AlignMiddle().Image(logoPath);
-                            }
+                                if (logoExists)
+                                {
+                                    logoRow.ConstantItem(45).PaddingRight(10).AlignMiddle().Image(logoPath);
+                                }
+                                else
+                                {
+                                    // Circular logo placeholder matching the image "A" inside a circle
+                                    logoRow.ConstantItem(40).Height(40).Border(2f).BorderColor("#6B21A8").AlignMiddle().AlignCenter().Text("A").FontSize(22).Bold().FontColor("#6B21A8");
+                                    logoRow.ConstantItem(10);
+                                }
 
-                            row.RelativeItem().Column(col =>
-                            {
-                                col.Item().Text("AISHWARYAM SWARNA MAHAL").FontSize(16).Bold().FontColor("#6B21A8");
-                                col.Item().Text("Aishwaryam @ your home").FontSize(9).Italic().FontColor("#D4AF37");
+                                logoRow.RelativeItem().AlignMiddle().Column(col =>
+                                {
+                                    col.Item().Text("AISHWARYAM @ YOUR HOME").FontSize(20).Bold().FontColor("#6B21A8");
+                                    col.Item().Text("Official Digital Gold Savings Investment Receipt").FontSize(8.5f).Italic().FontColor("#D4AF37").Bold();
+                                });
                             });
 
-                            row.ConstantItem(160).AlignRight().Column(col =>
+                            row.ConstantItem(200).AlignRight().Column(col =>
                             {
-                                col.Item().Text("TRANSACTION RECEIPT").FontSize(11).Bold().FontColor("#4B5563");
-                                col.Item().Text($"Receipt No: {tx.Id.ToString()[..8].ToUpper()}").FontSize(8.5f).FontColor("#6B7280");
+                                col.Item().Text("Aishwaryam @ Home Private Limited").FontSize(9).Bold().FontColor("#1F2937");
+                                col.Item().Text("45, Palace Road, Vasanth Nagar,").FontSize(8).FontColor("#4B5563");
+                                col.Item().Text("Chennai, Tamil Nadu - 600001").FontSize(8).FontColor("#4B5563");
+                                col.Item().Text("Mobile: +91 94430 00000").FontSize(8).FontColor("#4B5563");
+                                col.Item().Text("Email: support@aishwaryam.com").FontSize(8).FontColor("#4B5563");
                             });
                         });
                         
-                        header.Item().PaddingVertical(8).LineHorizontal(1.5f).LineColor("#6B21A8");
+                        header.Item().PaddingTop(10).LineHorizontal(3f).LineColor("#6B21A8");
                     });
 
                     // Content section
-                    page.Content().PaddingVertical(10).Column(col =>
+                    page.Content().PaddingVertical(15).Column(col =>
                     {
-                        col.Spacing(12);
+                        col.Spacing(15);
 
-                        // Card: Customer & Transaction Metadata
-                        col.Item().Background("#F9FAFB").Border(0.5f).BorderColor("#E5E7EB").Padding(12).Row(row =>
+                        // PURCHASE INFORMATION
+                        col.Item().Text("PURCHASE INFORMATION").FontSize(10).Bold().FontColor("#1F2937");
+                        
+                        col.Item().Row(row =>
                         {
-                            row.RelativeItem().Column(userCol =>
+                            row.RelativeItem().Column(subCol =>
                             {
-                                userCol.Item().Text("CUSTOMER DETAILS").FontSize(8.5f).Bold().FontColor("#6B21A8");
-                                userCol.Item().PaddingTop(3).Text($"Name: {tx.User?.FullName ?? "Customer"}").FontSize(9).FontColor("#1F2937");
-                                userCol.Item().Text($"Mobile: {tx.User?.PhoneNumber ?? "N/A"}").FontSize(9).FontColor("#1F2937");
-                                userCol.Item().Text($"Email: {tx.User?.Email ?? "N/A"}").FontSize(9).FontColor("#1F2937");
+                                subCol.Item().Row(r => { r.ConstantItem(100).Text("Customer Name:").Bold().FontSize(9).FontColor("#4B5563"); r.RelativeItem().Text(tx.User?.FullName ?? "Aishwaryam User").FontSize(9).FontColor("#1F2937"); });
+                                subCol.Item().Row(r => { r.ConstantItem(100).Text("Mobile Number:").Bold().FontSize(9).FontColor("#4B5563"); r.RelativeItem().Text(tx.User?.PhoneNumber ?? "N/A").FontSize(9).FontColor("#1F2937"); });
+                                subCol.Item().Row(r => { r.ConstantItem(100).Text("Plan / Scheme:").Bold().FontSize(9).FontColor("#4B5563"); r.RelativeItem().Text(!string.IsNullOrEmpty(schemePlanName) ? schemePlanName : "Digital Metal Savings Plan").FontSize(9).FontColor("#1F2937"); });
                             });
-
-                            row.ConstantItem(15);
-                            row.ConstantItem(1).Background("#E5E7EB");
-                            row.ConstantItem(15);
-
-                            row.RelativeItem().Column(txCol =>
+                            
+                            row.ConstantItem(20);
+                            
+                            row.RelativeItem().Column(subCol =>
                             {
-                                txCol.Item().Text("TRANSACTION SUMMARY").FontSize(8.5f).Bold().FontColor("#6B21A8");
-                                txCol.Item().PaddingTop(3).Text($"Date & Time: {tx.CreatedAt.LocalDateTime.ToString("dd MMM yyyy, hh:mm tt")}").FontSize(9).FontColor("#1F2937");
-                                txCol.Item().Text($"Payment Reference: {tx.RazorpayPaymentId ?? "N/A"}").FontSize(9).FontColor("#1F2937");
-                                txCol.Item().Text(x => {
-                                    x.Span("Status: ").FontSize(9).FontColor("#1F2937");
-                                    x.Span("COMPLETED").FontSize(9).Bold().FontColor("#10B981");
-                                });
-                                if (!string.IsNullOrEmpty(schemePlanName))
-                                {
-                                    txCol.Item().Text($"Linked Plan: {schemePlanName}").FontSize(9).Bold().FontColor("#D4AF37");
-                                }
+                                subCol.Item().Row(r => { r.ConstantItem(100).Text("Receipt Date:").Bold().FontSize(9).FontColor("#4B5563"); r.RelativeItem().Text(tx.CreatedAt.LocalDateTime.ToString("yyyy-MM-dd HH:mm:ss")).FontSize(9).FontColor("#1F2937"); });
+                                subCol.Item().Row(r => { r.ConstantItem(100).Text("Transaction ID:").Bold().FontSize(9).FontColor("#4B5563"); r.RelativeItem().Text($"TXN{tx.Id.ToString()[..8].ToUpper()}").FontSize(9).FontColor("#1F2937"); });
+                                subCol.Item().Row(r => { r.ConstantItem(100).Text("Razorpay ID:").Bold().FontSize(9).FontColor("#4B5563"); r.RelativeItem().Text(tx.RazorpayPaymentId ?? "Direct Account").FontSize(9).FontColor("#1F2937"); });
                             });
                         });
+                        
+                        col.Item().LineHorizontal(0.5f).LineColor("#E5E7EB");
 
-                        // Items Table
+                        // INVESTMENT BREAKDOWN
+                        col.Item().Text("INVESTMENT BREAKDOWN").FontSize(10).Bold().FontColor("#1F2937");
+
                         col.Item().Table(table =>
                         {
                             table.ColumnsDefinition(columns =>
                             {
-                                columns.ConstantColumn(30);
-                                columns.RelativeColumn(3);
-                                columns.RelativeColumn(2);
-                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(3); // Description
+                                columns.RelativeColumn(2); // Rate / Gram
+                                columns.RelativeColumn(2); // Metal Weight
+                                columns.RelativeColumn(2); // Amount
                             });
 
                             // Header
                             table.Header(header =>
                             {
-                                header.Cell().Background("#6B21A8").Padding(6).Text("S.No").Bold().FontColor(Colors.White).FontSize(9);
                                 header.Cell().Background("#6B21A8").Padding(6).Text("Description").Bold().FontColor(Colors.White).FontSize(9);
-                                header.Cell().Background("#6B21A8").Padding(6).AlignRight().Text("Rate (per gm)").Bold().FontColor(Colors.White).FontSize(9);
-                                header.Cell().Background("#6B21A8").Padding(6).AlignRight().Text("Amount").Bold().FontColor(Colors.White).FontSize(9);
+                                header.Cell().Background("#6B21A8").Padding(6).Text("Rate / Gram").Bold().FontColor(Colors.White).FontSize(9);
+                                header.Cell().Background("#6B21A8").Padding(6).AlignRight().Text(isSilver ? "Silver Weight" : "Gold Weight").Bold().FontColor(Colors.White).FontSize(9);
+                                header.Cell().Background("#6B21A8").Padding(6).AlignRight().Text("Amount (INR)").Bold().FontColor(Colors.White).FontSize(9);
                             });
 
                             // Row 1: Base Purchase
-                            string assetName = isSilver ? "DigiSilver Purchase" : "DigiGold (22K) Purchase";
-                            
-                            table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).Text("1").FontSize(9);
-                            table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).Column(c =>
-                            {
-                                c.Item().Text(assetName).FontSize(9).Bold();
-                                c.Item().Text($"Weight Credited: {tx.GoldWeightMg / 1000.0:F4} g").FontSize(8).FontColor("#6B7280");
-                            });
-                            table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).AlignRight().Text($"₹{(tx.PricePerGmPaise / 100.0):F2}").FontSize(9);
-                            table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).AlignRight().Text($"₹{((tx.Invoice?.BaseAmountPaise ?? (tx.TotalAmountPaise * 100 / 103)) / 100.0):F2}").FontSize(9);
+                            string baseLabel = isSilver ? "Silver Installment Amount (Base)" : "Gold Installment Amount (Base)";
+                            table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).Text(baseLabel).FontSize(9);
+                            table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).Text($"₹{pricePerGm:N2}/g").FontSize(9);
+                            table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).AlignRight().Text($"{baseWeightG:F3} g").FontSize(9);
+                            table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).AlignRight().Text($"₹{baseAmount:N2}").FontSize(9);
 
                             // Row 2: GST
-                            table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).Text("2").FontSize(9);
-                            table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).Text("GST (3%)").FontSize(9);
+                            table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).Text("GST Charges (3%)").FontSize(9);
+                            table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).Text("-").FontSize(9);
                             table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).AlignRight().Text("-").FontSize(9);
-                            table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).AlignRight().Text($"₹{((tx.Invoice?.GstAmountPaise ?? (tx.TotalAmountPaise - (tx.TotalAmountPaise * 100 / 103))) / 100.0):F2}").FontSize(9);
+                            table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).AlignRight().Text($"₹{gstAmount:N2}").FontSize(9);
+
+                            // Row 3: Loyalty Bonus (Optional, Green)
+                            if (tx.BonusGoldMg > 0)
+                            {
+                                decimal bonusPercent = tx.Invoice?.BonusPercentage ?? 7.5m;
+                                table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).Text($"Loyalty Bonus ({bonusPercent:F1}%)").FontSize(9).FontColor("#10B981");
+                                table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).Text("-").FontSize(9).FontColor("#10B981");
+                                table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).AlignRight().Text($"+ {bonusWeightG:F3} g").FontSize(9).FontColor("#10B981");
+                                table.Cell().BorderBottom(0.5f).BorderColor("#E5E7EB").Padding(6).AlignRight().Text($"₹{bonusAmount:N2}").FontSize(9).FontColor("#10B981");
+                            }
                         });
 
-                        // Financial Summary Block
-                        col.Item().AlignRight().Width(220).Table(table =>
+                        // Alignment totals
+                        col.Item().Table(table =>
                         {
                             table.ColumnsDefinition(columns =>
                             {
-                                columns.RelativeColumn(3);
-                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(3); // Description
+                                columns.RelativeColumn(2); // Rate / Gram
+                                columns.RelativeColumn(2); // Weight
+                                columns.RelativeColumn(2); // Amount
                             });
 
-                            table.Cell().Padding(4).Text("Total Amount Paid:").Bold().FontSize(10).FontColor("#1F2937");
-                            table.Cell().Padding(4).AlignRight().Text($"₹{(tx.TotalAmountPaise / 100.0):F2}").Bold().FontSize(10).FontColor("#6B21A8");
-                            
-                            if (tx.BonusGoldMg > 0)
-                            {
-                                string bonusLabel = isSilver ? "Bonus Silver Credited:" : "Bonus Gold Credited:";
-                                table.Cell().Padding(4).Text(bonusLabel).FontSize(9).FontColor("#10B981");
-                                table.Cell().Padding(4).AlignRight().Text($"+{tx.BonusGoldMg / 1000.0:F4} g").FontSize(9).FontColor("#10B981").Bold();
-                            }
+                            table.Cell().PaddingVertical(4).Text("Total Amount Paid:").Bold().FontSize(9.5f).FontColor("#1F2937");
+                            table.Cell().PaddingVertical(4).Text("").FontSize(9.5f);
+                            table.Cell().PaddingVertical(4).Text("").FontSize(9.5f);
+                            table.Cell().PaddingVertical(4).AlignRight().Text($"₹{(tx.TotalAmountPaise / 100.0):N2}").Bold().FontSize(9.5f).FontColor("#1F2937");
+
+                            string totalLabel = isSilver ? "Total Silver Credited to Wallet:" : "Total Gold Credited to Wallet:";
+                            table.Cell().PaddingVertical(4).Text(totalLabel).Bold().FontSize(9.5f).FontColor("#1F2937");
+                            table.Cell().PaddingVertical(4).Text("").FontSize(9.5f);
+                            table.Cell().PaddingVertical(4).AlignRight().Text($"{totalWeightG:F3} g").Bold().FontSize(9.5f).FontColor("#1F2937");
+                            table.Cell().PaddingVertical(4).AlignRight().Text("-").FontSize(9.5f).FontColor("#1F2937");
                         });
 
-                        // Important info callout
-                        col.Item().PaddingTop(15).Background("#FFFBEB").Padding(10).Border(0.5f).BorderColor("#FCD34D").BorderLeft(3f).BorderColor("#D4AF37").Column(noteCol =>
-                        {
-                            noteCol.Spacing(4);
-                            noteCol.Item().Text("IMPORTANT TERMS & DETAILS").FontSize(8.5f).Bold().FontColor("#92400E");
-                            if (isSilver)
-                            {
-                                noteCol.Item().Text("• Accumulated Silver weight will be stored in highly secure physical silver-backed vaults and can be redeemed for physical silver articles or gold jewelry at maturity.").FontSize(8).FontColor("#78350F");
-                            }
-                            else
-                            {
-                                noteCol.Item().Text("• Accumulated Gold weight will be stored in highly secure physical gold-backed vaults and can be redeemed for physical gold jewelry or coins at maturity.").FontSize(8).FontColor("#78350F");
-                            }
-                            noteCol.Item().Text("• Loyalty bonuses, percentages, and events are credited instantly to your portfolio ledger according to your selected scheme.").FontSize(8).FontColor("#78350F");
-                        });
+                        // Disclaimer
+                        string disclaimer = isSilver 
+                            ? "* Silver credited is subject to the terms and rules of the locked scheme plan."
+                            : "* Gold credited is subject to the terms and rules of the locked scheme plan.";
+                        col.Item().PaddingTop(10).Text(disclaimer).FontSize(8).Italic().FontColor("#9CA3AF");
                     });
 
                     // Footer section
@@ -211,15 +226,15 @@ namespace Aishwaryam.Infrastructure.Services
                         {
                             row.RelativeItem().Column(contactCol =>
                             {
-                                contactCol.Item().Text("Aishwaryam Swarna Mahal (Aishwaryam @ your home)").FontSize(8).Bold().FontColor("#4B5563");
-                                contactCol.Item().Text("Registered Office: No. 123, Gandhi Road, Chennai, Tamil Nadu - 600001").FontSize(7.5f).FontColor("#6B7280");
-                                contactCol.Item().Text("Support Desk: +91-9876543210 | Email: support@aishwaryamgold.com").FontSize(7.5f).FontColor("#6B7280");
+                                contactCol.Item().Text("Aishwaryam Swarna Mahal (Aishwaryam @ your home)").FontSize(7.5f).Bold().FontColor("#4B5563");
+                                contactCol.Item().Text("Registered Office: No. 123, Gandhi Road, Chennai, Tamil Nadu - 600001").FontSize(7f).FontColor("#6B7280");
+                                contactCol.Item().Text("Support Desk: +91-9876543210 | Email: support@aishwaryamgold.com").FontSize(7f).FontColor("#6B7280");
                             });
 
                             row.ConstantItem(80).AlignRight().AlignBottom().Text(x =>
                             {
-                                x.Span("Page ").FontSize(8).FontColor("#9CA3AF");
-                                x.CurrentPageNumber().FontSize(8).FontColor("#9CA3AF");
+                                x.Span("Page ").FontSize(7.5f).FontColor("#9CA3AF");
+                                x.CurrentPageNumber().FontSize(7.5f).FontColor("#9CA3AF");
                             });
                         });
                     });
