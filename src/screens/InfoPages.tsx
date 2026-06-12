@@ -5,6 +5,9 @@ import { ApiClient } from '../utils/ApiClient';
 import { ArrowLeft, Send, Copy, Share2, Bell, Clock, Headset } from 'lucide-react';
 import { useTranslation } from '../utils/translation';
 import { useApp } from '../context/AppContext';
+import { Share } from '@capacitor/share';
+import { Capacitor } from '@capacitor/core';
+
 
 const Header: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack }) => (
   <div className="app-header-bar" style={{
@@ -512,7 +515,18 @@ export const Referral: React.FC = () => {
 
   const handleShare = async () => {
     const shareText = `Start saving in gold or silver on Aishwaryam! Use my referral code: ${refCode} to get a bonus on your first chit payment.`;
-    if (navigator.share) {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await Share.share({
+          title: 'Aishwaryam Referral',
+          text: shareText,
+          url: window.location.origin,
+          dialogTitle: 'Share with friends'
+        });
+      } catch (err) {
+        console.error('Error sharing via Capacitor:', err);
+      }
+    } else if (navigator.share) {
       try {
         await navigator.share({
           title: 'Aishwaryam Referral',
@@ -520,7 +534,7 @@ export const Referral: React.FC = () => {
           url: window.location.origin
         });
       } catch (err) {
-        console.error('Error sharing:', err);
+        console.error('Error sharing via Web API:', err);
       }
     } else {
       navigator.clipboard.writeText(shareText);
