@@ -1221,52 +1221,58 @@ export const Dashboard: React.FC = () => {
               </button>
             </div>
 
-            {(selectedTxDetail.transactionType==='BONUS'||selectedTxDetail.transactionType==='EVENT_BONUS'||selectedTxDetail.type==='BONUS'||selectedTxDetail.type==='EVENT_BONUS') ? (
-              <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
-                {[
-                  { label:'Transaction ID', value:selectedTxDetail.id },
-                  { label:'Date & Time', value:`${new Date(selectedTxDetail.createdAt).toLocaleDateString()} ${new Date(selectedTxDetail.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}` },
-                  { label:'Scheme Name', value:selectedTxDetail.schemeName||'N/A' },
-                  { label:'Bonus Percentage', value:selectedTxDetail.bonusPercentage?`${selectedTxDetail.bonusPercentage}%`:'N/A' },
-                ].map(({ label, value }) => (
-                  <div key={label} style={{ display:'flex', justifyContent:'space-between', fontSize:'12px' }}>
-                    <span style={{ fontFamily:DS.font, color:DS.textSub, fontWeight:'600' }}>{label}</span>
-                    <span style={{ fontFamily:DS.font, fontWeight:'800', color:DS.textWhite, textAlign:'right', maxWidth:'55%', wordBreak:'break-all' }}>{value}</span>
+            {(() => {
+              const isSilverTx = selectedTxDetail.schemeName?.toLowerCase().includes('silver') || false;
+              const weightLabel = isSilverTx ? 'Silver Weight' : 'Gold Weight';
+              const bonusLabel = isSilverTx ? 'Bonus Silver Earned' : 'Bonus Gold Earned';
+
+              return (selectedTxDetail.transactionType==='BONUS'||selectedTxDetail.transactionType==='EVENT_BONUS'||selectedTxDetail.type==='BONUS'||selectedTxDetail.type==='EVENT_BONUS') ? (
+                <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+                  {[
+                    { label:'Transaction ID', value:selectedTxDetail.id },
+                    { label:'Date & Time', value:`${new Date(selectedTxDetail.createdAt).toLocaleDateString()} ${new Date(selectedTxDetail.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}` },
+                    { label:'Scheme Name', value:selectedTxDetail.schemeName||'N/A' },
+                    { label:'Bonus Percentage', value:selectedTxDetail.bonusPercentage?`${selectedTxDetail.bonusPercentage}%`:'N/A' },
+                  ].map(({ label, value }) => (
+                    <div key={label} style={{ display:'grid', gridTemplateColumns:'110px 1fr', gap:'12px', fontSize:'12px', alignItems:'start' }}>
+                      <span style={{ fontFamily:DS.font, color:DS.textSub, fontWeight:'600' }}>{label}</span>
+                      <span style={{ fontFamily:DS.font, fontWeight:'800', color:DS.textWhite, textAlign:'right', wordBreak:'break-all' }}>{value}</span>
+                    </div>
+                  ))}
+                  <div style={{ height:'1px', background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(74,14,78,0.08)', margin:'4px 0' }} />
+                  <div style={{ display:'flex', justifyContent:'space-between', fontSize:'14px', fontWeight:'800' }}>
+                    <span style={{ fontFamily:DS.font, color:DS.textWhite }}>{bonusLabel}</span>
+                    <span style={{ fontFamily:DS.font, color:'#10B981' }}>{mgToGrams(selectedTxDetail.goldWeightMg)}</span>
                   </div>
-                ))}
-                <div style={{ height:'1px', background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(74,14,78,0.08)', margin:'4px 0' }} />
-                <div style={{ display:'flex', justifyContent:'space-between', fontSize:'14px', fontWeight:'800' }}>
-                  <span style={{ fontFamily:DS.font, color:DS.textWhite }}>Bonus Gold Earned</span>
-                  <span style={{ fontFamily:DS.font, color:'#10B981' }}>{mgToGrams(selectedTxDetail.goldWeightMg)}</span>
                 </div>
-              </div>
-            ) : (
-              <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
-                {[
-                  { label:'Transaction ID', value:selectedTxDetail.id, show:true },
-                  { label:'Date & Time', value:`${new Date(selectedTxDetail.createdAt).toLocaleDateString()} ${new Date(selectedTxDetail.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`, show:true },
-                  { label:'Scheme Name', value:selectedTxDetail.schemeName, show:!!selectedTxDetail.schemeName },
-                  { label:'Gold Weight', value:mgToGrams(selectedTxDetail.goldWeightMg), show:selectedTxDetail.type!=='SCHEME_JOIN' },
-                  { label:'Bonus Gold Earned', value:mgToGrams(selectedTxDetail.bonusGoldMg), show:selectedTxDetail.bonusGoldMg>0 },
-                  { label:'Status', value:getStatusDetails(selectedTxDetail.status).text, show:true, color:getStatusDetails(selectedTxDetail.status).color },
-                ].filter(i=>i.show).map(({ label, value, color }) => (
-                  <div key={label} style={{ display:'flex', justifyContent:'space-between', fontSize:'12px' }}>
-                    <span style={{ fontFamily:DS.font, color:DS.textSub, fontWeight:'600' }}>{label}</span>
-                    <span style={{ fontFamily:DS.font, fontWeight:'800', color:color||DS.textWhite, textAlign:'right', maxWidth:'55%', wordBreak:'break-all' }}>{value}</span>
+              ) : (
+                <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+                  {[
+                    { label:'Transaction ID', value:selectedTxDetail.id, show:true },
+                    { label:'Date & Time', value:`${new Date(selectedTxDetail.createdAt).toLocaleDateString()} ${new Date(selectedTxDetail.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`, show:true },
+                    { label:'Scheme Name', value:selectedTxDetail.schemeName, show:!!selectedTxDetail.schemeName },
+                    { label:weightLabel, value:mgToGrams(selectedTxDetail.goldWeightMg), show:selectedTxDetail.type!=='SCHEME_JOIN' },
+                    { label:bonusLabel, value:mgToGrams(selectedTxDetail.bonusGoldMg), show:selectedTxDetail.bonusGoldMg>0 },
+                    { label:'Status', value:getStatusDetails(selectedTxDetail.status).text, show:true, color:getStatusDetails(selectedTxDetail.status).color },
+                  ].filter(i=>i.show).map(({ label, value, color }) => (
+                    <div key={label} style={{ display:'grid', gridTemplateColumns:'110px 1fr', gap:'12px', fontSize:'12px', alignItems:'start' }}>
+                      <span style={{ fontFamily:DS.font, color:DS.textSub, fontWeight:'600' }}>{label}</span>
+                      <span style={{ fontFamily:DS.font, fontWeight:'800', color:color||DS.textWhite, textAlign:'right', wordBreak:'break-all' }}>{value}</span>
+                    </div>
+                  ))}
+                  <div style={{ height:'1px', background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(74,14,78,0.08)', margin:'4px 0' }} />
+                  <div style={{ display:'flex', justifyContent:'space-between', fontSize:'14px', fontWeight:'800' }}>
+                    <span style={{ fontFamily:DS.font, color:DS.textWhite }}>{selectedTxDetail.type==='SCHEME_JOIN'?'Installment Size':'Amount Paid'}</span>
+                    <span style={{ fontFamily:DS.font, color: isDark ? '#FFD700' : '#B8860B' }}>{formatRupees(selectedTxDetail.amountPaise)}</span>
                   </div>
-                ))}
-                <div style={{ height:'1px', background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(74,14,78,0.08)', margin:'4px 0' }} />
-                <div style={{ display:'flex', justifyContent:'space-between', fontSize:'14px', fontWeight:'800' }}>
-                  <span style={{ fontFamily:DS.font, color:DS.textWhite }}>{selectedTxDetail.type==='SCHEME_JOIN'?'Installment Size':'Amount Paid'}</span>
-                  <span style={{ fontFamily:DS.font, color: isDark ? '#FFD700' : '#B8860B' }}>{formatRupees(selectedTxDetail.amountPaise)}</span>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             <button
               onClick={() => { 
-                if (selectedTxDetail && selectedTxDetail.transactionId) {
-                  const url = `${BASE_URL}api/Gold/receipt/download/${selectedTxDetail.transactionId}`;
+                if (selectedTxDetail && selectedTxDetail.id) {
+                  const url = `${BASE_URL}api/Gold/receipt/download/${selectedTxDetail.id}`;
                   const isCapacitor = !!(window as any).Capacitor;
                   if (isCapacitor) {
                     window.open(url, '_system');
