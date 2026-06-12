@@ -39,34 +39,7 @@ import {
    INLINE STYLES  – design tokens kept in JS so
    we don't need to touch index.css
 ───────────────────────────────────────────── */
-const darkTheme = {
-  bgPage:   '#0F0F1A',
-  bgCard:   'rgba(255,255,255,0.05)',
-  bgCardHover: 'rgba(255,255,255,0.08)',
-  bgSurface:'rgba(255,255,255,0.03)',
-  purple:   '#4A0E4E',
-  magenta:  '#C2185B',
-  gold:     '#FFD700',
-  goldSoft: '#FFB300',
-  glass: {
-    background: 'rgba(255,255,255,0.06)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: '20px',
-  } as React.CSSProperties,
-  textWhite:   '#FFFFFF',
-  textSub:     'rgba(255,255,255,0.55)',
-  textMuted:   'rgba(255,255,255,0.35)',
-  font: "'Montserrat', sans-serif",
-  navBg: 'rgba(15,15,26,0.9)',
-  sidebarBg: 'rgba(255,255,255,0.03)',
-  sidebarBorder: '1px solid rgba(255,255,255,0.07)',
-  bottomBarBg: 'rgba(15,15,26,0.95)',
-  bottomBarBorder: '1px solid rgba(255,255,255,0.07)',
-  cardHoverCss: 'rgba(255,255,255,0.09)',
-  actionHoverCss: 'rgba(255,255,255,0.1)',
-};
+
 
 const lightTheme = {
   bgPage:   '#F0EDE8',
@@ -175,13 +148,9 @@ export const Dashboard: React.FC = () => {
   const [userName, setUserName] = useState('');
   const [kycLevel, setKycLevel] = useState('BASIC');
 
-  // ── THEME TOGGLE ──────────────────────────────────────────────────────────
-  // Default: light (false). Persisted to localStorage.
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    const saved = localStorage.getItem('DASHBOARD_THEME');
-    return saved === 'dark'; // default light
-  });
-  const DS = isDark ? darkTheme : lightTheme;
+  // ── THEME TOGGLE (Always Light) ───────────────────────────────────────────
+  const isDark = false;
+  const DS = lightTheme;
   const globalStyles = `
     .dash-btn-hover:hover { opacity: 0.85; transform: translateY(-1px); }
     .dash-card-hover:hover { background: ${DS.cardHoverCss} !important; transform: translateY(-2px); }
@@ -195,14 +164,6 @@ export const Dashboard: React.FC = () => {
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .animate-spin { animation: spin 1s linear infinite; }
   `;
-  const toggleTheme = () => {
-    setIsDark(prev => {
-      const next = !prev;
-      localStorage.setItem('DASHBOARD_THEME', next ? 'dark' : 'light');
-      return next;
-    });
-  };
-  // ─────────────────────────────────────────────────────────────────────────
 
   // Ref for the tab scroll container — used to reset scroll on tab switch
   const tabScrollRef = useRef<HTMLDivElement>(null);
@@ -1387,24 +1348,6 @@ export const Dashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Theme Toggle Row */}
-                <div style={{ ...DS.glass, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 18px' }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>
-                    <div style={{ width:'42px', height:'42px', borderRadius:'12px', background: isDark ? 'rgba(255,215,0,0.15)' : 'rgba(74,14,78,0.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'20px' }}>
-                      {isDark ? '☀️' : '🌙'}
-                    </div>
-                    <div>
-                      <span style={{ fontFamily:DS.font, fontSize:'13px', fontWeight:'800', color:DS.textWhite, display:'block' }}>Appearance</span>
-                      <span style={{ fontFamily:DS.font, fontSize:'11px', color:DS.textSub }}>{isDark ? 'Dark Mode' : 'Light Mode'}</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={toggleTheme}
-                    style={{ width:'52px', height:'28px', borderRadius:'14px', background: isDark ? 'linear-gradient(135deg,#C2185B,#4A0E4E)' : 'rgba(74,14,78,0.15)', border:'none', position:'relative', cursor:'pointer', transition:'background 0.3s ease', padding:0 }}
-                  >
-                    <div style={{ width:'20px', height:'20px', borderRadius:'50%', background: isDark ? '#FFD700' : 'white', position:'absolute', top:'4px', left: isDark ? '28px' : '4px', transition:'left 0.3s ease', boxShadow:'0 2px 4px rgba(0,0,0,0.3)' }} />
-                  </button>
-                </div>
 
                 {/* Logout (mobile) */}
                 {!isDesktop && (
