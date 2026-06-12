@@ -100,7 +100,7 @@ namespace Aishwaryam.Infrastructure.Services
                     else
                     {
                         // Prefix relative image path with the backend's base URL
-                        string baseUrl = "https://aishwaryam.blazewing.in";
+                        string baseUrl = "https://aishwaryam-production.up.railway.app";
                         fcmImageUrl = $"{baseUrl.TrimEnd('/')}/{imageUrl.TrimStart('/')}";
                     }
 

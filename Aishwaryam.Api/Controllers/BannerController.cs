@@ -305,7 +305,8 @@ namespace Aishwaryam.Api.Controllers
                 var scheme = request.Scheme;
                 
                 // If requested host is the production host, force HTTPS scheme
-                if (request.Host.Host.Equals("aishwaryam.blazewing.in", StringComparison.OrdinalIgnoreCase))
+                if (request.Host.Host.Equals("aishwaryam-production.up.railway.app", StringComparison.OrdinalIgnoreCase) ||
+                    request.Host.Host.Equals("aishwaryam.blazewing.in", StringComparison.OrdinalIgnoreCase))
                 {
                     scheme = "https";
                 }

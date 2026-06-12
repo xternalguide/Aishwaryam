@@ -509,7 +509,7 @@ namespace Aishwaryam.Application.Services
                             var bUrl = request.BaseUrl;
                             if (string.IsNullOrEmpty(bUrl))
                             {
-                                bUrl = "https://aishwaryam.blazewing.in/";
+                                bUrl = "https://aishwaryam-production.up.railway.app/";
                             }
                             if (!bUrl.EndsWith("/"))
                             {
