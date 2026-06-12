@@ -1,6 +1,8 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Aishwaryam.Application.DTOs.Admin;
@@ -199,6 +201,35 @@ namespace Aishwaryam.Api.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Error updating receipt config", error = ex.Message });
+            }
+        }
+
+        [HttpPost("receipt-logo")]
+        [AllowAnonymous] // Allow access from Admin panel
+        public async Task<IActionResult> UploadReceiptLogo(IFormFile file, [FromServices] Microsoft.Extensions.Hosting.IHostEnvironment env)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return BadRequest("No file uploaded.");
+
+                var uploadsFolder = Path.Combine(env.ContentRootPath, "wwwroot");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                var filePath = Path.Combine(uploadsFolder, "logo.png");
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                return Ok(new { success = true, message = "Logo uploaded successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error uploading logo", error = ex.Message });
             }
         }
 
