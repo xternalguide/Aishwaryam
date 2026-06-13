@@ -378,12 +378,12 @@ export const Mpin: React.FC = () => {
                       key={i}
                       className={isFocused ? 'pin-box-active' : ''}
                       style={{
-                        width: '52px',
-                        height: '52px',
+                        width: 'clamp(40px, 12vw, 52px)',
+                        height: 'clamp(40px, 12vw, 52px)',
                         borderRadius: '14px',
                         border: `2px solid ${isFocused ? '#4A0E4E' : mpin[i] ? '#4A0E4E' : 'rgba(74,14,78,0.2)'}`,
                         textAlign: 'center',
-                        fontSize: mpin[i] ? '28px' : '16px',
+                        fontSize: mpin[i] ? 'clamp(20px, 6vw, 28px)' : '16px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -508,9 +508,9 @@ export const Mpin: React.FC = () => {
                       <div
                         key={i}
                         className={isFocused ? 'pin-box-active' : ''}
-                        style={{
-                          width: '48px',
-                          height: '48px',
+                      style={{
+                          width: 'clamp(36px, 11vw, 48px)',
+                          height: 'clamp(36px, 11vw, 48px)',
                           borderRadius: '12px',
                           border: `2px solid ${isFocused ? '#4A0E4E' : newMpin[i] ? '#4A0E4E' : 'rgba(74,14,78,0.2)'}`,
                           textAlign: 'center',
@@ -543,9 +543,9 @@ export const Mpin: React.FC = () => {
                       <div
                         key={i}
                         className={isFocused ? 'pin-box-active' : ''}
-                        style={{
-                          width: '48px',
-                          height: '48px',
+                      style={{
+                          width: 'clamp(36px, 11vw, 48px)',
+                          height: 'clamp(36px, 11vw, 48px)',
                           borderRadius: '12px',
                           border: `2px solid ${isFocused ? '#4A0E4E' : confirmMpin[i] ? '#4A0E4E' : newMpin.length === 4 ? 'rgba(74,14,78,0.2)' : 'rgba(74,14,78,0.08)'}`,
                           textAlign: 'center',
@@ -648,7 +648,7 @@ export const Mpin: React.FC = () => {
 
               <div 
                 onClick={() => otpInputRef.current?.focus()}
-                style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '24px', width: '100%', cursor: 'pointer' }}
+                style={{ display: 'flex', gap: 'clamp(4px, 2vw, 8px)', justifyContent: 'center', marginBottom: '24px', width: '100%', cursor: 'pointer' }}
               >
                 {Array.from({ length: 6 }).map((_, i) => {
                   const isFocused = isOtpFocused && (otp.length < 6 ? otp.length === i : i === 5);
@@ -657,12 +657,12 @@ export const Mpin: React.FC = () => {
                       key={i}
                       className={isFocused ? 'pin-box-active' : ''}
                       style={{
-                        width: '36px',
-                        height: '36px',
+                        width: 'clamp(28px, 8.5vw, 36px)',
+                        height: 'clamp(28px, 8.5vw, 36px)',
                         borderRadius: '8px',
                         border: `1.5px solid ${isFocused ? '#4A0E4E' : otp[i] ? '#4A0E4E' : 'rgba(74,14,78,0.15)'}`,
                         textAlign: 'center',
-                        fontSize: '16px',
+                        fontSize: 'clamp(12px, 4vw, 16px)',
                         fontWeight: 'bold',
                         display: 'flex',
                         alignItems: 'center',

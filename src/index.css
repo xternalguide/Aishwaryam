@@ -233,5 +233,24 @@ button, input, select {
   box-sizing: border-box;
 }
 
+/* Global nowrap utility classes */
+.no-wrap, .nowrap {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+/* Viewport scaling adjustments for small screens to prevent layout overflow and wrapping */
+@media (max-width: 360px) {
+  body {
+    zoom: 0.92 !important;
+  }
+}
+
+@media (max-width: 330px) {
+  body {
+    zoom: 0.86 !important;
+  }
+}
+
 
 
