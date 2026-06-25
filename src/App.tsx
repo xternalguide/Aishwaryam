@@ -1,5 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AuditLogger } from './utils/auditLogger';
+
+// ── TELEMETRY TRACKER COMPONENT ─────────────────────────────────────────────
+const TelemetryTracker: React.FC = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Log the page view
+    AuditLogger.log('View', location.pathname, `Navigated to ${location.pathname}`);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    // Click tracker
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+
+      // Find closest interactive element
+      const interactiveEl = target.closest('button, a, input, select, textarea, [role="button"]');
+      if (interactiveEl) {
+        const text = (interactiveEl.textContent || (interactiveEl as HTMLInputElement).value || interactiveEl.getAttribute('aria-label') || '').trim().substring(0, 50);
+        const typeName = interactiveEl.tagName.toLowerCase();
+        AuditLogger.log(
+          'Click',
+          location.pathname,
+          `Clicked ${typeName} "${text}"`,
+          {
+            element: typeName,
+            text,
+            id: interactiveEl.id,
+            className: interactiveEl.className
+          }
+        );
+      }
+    };
+
+    window.addEventListener('click', handleGlobalClick, true);
+    return () => {
+      window.removeEventListener('click', handleGlobalClick, true);
+    };
+  }, [location.pathname]);
+
+  return null;
+};
+// ────────────────────────────────────────────────────────────────────────────
 
 // ── SCROLL TO TOP ON EVERY ROUTE CHANGE ─────────────────────────────────────
 // Resets both window scroll and the #root element scroll on every navigation.
@@ -53,6 +98,7 @@ import {
 import { AppProvider } from './context/AppContext';
 import { PushNotificationHandler } from './components/PushNotificationHandler';
 import { BackButtonHandler } from './components/BackButtonHandler';
+import { SuperAdminDashboard } from './screens/super-admin/SuperAdminDashboard';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
 import './App.css';
@@ -178,6 +224,9 @@ const App: React.FC = () => {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   useEffect(() => {
+    // Initialize audit logger
+    AuditLogger.initialize();
+
     // Programmatically style and set translucent to false for native platforms
     if (Capacitor.isNativePlatform()) {
       StatusBar.setOverlaysWebView({ overlay: false })
@@ -190,9 +239,23 @@ const App: React.FC = () => {
     const handleOffline = () => setIsOffline(true);
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+
+    // Global error listener for automatic bug tracking
+    const handleGlobalError = (event: ErrorEvent) => {
+      AuditLogger.logError(event.error || event.message, 'UnhandledError');
+    };
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      AuditLogger.logError(event.reason, 'UnhandledPromiseRejection');
+    };
+
+    window.addEventListener('error', handleGlobalError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
     };
   }, []);
 
@@ -209,6 +272,7 @@ const App: React.FC = () => {
       <AppProvider>
         <Router>
           <ScrollToTop />
+          <TelemetryTracker />
           <PushNotificationHandler />
           <BackButtonHandler />
           <Routes>
@@ -251,6 +315,7 @@ const App: React.FC = () => {
             <Route path="/gold_rate_alerts" element={<GoldRateAlerts />} />
             <Route path="/my-bonuses" element={<MyBonuses />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/super-admin" element={<SuperAdminDashboard />} />
 
             {/* Fallback route */}
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
 import { SessionManager } from './SessionManager';
+import { AuditLogger } from './auditLogger';
 
 export const BASE_URL = 'https://aishwaryam-production.up.railway.app/';
 
@@ -20,13 +21,16 @@ const instance: AxiosInstance = axios.create({
 // Request interceptor: add bearer token if session exists
 instance.interceptors.request.use(
   (config) => {
+    // Log request
+    const url = config.url || '';
+    AuditLogger.log('System', 'API', `API Request: ${config.method?.toUpperCase()} ${url}`);
+
     // Exempt public auth endpoints from carrying the authorization header
     const publicEndpoints = [
       'api/Auth/send-otp',
       'api/Auth/verify-otp',
       'api/Auth/refresh'
     ];
-    const url = config.url || '';
     const isPublic = publicEndpoints.some(endpoint => url.includes(endpoint));
 
     if (!isPublic) {
@@ -66,8 +70,16 @@ const onRefreshFailed = (err: any) => {
 
 // Response interceptor: automatically handles JWT expiration and refresh token rotation
 instance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log successful response
+    const url = response.config.url || '';
+    AuditLogger.log('System', 'API', `API Success: ${response.config.method?.toUpperCase()} ${url} (${response.status} OK)`);
+    return response;
+  },
   async (error) => {
+    const url = error.config?.url || '';
+    const status = error.response?.status || 'Network Error';
+    AuditLogger.log('Error', 'API', `API Failure: ${error.config?.method?.toUpperCase()} ${url} (${status})`);
     const originalRequest = error.config;
     const publicEndpoints = [
       'api/Auth/verify-mpin',
@@ -75,7 +87,6 @@ instance.interceptors.response.use(
       'api/Auth/verify-otp',
       'api/Auth/refresh'
     ];
-    const url = originalRequest?.url || '';
     const isPublic = publicEndpoints.some(endpoint => url.includes(endpoint));
 
     if (isPublic) {

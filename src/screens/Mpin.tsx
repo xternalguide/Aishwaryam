@@ -5,6 +5,7 @@ import { ApiClient } from '../utils/ApiClient';
 import { CheckCircle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from '../utils/translation';
+import { AuditLogger } from '../utils/auditLogger';
 
 const MpinFlowState = {
   ENTER_PIN: 'ENTER_PIN',
@@ -122,16 +123,25 @@ export const Mpin: React.FC = () => {
         const refreshToken = response.data.refreshToken || SessionManager.getRefreshToken() || '';
         SessionManager.saveSession(userId, token, refreshToken);
         SessionManager.saveOnboardingStage(OnboardingStage.FULLY_VERIFIED);
-        refreshData().catch((err) => console.warn('Background preload failed on login:', err));
-        setSuccessMessage(lang === 'ta' ? 'உள்நுழைவு வெற்றிகரமாக முடிந்தது!' : 'Login Successful!');
+        
+        try {
+          await refreshData(false);
+        } catch (preloadErr) {
+          console.warn('Preload failed on login:', preloadErr);
+        }
+        setSuccessMessage(lang === 'ta' ? 'யாஹூ! உங்கள் கணக்கு வெற்றிகரமாக சரிபார்க்கப்பட்டது.' : 'Yahoo! You have successfully verified the account.');
         setShowSuccessDialog(true);
       } else {
-        setErrorMsg(response.data.message || 'Incorrect PIN. Please try again.');
+        const errorText = response.data.message || 'Incorrect PIN. Please try again.';
+        AuditLogger.log('Error', '/mpin/verify', `Failed MPIN authentication attempt: ${errorText}`);
+        setErrorMsg(errorText);
         setMpin('');
         mpinInputRef.current?.focus();
       }
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.message || 'Incorrect PIN. Please try again.');
+      const errorText = err.response?.data?.message || 'Incorrect PIN. Please try again.';
+      AuditLogger.log('Error', '/mpin/verify', `MPIN verification error: ${errorText}`);
+      setErrorMsg(errorText);
       setMpin('');
       mpinInputRef.current?.focus();
     } finally {
@@ -234,7 +244,7 @@ export const Mpin: React.FC = () => {
     if (showSuccessDialog) {
       const timer = setTimeout(() => {
         handleSuccessDismiss();
-      }, 1000);
+      }, 2500);
       return () => clearTimeout(timer);
     }
   }, [showSuccessDialog, flowState]);
@@ -742,9 +752,9 @@ export const Mpin: React.FC = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(41, 0, 29, 0.95)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
+          background: 'radial-gradient(circle at center, #111a14 0%, #060907 100%)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -753,22 +763,56 @@ export const Mpin: React.FC = () => {
           color: 'white',
           animation: 'fadeIn 0.3s ease-out'
         }}>
-          <div className="animate-tick-success" style={{
-            width: '120px',
-            height: '120px',
-            borderRadius: '50%',
-            background: 'rgba(16, 185, 129, 0.15)',
-            border: '2px solid var(--success-green)',
+          {/* Circular Success Checkmark Container with sparks */}
+          <div style={{
+            position: 'relative',
+            width: '180px',
+            height: '180px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginBottom: '24px',
-            boxShadow: '0 0 40px rgba(16, 185, 129, 0.3)'
+            marginBottom: '32px'
           }}>
-            <CheckCircle size={72} color="var(--success-green)" />
+            {/* Sparkles / Dots around the circle to match the image */}
+            {/* Dot 1: Top-Right green */}
+            <div style={{ position: 'absolute', top: '22px', right: '55px', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e', opacity: 0.8 }} />
+            {/* Dot 2: Right medium green */}
+            <div style={{ position: 'absolute', top: '62px', right: '28px', width: '13px', height: '13px', borderRadius: '50%', backgroundColor: '#22c55e', boxShadow: '0 0 10px rgba(34, 197, 94, 0.6)' }} />
+            {/* Dot 3: Bottom-Right small white */}
+            <div style={{ position: 'absolute', bottom: '60px', right: '22px', width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#ffffff', opacity: 0.6 }} />
+            {/* Dot 4: Bottom green */}
+            <div style={{ position: 'absolute', bottom: '30px', left: '110px', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e', opacity: 0.9 }} />
+            {/* Dot 5: Bottom-Left small white */}
+            <div style={{ position: 'absolute', bottom: '25px', left: '60px', width: '3px', height: '3px', borderRadius: '50%', backgroundColor: '#ffffff', opacity: 0.5 }} />
+            {/* Dot 6: Left-Bottom green */}
+            <div style={{ position: 'absolute', bottom: '65px', left: '32px', width: '9px', height: '9px', borderRadius: '50%', backgroundColor: '#22c55e' }} />
+            {/* Dot 7: Left-Top small white */}
+            <div style={{ position: 'absolute', top: '75px', left: '18px', width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#ffffff', opacity: 0.7 }} />
+            {/* Dot 8: Top-Left small green */}
+            <div style={{ position: 'absolute', top: '40px', left: '72px', width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#22c55e', opacity: 0.8 }} />
+            
+            {/* Inner Circle containing checkmark */}
+            <div className="animate-tick-success" style={{
+              width: '84px',
+              height: '84px',
+              borderRadius: '50%',
+              background: 'transparent',
+              border: '3px solid #22c55e',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 24px rgba(34, 197, 94, 0.4)'
+            }}>
+              {/* Clean Checkmark SVG */}
+              <svg width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 12L12 20L28 4" stroke="#22c55e" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
           </div>
+
+          {/* Title: Successfully */}
           <h2 style={{
-            fontSize: '24px',
+            fontSize: '34px',
             fontWeight: 'bold',
             fontFamily: 'var(--font-poppins)',
             color: 'white',
@@ -776,8 +820,24 @@ export const Mpin: React.FC = () => {
             margin: 0,
             letterSpacing: '0.5px'
           }}>
-            {successMessage}
+            {lang === 'ta' ? 'வெற்றிகரமாக முடிந்தது' : 'Successfully'}
           </h2>
+
+          {/* Subtitle: Details */}
+          <p style={{
+            fontSize: '15px',
+            color: '#A0AEC0',
+            textAlign: 'center',
+            marginTop: '16px',
+            maxWidth: '280px',
+            lineHeight: '1.6',
+            marginRight: 'auto',
+            marginLeft: 'auto',
+            padding: '0 16px',
+            fontFamily: 'var(--font-poppins)'
+          }}>
+            {successMessage}
+          </p>
         </div>
       )}
 
