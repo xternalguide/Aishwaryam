@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Aishwaryam Admin — Transactions</title>
+  <link rel="stylesheet" href="admin.css">
+  <script src="admin-shared.js"></script>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7L12 2z"/><path d="M12 2v20M3 7l9 5 9-5"/></svg></div>
+    <div><div class="logo-text">Aishwaryam</div><div class="logo-badge">Admin Console</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Overview</div>
+    <a href="index.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+    <div class="nav-section">Management</div>
+    <a href="users.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Users</a>
+    <a href="kyc.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>KYC Verification</a>
+    <a href="transactions.html" class="nav-link active"><svg viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>Transactions</a>
+    <a href="redemptions.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 1 0 0-4h14a2 2 0 1 0 0 4M5 8l1 8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-8"/><path d="M10 12v4M14 12v4"/></svg>Redemption Queue</a>
+    <a href="scheme-joined.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>Scheme Joined Users</a>
+    <div class="nav-section">Content</div>
+    <a href="schemes.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Schemes</a>
+    <a href="offers.html" class="nav-link"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Offers & Bonuses</a>
+    <a href="onboarding-banners.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Onboarding Banners</a>
+    <a href="posters.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>App Posters</a>
+    <a href="receipt-template.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Receipt Template</a>
+    <div class="nav-section">System</div>
+    <a href="notifications.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Push Broadcast</a>
+    <a href="audit.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Audit Logs</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-avatar">A</div>
+      <div><div class="user-name">Super Admin</div><div class="user-role">admin@aishwaryam.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="breadcrumb-item">Aishwaryam</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item current">Transactions</span>
+    </div>
+    <div class="topbar-right">
+      <div class="live-pill"><span class="live-dot"></span>Live</div>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme"></button>
+    </div>
+  </header>
+
+  <div class="page">
+    <div class="page-head">
+      <div>
+        <h1>Transactions</h1>
+        <p>Global gold buy & sell history from all users</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" onclick="exportTxs()">Export CSV</button>
+        <button class="btn btn-outline btn-sm" onclick="loadAllTransactions()">Refresh List</button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card">
+      <div class="card-body">
+        <div class="form-grid" style="grid-template-columns: 1fr 180px 150px; gap: 12px; align-items: flex-end">
+          <div class="form-group">
+            <label class="form-label">Search User Name / Phone / Weight</label>
+            <div class="input-group">
+              <span class="input-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+              <input type="text" class="form-control" id="searchFilter" placeholder="Search user name, phone, or weight..." onkeyup="filterTxs()">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-control" id="typeFilter" onchange="filterTxs()">
+              <option value="All">All Types</option>
+              <option value="BUY">Buy Gold</option>
+              <option value="SELL">Sell Gold</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="clearFilters()" style="height: 40px">Clear All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transaction Grid -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Global Transaction Ledger</span>
+        <span class="badge badge-accent" id="txCount">0 entries</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>User</th>
+              <th>Scheme Name</th>
+              <th>Type</th>
+              <th>Weight</th>
+              <th>Amount</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="txBody">
+            <tr><td colspan="7" class="table-empty">Loading transactions...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+<div id="toast"></div>
+
+<script>
+const API = API_BASE;
+let allTxs = [];
+
+async function loadAllTransactions() {
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get('userId');
+  
+  try {
+    const usersMap = await getUsersMap();
+    const url = userId ? `${API}/api/Dashboard/transactions/${userId}` : `${API}/api/Gold/transactions/all`;
+    const res = await fetch(url);
+    const data = await res.json();
+    allTxs = Array.isArray(data) ? data : (data.transactions || []);
+    
+    allTxs.forEach(t => {
+      const u = usersMap[(t.userId || '').toLowerCase()];
+      t.resolvedName = u ? u.fullName : (t.userId || 'Unknown');
+      t.resolvedPhone = u ? u.phoneNumber : '';
+    });
+    
+    if (userId) {
+      const targetUser = usersMap[(userId || '').toLowerCase()];
+      document.getElementById('searchFilter').value = targetUser ? targetUser.fullName : userId;
+    }
+    
+    filterTxs();
+  } catch (e) {
+    document.getElementById('txBody').innerHTML = `<tr><td colspan="7" class="table-empty">Failed to load transactions.</td></tr>`;
+  }
+}
+
+function exportTxs() {
+  exportToCSV('aishwaryam_transactions.csv', window.currentFilteredTxs || allTxs);
+}
+
+function filterTxs() {
+  const q = document.getElementById('searchFilter').value.toLowerCase();
+  const type = document.getElementById('typeFilter').value;
+  
+  const filtered = allTxs.filter(t => {
+    const matchQ = (t.resolvedName||'').toLowerCase().includes(q) || 
+                   (t.resolvedPhone||'').includes(q) ||
+                   (t.transactionId||'').toLowerCase().includes(q) || 
+                   (t.type||'').toLowerCase().includes(q) ||
+                   (t.goldWeightMg||'').toString().includes(q);
+    const matchType = type === 'All' || t.type === type;
+    return matchQ && matchType;
+  });
+  renderGrid(filtered);
+}
+
+function clearFilters() {
+  document.getElementById('searchFilter').value = '';
+  document.getElementById('typeFilter').value = 'All';
+  filterTxs();
+}
+
+function renderGrid(txs) {
+  const body = document.getElementById('txBody');
+  document.getElementById('txCount').textContent = `${txs.length} showing / ${allTxs.length} total`;
+  
+  window.currentFilteredTxs = txs;
+  
+  if (!txs.length) {
+    body.innerHTML = '<tr><td colspan="7" class="table-empty">No matching transactions found</td></tr>';
+    return;
+  }
+
+  body.innerHTML = txs.map(t => {
+    const isBuy = t.type === 'BUY';
+    return `
+      <tr>
+        <td class="text-xs" style="color:var(--text-3);white-space:nowrap">${new Date(t.createdAt).toLocaleString()}</td>
+        <td><a href="users.html?userId=${t.userId}" style="color:var(--accent);font-weight:500;text-decoration:underline">${t.resolvedName}</a></td>
+        <td>${t.schemeName || 'Direct Purchase'}</td>
+        <td><span class="badge ${isBuy ? 'badge-green' : 'badge-accent'}">${t.type}</span></td>
+        <td class="font-mono">${(t.goldWeightMg||0).toLocaleString()} mg</td>
+        <td style="font-weight:600">₹${((t.amountPaise||0)/100).toLocaleString('en-IN')}</td>
+        <td>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-xs" onclick="window.location.href='users.html?userId=${t.userId}'">Profile</button>
+            <button class="btn btn-outline btn-xs" onclick="downloadReceipt('${t.transactionId}')">Receipt</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function downloadReceipt(transactionId) {
+  window.open(`${API}/api/Gold/receipt/download/${transactionId}`, '_blank');
+}
+
+loadAllTransactions();
+
+// Auto-refresh data every 5 seconds
+setInterval(loadAllTransactions, 5000);
+</script>
+</body></html>
+

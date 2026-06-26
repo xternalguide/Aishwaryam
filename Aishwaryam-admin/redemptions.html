@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Aishwaryam Admin — Redemption Queue</title>
+  <link rel="stylesheet" href="admin.css">
+  <script src="admin-shared.js"></script>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7L12 2z"/><path d="M12 2v20M3 7l9 5 9-5"/></svg></div>
+    <div><div class="logo-text">Aishwaryam</div><div class="logo-badge">Admin Console</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Overview</div>
+    <a href="index.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+    <div class="nav-section">Management</div>
+    <a href="users.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Users</a>
+    <a href="kyc.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>KYC Verification</a>
+    <a href="transactions.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>Transactions</a>
+    <a href="redemptions.html" class="nav-link active"><svg viewBox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 1 0 0-4h14a2 2 0 1 0 0 4M5 8l1 8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-8"/><path d="M10 12v4M14 12v4"/></svg>Redemption Queue</a>
+    <a href="scheme-joined.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>Scheme Joined Users</a>
+    <div class="nav-section">Content</div>
+    <a href="schemes.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Schemes</a>
+    <a href="offers.html" class="nav-link"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Offers & Bonuses</a>
+    <a href="onboarding-banners.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Onboarding Banners</a>
+    <a href="posters.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>App Posters</a>
+    <a href="receipt-template.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Receipt Template</a>
+    <div class="nav-section">System</div>
+    <a href="notifications.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Push Broadcast</a>
+    <a href="audit.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Audit Logs</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-avatar">A</div>
+      <div><div class="user-name">Super Admin</div><div class="user-role">admin@aishwaryam.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="breadcrumb-item">Aishwaryam</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item current">Redemption Queue</span>
+    </div>
+    <div class="topbar-right">
+      <div class="live-pill"><span class="live-dot"></span>Live</div>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme"></button>
+    </div>
+  </header>
+
+  <div class="page">
+    <div class="page-head">
+      <div>
+        <h1>Gold Redemption Queue</h1>
+        <p>Approve physical gold deliveries, jewellery collections, or wallet credits (paise-accurate)</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" onclick="exportRedemptions()">Export CSV</button>
+        <button class="btn btn-outline btn-sm" onclick="loadData()">Refresh Queue</button>
+      </div>
+    </div>
+
+    <!-- Live KPI Summary Card Row -->
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-header">
+          <div class="kpi-icon" style="background:var(--accent-dim);color:var(--accent)">
+            <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 2v20M8 5l4-4 4 4"/></svg>
+          </div>
+          <span class="badge badge-accent">CASH</span>
+        </div>
+        <div class="kpi-label">Cash Redemptions</div>
+        <div class="kpi-value" id="kpiCashCount">0</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-header">
+          <div class="kpi-icon" style="background:var(--blue-dim);color:var(--blue)">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 16V4m0 0L3 8m4-4l4 4"/></svg>
+          </div>
+          <span class="badge badge-blue">DELIVERY</span>
+        </div>
+        <div class="kpi-label">Home Deliveries</div>
+        <div class="kpi-value" id="kpiDeliveryCount">0</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-header">
+          <div class="kpi-icon" style="background:var(--green-dim);color:var(--green)">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <span class="badge badge-green">JEWELLERY</span>
+        </div>
+        <div class="kpi-label">Showroom Collections</div>
+        <div class="kpi-value" id="kpiJewelleryCount">0</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-header">
+          <div class="kpi-icon" style="background:var(--amber-dim);color:var(--amber)">
+            <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+        </div>
+        <div class="kpi-label">Total Awaiting Action</div>
+        <div class="kpi-value" id="kpiTotalCount">0</div>
+      </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="card" style="margin-bottom: 20px">
+      <div class="card-body">
+        <div class="form-grid" style="grid-template-columns: 1fr 250px; gap: 12px; margin-bottom: 0;">
+          <div class="input-group" style="position: relative; flex: 1">
+            <span style="position: absolute; left: 12px; top: 10px; color: var(--text-3)">
+              <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill:none; stroke:currentColor; stroke-width:2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
+            <input type="text" class="form-control" id="redemptionSearch" placeholder="Search by User Name, Phone, or ID..." onkeyup="applyFilters()" style="padding-left:36px">
+          </div>
+          <div class="form-group">
+            <select class="form-control" id="typeFilter" onchange="applyFilters()">
+              <option value="All">All Types</option>
+              <option value="CASH">Cash Redemptions</option>
+              <option value="DELIVERY">Physical Delivery</option>
+              <option value="JEWELLERY">Showroom Jewellery</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Grid Table -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Pending Approvals Queue</span>
+        <span class="badge badge-accent" id="redemptionCount">0 showing</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Request Date</th>
+              <th>User Details</th>
+              <th>Type</th>
+              <th>Gold weight</th>
+              <th>Total value</th>
+              <th>Delivery Address / Notes</th>
+              <th style="text-align: right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="redemptionBody">
+            <tr><td colspan="7" class="table-empty">Loading redemption queue...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Action Modals -->
+<!-- Approval Modal -->
+<div id="approveModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:1000; align-items:center; justify-content:center; padding: 20px">
+  <div class="card" style="width: 100%; max-width: 450px; margin-bottom:0">
+    <div class="card-head">
+      <span class="card-title" style="color:var(--green)">Approve Redemption Request</span>
+      <button class="btn btn-ghost btn-xs" onclick="hideApproveModal()">✕</button>
+    </div>
+    <div class="card-body" style="display:flex; flex-direction:column; gap:12px">
+      <p style="font-size:13px; color:var(--text-2)">
+        Approving this request will mark the gold savings scheme as <strong>Claimed</strong>, sell the gold holdings, and initiate physical dispatch or wallet credit.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Internal Admin Notes (Optional)</label>
+        <textarea class="form-control" id="approveNotes" placeholder="e.g. Dispatched via BlueDart tracking ID #892837 or Approved wallet credit" rows="3" style="resize:none"></textarea>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:8px">
+        <button class="btn btn-success" onclick="submitApprove()" id="btnSubmitApprove" style="flex:1; justify-content:center">Confirm Approval</button>
+        <button class="btn btn-outline" onclick="hideApproveModal()" style="flex:1; justify-content:center">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rejection Modal -->
+<div id="rejectModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:1000; align-items:center; justify-content:center; padding: 20px">
+  <div class="card" style="width: 100%; max-width: 450px; margin-bottom:0">
+    <div class="card-head">
+      <span class="card-title" style="color:var(--red)">Reject Redemption Request</span>
+      <button class="btn btn-ghost btn-xs" onclick="hideRejectModal()">✕</button>
+    </div>
+    <div class="card-body" style="display:flex; flex-direction:column; gap:12px">
+      <p style="font-size:13px; color:var(--text-2)">
+        Please provide a reason for rejecting this request. This reason will be recorded and sent to the user.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Rejection Reason (Required)</label>
+        <textarea class="form-control" id="rejectReason" placeholder="e.g. KYC verification documents expired or mismatch in banking details." rows="3" style="resize:none"></textarea>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:8px">
+        <button class="btn btn-danger" onclick="submitReject()" id="btnSubmitReject" style="flex:1; justify-content:center">Reject Request</button>
+        <button class="btn btn-outline" onclick="hideRejectModal()" style="flex:1; justify-content:center">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = API_BASE;
+let allRedemptions = [];
+let usersMap = {};
+let activeTargetId = null;
+
+async function init() {
+  await loadUsersMap();
+  await loadData();
+}
+
+async function loadUsersMap() {
+  try {
+    const res = await fetch(`${API}/api/User/all`);
+    if (res.ok) {
+      const users = await res.json();
+      users.forEach(u => {
+        usersMap[u.id.toLowerCase()] = {
+          name: u.fullName || 'No Name',
+          phone: u.phoneNumber || 'No Phone'
+        };
+      });
+    }
+  } catch (e) {
+    console.error('Failed to pre-cache users list', e);
+  }
+}
+
+async function loadData() {
+  try {
+    const res = await fetch(`${API}/api/Scheme/admin/redemptions`);
+    if (res.ok) {
+      allRedemptions = await res.json();
+      updateKpiCards();
+      applyFilters();
+    } else {
+      document.getElementById('redemptionBody').innerHTML = `<tr><td colspan="7" class="table-empty" style="color:var(--red)">Failed to load redemptions queue.</td></tr>`;
+    }
+  } catch (e) {
+    document.getElementById('redemptionBody').innerHTML = `<tr><td colspan="7" class="table-empty" style="color:var(--red)">Network error loading queue: ${e.message}</td></tr>`;
+  }
+}
+
+function updateKpiCards() {
+  const cash = allRedemptions.filter(r => r.redemptionType === 'CASH').length;
+  const delivery = allRedemptions.filter(r => r.redemptionType === 'DELIVERY').length;
+  const jewellery = allRedemptions.filter(r => r.redemptionType === 'JEWELLERY').length;
+
+  document.getElementById('kpiCashCount').textContent = cash;
+  document.getElementById('kpiDeliveryCount').textContent = delivery;
+  document.getElementById('kpiJewelleryCount').textContent = jewellery;
+  document.getElementById('kpiTotalCount').textContent = allRedemptions.length;
+}
+
+function applyFilters() {
+  const q = document.getElementById('redemptionSearch').value.toLowerCase();
+  const type = document.getElementById('typeFilter').value;
+
+  const filtered = allRedemptions.filter(r => {
+    const matchType = type === 'All' || r.redemptionType === type;
+    const userProfile = usersMap[r.userId.toLowerCase()] || { name: '', phone: '' };
+    const matchQ = r.userId.toLowerCase().includes(q) || 
+                   userProfile.name.toLowerCase().includes(q) || 
+                   userProfile.phone.includes(q);
+    return matchType && matchQ;
+  });
+
+  renderTable(filtered);
+}
+
+function exportRedemptions() {
+  exportToCSV('aishwaryam_redemptions.csv', window.currentFilteredRedemptions || allRedemptions);
+}
+
+function renderTable(data) {
+  const body = document.getElementById('redemptionBody');
+  document.getElementById('redemptionCount').textContent = `${data.length} showing / ${allRedemptions.length} total`;
+
+  window.currentFilteredRedemptions = data;
+
+  if (!data.length) {
+    body.innerHTML = '<tr><td colspan="7" class="table-empty">No pending redemptions match these filters</td></tr>';
+    return;
+  }
+
+  body.innerHTML = data.map(r => {
+    const userProfile = usersMap[r.userId.toLowerCase()] || { name: 'Unknown User', phone: 'No Phone' };
+    const dateStr = new Date(r.createdAt).toLocaleString();
+    const typeClass = r.redemptionType === 'CASH' ? 'badge-accent' : (r.redemptionType === 'DELIVERY' ? 'badge-blue' : 'badge-green');
+    
+    return `
+      <tr>
+        <td class="text-xs font-mono" style="color:var(--text-3);white-space:nowrap">${dateStr}</td>
+        <td>
+          <div style="font-weight:600"><a href="users.html?userId=${r.userId}" style="color:var(--accent);text-decoration:underline">${userProfile.name}</a></div>
+          <div style="font-size:11px;color:var(--text-3)">Phone: ${userProfile.phone}</div>
+        </td>
+        <td><span class="badge ${typeClass}">${r.redemptionType}</span></td>
+        <td class="font-mono" style="font-weight:600">${(r.goldWeightMg / 1000).toFixed(3)}g <span style="font-size:10px;font-weight:400;color:var(--text-3)">(${r.goldWeightMg.toLocaleString()} mg)</span></td>
+        <td class="font-mono" style="color:var(--green);font-weight:600">₹${(r.totalAmountPaise / 100).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+        <td class="text-xs" style="max-width:280px;overflow:hidden;text-overflow:ellipsis;color:var(--text-2)" title="${r.address || '—'}">
+          ${r.redemptionType === 'DELIVERY' ? `<svg viewBox="0 0 24 24" style="width:11px;stroke:currentColor;fill:none;vertical-align:middle;margin-right:4px"><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/><circle cx="12" cy="10" r="3"/></svg>${r.address || 'No Address Provided'}` : '—'}
+        </td>
+        <td>
+          <div style="display:flex;gap:6px;justify-content:flex-end">
+            <button class="btn btn-success btn-xs" onclick="openApprove('${r.id}')">Approve</button>
+            <button class="btn btn-danger btn-xs" onclick="openReject('${r.id}')">Reject</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Approval Modals logic
+function openApprove(id) {
+  activeTargetId = id;
+  document.getElementById('approveNotes').value = '';
+  document.getElementById('approveModal').style.display = 'flex';
+}
+function hideApproveModal() {
+  document.getElementById('approveModal').style.display = 'none';
+  activeTargetId = null;
+}
+async function submitApprove() {
+  if (!activeTargetId) return;
+  const notes = document.getElementById('approveNotes').value.trim();
+  const btn = document.getElementById('btnSubmitApprove');
+  
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+
+  try {
+    const res = await fetch(`${API}/api/Scheme/admin/redemptions/${activeTargetId}/approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminId: 'admin@aishwaryam.com', notes: notes })
+    });
+
+    if (res.ok) {
+      showToast('Redemption request approved successfully!', 'success');
+      hideApproveModal();
+      loadData();
+    } else {
+      const err = await res.text();
+      showToast('Approval failed: ' + err, 'error');
+    }
+  } catch (e) {
+    showToast('Network error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Confirm Approval';
+  }
+}
+
+// Rejection Modals logic
+function openReject(id) {
+  activeTargetId = id;
+  document.getElementById('rejectReason').value = '';
+  document.getElementById('rejectModal').style.display = 'flex';
+}
+function hideRejectModal() {
+  document.getElementById('rejectModal').style.display = 'none';
+  activeTargetId = null;
+}
+async function submitReject() {
+  if (!activeTargetId) return;
+  const reason = document.getElementById('rejectReason').value.trim();
+  if (!reason) {
+    showToast('Rejection reason is required', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btnSubmitReject');
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+
+  try {
+    const res = await fetch(`${API}/api/Scheme/admin/redemptions/${activeTargetId}/reject`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminId: 'admin@aishwaryam.com', reason: reason })
+    });
+
+    if (res.ok) {
+      showToast('Redemption request rejected.', 'info');
+      hideRejectModal();
+      loadData();
+    } else {
+      const err = await res.text();
+      showToast('Rejection failed: ' + err, 'error');
+    }
+  } catch (e) {
+    showToast('Network error: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Reject Request';
+  }
+}
+
+// Init & Polling
+init();
+setInterval(loadData, 5000);
+</script>
+</body>
+</html>

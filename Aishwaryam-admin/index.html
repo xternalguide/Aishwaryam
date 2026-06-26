@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Aishwaryam Admin — Dashboard</title>
+  <link rel="stylesheet" href="admin.css">
+  <script src="admin-shared.js"></script>
+  <style>
+    .badge-birthday {
+      background: rgba(255, 105, 180, 0.2);
+      color: rgb(255, 105, 180);
+      border: 1px solid rgba(255, 105, 180, 0.3);
+    }
+    .badge-anniversary {
+      background: rgba(0, 191, 255, 0.2);
+      color: rgb(0, 191, 255);
+      border: 1px solid rgba(0, 191, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7L12 2z"/><path d="M12 2v20M3 7l9 5 9-5"/></svg></div>
+    <div><div class="logo-text">Aishwaryam</div><div class="logo-badge">Admin Console</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Overview</div>
+    <a href="index.html" class="nav-link active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+    <div class="nav-section">Management</div>
+    <a href="users.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Users</a>
+    <a href="kyc.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>KYC Verification</a>
+    <a href="transactions.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>Transactions</a>
+    <a href="redemptions.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 1 0 0-4h14a2 2 0 1 0 0 4M5 8l1 8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-8"/><path d="M10 12v4M14 12v4"/></svg>Redemption Queue</a>
+    <a href="scheme-joined.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>Scheme Joined Users</a>
+    <div class="nav-section">Content</div>
+    <a href="schemes.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Schemes</a>
+    <a href="offers.html" class="nav-link"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Offers & Bonuses</a>
+    <a href="onboarding-banners.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Onboarding Banners</a>
+    <a href="posters.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>App Posters</a>
+    <a href="receipt-template.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Receipt Template</a>
+    <div class="nav-section">System</div>
+    <a href="notifications.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Push Broadcast</a>
+    <a href="audit.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Audit Logs</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-avatar">A</div>
+      <div><div class="user-name">Super Admin</div><div class="user-role">admin@aishwaryam.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="breadcrumb-item">Aishwaryam</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item current">Dashboard</span>
+    </div>
+    <div class="topbar-right">
+      <div class="live-pill"><span class="live-dot"></span>Live</div>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme"></button>
+    </div>
+  </header>
+
+  <div class="page">
+    <div class="page-head">
+      <div>
+        <h1>Dashboard Overview</h1>
+        <p>Real-time platform metrics, today's events, and quick actions</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" onclick="exportReconciliation()">Download Daily Reconciliation (CSV)</button>
+        <button class="btn btn-primary btn-sm" style="background:var(--red);border-color:var(--red);" onclick="clearUserData()">Clear User Data (Testing)</button>
+      </div>
+    </div>
+
+    <!-- Main KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-header"><div class="kpi-icon" style="background:var(--accent-dim);color:var(--accent)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div></div>
+        <div class="kpi-label">Total Users</div>
+        <div class="kpi-value" id="kpiUsers">...</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-header"><div class="kpi-icon" style="background:var(--blue-dim);color:var(--blue)"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div></div>
+        <div class="kpi-label">KYC Verified</div>
+        <div class="kpi-value" id="kpiKyc">...</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-header">
+          <div class="kpi-icon" style="background:var(--amber-dim);color:var(--amber)">
+            <svg viewBox="0 0 24 24" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+        </div>
+        <div class="kpi-label">KYC Pending Queue</div>
+        <div class="kpi-value" id="kpiKycPending" style="cursor: pointer" onclick="location.href='kyc.html?filter=PENDING'">...</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-header"><div class="kpi-icon" style="background:var(--green-dim);color:var(--green)"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div></div>
+        <div class="kpi-label">Scheme Enrollments</div>
+        <div class="kpi-value" id="kpiSchemes">...</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-header"><div class="kpi-icon" style="background:rgba(255, 105, 180, 0.15);color:rgb(255, 105, 180)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div></div>
+        <div class="kpi-label">Birthdays / Anniversaries Today</div>
+        <div class="kpi-value" id="kpiEvents" style="cursor: pointer" onclick="location.href='users.html?filter=events'">...</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions Grid -->
+    <div class="section-head">Quick Management</div>
+    <div class="module-grid">
+      <div class="module-card" onclick="location.href='users.html'">
+        <div class="module-icon" style="background:var(--surface2);color:var(--text-2)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+        <div class="module-name">User Database</div>
+        <div class="module-desc">View and manage registered accounts, birthdays and anniversaries.</div>
+      </div>
+      <div class="module-card" onclick="location.href='offers.html'">
+        <div class="module-icon" style="background:var(--surface2);color:var(--text-2)"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <div class="module-name">Event Offer templates</div>
+        <div class="module-desc">Set birthday and anniversary bonus percentages and push today's offers.</div>
+      </div>
+      <div class="module-card" onclick="location.href='kyc.html'">
+        <div class="module-icon" style="background:var(--surface2);color:var(--text-2)"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <div class="module-name">KYC Grid</div>
+        <div class="module-desc">Approve documents and send push notifications.</div>
+      </div>
+      <div class="module-card" onclick="location.href='transactions.html'">
+        <div class="module-icon" style="background:var(--surface2);color:var(--text-2)"><svg viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg></div>
+        <div class="module-name">Global Ledger</div>
+        <div class="module-desc">Full transaction history from all app users.</div>
+      </div>
+      <div class="module-card" onclick="location.href='redemptions.html'">
+        <div class="module-icon" style="background:var(--surface2);color:var(--text-2)"><svg viewBox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 1 0 0-4h14a2 2 0 1 0 0 4M5 8l1 8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-8"/><path d="M10 12v4M14 12v4"/></svg></div>
+        <div class="module-name">Redemption Queue</div>
+        <div class="module-desc">Approve or reject gold redemption requests.</div>
+      </div>
+    </div>
+
+    <!-- Active Offers Overview Grid -->
+    <div class="section-head" style="margin-top:24px">Live Offers Overview</div>
+    <div class="card">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Type</th>
+              <th>Target Recipient</th>
+              <th>Bonus</th>
+              <th>Status</th>
+              <th>Expires At</th>
+            </tr>
+          </thead>
+          <tbody id="dashOffersBody">
+            <tr><td colspan="6" style="text-align:center">Loading offers...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+<div id="toast"></div>
+
+<script>
+const API = API_BASE;
+
+async function loadStats() {
+  try {
+    const res = await fetch(`${API}/api/Admin/kpis`);
+    if(res.ok) {
+        const kpis = await res.json();
+        
+        document.getElementById('kpiUsers').textContent = kpis.totalUsers !== undefined ? kpis.totalUsers : '—';
+        document.getElementById('kpiKyc').textContent = kpis.kycVerifiedCount !== undefined ? kpis.kycVerifiedCount : '—';
+        document.getElementById('kpiKycPending').textContent = kpis.kycPendingCount !== undefined ? kpis.kycPendingCount : '—';
+        document.getElementById('kpiSchemes').textContent = kpis.activeSchemesCount !== undefined ? kpis.activeSchemesCount : '—';
+        
+        // Update Gold Liability KPI if exists, otherwise create it
+        let liabilityKpi = document.getElementById('kpiLiability');
+        if (!liabilityKpi) {
+            const kpiGrid = document.querySelector('.kpi-grid');
+            if (kpiGrid) {
+                const newKpi = document.createElement('div');
+                newKpi.className = 'kpi';
+                newKpi.innerHTML = `
+                    <div class="kpi-header"><div class="kpi-icon" style="background:var(--accent-dim);color:var(--accent)"><svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div></div>
+                    <div class="kpi-label">Gold Liability (Live)</div>
+                    <div class="kpi-value" id="kpiLiability">...</div>
+                `;
+                kpiGrid.appendChild(newKpi);
+                liabilityKpi = document.getElementById('kpiLiability');
+            }
+        }
+        
+        if (liabilityKpi && kpis.totalGoldLiabilityMg !== undefined) {
+            liabilityKpi.textContent = (kpis.totalGoldLiabilityMg / 1000).toFixed(2) + " g";
+        }
+    } else {
+        setFallbackKpis();
+    }
+  } catch (e) { 
+      console.error('Stats load failed', e);
+      setFallbackKpis();
+  }
+
+  // Load event offer targets (Birthdays/Anniversaries today) from /api/User/all
+  try {
+      const usersRes = await fetch(`${API}/api/User/all`);
+      if (usersRes.ok) {
+          const users = await usersRes.json();
+          const today = new Date();
+          const todayMonth = today.getMonth() + 1;
+          const todayDay = today.getDate();
+          
+          let birthdaysToday = 0;
+          let anniversariesToday = 0;
+          
+          users.forEach(u => {
+              const dob = u.dateOfBirth ? new Date(u.dateOfBirth) : null;
+              const ann = u.weddingAnniversaryDate ? new Date(u.weddingAnniversaryDate) : null;
+              
+              if (dob && (dob.getMonth() + 1) === todayMonth && dob.getDate() === todayDay) birthdaysToday++;
+              if (ann && (ann.getMonth() + 1) === todayMonth && ann.getDate() === todayDay) anniversariesToday++;
+          });
+          
+          document.getElementById('kpiEvents').innerHTML = `
+            <span style="color: rgb(255, 105, 180); display: inline-flex; align-items: center; gap: 4px;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block;"><rect x="3" y="8" width="18" height="4"></rect><path d="M12 8V22"></path><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2 2v-7"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 4.8 0 0 1 12 8a4.8 4.8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"></path></svg>
+              ${birthdaysToday}
+            </span> 
+            / 
+            <span style="color: rgb(0, 191, 255); display: inline-flex; align-items: center; gap: 4px;">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+              ${anniversariesToday}
+            </span>`;
+      } else {
+          document.getElementById('kpiEvents').textContent = '—';
+      }
+  } catch (e) {
+      document.getElementById('kpiEvents').textContent = '—';
+  }
+}
+
+function setFallbackKpis() {
+    document.getElementById('kpiUsers').textContent = '—';
+    document.getElementById('kpiKyc').textContent = '—';
+    document.getElementById('kpiKycPending').textContent = '—';
+    document.getElementById('kpiSchemes').textContent = '—';
+    const liabilityKpi = document.getElementById('kpiLiability');
+    if (liabilityKpi) liabilityKpi.textContent = '—';
+}
+
+async function loadActiveOffers() {
+  try {
+    const res = await fetch(`${API}/api/Offers/all-enriched`);
+    if(res.ok) {
+      const offers = await res.json();
+      const tbody = document.getElementById('dashOffersBody');
+      tbody.innerHTML = '';
+      
+      const now = new Date();
+      // Only show top 5 active/recent offers
+      const recent = offers.slice(0, 5);
+
+      if(recent.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px; color: var(--text-muted)">No active offers.</td></tr>';
+        return;
+      }
+
+      recent.forEach(o => {
+          const expires = new Date(o.expiresAt);
+          const isExpired = expires < now || !o.isActive;
+          
+          let typeBadge = '';
+          if (o.offerType === 'BIRTHDAY') {
+              typeBadge = `<span class="badge badge-birthday"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; display: inline-block;"><rect x="3" y="8" width="18" height="4"></rect><path d="M12 8V22"></path><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 4.8 0 0 1 12 8a4.8 4.8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"></path></svg>Birthday</span>`;
+          } else if (o.offerType === 'ANNIVERSARY') {
+              typeBadge = `<span class="badge badge-anniversary"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px; display: inline-block;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>Anniversary</span>`;
+          } else if (o.offerType === 'TARGETED') {
+              typeBadge = `<span class="badge badge-warning">Targeted</span>`;
+          } else {
+              typeBadge = `<span class="badge badge-accent">Flash Sale</span>`;
+          }
+
+          const statusHtml = isExpired ? `<span class="badge badge-danger">Expired</span>` : `<span class="badge badge-success">Active</span>`;
+          
+          let recipient = '<span style="color: var(--text-muted)">All Users</span>';
+          if (o.targetUserId) {
+              recipient = o.targetUserName ? `<strong>${o.targetUserName}</strong>` : 'Event Target';
+          }
+
+          let bonusText = '';
+          if (o.bonusPercent > 0) {
+              bonusText = `${o.bonusPercent}%`;
+          } else {
+              bonusText = `₹${(o.bonusWorthPaise / 100).toFixed(2)}`;
+          }
+
+          tbody.innerHTML += `
+              <tr>
+                  <td style="font-weight: 500">${o.title}</td>
+                  <td>${typeBadge}</td>
+                  <td>${recipient}</td>
+                  <td style="color: var(--success); font-weight: 600">${bonusText}</td>
+                  <td>${statusHtml}</td>
+                  <td>${expires.toLocaleString()}</td>
+              </tr>
+          `;
+      });
+    }
+  } catch (e) { console.error('Offers load failed', e); }
+}
+
+function exportReconciliation() {
+  const today = new Date().toISOString().split('T')[0];
+  window.open(`${API}/api/Admin/reports/daily-reconciliation?date=${today}`, '_blank');
+}
+
+async function clearUserData() {
+  if (confirm("Are you sure you want to clear all user data? This will truncate the database and is irreversible!")) {
+    try {
+      const res = await fetch(`${API}/api/Admin/clear-user-data`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert("Success: " + data.message);
+        loadStats();
+      } else {
+        alert("Error: " + (data.message || 'Failed to clear data'));
+      }
+    } catch (e) {
+      alert("Error: " + e.message);
+    }
+  }
+}
+
+loadStats();
+loadActiveOffers();
+setInterval(() => {
+    loadStats();
+    loadActiveOffers();
+}, 6000);
+</script>
+</body></html>

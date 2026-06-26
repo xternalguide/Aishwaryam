@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Aishwaryam Admin — Onboarding Banners</title>
+  <link rel="stylesheet" href="admin.css">
+  <script src="admin-shared.js"></script>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7L12 2z"/><path d="M12 2v20M3 7l9 5 9-5"/></svg></div>
+    <div><div class="logo-text">Aishwaryam</div><div class="logo-badge">Admin Console</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Overview</div>
+    <a href="index.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+    <div class="nav-section">Management</div>
+    <a href="users.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Users</a>
+    <a href="kyc.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>KYC Verification</a>
+    <a href="transactions.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>Transactions</a>
+    <a href="redemptions.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 1 0 0-4h14a2 2 0 1 0 0 4M5 8l1 8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-8"/><path d="M10 12v4M14 12v4"/></svg>Redemption Queue</a>
+    <a href="scheme-joined.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>Scheme Joined Users</a>
+    <div class="nav-section">Content</div>
+    <a href="schemes.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Schemes</a>
+    <a href="offers.html" class="nav-link"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Offers & Bonuses</a>
+    <a href="onboarding-banners.html" class="nav-link active"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Onboarding Banners</a>
+    <a href="posters.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>App Posters</a>
+    <a href="receipt-template.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Receipt Template</a>
+    <div class="nav-section">System</div>
+    <a href="notifications.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Push Broadcast</a>
+    <a href="audit.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Audit Logs</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-avatar">A</div>
+      <div><div class="user-name">Super Admin</div><div class="user-role">admin@aishwaryam.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="breadcrumb-item">Aishwaryam</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item current">Onboarding Banners</span>
+    </div>
+    <div class="topbar-right">
+      <div class="live-pill"><span class="live-dot"></span>Live</div>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme"></button>
+    </div>
+  </header>
+
+  <div class="page">
+    <div class="page-head">
+      <div>
+        <h1>Onboarding Banners</h1>
+        <p>Manage full-screen onboarding banners for the mobile app</p>
+      </div>
+      <button class="btn btn-primary" onclick="showAddModal()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Banner
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="card" style="margin-bottom: 20px">
+      <div class="card-body">
+        <div class="form-grid" style="grid-template-columns: 1fr 200px; gap: 12px; margin-bottom: 0;">
+          <div class="input-group">
+            <span class="input-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+            <input type="text" class="form-control" id="bannerSearch" placeholder="Search by Title or URL..." onkeyup="renderBanners()">
+          </div>
+          <div class="form-group">
+            <select class="form-control" id="bannerStatusFilter" onchange="renderBanners()">
+              <option value="All">All Status</option>
+              <option value="Active">Active Only</option>
+              <option value="Inactive">Inactive Only</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Onboarding Banners</span>
+        <span class="badge badge-accent" id="bannerCount">0 total</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Preview</th>
+              <th>Banner Details</th>
+              <th>Tap Action</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="bannerBody">
+            <tr><td colspan="6" class="table-empty">Loading banners...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Add Modal -->
+<div id="addModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; padding: 20px">
+  <div class="card" style="width: 100%; max-width: 500px; margin-bottom:0">
+    <div class="card-head"><span class="card-title">Add New Banner</span><button class="btn btn-ghost btn-xs" onclick="hideAddModal()">✕</button></div>
+    <div class="card-body" style="display:flex; flex-direction:column; gap:12px">
+      <div class="form-group"><label class="form-label">Banner Title</label><input type="text" class="form-control" id="mTitle" placeholder="e.g. Festival Offer"></div>
+      <!-- Display Location hardcoded to ONBOARDING -->
+      <input type="hidden" id="mLocation" value="ONBOARDING">
+      <div class="form-group"><label class="form-label">Tap Action URL</label><input type="text" class="form-control" id="mUrl" placeholder="e.g. /schemes or https://..."></div>
+      <div class="form-group"><label class="form-label">Display Order</label><input type="number" class="form-control" id="mOrder" value="0"></div>
+      <div class="form-group">
+        <label class="form-label">Image (File)</label>
+        <input type="file" id="mFile" class="form-control" accept="image/*" onchange="previewImage(this)">
+        <div id="imgPreview" style="margin-top:10px; height:120px; background:var(--surface2); border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden">
+          <span style="color:var(--text-3); font-size:11px">No image selected</span>
+        </div>
+        <div id="dimensionWarning" style="display:none; color:#ff4444; font-size:11px; font-weight:bold; margin-top:8px; line-height:1.4"></div>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:8px">
+        <button class="btn btn-primary" onclick="saveBanner()" id="saveBtn" style="flex:1">Save Banner</button>
+        <button class="btn btn-outline" onclick="hideAddModal()" style="flex:1">Cancel</button>
+      </div>
+    </div>
+  </div>
+<!-- View Modal -->
+<div id="viewModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; padding: 20px">
+  <div class="card" style="width: 100%; max-width: 500px; margin-bottom:0">
+    <div class="card-head"><span class="card-title">View Banner Details</span><button class="btn btn-ghost btn-xs" onclick="hideViewModal()">✕</button></div>
+    <div class="card-body" style="display:flex; flex-direction:column; gap:12px">
+      <div id="viewImageContainer" style="width:100%; height:200px; background:var(--surface2); border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center">
+        <img id="vImage" style="width:100%; height:100%; object-fit:cover">
+      </div>
+      <div>
+        <h3 id="vTitle" style="margin:0; font-size:18px; font-weight:700"></h3>
+        <p id="vId" style="margin:4px 0; font-size:11px; color:var(--text-3)"></p>
+      </div>
+      <hr style="border:0; border-top:1px solid var(--border); margin:4px 0">
+      <div style="display:grid; grid-template-columns:120px 1fr; gap:8px; font-size:13px">
+        <span style="color:var(--text-3)">Location:</span>
+        <span id="vLocation" style="font-weight:600"></span>
+        
+        <span style="color:var(--text-3)">Display Order:</span>
+        <span id="vOrder" class="font-mono"></span>
+        
+        <span style="color:var(--text-3)">Tap Action URL:</span>
+        <span id="vUrl" style="word-break:break-all"></span>
+        
+        <span style="color:var(--text-3)">Status:</span>
+        <span id="vStatus"></span>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:8px">
+        <button class="btn btn-primary" onclick="hideViewModal()" style="flex:1">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = API_BASE;
+let allBanners = [];
+let base64Image = '';
+let imageWidth = 0;
+let imageHeight = 0;
+
+function getImageUrl(url) {
+  if (!url) return '';
+  if (url.startsWith('data:')) return url;
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    const index = url.indexOf('/uploads/');
+    if (index !== -1) {
+      return API + url.substring(index);
+    }
+    if (API.startsWith('https://') && url.startsWith('http://')) {
+      return url.replace('http://', 'https://');
+    }
+    return url;
+  }
+  if (url.startsWith('/')) {
+    return API + url;
+  }
+  return API + '/' + url;
+}
+
+async function loadBanners() {
+  try {
+    const res = await fetch(`${API}/api/Banner/admin/all`);
+    const data = await res.json();
+    allBanners = data.banners || [];
+    renderBanners();
+  } catch (e) {
+    document.getElementById('bannerBody').innerHTML = `<tr><td colspan="6" class="table-empty">Failed to load banners.</td></tr>`;
+  }
+}
+
+function renderBanners() {
+  const q = document.getElementById('bannerSearch').value.toLowerCase();
+  const status = document.getElementById('bannerStatusFilter').value;
+  
+  const filtered = allBanners.filter(b => {
+    const loc = (b.location || '').toUpperCase();
+    const matchLocation = loc === 'ONBOARDING';
+    const matchQ = (b.title||'').toLowerCase().includes(q) || (b.tapActionUrl||'').toLowerCase().includes(q);
+    const matchStatus = status === 'All' || (status === 'Active' ? b.isActive : !b.isActive);
+    return matchLocation && matchQ && matchStatus;
+  });
+  
+  const body = document.getElementById('bannerBody');
+  const totalOnboarding = allBanners.filter(b => (b.location || '').toUpperCase() === 'ONBOARDING').length;
+  document.getElementById('bannerCount').textContent = `${filtered.length} showing / ${totalOnboarding} total`;
+  
+  if (!filtered.length) {
+    body.innerHTML = '<tr><td colspan="6" class="table-empty">No matching banners found</td></tr>';
+    return;
+  }
+  
+  body.innerHTML = filtered.map(b => `
+    <tr>
+      <td class="font-mono">${b.displayOrder}</td>
+      <td><div style="width:80px; height:45px; background:var(--surface2); border-radius:4px; overflow:hidden"><img src="${getImageUrl(b.imageBase64)}" style="width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 0.3s;" onload="this.style.opacity=1" onerror="this.onerror=null; this.style.opacity=1; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'45\'><rect width=\'100%\' height=\'100%\' fill=\'%232d2d2d\'/><text x=\'50%\' y=\'55%\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23888\' font-family=\'sans-serif\' font-size=\'9\'>Error Loading</text></svg>'"></div></td>
+      <td>
+        <div style="font-weight:600">${b.title}</div>
+        <div style="display:flex; gap:4px; margin-top:4px">
+          <span class="badge" style="font-size:9px; padding:2px 6px; background:var(--surface2); color:var(--text-1); font-weight:700; border:1px solid var(--border)">${b.location || 'DASHBOARD'}</span>
+        </div>
+        <div style="font-size:10px; color:var(--text-3); margin-top:4px">ID: ${b.id.substring(0,8)}...</div>
+      </td>
+      <td class="text-xs" style="color:var(--text-2)">${b.tapActionUrl || '—'}</td>
+      <td><span class="badge ${b.isActive ? 'badge-green' : 'badge-red'}">${b.isActive ? 'Active' : 'Hidden'}</span></td>
+      <td>
+        <div style="display:flex; gap:6px">
+          <button class="btn btn-ghost btn-xs" onclick="viewBanner('${b.id}')">View</button>
+          <button class="btn btn-ghost btn-xs" style="color:var(--accent)" onclick="editBanner('${b.id}')">Edit</button>
+          <button class="btn btn-danger btn-xs" onclick="deleteBanner('${b.id}')">Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function previewImage(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      base64Image = e.target.result;
+      
+      const img = new Image();
+      img.onload = function() {
+        imageWidth = this.width;
+        imageHeight = this.height;
+        document.getElementById('imgPreview').innerHTML = `
+          <div style="position:relative; width:100%; height:100%">
+            <img src="${base64Image}" style="width:100%; height:100%; object-fit:cover">
+            <span style="position:absolute; bottom:4px; right:4px; background:rgba(0,0,0,0.75); color:#fff; font-size:9px; padding:2px 6px; border-radius:3px; font-weight:bold">
+              ${imageWidth} x ${imageHeight} px
+            </span>
+          </div>`;
+        validateImageDimensions();
+      };
+      img.src = base64Image;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function validateImageDimensions() {
+  const location = document.getElementById('mLocation').value;
+  const warningDiv = document.getElementById('dimensionWarning');
+  const saveBtn = document.getElementById('saveBtn');
+  
+  if (!base64Image) {
+    warningDiv.style.display = 'none';
+    saveBtn.disabled = false;
+    saveBtn.style.opacity = '1';
+    return;
+  }
+  
+  const ratio = imageWidth / imageHeight;
+  let isValid = true;
+  let errorMsg = '';
+  
+  if (location === 'ONBOARDING') {
+    // Vertical banner: ideally 9:16 (0.5625 ratio)
+    if (imageWidth >= imageHeight) {
+      isValid = false;
+      errorMsg = `❌ Error: Onboarding banners MUST be vertical (ideal aspect ratio 9:16). The selected image is horizontal or square (${imageWidth}x${imageHeight}).`;
+    } else if (ratio < 0.45 || ratio > 0.65) {
+      errorMsg = `⚠️ Warning: Ideal aspect ratio for onboarding is 9:16 (vertical). Selected image has aspect ratio of ${(1/ratio).toFixed(1)}:1. It will be automatically cropped to fit.`;
+    }
+  } else {
+    // Dashboard banner: ideally horizontal (16:9 or 2:1 ratio)
+    if (imageHeight >= imageWidth) {
+      isValid = false;
+      errorMsg = `❌ Error: Dashboard banners MUST be horizontal. The selected image is vertical or square (${imageWidth}x${imageHeight}).`;
+    } else if (ratio < 1.3 || ratio > 2.3) {
+      errorMsg = `⚠️ Warning: Ideal aspect ratio for dashboard is 16:9 or 2:1 (horizontal). Selected image has aspect ratio of ${ratio.toFixed(1)}:1.`;
+    }
+  }
+  
+  if (errorMsg) {
+    warningDiv.innerHTML = errorMsg;
+    warningDiv.style.display = 'block';
+    warningDiv.style.color = isValid ? '#e6a23c' : '#f56c6c'; // orange for warning, red for critical error
+  } else {
+    warningDiv.style.display = 'none';
+  }
+  
+  if (!isValid) {
+    saveBtn.disabled = true;
+    saveBtn.style.opacity = '0.5';
+    saveBtn.style.cursor = 'not-allowed';
+  } else {
+    saveBtn.disabled = false;
+    saveBtn.style.opacity = '1';
+    saveBtn.style.cursor = 'pointer';
+  }
+}
+
+let editBannerId = null;
+
+function viewBanner(id) {
+  const b = allBanners.find(x => x.id === id);
+  if (!b) return;
+  document.getElementById('vImage').src = getImageUrl(b.imageBase64);
+  document.getElementById('vTitle').textContent = b.title;
+  document.getElementById('vId').textContent = 'ID: ' + b.id;
+  document.getElementById('vLocation').textContent = b.location || 'ONBOARDING';
+  document.getElementById('vOrder').textContent = b.displayOrder;
+  document.getElementById('vUrl').textContent = b.tapActionUrl || '—';
+  
+  const statusEl = document.getElementById('vStatus');
+  statusEl.innerHTML = b.isActive 
+    ? '<span class="badge badge-green">Active</span>' 
+    : '<span class="badge badge-red">Hidden</span>';
+    
+  document.getElementById('viewModal').style.display = 'flex';
+}
+
+function hideViewModal() {
+  document.getElementById('viewModal').style.display = 'none';
+}
+
+function editBanner(id) {
+  const b = allBanners.find(x => x.id === id);
+  if (!b) return;
+  
+  editBannerId = b.id;
+  document.getElementById('mTitle').value = b.title;
+  document.getElementById('mUrl').value = b.tapActionUrl || '';
+  document.getElementById('mOrder').value = b.displayOrder;
+  document.getElementById('mLocation').value = b.location || 'ONBOARDING';
+  
+  base64Image = b.imageBase64;
+  document.getElementById('imgPreview').innerHTML = `
+    <div style="position:relative; width:100%; height:100%">
+      <img src="${getImageUrl(b.imageBase64)}" style="width:100%; height:100%; object-fit:cover">
+    </div>`;
+    
+  document.querySelector('#addModal .card-title').textContent = 'Edit Banner';
+  document.getElementById('saveBtn').textContent = 'Save Changes';
+  
+  document.getElementById('addModal').style.display = 'flex';
+}
+
+function showAddModal() { 
+  editBannerId = null;
+  document.querySelector('#addModal .card-title').textContent = 'Add New Banner';
+  document.getElementById('saveBtn').textContent = 'Save Banner';
+  document.getElementById('addModal').style.display = 'flex'; 
+}
+
+function hideAddModal() { 
+  document.getElementById('addModal').style.display = 'none'; 
+  editBannerId = null;
+  base64Image = ''; 
+  imageWidth = 0;
+  imageHeight = 0;
+  document.getElementById('mFile').value = '';
+  document.getElementById('mTitle').value = '';
+  document.getElementById('mUrl').value = '';
+  document.getElementById('mOrder').value = '0';
+  document.getElementById('mLocation').value = 'ONBOARDING';
+  document.getElementById('imgPreview').innerHTML = '<span style="color:var(--text-3); font-size:11px">No image selected</span>'; 
+  document.getElementById('dimensionWarning').style.display = 'none';
+}
+
+async function saveBanner() {
+  const title = document.getElementById('mTitle').value.trim();
+  const url = document.getElementById('mUrl').value.trim();
+  const order = parseInt(document.getElementById('mOrder').value);
+  const location = document.getElementById('mLocation').value;
+  if (!title || !base64Image) { showToast('Title and Image are required', 'error'); return; }
+  
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  try {
+    const isEdit = editBannerId !== null;
+    const apiUrl = isEdit ? `${API}/api/Banner/admin/${editBannerId}` : `${API}/api/Banner/admin/create`;
+    const apiMethod = isEdit ? 'PATCH' : 'POST';
+    
+    const bodyPayload = { title, tapActionUrl: url, displayOrder: order, location };
+    if (base64Image && base64Image.startsWith('data:')) {
+      bodyPayload.imageBase64 = base64Image;
+    }
+
+    const res = await fetch(apiUrl, {
+      method: apiMethod,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyPayload)
+    });
+    const result = await res.json();
+    if (res.ok) { 
+      showToast(isEdit ? 'Banner updated successfully' : 'Banner added successfully', 'success'); 
+      hideAddModal(); 
+      loadBanners(); 
+    } else {
+      showToast(result.message || 'Failed to save', 'error');
+    }
+  } catch (e) { 
+    showToast('Network error: ' + e.message, 'error'); 
+  } finally {
+    btn.disabled = false;
+    btn.textContent = editBannerId !== null ? 'Save Changes' : 'Save Banner';
+  }
+}
+
+async function toggleBanner(id, active) {
+  try {
+    const res = await fetch(`${API}/api/Banner/admin/${id}`, { 
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isActive: active })
+    });
+    if (res.ok) loadBanners();
+  } catch (e) { showToast('Update failed', 'error'); }
+}
+
+async function deleteBanner(id) {
+  if (!confirm('Delete this banner permanently?')) return;
+  try {
+    const res = await fetch(`${API}/api/Banner/admin/${id}`, { method: 'DELETE' });
+    if (res.ok) { showToast('Banner deleted', 'info'); loadBanners(); }
+  } catch (e) { showToast('Delete failed', 'error'); }
+}
+
+loadBanners();
+</script>
+</body></html>

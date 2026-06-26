@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aishwaryam Digital Gold - Master Handover Documentation</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #4A0E4E;
+            --primary-light: #7B1E5E;
+            --accent: #C2185B;
+            --accent-glow: rgba(194, 24, 91, 0.15);
+            --bg-dark: #0B030C;
+            --bg-card: #140716;
+            --bg-code: #1A0D1D;
+            --text-main: #F3E5F5;
+            --text-muted: #B39DDB;
+            --border: rgba(123, 30, 94, 0.25);
+            --success: #16A34A;
+            --success-glow: rgba(22, 163, 74, 0.15);
+            --warning: #EA580C;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-right: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            padding: 4rem 2rem;
+            text-align: center;
+            border-bottom: 2px solid var(--accent);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+            color: #FFFFFF;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto;
+            font-weight: 400;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2.5rem;
+            padding: 3rem 2rem;
+        }
+
+        /* Sidebar Navigation */
+        aside {
+            position: sticky;
+            top: 2rem;
+            height: calc(100vh - 4rem);
+            overflow-y: auto;
+            padding-right: 1rem;
+            border-right: 1px solid var(--border);
+        }
+
+        aside::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        aside::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .sidebar-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.8rem;
+        }
+
+        .sidebar-menu a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: block;
+            padding: 0.4rem 0.8rem;
+            border-left: 2px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            color: #FFFFFF;
+            border-left: 2px solid var(--accent);
+            background: rgba(194, 24, 91, 0.05);
+            padding-left: 1rem;
+        }
+
+        .sidebar-menu a.active {
+            color: #FFFFFF;
+            border-left: 2px solid var(--accent);
+            background: rgba(194, 24, 91, 0.08);
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        main {
+            min-width: 0; /* Prevents flex items from overflowing */
+        }
+
+        section {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            transition: transform 0.2s ease;
+        }
+
+        section:hover {
+            border-color: rgba(194, 24, 91, 0.4);
+        }
+
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            color: #FFFFFF;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            margin: 2rem 0 1rem 0;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            opacity: 0.9;
+        }
+
+        /* Tables styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 1rem 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: var(--primary);
+            color: #FFFFFF;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(74, 14, 78, 0.08);
+        }
+
+        tr:hover {
+            background-color: rgba(194, 24, 91, 0.05);
+        }
+
+        /* Code Block Styling */
+        pre {
+            background-color: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #E1BEE7;
+        }
+
+        /* Diff highlight styling */
+        .diff-add {
+            background-color: rgba(22, 163, 74, 0.15);
+            color: #86EFAC;
+            display: block;
+            padding: 0.1rem 0.5rem;
+            border-left: 3px solid var(--success);
+        }
+
+        .diff-remove {
+            background-color: rgba(220, 38, 38, 0.15);
+            color: #FCA5A5;
+            display: block;
+            padding: 0.1rem 0.5rem;
+            border-left: 3px solid #DC2626;
+        }
+
+        /* Callout styling */
+        .callout {
+            background-color: rgba(194, 24, 91, 0.08);
+            border-left: 4px solid var(--accent);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .callout-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* Buttons & Actions */
+        .btn-print {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            color: #FFFFFF;
+            border: none;
+            padding: 1rem 1.8rem;
+            border-radius: 30px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        .btn-print:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(194, 24, 91, 0.4);
+        }
+
+        /* Print styling rules */
+        @media print {
+            body {
+                background-color: #FFFFFF;
+                color: #000000;
+            }
+
+            .container {
+                display: block;
+                padding: 0;
+            }
+
+            aside, .btn-print {
+                display: none !important;
+            }
+
+            section {
+                border: none;
+                box-shadow: none;
+                background: none;
+                padding: 0;
+                margin-bottom: 4rem;
+                page-break-inside: avoid;
+            }
+
+            h2, h3, th {
+                color: #000000 !important;
+                border-bottom-color: #000000 !important;
+            }
+
+            th {
+                background-color: #F3F4F6 !important;
+            }
+
+            pre, code {
+                background-color: #F3F4F6 !important;
+                color: #000000 !important;
+                border-color: #D1D5DB !important;
+            }
+
+            .callout {
+                background-color: #F9FAFB !important;
+                border-left-color: #000000 !important;
+                color: #000000 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Aishwaryam Digital Gold</h1>
+        <p>Master Technical Reference & Developer Handover Specification Guide (A to Z)</p>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <aside>
+            <div class="sidebar-title">Documentation</div>
+            <ul class="sidebar-menu">
+                <li><a href="#section-architecture" class="active">1. Architecture Stack</a></li>
+                <li><a href="#section-screens">2. Screen Layouts</a></li>
+                <li><a href="#section-razorpay">3. Razorpay Integration</a></li>
+                <li><a href="#section-api">4. Retrofit API Specification</a></li>
+                <li><a href="#section-strings">5. Localizations &amp; Strings</a></li>
+                <li><a href="#section-bugs">6. Engineering Fixes</a></li>
+                <li><a href="#section-hosting">7. Production &amp; Hosting</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main>
+            <!-- 1. ARCHITECTURE -->
+            <section id="section-architecture">
+                <h2>1. Architecture &amp; Technology Stack</h2>
+                <p>The platform is designed as an ultra-secure, backend-driven financial gold ledger system. The mobile client functions as a lightweight interface, delegating all complex math, validation, and accounting calculations to the secure server.</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Technology</th>
+                            <th>Role &amp; Integration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Android Client</strong></td>
+                            <td>Kotlin, Jetpack Compose, MVVM</td>
+                            <td>Native mobile client, fully responsive and reactive.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Chart Engine</strong></td>
+                            <td>Vico Compose</td>
+                            <td>Plots month-on-month historical gold assets accumulation curves.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>API Client</strong></td>
+                            <td>Retrofit 2 &amp; OkHttp3</td>
+                            <td>Restful endpoints interaction with local token cache support.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Backend Framework</strong></td>
+                            <td>ASP.NET Core 8</td>
+                            <td>Clean Architecture Web API (Controller → Service → Repository).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Database ORM</strong></td>
+                            <td>EF Core + Dapper</td>
+                            <td>Dapper is used for high-frequency wallet ledgers, EF for schema sync.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Database</strong></td>
+                            <td>PostgreSQL (Supabase / Local)</td>
+                            <td>ACID-compliant persistent ledger consisting of 33 tables.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Payment Engine</strong></td>
+                            <td>Razorpay SDK (Standard &amp; Subscription)</td>
+                            <td>Standard pay sheets and secure monthly auto-debit setups.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Authentication</strong></td>
+                            <td>Firebase OTP + 6-digit MPIN</td>
+                            <td>Multi-factor, device-fingerprinted session token manager.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 2. SCREENS -->
+            <section id="section-screens">
+                <h2>2. Screen Layouts &amp; Navigation Flow</h2>
+                <p>Below is the structured walkthrough of the completed user interface flows on the Android mobile client:</p>
+                
+                <h3>Auth &amp; Onboarding Flow</h3>
+                <ul>
+                    <li><strong>Splash Screen (<code>SplashScreen.kt</code>)</strong>: Cold startup screen with fluid fade transition. Evaluates token validity and MPIN configurations from <code>SessionManager</code> to decide the target destination (<code>Login</code>, <code>MPIN</code>, or <code>Dashboard</code>).</li>
+                    <li><strong>Welcome Onboarding (<code>WelcomeOnboardingScreen.kt</code>)</strong>: Slide-based walkthrough of value propositions (BIS-certified purity, family savings habit, tiered monthly bonuses, and secure vault storage).</li>
+                    <li><strong>Login Screen (<code>LoginScreen.kt</code>)</strong>: Standard phone verification screen. Generates a secure Firebase OTP, auto-collapsing the virtual keyboard exactly upon typing the 10th digit.</li>
+                    <li><strong>MPIN Authentication Screen (<code>MpinScreen.kt</code>)</strong>: A biometric-fallback passcode screen. Returning users type a 6-digit MPIN to secure their active session. Includes a built-in reset loop.</li>
+                    <li><strong>Profile Setup (<code>ProfileSetupScreen.kt</code>)</strong>: Basic profile form (Name, Email) to establish the initial <code>userId</code> profile during registration.</li>
+                    <li><strong>KYC Document Upload (<code>OnboardingScreen.kt</code>)</strong>: Step-based KYC submission form (Aadhaar or PAN type, Document Number, and photo attachments) supporting real-time limits locking based on the verification level (<code>BASIC</code>, <code>AADHAAR</code>, <code>FULL</code>).</li>
+                </ul>
+
+                <h3>Core Dashboard &amp; Operations Flow</h3>
+                <ul>
+                    <li><strong>Home Screen (<code>DashboardScreen.kt</code>)</strong>:
+                        <ul>
+                            <li><strong>Unified Portfolio Card</strong>: Displays live grams balance, invested value, current gold market value, dynamic return percentage, and locked/redeemable gold weights. Clicking the card navigates directly to the Portfolio Analytics sheet.</li>
+                            <li><strong>Banners Carousel</strong>: Administrative promo slider utilizing smooth scale/fade parallax transitions and persistent auto-scroll timing.</li>
+                            <li><strong>Schemes Slider</strong>: Horizontal deck of available gold savings plans (Daily, Weekly, Monthly) with clear buy/installment markers.</li>
+                            <li><strong>Active Schemes Deck</strong>: Horizontal premium deck of joined schemes with a tactual swipe-tutorial Arrow hint, native long-press haptic snaps, and full expandability to view the ledger dropdown.</li>
+                            <li><strong>Add Savings Sheet</strong>: A bottom drawer calculation calculator that auto-includes BIS 3% GST, calculates the applicable dynamic monthly loyalty bonus, estimates the net gold credit in milligrams, and launches one-click checkout.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Portfolio Analytics Screen (<code>PortfolioAnalyticsScreen.kt</code>)</strong>: A detailed financial growth dashboard using Vico to plot the user's actual 6-month historical gold balances, showing their savings trajectory. Includes values breakdown and milestone achievements tracker.</li>
+                    <li><strong>Claim / Sell Gold Screen (<code>SellGoldScreen.kt</code>)</strong>: Redeeming digital gold to bank accounts or preparing for physical store collections. Highlights exact locked weights vs. redeemable gold assets.</li>
+                    <li><strong>Transactions History (<code>TransactionsScreen.kt</code>)</strong>: Standard tabular account statement of all historical transactions, filtering between Buy/Sell savings, and supporting PDF receipt downloading.</li>
+                </ul>
+            </section>
+
+            <!-- 3. RAZORPAY -->
+            <section id="section-razorpay">
+                <h2>3. Razorpay Payment Gateway Integration</h2>
+                <p>The payment gateway uses two distinct flows provided natively by Razorpay, backed by server-side signature verifications.</p>
+
+                <div class="callout">
+                    <div class="callout-title">Razorpay Integration Security Standard</div>
+                    <p>Every payment verification requires a secure server-side signature hash check. The backend computes an HMAC-SHA256 signature using the Razorpay order ID and payment ID combined with your secret key to prevent clients from faking transaction status.</p>
+                </div>
+
+                <h3>A. One-Time Payment Flow (Gold Buy / Scheme Savings Add)</h3>
+                <ol>
+                    <li>The app calls the backend <code>api/Payment/create-order</code> endpoint to request an active Razorpay Order ID.</li>
+                    <li>The app stores the resulting <code>orderId</code> inside local cache (<code>SessionManager</code>) to guarantee recovery if a device crashes or network disconnects during the payment screen.</li>
+                    <li>The app initializes the native Razorpay <code>Checkout</code> SDK.</li>
+                </ol>
+
+                <div class="callout" style="border-left-color: var(--warning); background-color: rgba(234, 88, 12, 0.05);">
+                    <div class="callout-title" style="color: var(--warning);">WebView Integration Guardrails (Critically Important)</div>
+                    <ul>
+                        <li><strong>No Manual Payment Forcing</strong>: Avoid manually injecting custom <code>method</code> or <code>upi</code> JSON objects into the checkout configuration. Manually forcing payment methods clutched Razorpay's native engine, leading to rendering freezes. Let Razorpay natively resolve active merchant payment configurations.</li>
+                        <li><strong>No Empty Prefill Strings</strong>: Never pass empty strings for prefill variables, specifically <code>email: ""</code>. Razorpay's Web script validates email formats within the WebView context; passing an empty string causes a JavaScript validation crash, freezing the payment sheet on a blank white screen during a cold launch. Leave empty fields out of the <code>prefill</code> block completely.</li>
+                    </ul>
+                </div>
+
+                <h3>B. AutoPay Flow (Recurring Monthly Subscriptions)</h3>
+                <ol>
+                    <li>When joining a plan with AutoPay activated, the app calls the backend <code>api/Subscription/create</code> endpoint to obtain a Razorpay subscription ID.</li>
+                    <li>The app initializes Razorpay using the <code>subscription_id</code> parameter instead of the traditional <code>order_id</code> parameter.</li>
+                    <li>Upon success, the app calls <code>api/Subscription/activate</code> on the backend, ensuring monthly auto-debit mandates are successfully configured.</li>
+                </ol>
+            </section>
+
+            <!-- 4. API -->
+            <section id="section-api">
+                <h2>4. Retrofit API Specification</h2>
+                <p>The complete, explicit endpoint maps established inside <code>ApiService.kt</code> are documented below:</p>
+
+                <h3>Authentication &amp; Security Interfaces</h3>
+                <pre><code>// Send OTP to phone
+@POST("api/Auth/send-otp")
+suspend fun sendOtp(@Body request: SendOtpRequest): Response&lt;SendOtpResponse&gt;
+
+// Verify OTP
+@POST("api/Auth/verify-otp")
+suspend fun verifyOtp(@Body request: VerifyOtpRequest): Response&lt;VerifyOtpResponse&gt;
+
+// Setup Login MPIN
+@POST("api/Auth/set-mpin")
+suspend fun setMpin(@Body request: SetMpinRequest): Response&lt;GenericAuthResponse&gt;
+
+// Verify MPIN session
+@POST("api/Auth/verify-mpin")
+suspend fun verifyMpin(@Body request: VerifyMpinRequest): Response&lt;GenericAuthResponse&gt;
+
+// Change MPIN
+@POST("api/Auth/change-mpin")
+suspend fun changeMpin(@Body request: ChangeMpinRequest): Response&lt;GenericAuthResponse&gt;</code></pre>
+
+                <h3>Gold Trading Interfaces</h3>
+                <pre><code>// Get live bullion gold rate
+@GET("api/Gold/price")
+suspend fun getLivePrice(): Response&lt;CurrentGoldPriceResponse&gt;
+
+// Hold the gold price for 30 seconds
+@POST("api/Gold/price/lock")
+suspend fun lockGoldPrice(@Query("userId") userId: String): Response&lt;PriceLockResponse&gt;
+
+// Credit gold based on direct purchases
+@POST("api/Gold/buy")
+suspend fun buyGold(@Body request: BuyGoldRequest): Response&lt;GoldTransactionResponse&gt;
+
+// Sell gold and liquidate back to cash bank account
+@POST("api/Gold/sell")
+suspend fun sellGold(@Body request: SellGoldRequest): Response&lt;GoldTransactionResponse&gt;</code></pre>
+
+                <h3>Gold Savings Schemes Interfaces</h3>
+                <pre><code>// List available gold savings schemes
+@GET("api/Scheme/list")
+suspend fun getAvailableSchemes(): Response&lt;List&lt;AvailableScheme&gt;&gt;
+
+// Get dynamic schemes dashboard
+@GET("api/Scheme/dashboard/{userId}")
+suspend fun getSchemeDashboard(@Path("userId") userId: String): Response&lt;SchemeDashboardResponse&gt;
+
+// Join a new scheme
+@POST("api/Scheme/join")
+suspend fun joinScheme(@Body request: JoinSchemeRequest): Response&lt;JoinSchemeResponseDto&gt;
+
+// Invest flexible savings into a scheme
+@POST("api/Scheme/invest")
+suspend fun investInScheme(@Body request: InvestSchemeRequest): Response&lt;InvestSchemeResponse&gt;
+
+// Retrieve payment ledger for active scheme
+@GET("api/Scheme/{id}/ledger")
+suspend fun getSchemeLedger(@Path("id") schemeId: String): Response&lt;List&lt;SchemeLedgerItem&gt;&gt;
+
+// Claim gold weight upon maturity
+@POST("api/Scheme/claim")
+suspend fun claimScheme(@Body request: ClaimSchemeRequest): Response&lt;GenericAuthResponse&gt;</code></pre>
+
+                <h3>Razorpay Payments &amp; AutoPay Interfaces</h3>
+                <pre><code>// Generate Razorpay merchant Order ID
+@POST("api/Payment/create-order")
+suspend fun createPaymentOrder(@Body request: PaymentOrderRequest): Response&lt;PaymentOrderResponse&gt;
+
+// Verify payment signature
+@POST("api/Payment/verify")
+suspend fun verifyPayment(@Body request: PaymentVerificationRequest): Response&lt;GoldTransactionResponse&gt;
+
+// Relaunch recovery for incomplete payments
+@GET("api/Payment/reconcile/{orderId}")
+suspend fun reconcilePayment(@Path("orderId") orderId: String): Response&lt;ReconcilePaymentResponse&gt;
+
+// Create AutoPay mandate subscription
+@POST("api/Subscription/create")
+suspend fun createSubscription(@Body request: CreateSubscriptionApiRequest): Response&lt;CreateSubscriptionResponse&gt;
+
+// Activate subscription links
+@POST("api/Subscription/activate")
+suspend fun activateSubscription(@Body request: ActivateSubscriptionApiRequest): Response&lt;Unit&gt;</code></pre>
+            </section>
+
+            <!-- 5. STRINGS -->
+            <section id="section-strings">
+                <h2>5. Localization &amp; Strings Registry</h2>
+                <p>The application is localized in both **English (<code>values</code>)** and **Tamil (<code>values-ta</code>)**, controlled dynamically by the <code>LocaleHelper</code> state controller.</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>String Key</th>
+                            <th>English Value (Default)</th>
+                            <th>Tamil Value (values-ta)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>app_name</code></td>
+                            <td>Aishwaryam Digital Gold</td>
+                            <td>ஐஸ்வர்யம் டிஜிட்டல் தங்கம்</td>
+                        </tr>
+                        <tr>
+                            <td><code>gold_balance</code></td>
+                            <td>GOLD BALANCE</td>
+                            <td>தங்க இருப்பு</td>
+                        </tr>
+                        <tr>
+                            <td><code>buy_gold</code></td>
+                            <td>Add Savings</td>
+                            <td>சேமிப்பைத் தொடங்கு</td>
+                        </tr>
+                        <tr>
+                            <td><code>sell_gold</code></td>
+                            <td>Redeem</td>
+                            <td>திரும்பப் பெறுதல்</td>
+                        </tr>
+                        <tr>
+                            <td><code>current_gold_price</code></td>
+                            <td>Current Gold Price</td>
+                            <td>தற்போதைய தங்க விலை</td>
+                        </tr>
+                        <tr>
+                            <td><code>gst_3</code></td>
+                            <td>GST (3%)</td>
+                            <td>ஜிஎஸ்டி (3%)</td>
+                        </tr>
+                        <tr>
+                            <td><code>estimated_gold_credited</code></td>
+                            <td>Estimated Gold Credited</td>
+                            <td>மதிப்பிடப்பட்ட தங்க வரவு</td>
+                        </tr>
+                        <tr>
+                            <td><code>pay_add_gold</code></td>
+                            <td>Pay &amp; Add Gold</td>
+                            <td>செலுத்தி தங்கம் சேர்க்கவும்</td>
+                        </tr>
+                        <tr>
+                            <td><code>maturity_date</code></td>
+                            <td>Maturity Date</td>
+                            <td>முதிர்வு தேதி</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 6. BUGS -->
+            <section id="section-bugs">
+                <h2>6. Key Engineering Practices &amp; Recent Bug Resolutions</h2>
+                <p>To maintain the application's performance and prevent future regressions, keep these completed resolutions in mind:</p>
+                
+                <h3>A. Razorpay Cold Start Hang (Resolved)</h3>
+                <p><strong>The Cause</strong>: The field <code>prefill.put("email", "")</code> passed an empty string to Razorpay's JavaScript validation script inside the WebView. On cold starts, Razorpay's internal validation crashed on the invalid email format, stopping execution.</p>
+                <p><strong>The Fix</strong>: Removed <code>prefill.put("email", "")</code> from <code>launchRazorpay</code> in <code>MainActivity.kt</code>. If email is empty, it should not be passed at all. This prevents WebView crashes and ensures instant checkout loading.</p>
+                
+                <pre><code><span class="diff-remove">-             prefill.put("email", "")</span></code></pre>
+
+                <h3>B. Dashboard Navigation Lag &amp; Recomposition Freezes (Resolved)</h3>
+                <p><strong>The Cause</strong>: 
+                    1. An <code>ON_RESUME</code> lifecycle observer in the UI layer triggered <code>refresh</code> every time the dashboard was displayed.
+                    2. The <code>loadDashboard</code> viewmodel logic set <code>isLoading = true</code> and suspended on <code>jobs.forEach { it.join() }</code>, blocking the UI state updates until all 7 parallel network requests finished.
+                    3. Re-reading and re-parsing cache on every back-press triggered massive Compose recomposition cycles.
+                </p>
+                <p><strong>The Fix</strong>:
+                    1. <strong>ON_RESUME Observer Removed</strong>: Removed the <code>ON_RESUME</code> observer block entirely from <code>DashboardScreen.kt</code>. Static screen navigations (back-presses) are now <strong>100% instant, static, and silent</strong>.
+                    2. <strong>Non-blocking Asynchronous Fetching</strong>: Removed the blocking <code>jobs.forEach { it.join() }</code> from the main thread in <code>loadDashboard</code>. The 7 requests now run in parallel, updating memory states instantly.
+                    3. <strong>Silent Disk Caching</strong>: Cache serialization runs on a separate background thread, eliminating UI freezes.
+                    4. <strong>Dynamic Loading State</strong>: <code>isLoading</code> is set to <code>true</code> ONLY if no data is found in memory, ensuring the home screen loads seamlessly.
+                </p>
+
+                <pre><code><span class="diff-add">+             // Asynchronously wait for all jobs to complete and serialize unified state to persistent cache</span>
+<span class="diff-add">+             viewModelScope.launch {</span>
+<span class="diff-add">+                 try {</span>
+<span class="diff-add">+                     jobs.forEach { it.join() }</span>
+<span class="diff-add">+                     val stateToCache = _uiState.value.copy(isLoading = false, error = null)</span>
+<span class="diff-add">+                     ApiClient.sessionManagerInstance?.saveCachedDashboard(Gson().toJson(stateToCache))</span>
+<span class="diff-add">+                 } catch (e: Exception) { e.printStackTrace() }</span>
+<span class="diff-add">+             }</span></code></pre>
+            </section>
+
+            <!-- 7. HOSTING -->
+            <section id="section-hosting">
+                <h2>7. Production Hosting &amp; Operations Infrastructure</h2>
+                <p>When preparing to move this setup to staging or production, use this configuration check:</p>
+                
+                <h3>Web API Hosting</h3>
+                <ul>
+                    <li><strong>Hosting Engine</strong>: ASP.NET Core 8 Web API hosted on a Windows Server IIS reverse proxy using <code>Kestrel</code>, or directly containerized inside a Linux Docker container on AWS ECS / Azure Container Apps.</li>
+                    <li><strong>Reverse Proxy</strong>: Utilize <code>Nginx</code> or <code>IIS</code> to handle SSL/TLS termination, exposing port <code>80</code> (HTTP) and <code>443</code> (HTTPS) to the public internet, forwarding traffic to the local Kestrel port (default: <code>5044</code>).</li>
+                </ul>
+
+                <h3>Supabase / PostgreSQL Connection String</h3>
+                <p>Enforce secure connection rules by adding <code>SSL Mode=Require;Trust Server Certificate=true;</code> to the connection string inside <code>appsettings.json</code>:</p>
+                <pre><code>"ConnectionStrings": {
+  "DefaultConnection": "Host=db.supabase.co;Port=5432;Database=postgres;Username=postgres;Password=YOUR_SECURE_PASSWORD;SSL Mode=Require;Trust Server Certificate=true;"
+}</code></pre>
+
+                <h3>FCM Push Notifications</h3>
+                <ul>
+                    <li>Create a Firebase service account key JSON inside the backend directory.</li>
+                    <li>Register FCM on backend startup using <code>FirebaseApp.Create()</code> and save active mobile FCM tokens under the <code>user_devices</code> database table to track device-to-user mappings.</li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <!-- Print Floating Action Button -->
+    <button class="btn-print" onclick="window.print()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+        Generate PDF / Print Report
+    </button>
+
+    <script>
+        // Simple scroll spy logic to update active menu items
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('aside a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= (sectionTop - sectionHeight / 3)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').slice(1) === current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Aishwaryamandroid" parent="Theme.AppCompat.Light.NoActionBar" />
+    
+    <style name="CheckoutTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">#4A0E4E</item>
+        <item name="colorPrimaryDark">#4A0E4E</item>
+        <item name="android:statusBarColor">#FFFFFF</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:fitsSystemWindows">true</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

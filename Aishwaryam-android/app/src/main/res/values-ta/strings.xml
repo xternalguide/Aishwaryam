@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ஐஸ்வர்யம் @ உங்கள் இல்லத்தில்</string>
+    <string name="dashboard_title">முகப்பு</string>
+    <string name="dashboard_subtitle">ஐஸ்வர்யம்</string>
+    <string name="gold_balance">தங்க இருப்பு</string>
+    <string name="invested_value">முதலீடு செய்த தொகை</string>
+    <string name="current_value">இன்றைய மதிப்பு</string>
+    <string name="live_22k_price">இன்றைய 22K தங்கம் விலை (வாங்குதல்)</string>
+    <string name="buy_gold">சேமிப்பைத் தொடங்கு</string>
+    <string name="sell_gold">பணமாக மாற்று</string>
+    <string name="auto_saving">தங்க சேமிப்புத் திட்டம்</string>
+    <string name="refer_earn">பரிந்துரை செய்து சம்பாதியுங்கள்</string>
+    <string name="faqs">கேள்வி பதில்கள்</string>
+    <string name="frequently_asked_questions">அடிக்கடி கேட்கப்படும் கேள்விகள்</string>
+    <string name="calculate_returns">எதிர்பார்க்கும் வருமானம்</string>
+    <string name="see_how_multiply">உங்கள் சேமிப்பு எவ்வாறு வளரும் என்பதை இங்கே பாருங்கள்</string>
+    <string name="daily_saving_amount">தினசரி சேமிப்புத் தொகை</string>
+    <string name="total_principal">மொத்த முதலீடு (%d நாட்கள்)</string>
+    <string name="projected_bonus">எதிர்பார்க்கும் போனஸ்</string>
+    <string name="maturity_value">முதிர்வு மதிப்பு</string>
+    <string name="matures_on">முதிர்வு தேதி %s</string>
+    <string name="start_auto_saving">சேமிப்பைத் தொடங்குங்கள்</string>
+    <string name="why_auto_save">ஏன் இந்தத் தங்க சேமிப்புத் திட்டத்தைத் தேர்ந்தெடுக்க வேண்டும்?</string>
+    <string name="what_is_auto_saving">சேமிப்புத் திட்டத்தைப் புரிந்து கொள்ளுதல்</string>
+    <string name="start_with_100">வெறும் ₹100 முதல் முதலீடு செய்யுங்கள்</string>
+    <string name="bonus_benefits">போனஸ் மற்றும் சலுகைகள்</string>
+    <string name="tenure_period">கால அளவு</string>
+    <string name="bonus_percent">போனஸ் %</string>
+    <string name="logout">வெளியேறு</string>
+    <string name="explore">ஆராய்ந்து பாருங்கள்</string>
+    <string name="quick_actions">விரைவான செயல்பாடுகள்</string>
+    <string name="language">மொழி</string>
+    <string name="start_saving_in_gold">தங்கத்தில் சேமிக்கத் தொடங்குங்கள்</string>
+    <string name="with_as_low_as_100">தினமும் வெறும் ₹100 முதல்</string>
+    <string name="secure_bonus_flexible" formatted="false">100% பாதுகாப்பானது • 7% போனஸ் • எப்போது வேண்டுமானாலும்</string>
+    
+    <string name="buy_digital_gold">தங்க சேமிப்பைச் சேர்க்கவும்</string>
+    <string name="current_gold_price">இன்றைய தங்கம் விலை</string>
+    <string name="how_much_buy">நீங்கள் எவ்வளவு சேமிக்க விரும்புகிறீர்கள்?</string>
+    <string name="amount_rupees">தொகை (ரூபாய்)</string>
+    <string name="weight_grams">எடை (கிராம்)</string>
+    <string name="or">அல்லது</string>
+    <string name="gold_value">தங்கத்தின் மதிப்பு</string>
+    <string name="gst_3">ஜிஎஸ்டி (3%)</string>
+    <string name="total_to_pay">மொத்தம் செலுத்த வேண்டியது</string>
+    <string name="proceed_to_buy">சேமிப்பைத் தொடரவும்</string>
+    <string name="back">பின்செல்</string>
+    
+    <string name="sell_digital_gold">டிஜிட்டல் தங்கத்தை மீட்டெடுக்கவும்</string>
+    <string name="sell_price">விற்பனை விலை</string>
+    <string name="how_much_sell">எவ்வளவு தங்கத்தை மீட்டெடுக்க விரும்புகிறீர்கள்?</string>
+    <string name="sell_value">விற்பனை மதிப்பு</string>
+    <string name="bank_settlement">வங்கிப் பரிமாற்றம் (உடனடியாக)</string>
+    <string name="proceed_to_sell">மீட்டெடுக்கத் தொடரவும்</string>
+    
+    <string name="available_balance">கிடைக்கக்கூடிய இருப்பு</string>
+    <string name="live_sell_price">இன்றைய மீட்பு விலை</string>
+    <string name="amount_receive">பெற வேண்டிய தொகை (₹)</string>
+    <string name="selling_amount">மீட்புத் தொகை</string>
+    <string name="you_will_receive">நீங்கள் பெறுவது</string>
+    <string name="money_credited_bank">பணம் உங்கள் வங்கி கணக்கில் நேரடியாகச் செலுத்தப்படும்.</string>
+    
+    <string name="refer_earn_subtitle">பரிந்துரை செய்து சலுகைகளைப் பெறுங்கள்</string>
+    <string name="auto_saving_subtitle">தானியங்கி சேமிப்பு</string>
+    <string name="faqs_subtitle">உதவி மற்றும் வழிகாட்டுதல்</string>
+    
+    <string name="home">முகப்பு</string>
+    <string name="transaction">பரிவர்த்தனை</string>
+    <string name="profile">சுயவிவரம்</string>
+    
+    <string name="last_updated">கடைசியாக புதுப்பிக்கப்பட்டது: %s</string>
+    <string name="refer_sheet_bonus">உங்கள் நண்பர்களை அழையுங்கள், இலவச தங்கத்தை வெல்லுங்கள்!</string>
+    <string name="your_referral_code">உங்கள் பரிந்துரை குறியீடு</string>
+    <string name="copied_clipboard">நகலெடுக்கப்பட்டது</string>
+    <string name="share_with_friends">நண்பர்களுடன் பகிரவும்</string>
+    <string name="share_referral_code">குறியீட்டைப் பகிரவும்</string>
+
+    <string name="account_settings">கணக்கு அமைப்புகள்</string>
+    <string name="personal_info">தனிப்பட்ட விவரங்கள்</string>
+    <string name="bank_accounts">வங்கி கணக்குகள்</string>
+    <string name="security_mpin">பாதுகாப்பு மற்றும் பின் (MPIN)</string>
+    <string name="more">மேலும்</string>
+    <string name="app_settings">செயலி அமைப்புகள்</string>
+    <string name="help_support">உதவி மற்றும் ஆதரவு</string>
+    <string name="terms_conditions">நிபந்தனைகள்</string>
+    <string name="privacy_policy">தனியுரிமைக் கொள்கை</string>
+    <string name="edit_personal_info">விவரங்களைத் திருத்தவும்</string>
+    <string name="full_name">முழு பெயர்</string>
+    <string name="email_address">மின்னஞ்சல் முகவரி</string>
+    <string name="nominee_name">வாரிசுதாரர் பெயர்</string>
+    <string name="save_changes">மாற்றங்களைச் சேமி</string>
+    <string name="cancel">ரத்து செய்</string>
+    <string name="biometric_unlock">பயோமெட்ரிக் பூட்டு</string>
+    <string name="biometric_desc">கைரேகை அல்லது முக அடையாளத்தைப் பயன்படுத்தவும்</string>
+    <string name="change_mpin">MPIN மாற்றவும்</string>
+    <string name="current_mpin">தற்போதைய MPIN</string>
+    <string name="new_mpin">புதிய MPIN</string>
+    <string name="confirm_new_mpin">புதிய MPIN-ஐ உறுதிப்படுத்தவும்</string>
+    <string name="update_mpin">MPIN-ஐ புதுப்பிக்கவும்</string>
+    <string name="kyc_verification">KYC சரிபார்ப்பு</string>
+    <string name="current_status">தற்போதைய நிலை: %s</string>
+    <string name="doc_type">ஆவண வகை</string>
+    <string name="doc_num">ஆவண எண்</string>
+    <string name="pan_card">பான் கார்டு</string>
+    <string name="aadhaar">ஆதார்</string>
+    <string name="submit_kyc">KYC சமர்ப்பிக்கவும்</string>
+    <string name="saved_bank_accounts">சேமிக்கப்பட்ட வங்கி கணக்குகள்</string>
+    <string name="add_new_bank">புதிய வங்கி கணக்கைச் சேர்க்கவும்</string>
+    <string name="bank_name">வங்கி பெயர்</string>
+    <string name="account_number">கணக்கு எண்</string>
+    <string name="ifsc_code">IFSC குறியீடு</string>
+    <string name="save">சேமி</string>
+    <string name="pending">நிலுவையில் உள்ளது</string>
+    <string name="verified">சரிபார்க்கப்பட்டது</string>
+    <string name="add_bank_account">வங்கி கணக்கைச் சேர்க்கவும்</string>
+
+    <string name="transactions">பரிவர்த்தனைகள்</string>
+    <string name="sort">வரிசைப்படுத்து</string>
+    <string name="all">அனைத்தும்</string>
+    <string name="buy">சேமிப்பு</string>
+    <string name="sell">மீட்பு</string>
+    <string name="no_transactions">பரிவர்த்தனைகள் எதுவும் இல்லை</string>
+    <string name="bought_digital_gold">சேமிக்கப்பட்ட டிஜிட்டல் தங்கம்</string>
+    <string name="sold_digital_gold">மீட்டெடுக்கப்பட்ட டிஜிட்டல் தங்கம்</string>
+    <string name="transaction_successful">பரிவர்த்தனை வெற்றி!</string>
+    <string name="transaction_id">பரிவர்த்தனை எண்</string>
+    <string name="type">வகை</string>
+    <string name="date">தேதி</string>
+    <string name="gold_weight">தங்கத்தின் எடை</string>
+    <string name="amount">தொகை</string>
+    <string name="download_receipt">ரசீதைப் பதிவிறக்கவும்</string>
+
+    <!-- Welcome Onboarding -->
+    <string name="skip">தவிர்</string>
+    <string name="get_started">தொடங்குங்கள்</string>
+    <string name="onboarding_trust_badge">குடும்பங்களின் நம்பிக்கை</string>
+    <string name="onboarding_save_future_title">உங்கள் குடும்பத்தின்\nஎதிர்காலத்திற்காக சேமிக்கவும்</string>
+    <string name="onboarding_save_future_subtitle">வெறும் ₹100 முதல் தொடங்குங்கள்</string>
+    <string name="onboarding_save_future_body">தங்கம் என்பது இந்தியாவின் மிகவும் நம்பகமான சேமிப்பு. திருமணங்கள், குழந்தைகளின் எதிர்காலம் அல்லது பாரம்பரிய முறையில் செல்வத்தை வளர்க்க இன்றே உங்கள் தங்கச் சேமிப்பைத் தொடங்குங்கள்.</string>
+    <string name="onboarding_save_future_stat_label">சேமிப்பைத் தொடங்க</string>
+
+    <string name="onboarding_secure_badge">100% பாதுகாப்பானது</string>
+    <string name="onboarding_secure_title">உங்கள் தங்கம்\nஎப்போதும் பாதுகாப்பாக இருக்கும்</string>
+    <string name="onboarding_secure_subtitle">BIS-சான்றளிக்கப்பட்ட 91.6% சுத்தமான 22K தங்கம்</string>
+    <string name="onboarding_secure_body">நீங்கள் சேமிக்கும் ஒவ்வொரு கிராமும் காப்பீடு செய்யப்பட்ட பாதுகாப்பான பெட்டகங்களில் சேமிக்கப்படுகிறது. உங்கள் தங்கம் 91.6% தூய்மையான 22K ஆகும் - நீங்கள் ஒரு நம்பகமான நகைக்கடையில் வாங்கும் அதே தரம்.</string>
+    <string name="onboarding_secure_stat_label">22K சுத்த தங்கம்</string>
+
+    <string name="onboarding_bonus_badge">அதிக தங்கம் சம்பாதிக்கவும்</string>
+    <string name="onboarding_bonus_title">7.5% வரை\nபோனஸ் தங்கம் பெறுங்கள்</string>
+    <string name="onboarding_bonus_subtitle">முதிர்வின் போது கூடுதல் தங்கம்</string>
+    <string name="onboarding_bonus_body">நீங்கள் எவ்வளவு சீக்கிரம் சேமிக்கிறீர்களோ, அவ்வளவு போனஸ் தங்கம் கிடைக்கும். எங்கள் போனஸ் முறை சேமிப்பாளர்களுக்காகவே உருவாக்கப்பட்டது — உங்கள் திட்டம் வெற்றிகரமாக முடிந்ததும் போனஸ் தங்கம் வரவு வைக்கப்படும்.</string>
+    <string name="onboarding_bonus_stat_label">கிடைக்கும் போனஸ் தங்கம்</string>
+
+    <string name="onboarding_physical_badge">நேரடித் தங்கம் மீட்பு</string>
+    <string name="onboarding_physical_title">எப்போது வேண்டுமானாலும்\nநேரடித் தங்கமாக மாற்றிக்கொள்ளுங்கள்</string>
+    <string name="onboarding_physical_subtitle">நாணயங்கள், பிஸ்கட்கள் அல்லது நகைகள்</string>
+    <string name="onboarding_physical_body">உங்கள் திட்டம் முதிர்ச்சியடையும் போது, உங்கள் தங்கத்தை அழகான நகைகளாகவோ அல்லது நாணயங்களாகவோ எமது கடைகளில் பெற்றுக்கொள்ளலாம்.</string>
+    <string name="onboarding_physical_stat_label">நேரடித் தங்கமாக மீட்டெடுக்கலாம்</string>
+
+    <string name="history">வரலாறு</string>
+    <string name="notifications">அறிவிப்புகள்</string>
+    <string name="all_caught_up">அனைத்தும் படிக்கப்பட்டது!</string>
+    <string name="unread_notifications">%d படிக்காதவை</string>
+    <string name="new_notifications">%d புதியவை</string>
+    <string name="no_new_notifications_desc">தற்போது புதிய அறிவிப்புகள் எதுவுமில்லை.</string>
+    <string name="view_all">அனைத்தையும் பார்</string>
+    <string name="start_saving_gold_title">தங்க சேமிப்பைத் தொடங்குங்கள்</string>
+    <string name="digital_gold_plan_default">டிஜிட்டல் தங்கத் திட்டம்</string>
+    <string name="active_status">செயலில் உள்ளது</string>
+    <string name="monthly_freq">மாதாந்திர</string>
+    <string name="calculating">கணக்கிடப்படுகிறது...</string>
+    <string name="start_saving_gold_emoji">தங்க சேமிப்பைத் தொடங்குங்கள் 🪙</string>
+    <string name="next">அடுத்தது →</string>
+    <string name="already_have_account_login">ஏற்கனவே கணக்கு உள்ளதா? உள்நுழையவும்</string>
+    <string name="login_title">ஐஸ்வர்யம் உங்கள் இல்லத்தில்</string>
+    <string name="login_subtitle">உங்கள் கணக்கில் பாதுகாப்பாக உள்நுழையவும்</string>
+    <string name="enter_otp_desc">உங்கள் தொலைபேசிக்கு அனுப்பப்பட்ட 6 இலக்க OTP-ஐ உள்ளிடவும்</string>
+    <string name="otp_label">OTP</string>
+    <string name="verify_continue">சரிபார்த்து தொடரவும்</string>
+    <string name="mobile_number">கைபேசி எண்</string>
+    <string name="mobile_placeholder">10 இலக்க எண்</string>
+    <string name="get_otp">OTP பெறவும்</string>
+    <string name="learn_trust_hub">அறிந்து கொள்ளுங்கள்</string>
+    <string name="why_save_gold">ஏன் தங்கம் சேமிக்க வேண்டும்?</string>
+    <string name="digigold_savings">டிஜி-கோல்ட் சேமிப்பு</string>
+    <string name="how_it_works_menu">இது எப்படி செயல்படுகிறது?</string>
+    <string name="faq_common_questions">அடிக்கடி கேட்கப்படும் கேள்விகள்</string>
+    <string name="safety_gold_security">பாதுகாப்பு மற்றும் தரம்</string>
+    <string name="redeeming_your_gold">தங்கத்தை மீட்டெடுத்தல்</string>
+    <string name="about_aishwaryam">ஐஸ்வர்யம் பற்றி</string>
+    <string name="support_hub">ஆதரவு மையம்</string>
+    <string name="kyc_instruction">உங்கள் KYC விவரங்களைப் புதுப்பிக்க, தயவுசெய்து எமது அருகிலுள்ள கிளைக்கு வரவும் அல்லது எமது வாடிக்கையாளர் சேவையைத் தொடர்பு கொள்ளவும்.</string>
+    <string name="ai_assistant_title">ஐஸ்வர்யம் உதவியாளர்</string>
+    <string name="ai_assistant_subtitle">உங்களுக்கு உதவ நாங்கள் தயாராக இருக்கிறோம்</string>
+    <string name="ai_greeting">வணக்கம்! 🙏 நான் உங்கள் ஐஸ்வர்யம் தங்க சேமிப்பு உதவியாளர். இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?</string>
+    <string name="qr_scheme_title">திட்டங்கள் பற்றி</string>
+    <string name="qr_scheme_response" formatted="false">₹100 முதல் நெகிழ்வான தங்க சேமிப்பு திட்டங்களை நாங்கள் வழங்குகிறோம். நீங்கள் சேமிக்கும் காலத்திற்கு ஏற்ப 7% வரை போனஸ் தங்கம் பெறலாம். முதிர்வு காலத்தில் நகையாகவோ அல்லது நாணயமாகவோ பெற்றுக்கொள்ளலாம்.</string>
+    <string name="qr_bonus_title">போனஸ் கணக்கீடு</string>
+    <string name="qr_bonus_response" formatted="false">நீங்கள் எவ்வளவு சீக்கிரம் சேமிக்கிறீர்களோ, அதற்கேற்ப உங்கள் போனஸ் கணக்கிடப்படும். 330-நாள் திட்டத்திற்கு, முதல் 75 நாட்களுக்கு 7.5% போனஸ் கிடைக்கும், இது முதிர்வு காலத்தை நெருங்கும்போது 1.5% ஆகக் குறையும்.</string>
+    <string name="qr_safety_title">தங்கத்தின் பாதுகாப்பு</string>
+    <string name="qr_safety_response" formatted="false">உங்கள் தங்கம் 100% பாதுகாப்பானது. நீங்கள் சேமிக்கும் ஒவ்வொரு கிராமும் 22K 91.6% தூய தங்கமாக மாற்றப்பட்டு, காப்பீடு செய்யப்பட்டு பாதுகாப்பான பெட்டகங்களில் சேமிக்கப்படுகிறது.</string>
+    <string name="qr_redemption_title">மீட்பது எப்படி</string>
+    <string name="qr_redemption_response">உங்கள் திட்டம் முடிவடைந்ததும், நீங்கள் சேமித்த தங்கத்தை எங்கள் கூட்டாளர் கடைகளில் அழகான நகையாகப் பெறலாம் அல்லது நாணயங்களாக/கட்டிகளாக உங்கள் வீட்டிற்கே வரவழைக்கலாம்.</string>
+    <string name="qr_missed_title">தவறவிட்ட சேமிப்பு</string>
+    <string name="qr_missed_response">கவலைப்பட வேண்டாம்! தினசரி சேமிப்பை தவறவிடுவதால் எந்த அபராதமும் இல்லை. இருப்பினும், தொடர்ந்து சேமிப்பது உங்கள் போனஸ் பலன்களை அதிகரிக்கும்.</string>
+    <string name="qr_kyc_title">KYC உதவி</string>
+    <string name="qr_kyc_response">KYC என்பது அரசாங்க விதிமுறைகளுக்கு அவசியமானது. சரிபார்ப்பை முடிக்க உங்கள் PAN அல்லது ஆதார் அட்டையை Profile பிரிவில் எளிதாக பதிவேற்றலாம்.</string>
+    <string name="qr_gst_title">GST குறித்த கேள்விகள்</string>
+    <string name="qr_gst_response" formatted="false">அரசாங்க விதிமுறைகளின்படி, நீங்கள் சேமிப்பை (வாங்கும் போது) தங்கமாக மாற்றும் போது நிலையான 3% GST பொருந்தும்.</string>
+    <string name="escalate_support">வாடிக்கையாளர் சேவையைத் தொடர்பு கொள்க</string>
+    <string name="type_message">உங்கள் செய்தியை உள்ளிடவும்...</string>
+    <string name="referral_title">அழைக்கவும், தங்கம் பெறவும்</string>
+    <string name="referral_subtitle">தங்கம் சேமிக்கும் பழக்கத்தை உங்கள் குடும்பத்தினர் மற்றும் நண்பர்களுடன் பகிருங்கள்.</string>
+    <string name="gift_gold_family_title">உங்கள் குடும்பத்திற்கு தங்கம் பரிசளியுங்கள்</string>
+    <string name="gift_gold_family_desc">உங்களுக்கு அன்பானவர்கள் சேமிக்கத் தொடங்கும்போது, ​​நீங்கள் இருவருமே இலவச 22K தூய தங்கத்தைப் பெறுவீர்கள்!</string>
+    <string name="your_invite_code">உங்கள் அழைப்புக் குறியீடு</string>
+    <string name="share_whatsapp">WhatsApp வழியாக பகிரவும்</string>
+    <string name="referral_progress">உங்கள் அழைப்பு முன்னேற்றம்</string>
+    <string name="friends_joined">சேர்ந்த நண்பர்கள்</string>
+    <string name="gold_earned">பெற்ற தங்கம்</string>
+    <string name="milestones">வெகுமதி மைல்கற்கள்</string>
+    <string name="milestone_1">1வது நண்பர்</string>
+    <string name="milestone_1_reward">0.05 கிராம் தங்கம் பெறுங்கள்</string>
+    <string name="milestone_5">5 நண்பர்கள்</string>
+    <string name="milestone_5_reward">0.50 கிராம் தங்கம் + இலவச டெலிவரி</string>
+    <string name="milestone_locked">பூட்டப்பட்டுள்ளது</string>
+    
+    <string name="legal_hub_title">சட்டம் மற்றும் நம்பிக்கை</string>
+    <string name="refund_policy">பணம் திரும்பப்பெறும் கொள்கை</string>
+    <string name="gold_purity_cert">22K 91.6% தூய தங்கச் சான்றிதழ்</string>
+    <string name="trust_notes">காப்பீடு செய்யப்பட்ட பெட்டகங்கள்</string>
+    <string name="gold_rate_alert_title">தங்க விலை எச்சரிக்கைகள்</string>
+    <string name="price_drop_alerts">விலை வீழ்ச்சி எச்சரிக்கைகள்</string>
+    <string name="price_drop_alerts_desc">தங்கத்தின் விலை குறையும் போது அறிவிப்பைப் பெறுங்கள்</string>
+    <string name="best_time_to_buy">வாங்குவதற்கான சிறந்த நேரம்</string>
+    <string name="best_time_to_buy_desc">சரியான நேரத்தில் வாங்குவதற்கான ஸ்மார்ட் எச்சரிக்கைகள்</string>
+    <string name="daily_trend">தினசரி தங்க விலை நிலவரம்</string>
+    <string name="weekly_trend">வாராந்திர தங்க விலை நிலவரம்</string>
+    <string name="push_notification_prefs">அறிவிப்பு விருப்பங்கள்</string>
+    
+    <string name="goal_planner_title">இலக்கு திட்டமிடுபவர்</string>
+    <string name="wedding_jewellery_goal">திருமண நகைகள்</string>
+    <string name="festival_savings_goal">பண்டிகை சேமிப்பு (தீபாவளி/பொங்கல்)</string>
+    <string name="child_future_goal">குழந்தையின் எதிர்காலம் / குடும்பம்</string>
+    <string name="monthly_contribution_calc">மாதாந்திர பங்களிப்பு கால்குலேட்டர்</string>
+    <string name="visual_progress_timeline">உங்கள் பயணக் காலவரிசை</string>
+    <string name="plan_my_goal">என் இலக்கை திட்டமிடு</string>
+    <string name="target_amount">இலக்குத் தொகை (₹)</string>
+    <string name="duration_months">கால அளவு (மாதங்கள்)</string>
+    <string name="monthly_save_amount">நீங்கள் மாதந்தோறும் சேமிக்க வேண்டியது</string>
+
+    <!-- Schemes Detailed Localization -->
+    <string name="your_active_schemes">உங்களது தற்போதைய திட்டங்கள் (%d)</string>
+    <string name="swipe_to_view">நகர்த்தி பார்க்கவும் →</string>
+    <string name="installment_amount">சேமிப்புத் தொகை</string>
+    <string name="next_milestone_due">அடுத்த மைல்கல் தவணை</string>
+    <string name="bonus_window">போனஸ் காலம்</string>
+    <string name="maturity_date">முதிர்வுத் தேதி</string>
+    <string name="days_left">%d நாட்கள் மீதமுள்ளன</string>
+    <string name="loyalty_bonus_ladder">விசுவாச போனஸ் ஏணி</string>
+    <string name="active">செயலில் உள்ளது</string>
+    <string name="expired">முடிவடைந்தது</string>
+    <string name="claim_maturity_options">முதிர்வு பலன்களைப் பெறுக</string>
+    <string name="add_savings">சேமிப்பைச் சேர்க்கவும்</string>
+    <string name="gold_redeemed_successfully">தங்கம் வெற்றிகரமாக மீட்டெடுக்கப்பட்டது</string>
+    <string name="view_ledger_details">கார்டு லெட்ஜர் மற்றும் விபரங்களைப் பார்</string>
+    
+    <string name="investment_frequency">முதலீட்டு அதிர்வெண்</string>
+    <string name="total_duration">மொத்த கால அளவு</string>
+    <string name="total_investment_label">மொத்த முதலீடு</string>
+    <string name="approx_maturity_gold">தோராய முதிர்வு தங்கம்</string>
+    <string name="how_it_works">இது எவ்வாறு செயல்படுகிறது</string>
+    <string name="bullet_how_it_works_1">தினம் அல்லது மாதந்தோறும் சிறிய அளவு தங்கத்தை சேமிக்கவும்.</string>
+    <string name="bullet_how_it_works_2">ஐஸ்வர்யம் விலை பூட்டை வழங்குகிறது – நீங்கள் செலுத்தும் நாளில் தங்கம் வாங்கப்படும்.</string>
+    <string name="bullet_how_it_works_3">திட்டம் முடிவடைந்ததும், உங்கள் தொடர் சேமிப்பின் அடிப்படையில் பெரிய போனஸை பெறுவீர்கள்.</string>
+    <string name="bullet_how_it_works_4">UPI, கார்டு, நெட்பேங்கிங் மூலம் உடனடியாக செலுத்தவும்.</string>
+    
+    <string name="interactive_calculator_title">💡 கால்குலேட்டர் விளக்கம்</string>
+    <string name="gold_price_assumption">தங்க விலை (கணக்கீடு)</string>
+    <string name="you_invest">நீங்கள் முதலீடு செய்ய</string>
+    <string name="eligible_bonus">கிடைக்கும் போனஸ் (7.5%)</string>
+    <string name="total_gold_credited">மொத்த தங்கம் கிரெடிட்</string>
+    
+    <string name="add_scheme_savings_title">திட்ட சேமிப்பைச் சேர்க்கவும்</string>
+    <string name="add_scheme_savings_desc">அபராதம் இன்றி எப்போது வேண்டுமானாலும் முதலீடு செய்யுங்கள். போனஸ் உடனடியாகப் பொருந்தும்!</string>
+    <string name="enter_custom_amount">முதலீட்டுத் தொகையை உள்ளிடவும் (₹)</string>
+    <string name="entered_amount">முதலீட்டுத் தொகை</string>
+    <string name="gst_included">ஜிஎஸ்டி (3% உட்பட)</string>
+    <string name="base_savings_amount">அடிப்படை சேமிப்புத் தொகை</string>
+    <string name="loyalty_bonus_dynamic">விசுவாச போனஸ் (%d%%)</string>
+    <string name="total_purchase_value">மொத்த கொள்முதல் மதிப்பு</string>
+    <string name="estimated_gold_credited">மதிப்பிடப்பட்ட தங்கம் எடை</string>
+    <string name="pay_add_gold">கட்டணம் செலுத்தி தங்கத்தைச் சேர்க்கவும்</string>
+    <string name="review_saving_plan">உங்கள் சேமிப்புத் திட்டத்தை சரிபார்க்கவும்</string>
+    <string name="joining_date">சேரும் தேதி</string>
+    <string name="enable_autopay_rec">தானியங்கி முறையில் செலுத்தவும் (பரிந்துரைக்கப்படுகிறது)</string>
+    <string name="autopay_desc">எளிதான சேமிப்பிற்கு மாதாந்திரம் தானியங்கி முறையில் செலுத்துங்கள்.</string>
+    <string name="initial_security_deposit">ஆரம்ப பாதுகாப்பு வைப்புத் தொகை</string>
+    <string name="first_installment_due">முதல் சேமிப்பு இன்று செலுத்த வேண்டியது</string>
+    <string name="setup_autopay_join">AutoPay அமைத்து சேரவும்</string>
+    <string name="proceed_to_pay_val">%s செலுத்தத் தொடரவும்</string>
+    <string name="milestone_day">நாள் %d</string>
+    <string name="milestone_day_ladder">நாள் %d / 330</string>
+    <string name="milestone_bonus_percent">%s%% போனஸ்</string>
+    <string name="loyalty_bonus_calc">விசுவாச போனஸ் கால்குலேட்டர்</string>
+    <string name="loyalty_bonus_calc_desc">நீங்கள் முதலீடு செய்யும் நாட்களுக்கு ஏற்ப லாயல்டி போனஸைக் கணக்கிட்டுப் பாருங்கள்.</string>
+    <string name="select_scheme_day">திட்ட நாளைத் தேர்ந்தெடுக்கவும்</string>
+    <string name="base_investment_value">அடிப்படை முதலீட்டுத் தொகை</string>
+    <string name="gst_included_calc">ஜிஎஸ்டி (3% உட்பட)</string>
+    <string name="eligible_loyalty_bonus">கிடைக்கும் விசுவாச போனஸ் (%s%%)</string>
+    <string name="includes_bonus_val">(போனஸ் %s உட்பட)</string>
+    <string name="tap_to_explore">ஆராய்ந்து பார்க்க தட்டவும் →</string>
+    <string name="live_badge">நேரடி</string>
+
+    <!-- Dashboard Card &amp; Timeline labels -->
+    <string name="jewellery_savings_card">நகைச் சேமிப்பு அட்டை</string>
+    <string name="tap_to_collapse">மூட தட்டவும்</string>
+    <string name="tap_to_open_details">விவரங்களைப் பார்க்க தட்டவும்</string>
+    <string name="scheme_timeline_progress">திட்டக் காலவரிசை முன்னேற்றம்</string>
+    <string name="installments_paid_label">சேமித்த நாட்கள்</string>
+    <string name="total_savings_added">மொத்த சேமிப்பு சேர்க்கப்பட்டது</string>
+    <string name="total_bonus_earned">மொத்த போனஸ் சம்பாதிக்கப்பட்டது</string>
+    <string name="gold_accumulated">சேர்க்கப்பட்ட தங்கம்</string>
+    <string name="current_bonus_tier">தற்போதைய போனஸ் நிலை</string>
+    <string name="swipe_to_explore_schemes">உங்கள் திட்டங்களை ஆராய நகர்த்தவும்</string>
+
+    <!-- Transactions filter / item labels -->
+    <string name="filter_all_activity">அனைத்து செயல்பாடுகளும்</string>
+    <string name="filter_savings">சேமிப்பு</string>
+    <string name="filter_redeemed">மீட்கப்பட்டவை</string>
+    <string name="added_to_savings">சேமிப்பில் சேர்க்கப்பட்டது</string>
+    <string name="redeemed_gold">மீட்கப்பட்ட தங்கம்</string>
+    <string name="receipt_generated_desc">உங்கள் பதிவுக்கான ரசீது உருவாக்கப்பட்டது</string>
+    <string name="total_amount">மொத்தத் தொகை</string>
+    <string name="my_bonuses">எனது போனஸ்கள்</string>
+    <string name="total_bonus_gold">மொத்த போனஸ் தங்கம்</string>
+    <string name="no_bonuses_yet">போனஸ் எதுவும் இன்னும் பெறப்படவில்லை</string>
+    <string name="referral_code_optional">பரிந்துரை குறியீடு (விருப்பத்தேர்வு)</string>
+    <string name="special_event_referral_bonuses">சிறப்பு நிகழ்வு மற்றும் பரிந்துரை போனஸ்கள்</string>
+    <string name="scheme_loyalty_bonuses">திட்ட விசுவாச போனஸ்கள்</string>
+    <string name="birthday_bonus">பிறந்தநாள் சிறப்பு போனஸ்</string>
+    <string name="anniversary_bonus">திருமண நாள் போனஸ்</string>
+    <string name="work_joining_bonus">வேலைக்கு சேர்ந்த போனஸ்</string>
+    <string name="referral_bonus">பரிந்துரை போனஸ்</string>
+</resources>

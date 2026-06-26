@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Aishwaryam Admin — Schemes</title>
+  <link rel="stylesheet" href="admin.css">
+  <script src="admin-shared.js"></script>
+  <style>
+    .grid-selector {
+      display: none;
+      position: absolute;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    .grid-row { display: flex; gap: 4px; margin-bottom: 4px; }
+    .grid-cell {
+      width: 18px;
+      height: 18px;
+      border: 1px solid var(--border);
+      background: var(--bg-2);
+      cursor: pointer;
+      border-radius: 2px;
+    }
+    .grid-cell.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      opacity: 0.6;
+    }
+    .grid-info {
+      margin-top: 8px;
+      font-size: 11px;
+      text-align: center;
+      color: var(--text-3);
+      font-weight: 600;
+    }
+    .visual-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .visual-table th, .visual-table td {
+      border: 1px solid var(--border);
+      padding: 8px;
+      font-size: 12px;
+      min-width: 60px;
+
+      outline: none;
+    }
+    .visual-table th {
+      background: var(--bg-2);
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .visual-table td:focus {
+      background: var(--accent);
+      color: white;
+      opacity: 0.8;
+    }
+    .table-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    /* ── Drag & Drop Reordering ── */
+    .section-row {
+      cursor: grab;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+    }
+    .section-row:active {
+      cursor: grabbing;
+    }
+    .section-row.over {
+      border: 2px dashed var(--accent) !important;
+      transform: scale(0.98);
+      box-shadow: 0 0 10px rgba(194,24,91,0.2);
+    }
+    .drag-handle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-3);
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: grab;
+      user-select: none;
+    }
+    
+    /* ── Smartphone Mockup ── */
+    .mobile-device-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: sticky;
+      top: 24px;
+      z-index: 100;
+    }
+    .mobile-device-mockup {
+      width: 330px;
+      height: 600px;
+      background: #121214;
+      border: 12px solid #2d2d30;
+      border-radius: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      color: #fff;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      border-color: #3f3f46;
+    }
+    /* Notch / Dynamic Island */
+    .mobile-notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 22px;
+      background: #3f3f46;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      z-index: 999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .mobile-screen-content {
+      flex: 1;
+      padding-top: 25px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      font-size: 12px;
+      background: #18191b;
+    }
+    .mobile-screen-content::-webkit-scrollbar {
+      width: 4px;
+    }
+    .mobile-screen-content::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.15);
+      border-radius: 2px;
+    }
+    /* Navigation inside Mockup */
+    .mockup-nav {
+      display: flex;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px;
+      margin-bottom: 12px;
+      width: 100%;
+      max-width: 330px;
+    }
+    .mockup-nav-btn {
+      flex: 1;
+      text-align: center;
+      padding: 6px 2px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-2);
+      background: transparent;
+      border: none;
+      border-radius: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .mockup-nav-btn.active {
+      background: var(--accent);
+      color: #fff;
+    }
+    /* Card Mockup View */
+    .mockup-card-view {
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+    .phone-card {
+      width: 100%;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #22252a;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+    }
+    .phone-card-hero {
+      height: 150px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      background-size: cover;
+      background-position: center;
+    }
+    .phone-card-hero-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
+      z-index: 1;
+    }
+    .phone-card-hero-content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .phone-card-title {
+      font-size: 16px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .phone-card-desc {
+      font-size: 10px;
+      color: rgba(255,255,255,0.85);
+      margin-top: 2px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .phone-card-chips {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 5px;
+    }
+    .phone-card-chip {
+      font-size: 8px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.15);
+      border: 0.5px solid rgba(255,255,255,0.25);
+      color: #fff;
+    }
+    .phone-card-bottom {
+      padding: 10px 14px;
+      background: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .phone-card-bottom-text {
+      font-size: 11px;
+      font-weight: 700;
+      color: #4a0e4e;
+    }
+    /* Browse Screen View */
+    .phone-browse-hero {
+      padding: 20px 16px;
+      background: linear-gradient(135deg, #4A0E4E 0%, #2a082d 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .phone-accordion-list {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .phone-accordion-item {
+      border: 1px solid rgba(255,255,255,0.06);
+      background: #22252a;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .phone-accordion-header {
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 11px;
+    }
+    .phone-accordion-body {
+      padding: 10px 12px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      font-size: 10px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.4;
+      background: #1c1d21;
+    }
+    /* Active Screen View */
+    .phone-active-hero {
+      padding: 16px;
+      background: linear-gradient(135deg, #18191b 0%, #1e2024 100%);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .phone-gauge {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: 8px solid rgba(255,255,255,0.05);
+      border-top-color: #E8A83A;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .phone-gauge-value {
+      font-size: 14px;
+      font-weight: 800;
+      color: #E8A83A;
+    }
+    .phone-active-stats-grid {
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .phone-active-stat-box {
+      background: #22252a;
+      border-radius: 10px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+    .phone-active-stat-label {
+      font-size: 8px;
+      color: rgba(255,255,255,0.5);
+    }
+    .phone-active-stat-val {
+      font-size: 10px;
+      font-weight: 700;
+      margin-top: 2px;
+      color: #fff;
+    }
+    .phone-stepper {
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .phone-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .phone-step-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #C2185B;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 8px;
+      font-weight: bold;
+      color: white;
+    }
+    .phone-step-label {
+      font-size: 9.5px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7L12 2z"/><path d="M12 2v20M3 7l9 5 9-5"/></svg></div>
+    <div><div class="logo-text">Aishwaryam</div><div class="logo-badge">Admin Console</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Overview</div>
+    <a href="index.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+    <div class="nav-section">Management</div>
+    <a href="users.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Users</a>
+    <a href="kyc.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>KYC Verification</a>
+    <a href="transactions.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>Transactions</a>
+    <a href="redemptions.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 1 0 0-4h14a2 2 0 1 0 0 4M5 8l1 8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-8"/><path d="M10 12v4M14 12v4"/></svg>Redemption Queue</a>
+    <a href="scheme-joined.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>Scheme Joined Users</a>
+    <div class="nav-section">Content</div>
+    <a href="schemes.html" class="nav-link active"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Schemes</a>
+    <a href="offers.html" class="nav-link"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Offers & Bonuses</a>
+    <a href="onboarding-banners.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Onboarding Banners</a>
+    <a href="posters.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>App Posters</a>
+    <a href="receipt-template.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Receipt Template</a>
+    <div class="nav-section">System</div>
+    <a href="notifications.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Push Broadcast</a>
+    <a href="audit.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Audit Logs</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-avatar">A</div>
+      <div><div class="user-name">Super Admin</div><div class="user-role">admin@aishwaryam.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="breadcrumb-item">Aishwaryam</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item current">Schemes</span>
+    </div>
+    <div class="topbar-right">
+      <div class="live-pill"><span class="live-dot"></span>Live</div>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme"></button>
+      <button class="btn btn-outline btn-sm" onclick="loadSchemes()">Refresh</button>
+    </div>
+  </header>
+
+  <div class="page">
+    <div class="page-head">
+      <div>
+        <h1>Savings Schemes</h1>
+        <p>Create and manage gold savings plans for users</p>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 460px 1fr; gap: 24px; align-items: start">
+      <!-- Create form -->
+      <div class="card" style="margin-bottom: 0">
+        <div class="card-head" style="display: flex; justify-content: space-between; align-items: center">
+          <span class="card-title">Create New Scheme</span>
+          <button type="button" class="btn btn-sm" onclick="autoFillPothys()" style="background: var(--accent); color: white; border: none; font-size: 11px; font-weight: 700; cursor: pointer">+ Auto-fill from Pothys</button>
+        </div>
+        <div class="card-body" style="display: flex; flex-direction: column; gap: 14px">
+          <div class="form-group">
+            <label class="form-label">Plan Name <span style="color: var(--red)">*</span></label>
+            <input type="text" class="form-control" id="planName" placeholder="e.g. Mahalakshmi 11 Months" oninput="updateLivePreview()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" id="description" placeholder="Scheme benefits and terms..." style="min-height: 72px" oninput="updateLivePreview()"></textarea>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+            <div class="form-group">
+              <label class="form-label">Target Amount (₹) <span style="color: var(--red)">*</span></label>
+              <input type="number" class="form-control" id="amount" placeholder="5000" oninput="updateLivePreview()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Duration <span style="color: var(--red)">*</span></label>
+              <div style="display: flex; gap: 8px">
+                <input type="number" class="form-control" id="installments" placeholder="330" style="flex: 1" oninput="updateLivePreview()">
+                <select id="durationUnit" class="form-control" style="width: 90px" onchange="updateLivePreview()">
+                  <option value="Days">Days</option>
+                  <option value="Months">Months</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Type</label>
+            <select class="form-control" id="frequency" onchange="updateLivePreview()">
+              <option value="Flexible">Flexible</option>
+              <option value="Daily">Daily</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Weekly">Weekly</option>
+            </select>
+          </div>
+          
+          <div style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 14px">
+            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center">
+              Bonus Tiers (Optional)
+              <button class="btn btn-sm" onclick="addBonusTier()" style="padding: 2px 8px; font-size: 11px">+ Add Tier</button>
+            </label>
+            <div id="bonusTiers" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px">
+              <!-- Dynamic tiers -->
+            </div>
+          </div>
+
+          <div style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 14px">
+            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center">
+              Custom Content Sections <span class="text-muted" style="font-size:10px;font-weight:400">(Drag list to reorder)</span>
+              <button class="btn btn-sm" onclick="addCustomSection()" style="padding: 2px 8px; font-size: 11px">+ Add Section</button>
+            </label>
+            <div id="customSections" style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px">
+              <!-- Dynamic sections -->
+            </div>
+          </div>
+
+          <!-- Poster Image Upload -->
+          <div class="form-section" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 14px">
+            <label class="form-label">Scheme Poster Image <span class="text-muted" style="font-size:11px;font-weight:400">(optional — shown as card background on mobile app)</span></label>
+            <div id="posterPreviewContainer" style="margin-bottom:10px;display:none">
+              <img id="posterPreview" style="max-height:160px;border-radius:12px;border:2px solid #ccc;object-fit:cover" />
+              <button type="button" onclick="clearPoster(); updateLivePreview();" class="btn btn-sm" style="color:var(--red);margin-top:4px">Remove Image</button>
+            </div>
+            <input type="file" id="posterImageFile" accept="image/*" class="form-control" onchange="handlePosterUpload(event)" />
+            <input type="hidden" id="posterImageBase64" name="posterImageBase64" />
+            <div style="font-size:12px;margin-top:4px;color:var(--text-3)">Upload JPG/PNG/WEBP. This image will be the full-bleed background of the scheme card in the app. If left empty, a generated design is used as fallback.</div>
+          </div>
+
+          <!-- Payment Rules -->
+          <div class="form-section" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 14px">
+            <label class="form-label">Payment Rules</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="form-group">
+                <label class="form-label" style="font-size:13px">Min Amount (₹)</label>
+                <input type="number" id="pr_minAmount" class="form-control" placeholder="e.g. 100" oninput="updateLivePreview()" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size:13px">Max Amount (₹)</label>
+                <input type="number" id="pr_maxAmount" class="form-control" placeholder="e.g. 50000" oninput="updateLivePreview()" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size:13px">Multiple per day?</label>
+                <select id="pr_multiplePerDay" class="form-control" onchange="updateLivePreview()">
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size:13px">Early exit after (days)</label>
+                <input type="number" id="pr_earlyExitDays" class="form-control" placeholder="e.g. 180" oninput="updateLivePreview()" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Rating -->
+          <div class="form-section" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 14px">
+            <div class="form-group">
+              <label class="form-label" style="font-size:13px">Card Rating (⭐)</label>
+              <input type="number" step="0.1" max="5.0" id="cardRating" class="form-control" placeholder="e.g. 4.9" value="4.9" oninput="updateLivePreview()" />
+            </div>
+          </div>
+
+          <!-- Feature Attributes Toggles -->
+          <div class="form-section" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 14px">
+            <label class="form-label">Feature Attributes <span class="text-muted" style="font-size:11px;font-weight:400">(Toggled attributes render dynamically as premium cards on mobile)</span></label>
+            
+            <!-- Maturity Toggle -->
+            <div style="display:flex; flex-direction:column; gap:8px; background:var(--bg-2); padding:10px; border-radius:8px; border:1.5px solid var(--border); margin-bottom:10px">
+              <div style="display:flex; justify-content:space-between; align-items:center">
+                <span style="font-size:12.5px; font-weight:700">Maturity Benefits</span>
+                <select id="attr_maturity_enabled" class="form-control" style="width:80px; height:24px; padding:2px 4px; font-size:11px" onchange="updateLivePreview()">
+                  <option value="1">ON (1)</option>
+                  <option value="0" selected>OFF (0)</option>
+                </select>
+              </div>
+              <input type="text" id="attr_maturity_title" class="form-control" placeholder="Maturity Title" value="Maturity benefits" style="font-size:12px; height:26px" oninput="updateLivePreview()" />
+              <textarea id="attr_maturity_desc" class="form-control" placeholder="Maturity Description" style="font-size:11px; min-height:40px" oninput="updateLivePreview()">Get accumulated gold bonus automatically credited upon completing plan payments.</textarea>
+            </div>
+
+            <!-- Lockable Toggle -->
+            <div style="display:flex; flex-direction:column; gap:8px; background:var(--bg-2); padding:10px; border-radius:8px; border:1.5px solid var(--border); margin-bottom:10px">
+              <div style="display:flex; justify-content:space-between; align-items:center">
+                <span style="font-size:12.5px; font-weight:700">Lockable Rate Scheme</span>
+                <select id="attr_lockable_enabled" class="form-control" style="width:80px; height:24px; padding:2px 4px; font-size:11px" onchange="updateLivePreview()">
+                  <option value="1">ON (1)</option>
+                  <option value="0" selected>OFF (0)</option>
+                </select>
+              </div>
+              <input type="text" id="attr_lockable_title" class="form-control" placeholder="Lockable Title" value="Lockable scheme" style="font-size:12px; height:26px" oninput="updateLivePreview()" />
+              <textarea id="attr_lockable_desc" class="form-control" placeholder="Lockable Description" style="font-size:11px; min-height:40px" oninput="updateLivePreview()">Lock in lower gold rates during market drops to maximize profit yields.</textarea>
+            </div>
+
+            <!-- Known Toggle -->
+            <div style="display:flex; flex-direction:column; gap:8px; background:var(--bg-2); padding:10px; border-radius:8px; border:1.5px solid var(--border)">
+              <div style="display:flex; justify-content:space-between; align-items:center">
+                <span style="font-size:12.5px; font-weight:700">Known Rates / No hidden fees</span>
+                <select id="attr_known_enabled" class="form-control" style="width:80px; height:24px; padding:2px 4px; font-size:11px" onchange="updateLivePreview()">
+                  <option value="1">ON (1)</option>
+                  <option value="0" selected>OFF (0)</option>
+                </select>
+              </div>
+              <input type="text" id="attr_known_title" class="form-control" placeholder="Known Title" value="Known rates" style="font-size:12px; height:26px" oninput="updateLivePreview()" />
+              <textarea id="attr_known_desc" class="form-control" placeholder="Known Description" style="font-size:11px; min-height:40px" oninput="updateLivePreview()">Transparent processing and physical gold delivery rates with zero extra charges.</textarea>
+            </div>
+          </div>
+
+          <!-- Keywords / Badge Chips -->
+          <div class="form-section" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 14px">
+            <label class="form-label">Card Keywords <span class="text-muted" style="font-size:11px;font-weight:400">(shown as badge chips on scheme card — max 4)</span></label>
+            <div id="keywordsContainer" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"></div>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="newKeywordInput" class="form-control" placeholder="e.g. Flexible, 7.5% Bonus, Start ₹100, 330 Days" style="max-width:300px" oninput="updateLivePreview()">
+              <button type="button" class="btn btn-sm" onclick="addKeyword()">+ Add</button>
+            </div>
+            <input type="hidden" id="keywordsJson" name="keywordsJson" value="[]" />
+          </div>
+
+          <button class="btn btn-primary" onclick="createScheme()" style="justify-content: center; margin-top: 12px">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Publish Scheme
+          </button>
+        </div>
+      </div>
+
+
+
+      <!-- Live schemes -->
+      <div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px">
+          <div class="section-head" style="margin-bottom: 0">Live Schemes</div>
+          <div class="input-group" style="width: 250px">
+            <span class="input-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+            <input type="text" class="form-control" id="schemeSearch" placeholder="Filter plans..." onkeyup="renderSchemes()">
+          </div>
+        </div>
+        <div id="schemeList" style="display: flex; flex-direction: column; gap: 12px">
+          <div class="card"><div class="card-body" style="text-align: center; color: var(--text-2); padding: 40px">Loading schemes...</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<div id="toast"></div>
+
+<!-- Grid Selector Modal-like -->
+<div id="tableGridSelector" class="grid-selector">
+  <div id="gridContainer"></div>
+  <div class="grid-info" id="gridInfo">Select Size</div>
+</div>
+
+<script>
+const API = API_BASE;
+let allSchemes = [];
+let editingSchemeId = null;
+let keywords = [];
+
+async function loadSchemes() {
+  try {
+    const res = await fetch(`${API}/api/Scheme/admin/list`);
+    allSchemes = await res.json();
+    renderSchemes();
+  } catch (e) {
+    document.getElementById('schemeList').innerHTML = `<div class="card"><div class="card-body" style="color: var(--red); padding: 24px">Error: ${e.message}</div></div>`;
+  }
+}
+
+async function autoFillPothys() {
+  try {
+    const res = await fetch(`${API}/api/Scheme/scrape-pothys`);
+    if (!res.ok) {
+      showToast('Failed to scrape Pothys details', 'error');
+      return;
+    }
+    const data = await res.json();
+    
+    // Populate simple fields
+    document.getElementById('planName').value = data.planName || '';
+    document.getElementById('description').value = data.description || '';
+    document.getElementById('amount').value = data.installmentAmount || '';
+    document.getElementById('installments').value = data.totalInstallments || '';
+    document.getElementById('frequency').value = data.frequency || 'Flexible';
+    
+    // Populate Tiers
+    const tierContainer = document.getElementById('bonusTiers');
+    tierContainer.innerHTML = '';
+    if (data.bonusTiers && data.bonusTiers.length) {
+      data.bonusTiers.forEach(t => {
+        addBonusTier(t.startDay, t.endDay, t.bonusPercentage);
+      });
+    }
+    
+    // Populate Custom Sections
+    const sectionContainer = document.getElementById('customSections');
+    sectionContainer.innerHTML = '';
+    if (data.customSections && data.customSections.length) {
+      data.customSections.forEach(sec => {
+        addCustomSection(sec.title, sec.content, '', sec.type || 0);
+      });
+    }
+
+    // Populate Payment Rules
+    if (data.paymentRules) {
+      document.getElementById('pr_minAmount').value = data.paymentRules.minAmount || '';
+      document.getElementById('pr_maxAmount').value = data.paymentRules.maxAmount || '';
+      document.getElementById('pr_multiplePerDay').value = data.paymentRules.multiplePerDay ? 'true' : 'false';
+      document.getElementById('pr_earlyExitDays').value = data.paymentRules.earlyExitAfterDays || '180';
+      document.getElementById('cardRating').value = data.paymentRules.rating || '4.9';
+      
+      // Feature Attributes
+      if (data.paymentRules.attributes && data.paymentRules.attributes.length) {
+        data.paymentRules.attributes.forEach(attr => {
+          const key = attr.key;
+          const enabledSelect = document.getElementById(`attr_${key}_enabled`);
+          const titleInput = document.getElementById(`attr_${key}_title`);
+          const descInput = document.getElementById(`attr_${key}_desc`);
+          if (enabledSelect) enabledSelect.value = attr.enabled ? '1' : '0';
+          if (titleInput) titleInput.value = attr.title || '';
+          if (descInput) descInput.value = attr.description || '';
+        });
+      }
+    }
+    
+    // Populate Keywords
+    if (data.keywords && data.keywords.length) {
+      keywords = [...data.keywords];
+    } else {
+      keywords = [];
+    }
+    renderKeywords();
+    
+    showToast('Pothys DiGiGOLD Scheme parameters populated!', 'success');
+    updateLivePreview();
+  } catch (e) {
+    showToast('Error autofilling: ' + e.message, 'error');
+  }
+}
+
+function addBonusTier(startDay = '', endDay = '', bonusPercentage = '') {
+  const container = document.getElementById('bonusTiers');
+  const div = document.createElement('div');
+  div.className = 'tier-row';
+  div.style = 'display: grid; grid-template-columns: 80px 80px 80px 30px; gap: 8px; align-items: center';
+  div.innerHTML = `
+    <input type="number" class="form-control start-day" placeholder="Start" value="${startDay}" style="padding: 6px 10px; font-size: 12px" oninput="updateLivePreview()">
+    <input type="number" class="form-control end-day" placeholder="End" value="${endDay}" style="padding: 6px 10px; font-size: 12px" oninput="updateLivePreview()">
+    <input type="number" step="0.01" class="form-control bonus-percent" placeholder="%" value="${bonusPercentage}" style="padding: 6px 10px; font-size: 12px" oninput="updateLivePreview()">
+    <button class="btn btn-sm" onclick="this.parentElement.remove(); updateLivePreview();" style="padding: 4px; color: var(--red)">×</button>
+  `;
+  container.appendChild(div);
+  updateLivePreview();
+}
+
+let dragSrcEl = null;
+
+function handleDragStart(e) {
+  this.style.opacity = '0.4';
+  dragSrcEl = this;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', this.innerHTML);
+}
+
+function handleDragOver(e) {
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+  e.dataTransfer.dropEffect = 'move';
+  return false;
+}
+
+function handleDragEnter(e) {
+  this.classList.add('over');
+}
+
+function handleDragLeave(e) {
+  this.classList.remove('over');
+}
+
+function handleDrop(e) {
+  if (e.stopPropagation) {
+    e.stopPropagation();
+  }
+  if (dragSrcEl !== this) {
+    const list = document.getElementById('customSections');
+    const children = Array.from(list.children);
+    const dragIndex = children.indexOf(dragSrcEl);
+    const dropIndex = children.indexOf(this);
+    
+    if (dragIndex < dropIndex) {
+      list.insertBefore(dragSrcEl, this.nextSibling);
+    } else {
+      list.insertBefore(dragSrcEl, this);
+    }
+    updateLivePreview();
+  }
+  return false;
+}
+
+function handleDragEnd(e) {
+  this.style.opacity = '1';
+  document.querySelectorAll('.section-row').forEach(row => {
+    row.classList.remove('over');
+  });
+}
+
+function bindDragAndDrop() {
+  const rows = document.querySelectorAll('.section-row');
+  rows.forEach(row => {
+    row.setAttribute('draggable', 'true');
+    row.removeEventListener('dragstart', handleDragStart);
+    row.removeEventListener('dragover', handleDragOver);
+    row.removeEventListener('dragenter', handleDragEnter);
+    row.removeEventListener('dragleave', handleDragLeave);
+    row.removeEventListener('drop', handleDrop);
+    row.removeEventListener('dragend', handleDragEnd);
+
+    row.addEventListener('dragstart', handleDragStart);
+    row.addEventListener('dragover', handleDragOver);
+    row.addEventListener('dragenter', handleDragEnter);
+    row.addEventListener('dragleave', handleDragLeave);
+    row.addEventListener('drop', handleDrop);
+    row.addEventListener('dragend', handleDragEnd);
+    
+    const input = row.querySelector('input');
+    const textarea = row.querySelector('textarea');
+    if (input) input.oninput = updateLivePreview;
+    if (textarea) textarea.oninput = updateLivePreview;
+  });
+}
+
+function addCustomSection(title = '', content = '', tableHtml = '', type = 0) {
+  const container = document.getElementById('customSections');
+  const div = document.createElement('div');
+  div.className = 'section-row card';
+  div.setAttribute('draggable', 'true');
+  div.style = 'padding: 12px; background: var(--bg-2); border-color: var(--border); margin-bottom: 0';
+  div.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px">
+      <div style="display: flex; align-items: center; gap: 8px; flex: 1">
+        <div class="drag-handle" style="display: flex; align-items: center; justify-content: center; cursor: grab; padding: 4px; color: var(--text-3)">
+          <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor"><path d="M20 9H4v2h16V9zM20 13H4v2h16v-2z"/></svg>
+        </div>
+        <input type="text" class="form-control" placeholder="Section Heading (e.g. FAQ)" value="${title}" style="font-weight: 700; border: none; background: transparent; padding: 0" oninput="updateLivePreview()">
+      </div>
+      <button class="btn btn-sm" onclick="this.closest('.section-row').remove(); updateLivePreview();" style="color: var(--red)">×</button>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px; align-items: center">
+      <div class="form-group" style="margin-bottom: 0">
+        <select class="form-control section-type" style="padding: 4px 8px; font-size: 11px; height: 28px" onchange="updateLivePreview()">
+          <option value="0" ${type === 0 ? 'selected' : ''}>Accordion Tab (Standard FAQ)</option>
+          <option value="1" ${type === 1 ? 'selected' : ''}>Premium Info Card (Highlights)</option>
+          <option value="2" ${type === 2 ? 'selected' : ''}>2-Column Feature Grid</option>
+        </select>
+      </div>
+      <div style="display: flex; gap: 6px; justify-content: flex-end">
+        <button class="btn btn-sm" onclick="showGridSelector(this)" style="font-size: 10px; padding: 2px 6px">Create Table</button>
+        <button class="btn btn-sm" onclick="addRow(this)" style="font-size: 10px; padding: 2px 6px">+ Row</button>
+        <button class="btn btn-sm" onclick="addCol(this)" style="font-size: 10px; padding: 2px 6px">+ Col</button>
+      </div>
+    </div>
+    
+    <div class="visual-editor-container">
+       <textarea class="form-control" placeholder="Section Content..." style="min-height: 60px; font-size: 12px; margin-bottom: 8px" oninput="updateLivePreview()">${content}</textarea>
+       <div class="table-wrapper">${tableHtml}</div>
+    </div>
+  `;
+  container.appendChild(div);
+  
+  const observer = new MutationObserver(() => {
+    updateLivePreview();
+  });
+  observer.observe(div.querySelector('.table-wrapper'), { childList: true, subtree: true, characterData: true });
+  
+  bindDragAndDrop();
+  updateLivePreview();
+}
+
+function addRow(btn) {
+  const table = btn.closest('.section-row').querySelector('.visual-table');
+  if (!table) return;
+  const cols = table.rows[0].cells.length;
+  const row = table.insertRow();
+  for (let i = 0; i < cols; i++) {
+    const cell = row.insertCell();
+    cell.contentEditable = "true";
+    cell.innerText = "Data";
+  }
+}
+
+function addCol(btn) {
+  const table = btn.closest('.section-row').querySelector('.visual-table');
+  if (!table) return;
+  Array.from(table.rows).forEach((row, i) => {
+    const cell = i === 0 ? document.createElement('th') : row.insertCell();
+    if (i === 0) row.appendChild(cell);
+    cell.contentEditable = "true";
+    cell.innerText = i === 0 ? "Header" : "Data";
+  });
+}
+
+function showGridSelector(btn) {
+  const selector = document.getElementById('tableGridSelector');
+  const container = document.getElementById('gridContainer');
+  const info = document.getElementById('gridInfo');
+  const wrapper = btn.closest('.section-row').querySelector('.table-wrapper');
+  
+  container.innerHTML = '';
+  selector.style.display = 'block';
+  const rect = btn.getBoundingClientRect();
+  selector.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+  selector.style.left = (rect.left + window.scrollX) + 'px';
+
+  for (let r = 1; r <= 10; r++) {
+    const row = document.createElement('div');
+    row.className = 'grid-row';
+    for (let c = 1; c <= 10; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell';
+      cell.onmouseover = () => {
+        info.innerText = `${c} x ${r}`;
+        container.querySelectorAll('.grid-cell').forEach((el, idx) => {
+          const rr = Math.floor(idx / 10) + 1;
+          const cc = (idx % 10) + 1;
+          el.classList.toggle('active', rr <= r && cc <= c);
+        });
+      };
+      cell.onclick = () => {
+        createVisualTable(wrapper, r, c);
+        selector.style.display = 'none';
+      };
+      row.appendChild(cell);
+    }
+    container.appendChild(row);
+  }
+
+  const closer = (e) => { if (!selector.contains(e.target) && e.target !== btn) { selector.style.display = 'none'; document.removeEventListener('click', closer); } };
+  setTimeout(() => document.addEventListener('click', closer), 10);
+}
+
+function createVisualTable(wrapper, rows, cols) {
+  let html = `<table class="visual-table"><thead><tr>`;
+  for (let c = 0; c < cols; c++) html += `<th contenteditable="true">Header ${c+1}</th>`;
+  html += `</tr></thead><tbody>`;
+  for (let r = 1; r < rows; r++) {
+    html += `<tr>`;
+    for (let c = 0; c < cols; c++) html += `<td contenteditable="true">Data</td>`;
+    html += `</tr>`;
+  }
+  html += `</tbody></table>`;
+  wrapper.innerHTML = html;
+}
+
+function serializeSection(row, index) {
+  let title = row.querySelector('input').value.trim();
+  const content = row.querySelector('textarea').value.trim();
+  const typeSelect = row.querySelector('.section-type');
+  const type = typeSelect ? parseInt(typeSelect.value) : 0;
+  const table = row.querySelector('.visual-table');
+  let tableMarkup = "";
+  
+  if (!title && (content || table)) {
+     title = "Section " + (index + 1); // Fallback title
+  }
+  
+  if (table) {
+    tableMarkup = "\n[TABLE]\n";
+    Array.from(table.rows).forEach(r => {
+      const rowData = Array.from(r.cells).map(c => c.innerText.trim()).join(' | ');
+      tableMarkup += rowData + "\n";
+    });
+    tableMarkup += "[/TABLE]\n";
+  }
+  
+  return { title, content: content + tableMarkup, type };
+}
+
+function renderSchemes() {
+  const q = document.getElementById('schemeSearch').value.toLowerCase();
+  const filtered = allSchemes.filter(s => 
+    (s.planName||'').toLowerCase().includes(q) || 
+    (s.description||'').toLowerCase().includes(q) ||
+    (s.frequency||'').toLowerCase().includes(q)
+  );
+  
+  const list = document.getElementById('schemeList');
+  if (!filtered.length) {
+    list.innerHTML = `<div class="card"><div class="card-body" style="text-align: center; color: var(--text-2); padding: 40px">No matching schemes found.</div></div>`;
+    return;
+  }
+  
+  list.innerHTML = filtered.map(s => {
+    let bonusTableRows = '';
+    try {
+      const config = JSON.parse(s.bonusConfigJson || '[]');
+      bonusTableRows = config.map(t => {
+        let label = '';
+        let pct = '';
+        if (t.startDay !== undefined || t.StartDay !== undefined) {
+           label = `Days ${t.startDay ?? t.StartDay} - ${t.endDay ?? t.EndDay}`;
+           pct = `${t.bonusPercentage ?? t.BonusPercentage}%`;
+        } else {
+           label = t.days || 'Tier';
+           pct = t.bonus || '0%';
+        }
+        return `
+          <tr style="border-top: 1px solid var(--border)">
+            <td>${label}</td>
+            <td style="color: var(--green)">${pct}</td>
+            <td>Tier</td>
+          </tr>`;
+      }).join('');
+    } catch(e) {}
+
+    const bonusAccordion = bonusTableRows ? `
+      <div style="margin-top: 16px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden">
+        <button onclick="this.nextElementSibling.classList.toggle('active')" style="width: 100%; background: var(--bg-2); border: none; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; color: var(--text-1); font-size: 12.5px; font-weight: 600">
+          <span>View Bonus Methodology</span>
+          <svg viewBox="0 0 24 24" style="width: 16px; height: 16px"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="bonus-accordion-content" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: var(--bg-1)">
+          <div style="padding: 12px">
+             <table style="width: 100%; font-size: 11.5px; border-collapse: collapse">
+                <thead><tr style="text-align: left; color: var(--text-3)"><th>Duration</th><th>Bonus</th><th>Type</th></tr></thead>
+                <tbody>${bonusTableRows}</tbody>
+             </table>
+          </div>
+        </div>
+      </div>` : '';
+    
+    let customSectionsHtml = '';
+    try {
+      const sections = JSON.parse(s.customSectionsJson || '[]');
+      if (sections.length) {
+        customSectionsHtml = `
+          <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px">
+            ${sections.map(sec => `<span class="badge badge-accent" style="font-size: 10px; opacity: 0.8">📂 ${sec.title}</span>`).join('')}
+          </div>`;
+      }
+    } catch(e) {}
+
+    return `
+    <div class="card" style="margin-bottom: 0">
+      <div class="card-body" style="padding: 18px 22px">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start">
+          <div style="flex: 1">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px">
+              <span class="badge ${s.frequency === 'Daily' ? 'badge-blue' : 'badge-accent'}">${s.frequency}</span>
+              <span class="badge ${s.isActive ? 'badge-green' : 'badge-red'}">${s.isActive ? 'Active' : 'Inactive'}</span>
+            </div>
+            <div style="font-size: 15px; font-weight: 700; margin-bottom: 3px">${s.planName}</div>
+            <div style="font-size: 12.5px; color: var(--text-2); margin-bottom: 12px">${s.description || 'No description'}</div>
+            <div style="display: flex; gap: 24px; font-size: 12.5px">
+              <span><span style="color: var(--text-3)">Target</span>&nbsp;&nbsp;<strong style="color: var(--accent)">₹${((s.installmentAmountPaise || 0) / 100).toLocaleString('en-IN')}</strong></span>
+              <span><span style="color: var(--text-3)">Duration</span>&nbsp;&nbsp;<strong>${s.totalInstallments} ${s.durationUnit || 'Days'}</strong></span>
+            </div>
+            ${bonusAccordion}
+            ${customSectionsHtml}
+          </div>
+          <div style="display: flex; gap: 8px">
+            <button class="btn btn-outline btn-sm" style="color: ${s.isActive ? 'var(--red)' : 'var(--green)'}; border-color: ${s.isActive ? 'var(--red)' : 'var(--green)'}" onclick="toggleSchemeActive('${s.id}')">
+              ${s.isActive ? 'Deactivate' : 'Activate'}
+            </button>
+            <button class="btn btn-outline btn-sm" style="color: var(--accent)" onclick="viewScheme('${s.id}')">View</button>
+            <button class="btn btn-outline btn-sm" onclick="editScheme('${s.id}')">Edit</button>
+            <button class="btn btn-outline btn-sm" onclick="showSchemeMembersModal('${s.planName.replace(/'/g, "\\'")}')">Members</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteScheme('${s.id}')">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function resetForm() {
+  editingSchemeId = null;
+  document.getElementById('planName').value = '';
+  document.getElementById('description').value = '';
+  document.getElementById('amount').value = '';
+  document.getElementById('installments').value = '';
+  document.getElementById('frequency').value = 'Flexible';
+  document.getElementById('durationUnit').value = 'Days';
+  document.getElementById('bonusTiers').innerHTML = '';
+  document.getElementById('customSections').innerHTML = '';
+  clearPoster();
+  document.getElementById('pr_minAmount').value = '';
+  document.getElementById('pr_maxAmount').value = '';
+  document.getElementById('pr_multiplePerDay').value = 'true';
+  document.getElementById('pr_earlyExitDays').value = '';
+  keywords = [];
+  renderKeywords();
+  
+  // Reset dynamic feature attributes
+  document.getElementById('attr_maturity_enabled').value = '0';
+  document.getElementById('attr_maturity_title').value = 'Maturity benefits';
+  document.getElementById('attr_maturity_desc').value = 'Get accumulated gold bonus automatically credited upon completing plan payments.';
+  document.getElementById('attr_lockable_enabled').value = '0';
+  document.getElementById('attr_lockable_title').value = 'Lockable scheme';
+  document.getElementById('attr_lockable_desc').value = 'Lock in lower gold rates during market drops to maximize profit yields.';
+  document.getElementById('attr_known_enabled').value = '0';
+  document.getElementById('attr_known_title').value = 'Known rates';
+  document.getElementById('attr_known_desc').value = 'Transparent processing and physical gold delivery rates with zero extra charges.';
+
+  const btn = document.querySelector('.card-body > .btn-primary');
+  if (btn) {
+     btn.innerHTML = `
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Publish Scheme
+     `;
+  }
+  const cancelBtn = document.getElementById('cancelEditBtn');
+  if (cancelBtn) cancelBtn.remove();
+  updateLivePreview();
+}
+
+function editScheme(id) {
+  const s = allSchemes.find(x => x.id === id);
+  if (!s) return;
+  
+  editingSchemeId = s.id;
+  document.getElementById('planName').value = s.planName;
+  document.getElementById('description').value = s.description || '';
+  document.getElementById('amount').value = s.installmentAmountPaise / 100;
+  document.getElementById('installments').value = s.totalInstallments;
+  document.getElementById('frequency').value = s.frequency;
+  document.getElementById('durationUnit').value = s.durationUnit || 'Days';
+  
+  // Load Tiers
+  const tierContainer = document.getElementById('bonusTiers');
+  tierContainer.innerHTML = '';
+  try {
+     const config = JSON.parse(s.bonusConfigJson || '[]');
+     config.forEach(t => {
+        if (t.startDay !== undefined || t.StartDay !== undefined) {
+           addBonusTier(t.startDay ?? t.StartDay, t.endDay ?? t.EndDay, t.bonusPercentage ?? t.BonusPercentage);
+        } else if (t.days && t.bonus) {
+           const startDay = 0;
+           const endDay = parseInt(t.days) || 0;
+           const pct = parseFloat(t.bonus) || 0.0;
+           addBonusTier(startDay, endDay, pct);
+        }
+     });
+  } catch(e) {}
+  
+  // Load Custom Sections
+  const sectionContainer = document.getElementById('customSections');
+  sectionContainer.innerHTML = '';
+  try {
+     const sections = JSON.parse(s.customSectionsJson || '[]');
+     sections.forEach(sec => {
+        let visualTableHtml = '';
+        let cleanText = sec.content || '';
+        const type = sec.type !== undefined ? sec.type : 0;
+        
+        if (cleanText.includes('[TABLE]')) {
+           const startIdx = cleanText.indexOf('[TABLE]');
+           const endIdx = cleanText.indexOf('[/TABLE]');
+           if (startIdx !== -1 && endIdx !== -1) {
+              const tableData = cleanText.substring(startIdx + 7, endIdx).trim().split('\n');
+              cleanText = cleanText.substring(0, startIdx).trim();
+              
+              if (tableData.length) {
+                 visualTableHtml = `<table class="visual-table"><thead><tr>`;
+                 const headers = tableData[0].split('|').map(h => h.trim());
+                 headers.forEach(h => visualTableHtml += `<th contenteditable="true">${h}</th>`);
+                 visualTableHtml += `</tr></thead><tbody>`;
+                 
+                 for (let i = 1; i < tableData.length; i++) {
+                    visualTableHtml += `<tr>`;
+                    const cells = tableData[i].split('|').map(c => c.trim());
+                    cells.forEach(c => visualTableHtml += `<td contenteditable="true">${c}</td>`);
+                    visualTableHtml += `</tr>`;
+                 }
+                 visualTableHtml += `</tbody></table>`;
+              }
+           }
+        }
+        
+        addCustomSection(sec.title, cleanText, visualTableHtml, type);
+     });
+  } catch(e) {}
+  
+  // Load Poster Image
+  clearPoster();
+  if (s.posterImageBase64) {
+    document.getElementById('posterImageBase64').value = s.posterImageBase64;
+    document.getElementById('posterPreview').src = s.posterImageBase64;
+    document.getElementById('posterPreviewContainer').style.display = 'block';
+  }
+
+  // Load Payment Rules
+  try {
+    const pr = JSON.parse(s.paymentRulesJson || '{}');
+    document.getElementById('pr_minAmount').value = pr.minAmountPaise ? pr.minAmountPaise / 100 : '';
+    document.getElementById('pr_maxAmount').value = pr.maxAmountPaise ? pr.maxAmountPaise / 100 : '';
+    document.getElementById('pr_multiplePerDay').value = (pr.multiplePerDay === false) ? 'false' : 'true';
+    document.getElementById('pr_earlyExitDays').value = pr.earlyExitAfterDays || '';
+    document.getElementById('cardRating').value = pr.rating !== undefined ? pr.rating : 4.9;
+    
+    // Parse centered attributes
+    const attrs = pr.attributes || [];
+    const mat = attrs.find(a => a.key === 'maturity') || {};
+    document.getElementById('attr_maturity_enabled').value = mat.enabled !== undefined ? mat.enabled : 0;
+    document.getElementById('attr_maturity_title').value = mat.title || 'Maturity benefits';
+    document.getElementById('attr_maturity_desc').value = mat.description || 'Get accumulated gold bonus automatically credited upon completing plan payments.';
+
+    const lock = attrs.find(a => a.key === 'lockable') || {};
+    document.getElementById('attr_lockable_enabled').value = lock.enabled !== undefined ? lock.enabled : 0;
+    document.getElementById('attr_lockable_title').value = lock.title || 'Lockable scheme';
+    document.getElementById('attr_lockable_desc').value = lock.description || 'Lock in lower gold rates during market drops to maximize profit yields.';
+
+    const kn = attrs.find(a => a.key === 'known') || {};
+    document.getElementById('attr_known_enabled').value = kn.enabled !== undefined ? kn.enabled : 0;
+    document.getElementById('attr_known_title').value = kn.title || 'Known rates';
+    document.getElementById('attr_known_desc').value = kn.description || 'Transparent processing and physical gold delivery rates with zero extra charges.';
+  } catch(e) {}
+
+  // Load Keywords
+  try {
+    keywords = JSON.parse(s.keywordsJson || '[]');
+  } catch(e) { keywords = []; }
+  renderKeywords();
+  
+  const submitBtn = document.querySelector('.card-body > .btn-primary');
+  if (submitBtn) {
+     submitBtn.innerHTML = `
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Changes
+     `;
+     if (!document.getElementById('cancelEditBtn')) {
+        const cancel = document.createElement('button');
+        cancel.id = 'cancelEditBtn';
+        cancel.className = 'btn btn-outline';
+        cancel.style = 'justify-content: center; margin-top: 8px';
+        cancel.innerText = 'Cancel Edit';
+        cancel.onclick = resetForm;
+        submitBtn.parentNode.insertBefore(cancel, submitBtn.nextSibling);
+     }
+  }
+  document.getElementById('planName').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function createScheme() {
+  const planName = document.getElementById('planName').value.trim();
+  const description = document.getElementById('description').value.trim();
+  const amount = parseFloat(document.getElementById('amount').value);
+  const installments = parseInt(document.getElementById('installments').value);
+  const frequency = document.getElementById('frequency').value;
+  const durationUnit = document.getElementById('durationUnit').value;
+  
+  // Collect bonus tiers
+  const tierRows = document.querySelectorAll('.tier-row');
+  const bonusTiers = Array.from(tierRows).map(row => {
+    const startDay = parseInt(row.querySelector('.start-day').value);
+    const endDay = parseInt(row.querySelector('.end-day').value);
+    const bonusPercentage = parseFloat(row.querySelector('.bonus-percent').value);
+    return { startDay, endDay, bonusPercentage };
+  }).filter(t => !isNaN(t.startDay) && !isNaN(t.endDay) && !isNaN(t.bonusPercentage));
+
+  if (!planName || isNaN(amount) || isNaN(installments)) { showToast('Fill all required fields', 'error'); return; }
+  
+  try {
+    const isEdit = editingSchemeId !== null;
+    const url = isEdit ? `${API}/api/Scheme/update` : `${API}/api/Scheme/create`;
+    const payload = {
+      planName,
+      description,
+      installmentAmountPaise: Math.round(amount * 100),
+      totalInstallments: installments,
+      frequency,
+      durationUnit,
+      bonusConfigJson: JSON.stringify(bonusTiers),
+      customSectionsJson: JSON.stringify(Array.from(document.querySelectorAll('.section-row')).map((row, idx) => serializeSection(row, idx)).filter(s => s.title)),
+      posterImageBase64: document.getElementById('posterImageBase64').value,
+      paymentRulesJson: JSON.stringify({
+        minAmountPaise: Math.round((parseFloat(document.getElementById('pr_minAmount').value) || 0) * 100),
+        maxAmountPaise: Math.round((parseFloat(document.getElementById('pr_maxAmount').value) || 0) * 100),
+        multiplePerDay: document.getElementById('pr_multiplePerDay').value === 'true',
+        earlyExitAfterDays: parseInt(document.getElementById('pr_earlyExitDays').value) || 180,
+        rating: parseFloat(document.getElementById('cardRating').value) || 4.9,
+        attributes: [
+          {
+            key: "maturity",
+            enabled: parseInt(document.getElementById('attr_maturity_enabled').value) || 0,
+            title: document.getElementById('attr_maturity_title').value.trim(),
+            description: document.getElementById('attr_maturity_desc').value.trim()
+          },
+          {
+            key: "lockable",
+            enabled: parseInt(document.getElementById('attr_lockable_enabled').value) || 0,
+            title: document.getElementById('attr_lockable_title').value.trim(),
+            description: document.getElementById('attr_lockable_desc').value.trim()
+          },
+          {
+            key: "known",
+            enabled: parseInt(document.getElementById('attr_known_enabled').value) || 0,
+            title: document.getElementById('attr_known_title').value.trim(),
+            description: document.getElementById('attr_known_desc').value.trim()
+          }
+        ]
+      }),
+      keywordsJson: document.getElementById('keywordsJson').value
+    };
+    if (isEdit) {
+      payload.id = editingSchemeId;
+    }
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      showToast(isEdit ? 'Scheme updated successfully' : 'Scheme published successfully', 'success');
+      resetForm();
+      loadSchemes();
+    } else {
+      const e = await res.json().catch(() => ({}));
+      showToast('Failed: ' + (e.message || 'API error'), 'error');
+    }
+  } catch (e) { showToast('Network error', 'error'); }
+}
+
+async function deleteScheme(id) {
+  if (!confirm('Delete this scheme? Enrolled users will not be affected.')) return;
+  try {
+    const res = await fetch(`${API}/api/Scheme/${id}`, { method: 'DELETE' });
+    showToast(res.ok ? 'Scheme deleted' : 'Delete failed', res.ok ? 'info' : 'error');
+    if (res.ok) loadSchemes();
+  } catch (e) { showToast('Network error', 'error'); }
+}
+
+async function toggleSchemeActive(id) {
+  const scheme = allSchemes.find(s => s.id === id);
+  if (!scheme) return;
+  
+  const updatedActiveState = !scheme.isActive;
+  
+  // Clone the scheme object and update its isActive flag
+  const payload = { ...scheme, isActive: updatedActiveState };
+  
+  try {
+    const res = await fetch(`${API}/api/Scheme/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      showToast(updatedActiveState ? 'Scheme activated successfully' : 'Scheme deactivated successfully', 'success');
+      loadSchemes();
+    } else {
+      const e = await res.json().catch(() => ({}));
+      showToast('Failed to toggle status: ' + (e.message || 'API error'), 'error');
+    }
+  } catch (e) {
+    showToast('Network error', 'error');
+  }
+}
+
+// ── Poster Image ───────────────────────────────────────────────────────────────────
+function handlePosterUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const b64 = e.target.result;
+    document.getElementById('posterImageBase64').value = b64;
+    document.getElementById('posterPreview').src = b64;
+    document.getElementById('posterPreviewContainer').style.display = 'block';
+    updateLivePreview();
+  };
+  reader.readAsDataURL(file);
+}
+function clearPoster() {
+  document.getElementById('posterImageBase64').value = '';
+  document.getElementById('posterImageFile').value = '';
+  document.getElementById('posterPreviewContainer').style.display = 'none';
+  updateLivePreview();
+}
+
+// ── Keywords ───────────────────────────────────────────────────────────────────
+function addKeyword() {
+  if (keywords.length >= 4) { alert('Maximum 4 keywords allowed.'); return; }
+  const val = document.getElementById('newKeywordInput').value.trim();
+  if (!val) return;
+  keywords.push(val);
+  document.getElementById('newKeywordInput').value = '';
+  renderKeywords();
+  updateLivePreview();
+}
+function removeKeyword(i) {
+  keywords.splice(i, 1);
+  renderKeywords();
+  updateLivePreview();
+}
+function renderKeywords() {
+  const container = document.getElementById('keywordsContainer');
+  container.innerHTML = keywords.map((k, i) =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--accent);color:#fff;border-radius:20px;padding:4px 10px;font-size:13px">${k} <button type="button" onclick="removeKeyword(${i})" style="background:none;border:none;color:#fff;font-size:14px;line-height:1;cursor:pointer">&times;</button></span>`
+  ).join('');
+  document.getElementById('keywordsJson').value = JSON.stringify(keywords);
+}
+
+// ── Live Preview & Mockup Engine ───────────────────────────────────────────────────
+let currentMockupView = 'card';
+
+function switchMockupView(view) {
+  currentMockupView = view;
+  document.querySelectorAll('.mockup-nav-btn').forEach(btn => btn.classList.remove('active'));
+  if (view === 'card') document.getElementById('btn_mock_card').classList.add('active');
+  if (view === 'browse') document.getElementById('btn_mock_browse').classList.add('active');
+  if (view === 'active') document.getElementById('btn_mock_active').classList.add('active');
+  updateLivePreview();
+}
+
+function updateLivePreview() {
+  const mockupScreen = document.getElementById('mockupScreen');
+  if (!mockupScreen) return;
+
+  const planName = document.getElementById('planName').value.trim() || 'Golden Savings Scheme';
+  const description = document.getElementById('description').value.trim() || 'Start accumulating wealth in 99.9% pure gold with customizable daily milestones.';
+  const amount = parseFloat(document.getElementById('amount').value) || 5000;
+  const installments = parseInt(document.getElementById('installments').value) || 330;
+  const frequency = document.getElementById('frequency').value || 'Flexible';
+  const durationUnit = document.getElementById('durationUnit').value;
+  const poster = document.getElementById('posterImageBase64').value;
+  const rating = parseFloat(document.getElementById('cardRating').value) || 4.9;
+
+  const chipsHtml = keywords.map(k => `<span class="phone-card-chip">${k}</span>`).join('');
+
+  if (currentMockupView === 'card') {
+    const heroBg = poster ? `background-image: url('${poster}')` : `background-image: linear-gradient(135deg, #4A0E4E 0%, #1e0520 100%)`;
+    mockupScreen.innerHTML = `
+      <div class="mockup-card-view">
+        <div class="phone-card">
+          <div class="phone-card-hero" style="${heroBg}">
+            <div class="phone-card-hero-overlay"></div>
+            <div class="phone-card-hero-content">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start">
+                <span class="phone-card-chip" style="background:#E8A83A; color:#121214; border:none; font-weight:800; text-transform:uppercase">${frequency}</span>
+                <span class="phone-card-chip" style="background:rgba(255,255,255,0.25); backdrop-filter:blur(4px); border:none; display:inline-flex; align-items:center; gap:2px">
+                  ⭐ ${rating.toFixed(1)}
+                </span>
+              </div>
+              <div>
+                <div class="phone-card-title">${planName}</div>
+                <div class="phone-card-desc">${description}</div>
+                <div class="phone-card-chips">${chipsHtml || '<span class="phone-card-chip">Instant Gold</span><span class="phone-card-chip">99.9% Pure</span>'}</div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-card-bottom">
+            <div>
+              <div style="font-size:8px; color:#8e8e93; text-transform:uppercase; font-weight:600">Target Goal</div>
+              <div class="phone-card-bottom-text">₹${amount.toLocaleString('en-IN')}</div>
+            </div>
+            <div>
+              <div style="font-size:8px; color:#8e8e93; text-transform:uppercase; font-weight:600; text-align:right">Duration</div>
+              <div style="font-size:11px; font-weight:700; color:#121214">${installments} ${durationUnit}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (currentMockupView === 'browse') {
+    const heroBg = poster ? `background-image: url('${poster}')` : `background-image: linear-gradient(135deg, #4A0E4E 0%, #1e0520 100%)`;
+    const sectionRows = document.querySelectorAll('.section-row');
+    let accordionItemsHtml = '';
+    
+    // Parse dynamic centered attributes
+    const matEnabled = parseInt(document.getElementById('attr_maturity_enabled').value) || 0;
+    const matTitle = document.getElementById('attr_maturity_title').value.trim() || 'Maturity benefits';
+    const matDesc = document.getElementById('attr_maturity_desc').value.trim() || '';
+
+    const lockEnabled = parseInt(document.getElementById('attr_lockable_enabled').value) || 0;
+    const lockTitle = document.getElementById('attr_lockable_title').value.trim() || 'Lockable scheme';
+    const lockDesc = document.getElementById('attr_lockable_desc').value.trim() || '';
+
+    const knEnabled = parseInt(document.getElementById('attr_known_enabled').value) || 0;
+    const knTitle = document.getElementById('attr_known_title').value.trim() || 'Known rates';
+    const knDesc = document.getElementById('attr_known_desc').value.trim() || '';
+
+    let attributesHtml = '';
+    if (matEnabled === 1) {
+      attributesHtml += `
+        <div style="border:1.5px solid rgba(232,168,58,0.35); background:linear-gradient(135deg, rgba(74,14,78,0.2) 0%, rgba(30,5,32,0.4) 100%); border-radius:14px; padding:12px; margin-bottom:10px; text-align:center; box-shadow: 0 4px 10px rgba(0,0,0,0.15)">
+          <div style="font-size:11.5px; font-weight:800; color:#E8A83A; display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:4px">
+            🌟 ${matTitle}
+          </div>
+          <div style="font-size:9.5px; color:rgba(255,255,255,0.85); line-height:1.4">
+            ${matDesc}
+          </div>
+        </div>
+      `;
+    }
+    if (lockEnabled === 1) {
+      attributesHtml += `
+        <div style="border:1.5px solid rgba(232,168,58,0.35); background:linear-gradient(135deg, rgba(74,14,78,0.2) 0%, rgba(30,5,32,0.4) 100%); border-radius:14px; padding:12px; margin-bottom:10px; text-align:center; box-shadow: 0 4px 10px rgba(0,0,0,0.15)">
+          <div style="font-size:11.5px; font-weight:800; color:#E8A83A; display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:4px">
+            🔒 ${lockTitle}
+          </div>
+          <div style="font-size:9.5px; color:rgba(255,255,255,0.85); line-height:1.4">
+            ${lockDesc}
+          </div>
+        </div>
+      `;
+    }
+    if (knEnabled === 1) {
+      attributesHtml += `
+        <div style="border:1.5px solid rgba(232,168,58,0.35); background:linear-gradient(135deg, rgba(74,14,78,0.2) 0%, rgba(30,5,32,0.4) 100%); border-radius:14px; padding:12px; margin-bottom:10px; text-align:center; box-shadow: 0 4px 10px rgba(0,0,0,0.15)">
+          <div style="font-size:11.5px; font-weight:800; color:#E8A83A; display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:4px">
+            🛡️ ${knTitle}
+          </div>
+          <div style="font-size:9.5px; color:rgba(255,255,255,0.85); line-height:1.4">
+            ${knDesc}
+          </div>
+        </div>
+      `;
+    }
+
+    if (sectionRows.length === 0) {
+      accordionItemsHtml = `
+        <div class="phone-accordion-item">
+          <div class="phone-accordion-header" onclick="togglePhoneAccordion(this)">
+            <span>Frequently Asked Questions</span>
+            <span style="font-size:9px">▼</span>
+          </div>
+          <div class="phone-accordion-body">
+            This plan allows daily or weekly contributions. All investments are converted instantly to 24k gold.
+          </div>
+        </div>
+        <div class="phone-accordion-item">
+          <div class="phone-accordion-header" onclick="togglePhoneAccordion(this)">
+            <span>Terms & Conditions</span>
+            <span style="font-size:9px">▼</span>
+          </div>
+          <div class="phone-accordion-body">
+            Early exit rules apply after 180 days. Gold delivery can be requested upon scheme maturity.
+          </div>
+        </div>
+      `;
+    } else {
+      sectionRows.forEach((row, idx) => {
+        const sec = serializeSection(row, idx);
+        if (!sec.title) return;
+        
+        let contentHtml = sec.content || '';
+        if (contentHtml.includes('[TABLE]')) {
+          const startIdx = contentHtml.indexOf('[TABLE]');
+          const endIdx = contentHtml.indexOf('[/TABLE]');
+          if (startIdx !== -1 && endIdx !== -1) {
+            const tableData = contentHtml.substring(startIdx + 7, endIdx).trim().split('\n');
+            let tableMarkup = `<table style="width:100%; border-collapse:collapse; margin-top:8px; font-size:9px; border: 1px solid rgba(255,255,255,0.08)">`;
+            if (tableData.length) {
+              const headers = tableData[0].split('|').map(h => h.trim());
+              tableMarkup += `<tr style="background:rgba(255,255,255,0.05)">` + headers.map(h => `<th style="padding:4px; border:1px solid rgba(255,255,255,0.08); text-align:left; font-weight:700">${h}</th>`).join('') + `</tr>`;
+              for (let i = 1; i < tableData.length; i++) {
+                const cells = tableData[i].split('|').map(c => c.trim());
+                tableMarkup += `<tr>` + cells.map(c => `<td style="padding:4px; border:1px solid rgba(255,255,255,0.08)">${c}</td>`).join('') + `</tr>`;
+              }
+            }
+            tableMarkup += `</table>`;
+            contentHtml = contentHtml.substring(0, startIdx).trim() + tableMarkup;
+          }
+        }
+        
+        if (sec.type === 1) {
+          // Premium Card component
+          accordionItemsHtml += `
+            <div style="border:1px solid rgba(232,168,58,0.35); background:linear-gradient(135deg, rgba(74,14,78,0.3) 0%, rgba(30,5,32,0.5) 100%); border-radius:14px; padding:12px; margin-bottom:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.15)">
+              <div style="font-size:11.5px; font-weight:800; color:#E8A83A; display:flex; align-items:center; gap:6px; margin-bottom:6px">
+                ✨ ${sec.title}
+              </div>
+              <div style="font-size:10px; color:rgba(255,255,255,0.85); line-height:1.4">
+                ${contentHtml}
+              </div>
+            </div>
+          `;
+        } else if (sec.type === 2) {
+          // 2-Column Grid component
+          accordionItemsHtml += `
+            <div style="margin-bottom:10px">
+              <div style="font-size:9.5px; font-weight:800; color:#E8A83A; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:5px; padding-left:2px">${sec.title}</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
+                <div style="background:#22252a; border-radius:10px; padding:10px; border: 1px solid rgba(255,255,255,0.04); font-size:9.5px; line-height:1.45; color:#fff">
+                  ${contentHtml}
+                </div>
+                <div style="background:#22252a; border-radius:10px; padding:10px; border: 1px solid rgba(255,255,255,0.04); font-size:9.5px; line-height:1.45; color:rgba(255,255,255,0.55); display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center">
+                  <div style="font-size:14px; margin-bottom:2px">⚡</div>
+                  <div>App Asset Linked</div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          // Accordion tab
+          accordionItemsHtml += `
+            <div class="phone-accordion-item">
+              <div class="phone-accordion-header" onclick="togglePhoneAccordion(this)">
+                <span>${sec.title}</span>
+                <span style="font-size:9px">▼</span>
+              </div>
+              <div class="phone-accordion-body" style="display:none">
+                ${contentHtml}
+              </div>
+            </div>
+          `;
+        }
+      });
+    }
+
+    mockupScreen.innerHTML = `
+      <div style="flex:1; display:flex; flex-direction:column">
+        <div class="phone-browse-hero" style="${heroBg}; background-size: cover; position: relative">
+          <div class="phone-card-hero-overlay"></div>
+          <div style="position:relative; z-index:2; display:flex; flex-direction:column; gap:4px">
+            <div style="font-size:18px; font-weight:900">${planName}</div>
+            <div style="font-size:10px; color:rgba(255,255,255,0.85); line-height:1.3">${description}</div>
+            <div style="display:flex; align-items:center; gap:6px; margin-top:4px">
+              <span class="phone-card-chip" style="background:#E8A83A; color:#121214; font-weight:800; border:none">${frequency}</span>
+              <span style="font-size:10px; font-weight:700">⭐ ${rating.toFixed(1)}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div style="padding:14px; background:#1c1d21; display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.05)">
+          <div>
+            <div style="font-size:8px; color:rgba(255,255,255,0.4)">MIN / MAX LIMIT</div>
+            <div style="font-size:11px; font-weight:700">₹${(parseFloat(document.getElementById('pr_minAmount').value) || 100)} - ₹${(parseFloat(document.getElementById('pr_maxAmount').value) || 10000)}</div>
+          </div>
+          <div>
+            <div style="font-size:8px; color:rgba(255,255,255,0.4); text-align:right">EARLY EXIT</div>
+            <div style="font-size:11px; font-weight:700; text-align:right">${parseInt(document.getElementById('pr_earlyExitDays').value) || 180} Days</div>
+          </div>
+        </div>
+        
+        <div class="phone-accordion-list">
+          ${attributesHtml}
+          ${accordionItemsHtml}
+        </div>
+      </div>
+    `;
+  } else if (currentMockupView === 'active') {
+    const currentPaid = Math.round(amount * 0.45);
+    const percent = 45;
+    
+    const tierRows = document.querySelectorAll('.tier-row');
+    let stepperHtml = '';
+    
+    if (tierRows.length === 0) {
+      stepperHtml = `
+        <div class="phone-step">
+          <div class="phone-step-dot" style="background:#4cd964">✓</div>
+          <div class="phone-step-label" style="color:rgba(255,255,255,0.5)">Day 90: <span style="color:#4cd964">2.0% Bonus Tier</span> reached</div>
+        </div>
+        <div class="phone-step">
+          <div class="phone-step-dot" style="background:#E8A83A">2</div>
+          <div class="phone-step-label">Day 180: <span style="color:#E8A83A">5.0% Bonus Tier</span> active</div>
+        </div>
+        <div class="phone-step">
+          <div class="phone-step-dot" style="background:rgba(255,255,255,0.1)">3</div>
+          <div class="phone-step-label" style="color:rgba(255,255,255,0.4)">Day 330: <span style="color:#C2185B">7.5% Bonus Tier</span> (Locked)</div>
+        </div>
+      `;
+    } else {
+      tierRows.forEach((row, idx) => {
+        const startDay = parseInt(row.querySelector('.start-day').value) || 0;
+        const endDay = parseInt(row.querySelector('.end-day').value) || 0;
+        const pct = parseFloat(row.querySelector('.bonus-percent').value) || 0;
+        
+        let dotBg = 'rgba(255,255,255,0.1)';
+        let dotContent = idx + 1;
+        let labelColor = 'rgba(255,255,255,0.4)';
+        let statusText = 'Locked';
+        
+        if (idx === 0) {
+          dotBg = '#4cd964';
+          dotContent = '✓';
+          labelColor = 'rgba(255,255,255,0.6)';
+          statusText = 'Reached';
+        } else if (idx === 1) {
+          dotBg = '#E8A83A';
+          labelColor = '#fff';
+          statusText = 'Active';
+        }
+        
+        stepperHtml += `
+          <div class="phone-step" style="margin-bottom:8px">
+            <div class="phone-step-dot" style="background:${dotBg}">${dotContent}</div>
+            <div class="phone-step-label" style="color:${labelColor}">
+              Days ${startDay} - ${endDay}: <span style="color:${dotBg === 'rgba(255,255,255,0.1)' ? '#C2185B' : dotBg}">${pct.toFixed(2)}% Bonus</span> (${statusText})
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    mockupScreen.innerHTML = `
+      <div style="flex:1; display:flex; flex-direction:column">
+        <div class="phone-active-hero">
+          <div class="phone-gauge">
+            <div class="phone-gauge-value">${percent}%</div>
+            <div style="font-size:7px; color:rgba(255,255,255,0.5); text-transform:uppercase; margin-top:2px">Saved</div>
+          </div>
+          <div style="font-size:15px; font-weight:800; margin-top:12px; color:#fff">${planName}</div>
+          <div style="font-size:10px; color:rgba(255,255,255,0.5); margin-top:2px">Active Savings Scheme</div>
+        </div>
+        
+        <div class="phone-active-stats-grid">
+          <div class="phone-active-stat-box">
+            <div class="phone-active-stat-label">Total Saved</div>
+            <div class="phone-active-stat-val">₹${currentPaid.toLocaleString('en-IN')}</div>
+          </div>
+          <div class="phone-active-stat-box">
+            <div class="phone-active-stat-label">Goal Target</div>
+            <div class="phone-active-stat-val">₹${amount.toLocaleString('en-IN')}</div>
+          </div>
+          <div class="phone-active-stat-box">
+            <div class="phone-active-stat-label">Gold Accumulated</div>
+            <div class="phone-active-stat-val">0.7850 grams</div>
+          </div>
+          <div class="phone-active-stat-box">
+            <div class="phone-active-stat-label">Frequency</div>
+            <div class="phone-active-stat-val">${frequency}</div>
+          </div>
+        </div>
+        
+        <div style="padding:4px 14px 0 14px; font-size:9.5px; font-weight:700; color:#E8A83A; text-transform:uppercase; letter-spacing:0.5px">Milestone & Bonus Stages</div>
+        <div class="phone-stepper">
+          ${stepperHtml}
+        </div>
+      </div>
+    `;
+  }
+}
+
+function togglePhoneAccordion(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('span:last-child');
+  if (body.style.display === 'none' || body.style.display === '') {
+    body.style.display = 'block';
+    arrow.innerText = '▲';
+  } else {
+    body.style.display = 'none';
+    arrow.innerText = '▼';
+  }
+}
+
+// View Scheme details logic
+function viewScheme(id) {
+  const s = allSchemes.find(x => x.id === id);
+  if (!s) return;
+  
+  document.getElementById('vPlanName').textContent = s.planName;
+  document.getElementById('vDescription').textContent = s.description || 'No description provided.';
+  document.getElementById('vId').textContent = 'Scheme ID: ' + s.id + ' | Code: ' + (s.schemeCode || 'N/A');
+  document.getElementById('vFrequency').textContent = s.frequency || 'Daily';
+  document.getElementById('vAmount').textContent = '₹' + ((s.installmentAmountPaise || 0) / 100).toLocaleString('en-IN');
+  document.getElementById('vTotalInstallments').textContent = s.totalInstallments + ' ' + (s.durationUnit || 'Days');
+  document.getElementById('vMinDeposit').textContent = '₹' + ((s.minAmountPaise || 0) / 100).toLocaleString('en-IN');
+  document.getElementById('vUpperCap').textContent = s.upperCapPaise ? '₹' + (s.upperCapPaise / 100).toLocaleString('en-IN') : 'None';
+  document.getElementById('vSovereign').textContent = s.sovereignWeightMg ? (s.sovereignWeightMg / 1000).toFixed(4) + ' g' : 'None';
+  
+  const statusEl = document.getElementById('vStatus');
+  statusEl.innerHTML = s.isActive 
+    ? '<span class="badge badge-green">Active</span>' 
+    : '<span class="badge badge-red">Inactive</span>';
+    
+  if (s.posterImageUrl) {
+    document.getElementById('vPoster').src = s.posterImageUrl.startsWith('/') ? API_BASE + s.posterImageUrl : s.posterImageUrl;
+    document.getElementById('vPosterContainer').style.display = 'flex';
+  } else {
+    document.getElementById('vPosterContainer').style.display = 'none';
+  }
+  
+  let bonusHtml = '';
+  if (s.bonusConfigJson) {
+    try {
+      const bConfig = JSON.parse(s.bonusConfigJson);
+      bonusHtml += `<div style="background:var(--bg-2); padding:10px; border-radius:6px; border:1px solid var(--border)">`;
+      bonusHtml += `<div><strong>Starting Loyalty Bonus:</strong> ${bConfig.starting_bonus_percentage || 7.5}%</div>`;
+      if (bConfig.bonus_tiers && bConfig.bonus_tiers.length > 0) {
+        bonusHtml += `<div style="margin-top:6px; font-weight:600">Loyalty Milestones:</div><ul style="margin:4px 0 0 16px; padding:0">`;
+        bConfig.bonus_tiers.forEach(tier => {
+          bonusHtml += `<li>Day ${tier.days_completed}: ${tier.bonus_percentage}% Bonus</li>`;
+        });
+        bonusHtml += `</ul>`;
+      }
+      bonusHtml += `</div>`;
+    } catch(e) {
+      bonusHtml = `<span style="color:var(--red)">Error parsing bonus config JSON.</span>`;
+    }
+  } else {
+    bonusHtml = 'None';
+  }
+  document.getElementById('vBonusConfig').innerHTML = bonusHtml;
+  
+  let sectionsHtml = '';
+  if (s.customSectionsJson) {
+    try {
+      const sections = JSON.parse(s.customSectionsJson);
+      if (sections && sections.length > 0) {
+        sections.forEach(sec => {
+          sectionsHtml += `<div style="background:var(--bg-2); padding:10px; border-radius:6px; border:1px solid var(--border); margin-bottom: 8px">`;
+          sectionsHtml += `<div style="font-weight:700">${sec.title}</div>`;
+          if (sec.type === 'faq' && sec.items) {
+            sec.items.forEach(faq => {
+              sectionsHtml += `<div style="margin-top:6px">`;
+              sectionsHtml += `<div style="font-weight:600; font-size:12px">Q: ${faq.q}</div>`;
+              sectionsHtml += `<div style="font-size:12px; color:var(--text-2)">A: ${faq.a}</div>`;
+              sectionsHtml += `</div>`;
+            });
+          } else if (sec.type === 'grid' && sec.gridData) {
+            sectionsHtml += `<table class="view-grid" style="width:100%; border-collapse:collapse; margin-top:6px; font-size:11px">`;
+            sec.gridData.forEach((row, ri) => {
+              sectionsHtml += `<tr>`;
+              row.forEach(cell => {
+                sectionsHtml += `<td style="border:1px solid var(--border); padding:4px 6px; font-weight:${ri===0?'bold':'normal'}">${cell}</td>`;
+              });
+              sectionsHtml += `</tr>`;
+            });
+            sectionsHtml += `</table>`;
+          }
+          sectionsHtml += `</div>`;
+        });
+      } else {
+        sectionsHtml = '<span style="color:var(--text-3)">No custom info sections.</span>';
+      }
+    } catch(e) {
+      sectionsHtml = `<span style="color:var(--red)">Error parsing custom sections JSON.</span>`;
+    }
+  } else {
+    sectionsHtml = '<span style="color:var(--text-3)">No custom info sections.</span>';
+  }
+  document.getElementById('vCustomSections').innerHTML = sectionsHtml;
+  
+  document.getElementById('viewModal').style.display = 'flex';
+}
+
+function hideViewModal() {
+  document.getElementById('viewModal').style.display = 'none';
+}
+
+async function showSchemeMembersModal(planName) {
+  const titleEl = document.getElementById('membersModalTitle');
+  titleEl.textContent = `${planName} - Scheme Members`;
+  
+  const tbody = document.getElementById('membersTableBody');
+  tbody.innerHTML = `<tr><td colspan="8" class="table-empty">Loading members list...</td></tr>`;
+  document.getElementById('membersModal').style.display = 'flex';
+  
+  try {
+    const usersMap = await getUsersMap();
+    const res = await fetch(`${API}/api/Scheme/enrollments`);
+    if (!res.ok) {
+      throw new Error(`Server returned status ${res.status}`);
+    }
+    const data = await res.json();
+    const enrollments = data.enrollments || (Array.isArray(data) ? data : []);
+    
+    const filtered = enrollments.filter(e => (e.planName || '').toLowerCase() === planName.toLowerCase());
+    
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="table-empty">No members have joined this scheme yet.</td></tr>`;
+      return;
+    }
+    
+    tbody.innerHTML = filtered.map(u => {
+      const userObj = usersMap[(u.userId || '').toLowerCase()];
+      const resolvedName = userObj ? userObj.fullName : (u.userName || 'Unknown');
+      const resolvedPhone = userObj ? userObj.phoneNumber : (u.userPhone || 'N/A');
+      
+      const joinDateObj = new Date(u.createdAt);
+      const joinDate = joinDateObj.toLocaleDateString('en-IN');
+      const joinTime = joinDateObj.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      
+      const totalInvestment = `₹${((u.totalInvestmentPaise || 0) / 100).toLocaleString('en-IN')}`;
+      const totalGoldAcc = `${((u.accumulatedGoldMg || 0) / 1000).toFixed(4)} g`;
+      const totalBonusGold = `${((u.totalBonusGoldMg || 0) / 1000).toFixed(4)} g`;
+      
+      const statusClass = u.status === 'Active' ? 'badge-green' : 'badge-amber';
+      
+      return `
+        <tr>
+          <td><a href="users.html?userId=${u.userId}" style="color:var(--accent);font-weight:500;text-decoration:underline">${resolvedName}</a></td>
+          <td class="font-mono">${resolvedPhone}</td>
+          <td>${joinDate}</td>
+          <td>${joinTime}</td>
+          <td><span class="badge ${statusClass}">${u.status}</span></td>
+          <td class="font-mono" style="font-weight:600">${totalInvestment}</td>
+          <td class="font-mono" style="font-weight:600;color:var(--green)">${totalGoldAcc}</td>
+          <td class="font-mono" style="font-weight:600;color:var(--accent)">${totalBonusGold}</td>
+        </tr>
+      `;
+    }).join('');
+  } catch (error) {
+    console.error('Error fetching scheme members:', error);
+    tbody.innerHTML = `<tr><td colspan="8" class="table-empty" style="color:var(--red)">Failed to load scheme members. ${error.message}</td></tr>`;
+  }
+}
+
+function closeMembersModal() {
+  document.getElementById('membersModal').style.display = 'none';
+}
+
+loadSchemes();
+updateLivePreview();
+</script>
+
+<!-- Members Modal -->
+<div id="membersModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; padding: 20px">
+  <div class="card" style="width: 100%; max-width: 900px; margin-bottom:0; max-height:90vh; overflow-y:auto">
+    <div class="card-head">
+      <span class="card-title" id="membersModalTitle">Scheme Members List</span>
+      <button class="btn btn-ghost btn-xs" onclick="closeMembersModal()">✕</button>
+    </div>
+    <div class="card-body" style="padding:0">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>User Name</th>
+              <th>Mobile Number</th>
+              <th>Join Date</th>
+              <th>Join Time</th>
+              <th>Scheme Status</th>
+              <th>Total Investment</th>
+              <th>Total Gold Accumulated</th>
+              <th>Total Bonus Gold Earned</th>
+            </tr>
+          </thead>
+          <tbody id="membersTableBody">
+            <tr><td colspan="8" class="table-empty">Loading member data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-body" style="border-top:1px solid var(--border); display:flex; justify-content:flex-end; padding: 12px 20px">
+      <button class="btn btn-outline btn-sm" onclick="closeMembersModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Modal -->
+<div id="viewModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; padding: 20px">
+  <div class="card" style="width: 100%; max-width: 600px; margin-bottom:0; max-height:90vh; overflow-y:auto">
+    <div class="card-head"><span class="card-title" id="vPlanName">View Scheme Details</span><button class="btn btn-ghost btn-xs" onclick="hideViewModal()">✕</button></div>
+    <div class="card-body" style="display:flex; flex-direction:column; gap:16px">
+      <div id="vPosterContainer" style="width:100%; height:180px; background:var(--surface2); border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center">
+        <img id="vPoster" style="width:100%; height:100%; object-fit:cover">
+      </div>
+      <div>
+        <h3 id="vDescription" style="margin:0 0 6px 0; font-size:14px; font-weight:400; line-height:1.4"></h3>
+        <p id="vId" style="margin:0; font-size:11px; color:var(--text-3)"></p>
+      </div>
+      <hr style="border:0; border-top:1px solid var(--border); margin:0">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13px">
+        <div>
+          <span style="color:var(--text-3)">Frequency:</span>&nbsp;&nbsp;<strong id="vFrequency"></strong>
+        </div>
+        <div>
+          <span style="color:var(--text-3)">Status:</span>&nbsp;&nbsp;<span id="vStatus"></span>
+        </div>
+        <div>
+          <span style="color:var(--text-3)">Contribution Amount:</span>&nbsp;&nbsp;<strong id="vAmount"></strong>
+        </div>
+        <div>
+          <span style="color:var(--text-3)">Total Contributions:</span>&nbsp;&nbsp;<strong id="vTotalInstallments"></strong>
+        </div>
+        <div>
+          <span style="color:var(--text-3)">Min Deposit:</span>&nbsp;&nbsp;<strong id="vMinDeposit"></strong>
+        </div>
+        <div>
+          <span style="color:var(--text-3)">Upper Cap:</span>&nbsp;&nbsp;<strong id="vUpperCap"></strong>
+        </div>
+        <div>
+          <span style="color:var(--text-3)">Sovereign Weight:</span>&nbsp;&nbsp;<strong id="vSovereign"></strong>
+        </div>
+      </div>
+      <hr style="border:0; border-top:1px solid var(--border); margin:0">
+      <div>
+        <span style="color:var(--text-3); font-size:13px; font-weight:600; display:block; margin-bottom:6px">Bonus Configuration:</span>
+        <div id="vBonusConfig" style="font-size:13px; line-height:1.4"></div>
+      </div>
+      <hr style="border:0; border-top:1px solid var(--border); margin:0">
+      <div>
+        <span style="color:var(--text-3); font-size:13px; font-weight:600; display:block; margin-bottom:6px">Custom Info Sections:</span>
+        <div id="vCustomSections" style="display:flex; flex-direction:column; gap:8px"></div>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:8px">
+        <button class="btn btn-primary" onclick="hideViewModal()" style="flex:1; justify-content:center">Close Details</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body></html>

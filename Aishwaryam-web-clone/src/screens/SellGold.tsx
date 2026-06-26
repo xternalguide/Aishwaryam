@@ -1,0 +1,380 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { SessionManager } from '../utils/SessionManager';
+import { useTranslation } from '../utils/translation';
+import { ApiClient } from '../utils/ApiClient';
+import { useApp } from '../context/AppContext';
+import { ArrowLeft, AlertTriangle } from 'lucide-react';
+
+export const SellGold: React.FC = () => {
+  const navigate = useNavigate();
+  const { portfolio, livePrice, refreshData } = useApp();
+  const { t, lang } = useTranslation();
+
+  const [goldBalanceMg, setGoldBalanceMg] = useState(19800); // 19.8 grams
+  const [redeemableGoldMg, setRedeemableGoldMg] = useState(19800);
+  const [lockedGoldMg, setLockedGoldMg] = useState(0);
+
+  const [sellPricePaise, setSellPricePaise] = useState(721000); // ₹7,210.00 per gram paise
+  const [priceUpdatedAt, setPriceUpdatedAt] = useState<string | null>(null);
+  const [lockExpiresAt, setLockExpiresAt] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState('');
+
+  const [weightInput, setWeightInput] = useState('');
+  const [amountInput, setAmountInput] = useState('');
+  const [amountToReceivePaise, setAmountToReceivePaise] = useState(0);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Load portfolio and pricing from context
+  useEffect(() => {
+    if (portfolio) {
+      setGoldBalanceMg(portfolio.goldBalanceMg || 0);
+      setRedeemableGoldMg(portfolio.redeemableGoldMg || portfolio.goldBalanceMg || 0);
+      setLockedGoldMg(portfolio.lockedGoldMg || 0);
+    }
+    if (livePrice) {
+      setSellPricePaise(livePrice.sellPricePaise || 721000);
+      setPriceUpdatedAt(livePrice.updatedAt || new Date().toISOString());
+      setLockExpiresAt(new Date(Date.now() + 5 * 60 * 1000).toISOString());
+    }
+  }, [portfolio, livePrice]);
+
+  // Timer countdown
+  useEffect(() => {
+    if (!lockExpiresAt) return;
+    const interval = setInterval(() => {
+      const diff = new Date(lockExpiresAt).getTime() - Date.now();
+      if (diff <= 0) {
+        setTimeLeft('Expired');
+        clearInterval(interval);
+      } else {
+        const min = Math.floor((diff / 1000) / 60);
+        const sec = Math.floor((diff / 1000) % 60);
+        setTimeLeft(`${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [lockExpiresAt]);
+
+  const onWeightChanged = (val: string) => {
+    const clean = val.replace(/[^\d.]/g, '');
+    setWeightInput(clean);
+
+    const parsedWt = parseFloat(clean);
+    if (!isNaN(parsedWt) && parsedWt > 0) {
+      const pricePerGm = sellPricePaise;
+      const totalPaise = Math.round(parsedWt * pricePerGm);
+
+      setAmountToReceivePaise(totalPaise);
+      setAmountInput((totalPaise / 100).toFixed(2));
+
+      // Validate weight limits
+      const wtMg = parsedWt * 1000;
+      if (wtMg > redeemableGoldMg) {
+        setErrorMsg(lang === 'en'
+          ? `Insufficient sellable balance. Maximum sellable is ${mgToGrams(redeemableGoldMg)}.`
+          : `உங்களிடம் போதிய இருப்பு இல்லை. அதிகபட்சமாக விற்கக்கூடியது ${mgToGrams(redeemableGoldMg)}.`
+        );
+      } else {
+        setErrorMsg(null);
+      }
+    } else {
+      setAmountToReceivePaise(0);
+      setAmountInput('');
+      setErrorMsg(null);
+    }
+  };
+
+  const onAmountChanged = (val: string) => {
+    const clean = val.replace(/[^\d.]/g, '');
+    setAmountInput(clean);
+
+    const parsedAmt = parseFloat(clean);
+    if (!isNaN(parsedAmt) && parsedAmt > 0) {
+      const totalPaise = Math.round(parsedAmt * 100);
+      setAmountToReceivePaise(totalPaise);
+
+      // Convert to grams
+      const pricePerGm = sellPricePaise;
+      if (pricePerGm > 0) {
+        const wt = totalPaise / pricePerGm;
+        setWeightInput(wt.toFixed(4));
+
+        // Validate limits
+        if (wt * 1000 > redeemableGoldMg) {
+          setErrorMsg(lang === 'en'
+            ? `Insufficient sellable balance. Maximum sellable is ${mgToGrams(redeemableGoldMg)}.`
+            : `உங்களிடம் போதிய இருப்பு இல்லை. அதிகபட்சமாக விற்கக்கூடியது ${mgToGrams(redeemableGoldMg)}.`
+          );
+        } else {
+          setErrorMsg(null);
+        }
+      }
+    } else {
+      setAmountToReceivePaise(0);
+      setWeightInput('');
+      setErrorMsg(null);
+    }
+  };
+
+  const handleSell = async () => {
+    if (amountToReceivePaise <= 0 || errorMsg) return;
+    setIsLoading(true);
+    setErrorMsg(null);
+
+    try {
+      const userId = SessionManager.getUserId() || 'user-id-999';
+      await ApiClient.post('api/Gold/sell', {
+        userId,
+        goldWeightMg: Math.round(parseFloat(weightInput) * 1000),
+        amountPaise: amountToReceivePaise
+      });
+
+      await refreshData();
+      alert(lang === 'en' 
+        ? 'Gold sold successfully! Money will be credited to your linked bank account.' 
+        : 'தங்கம் வெற்றிகரமாக விற்கப்பட்டது! பணம் உங்கள் வங்கி கணக்கில் செலுத்தப்படும்.'
+      );
+      navigate(-1);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Sell transaction failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatRupees = (paise: number) => {
+    const rupees = paise / 100;
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(rupees);
+  };
+
+  const mgToGrams = (mg: number) => {
+    return `${(mg / 1000).toFixed(4)} g`;
+  };
+
+  const formatDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F9FAFB' }}>
+      {/* Top Bar */}
+      <div className="app-header-bar" style={{
+        background: 'white',
+        borderBottom: '1px solid #ECECEC',
+        padding: '16px 20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px'
+      }}>
+        <button
+          onClick={() => navigate(-1)}
+          style={{ background: 'transparent', border: 'none', color: 'var(--brand-dark)', display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+        >
+          <ArrowLeft size={24} />
+        </button>
+        <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--brand-dark)', fontFamily: 'var(--font-poppins)' }}>
+          {t('sell_gold_silver')}
+        </span>
+      </div>
+
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* Available Balance Card */}
+        <div style={{
+          background: 'var(--gradient-brand)',
+          borderRadius: '18px',
+          padding: '20px',
+          color: 'white',
+          position: 'relative',
+          boxShadow: '0 8px 16px rgba(0,0,0,0.15)'
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', margin: '0 0 10px 0' }}>
+              {lang === 'en'
+                ? 'Visit our store to claim your physical gold. Festival and Birthday bonuses will be applied by the admin upon redemption.'
+                : 'உங்களது சேமிப்பு தங்கத்தைப் பெற எங்கள் கடைக்கு வரவும். திருவிழா மற்றும் பிறந்தநாள் போனஸ்கள் நிர்வாகியால் சரிபார்க்கப்பட்டு பின்னர் வழங்கப்படும்.'}
+            </p>
+            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+              {t('available_balance')}
+            </span>
+            <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: 'white', fontFamily: 'var(--font-poppins)', margin: '4px 0 12px 0' }}>
+              {mgToGrams(goldBalanceMg)}
+            </h2>
+
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <div>
+                <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'rgba(255,255,255,0.5)' }}>{lang === 'en' ? 'SELLABLE' : 'விற்கக்கூடியது'}</span>
+                <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--success-green)' }}>{mgToGrams(redeemableGoldMg)}</div>
+              </div>
+              <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.2)' }} />
+              <div>
+                <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'rgba(255,255,255,0.5)' }}>{t('locked').toUpperCase()}</span>
+                <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'white' }}>{mgToGrams(lockedGoldMg)}</div>
+              </div>
+            </div>
+
+            <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '16px 0 8px 0' }} />
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '4px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.6)' }}>{t('current_sell_price')}</span>
+                  {timeLeft && (
+                    <span style={{
+                      fontSize: '9px', fontWeight: 'bold', color: '#FFB300', background: 'rgba(255, 179, 0, 0.15)',
+                      padding: '1px 4px', borderRadius: '4px'
+                    }}>{t('locked_status')}</span>
+                  )}
+                </div>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--brand-accent)' }}>
+                  {formatRupees(sellPricePaise)} / g
+                </div>
+                {priceUpdatedAt && (
+                  <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.5)' }}>
+                    {t('last_updated')}: {formatDate(priceUpdatedAt)}
+                  </span>
+                )}
+              </div>
+              {timeLeft && (
+                <span style={{ fontSize: '11px', color: '#FFB300', fontWeight: 'bold' }}>{timeLeft}</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Form Inputs */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>{t('enter_redemption_amount')}</span>
+
+          <div>
+            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginLeft: '4px' }}>{t('redemption_weight_grams')}</label>
+            <div style={{ position: 'relative', marginTop: '4px' }}>
+              <input
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*\\.?[0-9]*"
+                placeholder={t('enter_weight')}
+                value={weightInput}
+                onChange={(e) => onWeightChanged(e.target.value)}
+                style={{
+                  width: '100%',
+                  height: '48px',
+                  borderRadius: '12px',
+                  border: errorMsg ? '1px solid var(--error-red)' : '1px solid rgba(0,0,0,0.1)',
+                  padding: '0 40px 0 16px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  outline: 'none'
+                }}
+              />
+              <span style={{ position: 'absolute', right: '16px', top: '14px', fontSize: '16px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>g</span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('or').toUpperCase()}</span>
+          </div>
+
+          <div>
+            <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginLeft: '4px' }}>{t('redemption_amount_rupees')}</label>
+            <div style={{ position: 'relative', marginTop: '4px' }}>
+              <span style={{ position: 'absolute', left: '16px', top: '14px', fontSize: '16px', fontWeight: 'bold', color: 'var(--text-primary)' }}>₹</span>
+              <input
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*\\.?[0-9]*"
+                placeholder={t('enter_amount')}
+                value={amountInput}
+                onChange={(e) => onAmountChanged(e.target.value)}
+                style={{
+                  width: '100%',
+                  height: '48px',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(0,0,0,0.1)',
+                  padding: '0 16px 0 32px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  outline: 'none'
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Payout Summary Card */}
+        {amountToReceivePaise > 0 && !errorMsg && (
+          <div className="glass-card" style={{
+            borderRadius: '16px',
+            padding: '16px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            border: '1px solid #ECECEC'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-secondary)' }}>
+              <span>{lang === 'en' ? 'Selling Amount' : 'விற்பனைத் தொகை'}</span>
+              <span style={{ fontWeight: '500' }}>{formatRupees(amountToReceivePaise)}</span>
+            </div>
+            <div style={{ height: '1px', background: '#F3F4F6', margin: '4px 0' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
+              <span>{lang === 'en' ? 'Total Payout (Store Claim)' : 'மொத்த தொகை (கடையில் பெறுவது)'}</span>
+              <span style={{ fontSize: '18px', color: 'var(--success-green)' }}>{formatRupees(amountToReceivePaise)}</span>
+            </div>
+          </div>
+        )}
+
+        <div style={{ flex: 1 }} />
+
+        {errorMsg && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', marginBottom: '12px', padding: '0 8px' }}>
+            <AlertTriangle size={16} color="var(--error-red)" />
+            <span style={{ color: 'var(--error-red)', fontSize: '13px', fontWeight: 'bold', textAlign: 'center' }}>
+              {errorMsg}
+            </span>
+          </div>
+        )}
+
+        {/* Sell Button */}
+        <button
+          onClick={handleSell}
+          disabled={amountToReceivePaise <= 0 || errorMsg !== null || isLoading}
+          style={{
+            width: '100%',
+            height: '56px',
+            borderRadius: '16px',
+            background: 'var(--brand-dark)',
+            color: 'white',
+            border: 'none',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            cursor: (amountToReceivePaise > 0 && !errorMsg) ? 'pointer' : 'default',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: (amountToReceivePaise <= 0 || errorMsg !== null || isLoading) ? 0.5 : 1,
+            boxShadow: '0 8px 16px var(--brand-glow)'
+          }}
+        >
+          {isLoading ? (
+            <div className="spinner" style={{ width: '24px', height: '24px', border: '3px solid white', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          ) : (
+            t('redeem_now')
+          )}
+        </button>
+
+        <span style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', display: 'block', paddingBottom: '8px' }}>
+          {lang === 'en'
+            ? 'Money will be credited directly to your verified bank account.'
+            : 'பணம் உங்கள் சரிபார்க்கப்பட்ட வங்கி கணக்கில் நேரடியாக செலுத்தப்படும்.'}
+        </span>
+      </div>
+    </div>
+  );
+};

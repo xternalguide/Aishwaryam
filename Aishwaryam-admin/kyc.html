@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Aishwaryam Admin — KYC Verification</title>
+  <link rel="stylesheet" href="admin.css">
+  <script src="admin-shared.js"></script>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7L12 2z"/><path d="M12 2v20M3 7l9 5 9-5"/></svg></div>
+    <div><div class="logo-text">Aishwaryam</div><div class="logo-badge">Admin Console</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Overview</div>
+    <a href="index.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+    <div class="nav-section">Management</div>
+    <a href="users.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Users</a>
+    <a href="kyc.html" class="nav-link active"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>KYC Verification</a>
+    <a href="transactions.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>Transactions</a>
+    <a href="redemptions.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 1 0 0-4h14a2 2 0 1 0 0 4M5 8l1 8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-8"/><path d="M10 12v4M14 12v4"/></svg>Redemption Queue</a>
+    <a href="scheme-joined.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>Scheme Joined Users</a>
+    <div class="nav-section">Content</div>
+    <a href="schemes.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Schemes</a>
+    <a href="offers.html" class="nav-link"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Offers & Bonuses</a>
+    <a href="onboarding-banners.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Onboarding Banners</a>
+    <a href="posters.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>App Posters</a>
+    <a href="receipt-template.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Receipt Template</a>
+    <div class="nav-section">System</div>
+    <a href="notifications.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Push Broadcast</a>
+    <a href="audit.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Audit Logs</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-avatar">A</div>
+      <div><div class="user-name">Super Admin</div><div class="user-role">admin@aishwaryam.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="breadcrumb-item">Aishwaryam</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-item current">KYC Verification</span>
+    </div>
+    <div class="topbar-right">
+      <div class="live-pill"><span class="live-dot"></span>Live</div>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme"></button>
+    </div>
+  </header>
+
+  <div class="page">
+    <div class="page-head">
+      <div>
+        <h1>KYC Verification</h1>
+        <p>Monitor user identity levels and send push notifications to pending accounts</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" onclick="exportKyc()">Export CSV</button>
+        <button class="btn btn-outline btn-sm" onclick="loadKycGrid()">Refresh List</button>
+        <button class="btn btn-accent btn-sm" onclick="openBulkNotificationModal()">Send Bulk Notification</button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card">
+      <div class="card-body">
+        <div class="form-grid" style="grid-template-columns: 1fr 200px; gap: 12px; margin-bottom: 0;">
+          <div class="input-group">
+            <span class="input-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+            <input type="text" class="form-control" id="kycSearch" placeholder="Search by Name, Phone, or ID..." onkeyup="applyKycFilters()">
+          </div>
+          <div class="form-group">
+            <select class="form-control" id="kycLevelFilter" onchange="applyKycFilters()">
+              <option value="All">All Status</option>
+              <option value="PENDING">Pending Verification (PENDING)</option>
+              <option value="FULL">Completed (FULL)</option>
+              <option value="AADHAAR">Aadhaar Linked</option>
+              <option value="BASIC">Not Verified (BASIC)</option>
+              <option value="NONE">Not Started</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KYC Grid -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">KYC Status Dashboard</span>
+        <span class="badge badge-accent" id="kycCount">0 total</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>User Name</th>
+              <th>Phone</th>
+              <th>KYC Level</th>
+              <th>Joined Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="kycBody">
+            <tr><td colspan="5" class="table-empty">Loading KYC data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Details / Lookup -->
+    <div id="kycDetail" style="display:none" class="card">
+      <div class="card-head"><span class="card-title">Manage KYC for <span id="targetUserName">User</span></span><button class="btn btn-ghost btn-xs" onclick="closeKycDetail()">✕</button></div>
+      <div class="card-body">
+        <div class="form-grid" style="grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px">
+          <div class="form-group"><label class="form-label">Document Type</label><input type="text" class="form-control" id="kycDocType" readonly style="background: var(--surface2)"></div>
+          <div class="form-group"><label class="form-label">Document Number</label><input type="text" class="form-control" id="kycDocNum" readonly style="background: var(--surface2)"></div>
+          <div class="form-group"><label class="form-label">Current Status</label><input type="text" class="form-control" id="kycStatus" readonly style="background: var(--surface2)"></div>
+        </div>
+        <!-- Document Link and Preview Container for Multiple Documents -->
+        <div id="kycDocsContainer" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
+          <!-- Dynamically populated document cards will be rendered here -->
+        </div>
+        <div style="display: flex; gap: 10px">
+          <button id="btnApproveKyc" class="btn btn-success" onclick="approveKyc()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Approve</button>
+          <button id="btnRejectKyc" class="btn btn-danger" onclick="rejectKyc()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Reject</button>
+          <button id="btnSendPush" class="btn btn-primary" onclick="sendPushNotification()"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Send Notification</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<div id="toast"></div>
+
+<script>
+const API = API_BASE;
+let allKycUsers = [];
+let currentKycUid = '';
+
+let isInitialLoad = true;
+async function loadKycGrid() {
+  try {
+    const res = await fetch(`${API}/api/Kyc/all`);
+    allKycUsers = await res.json();
+    
+    if (isInitialLoad) {
+      isInitialLoad = false;
+      const urlParams = new URLSearchParams(window.location.search);
+      const filterParam = urlParams.get('filter');
+      if (filterParam) {
+        document.getElementById('kycLevelFilter').value = filterParam;
+      }
+      const searchParam = urlParams.get('search');
+      if (searchParam) {
+        document.getElementById('kycSearch').value = searchParam;
+      }
+      applyKycFilters();
+      
+      const uidParam = urlParams.get('uid');
+      if (uidParam) {
+        const found = allKycUsers.find(u => u.id && typeof u.id === 'string' && u.id.toLowerCase() === uidParam.toLowerCase());
+        if (found) {
+          viewKyc(found.id, found.fullName);
+        }
+      }
+    } else {
+      applyKycFilters();
+    }
+  } catch (e) {
+    console.error("KYC load error:", e);
+    document.getElementById('kycBody').innerHTML = `<tr><td colspan="5" class="table-empty">Failed to load KYC data.</td></tr>`;
+  }
+}
+
+function exportKyc() {
+  exportToCSV('aishwaryam_kyc.csv', window.currentFilteredKyc || allKycUsers);
+}
+
+function applyKycFilters() {
+  const q = document.getElementById('kycSearch').value.toLowerCase();
+  const level = document.getElementById('kycLevelFilter').value;
+  
+  const filtered = allKycUsers.filter(u => {
+    const matchQ = (u.fullName||'').toLowerCase().includes(q) || 
+                   (u.phoneNumber||'').includes(q) || 
+                   u.id.toLowerCase().includes(q);
+    const matchLevel = level === 'All' || u.kycLevel === level;
+    return matchQ && matchLevel;
+  });
+  
+  renderKycGrid(filtered);
+}
+
+function renderKycGrid(users) {
+  const body = document.getElementById('kycBody');
+  document.getElementById('kycCount').textContent = `${users.length} showing / ${allKycUsers.length} total`;
+  
+  window.currentFilteredKyc = users;
+  
+  if (!users.length) {
+    body.innerHTML = '<tr><td colspan="5" class="table-empty">No matching records found</td></tr>';
+    return;
+  }
+  
+  body.innerHTML = users.map(u => `
+    <tr>
+      <td><div style="font-weight:600">${u.fullName || 'Unknown'}</div></td>
+      <td>${u.phoneNumber}</td>
+      <td><span class="badge ${u.kycLevel==='FULL'?'badge-green':u.kycLevel==='PENDING'?'badge-amber':u.kycLevel==='BASIC'?'badge-blue':'badge-red'}">${u.kycLevel}</span></td>
+      <td class="text-xs" style="color:var(--text-3)">${new Date(u.createdAt).toLocaleDateString()}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-xs" onclick="viewKyc('${u.id}', '${u.fullName}')">Review</button>
+          <button class="btn btn-outline btn-xs" onclick="sendPushNotification('${u.id}', '${u.fullName}')" title="Nudge to complete KYC">
+            <svg viewBox="0 0 24 24" style="width:11px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function viewKyc(uid, name) {
+  currentKycUid = uid;
+  document.getElementById('targetUserName').textContent = name || 'User';
+  try {
+    const res = await fetch(`${API}/api/Kyc/status/${uid}`);
+    const d = await res.json();
+    document.getElementById('kycDocType').value = d.documentType || '—';
+    let docNum = d.documentNumber || '—';
+    if (docNum && (d.documentType || '').toUpperCase().includes('AADHAAR') && docNum.length === 12 && /^\d+$/.test(docNum)) {
+      docNum = docNum.replace(/(\d{4})(\d{4})(\d{4})/, '$1 $2 $3');
+    }
+    document.getElementById('kycDocNum').value = docNum;
+    document.getElementById('kycStatus').value = d.status || '—';
+    
+    // Check if the user is already approved in local allKycUsers list
+    const foundUser = allKycUsers.find(u => u.id === uid);
+    const isAlreadyApproved = foundUser && (foundUser.kycLevel === 'FULL' || foundUser.kycLevel === 'VERIFIED');
+    
+    const approveBtn = document.getElementById('btnApproveKyc');
+    const rejectBtn = document.getElementById('btnRejectKyc');
+    
+    if (isAlreadyApproved) {
+      approveBtn.disabled = true;
+      approveBtn.style.opacity = '0.5';
+      approveBtn.style.cursor = 'not-allowed';
+      approveBtn.title = "This user's KYC is already approved";
+      
+      rejectBtn.disabled = true;
+      rejectBtn.style.opacity = '0.5';
+      rejectBtn.style.cursor = 'not-allowed';
+      rejectBtn.title = "This user's KYC is already approved";
+    } else {
+      approveBtn.disabled = false;
+      approveBtn.style.opacity = '1';
+      approveBtn.style.cursor = 'pointer';
+      approveBtn.title = "";
+      
+      rejectBtn.disabled = false;
+      rejectBtn.style.opacity = '1';
+      rejectBtn.style.cursor = 'pointer';
+      rejectBtn.title = "";
+    }
+    
+    // Render dynamic attachments
+    const docsContainer = document.getElementById('kycDocsContainer');
+    docsContainer.innerHTML = '';
+    
+    const docsToRender = (d.documents && d.documents.length) 
+      ? d.documents 
+      : (d.documentUrl ? [{ documentType: d.documentType, documentNumber: d.documentNumber, documentUrl: d.documentUrl }] : []);
+      
+    if (docsToRender.length) {
+      docsToRender.forEach(doc => {
+        const parts = doc.documentUrl.split('/');
+        const filename = parts[parts.length - 1] || 'document';
+        const lowerUrl = doc.documentUrl.toLowerCase();
+        const isImg = lowerUrl.includes('.jpg') || lowerUrl.includes('.jpeg') || lowerUrl.includes('.png') || lowerUrl.includes('.webp') || lowerUrl.startsWith('data:image');
+        
+        const docDiv = document.createElement('div');
+        docDiv.style.cssText = 'padding: 16px; background: var(--surface2); border-radius: 8px; border: 1px dashed var(--border);';
+        docDiv.innerHTML = `
+          <label class="form-label" style="display:block; margin-bottom: 8px; font-weight: bold; color: var(--brand-accent);">${doc.documentType} Document</label>
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <a href="${doc.documentUrl}" target="_blank" class="btn btn-outline btn-xs" style="text-decoration: none; display: inline-flex; align-items: center;">
+              <svg viewBox="0 0 24 24" style="width:14px; margin-right:4px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              View Full ${doc.documentType}
+            </a>
+            <span style="font-size: 12px; color: var(--text-3); font-family: monospace;">${filename}</span>
+          </div>
+          ${isImg ? `
+            <div style="margin-top: 12px;">
+              <img src="${doc.documentUrl}" alt="${doc.documentType} Preview" style="max-width: 100%; max-height: 250px; border-radius: 4px; border: 1px solid var(--border); background: #000; object-fit: contain;" />
+            </div>
+          ` : ''}
+        `;
+        docsContainer.appendChild(docDiv);
+      });
+    } else {
+      docsContainer.innerHTML = `
+        <div style="padding: 16px; background: var(--surface2); border-radius: 8px; border: 1px dashed var(--border); text-align: center; color: var(--text-3);">
+          No document files uploaded
+        </div>
+      `;
+    }
+    
+    document.getElementById('kycDetail').style.display = 'block';
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  } catch (e) { 
+    showToast('Failed to retrieve document details', 'error'); 
+  }
+}
+
+function closeKycDetail() {
+  document.getElementById('kycDetail').style.display = 'none';
+  currentKycUid = '';
+}
+
+async function sendPushNotification(uid, name) {
+  const targetId = uid || currentKycUid;
+  const targetName = name || document.getElementById('targetUserName').textContent;
+  if (!targetId) return;
+  
+  try {
+    // Send real notification record for polling and triggering push FCM
+    const res = await fetch(`${API}/api/Notifications/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: targetId,
+        title: 'KYC Verification Pending',
+        message: 'Please complete your KYC to unlock all features in Aishwaryam.',
+        type: 'KYC'
+      })
+    });
+
+    if (res.ok) {
+      showToast(`Notification nudge sent to ${targetName}`, 'success');
+    } else {
+      showToast('Failed to send notification nudge', 'error');
+    }
+
+    // Audit Log
+    await fetch(`${API}/api/Audit/report`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: targetId,
+        action: 'KYC_NUDGE_PUSH',
+        details: `Admin sent KYC completion push notification to user ${targetName}`,
+        status: 'SUCCESS'
+      })
+    });
+  } catch (e) {
+    showToast('Network error while sending notification nudge', 'error');
+  }
+}
+
+async function approveKyc() {
+  if (!currentKycUid) return;
+  try {
+    const res = await fetch(`${API}/api/Admin/kyc-action`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentKycUid, isApproved: true, adminNotes: "Approved by manual review" })
+    });
+    showToast(res.ok ? 'KYC Approved' : 'Failed', res.ok ? 'success' : 'error');
+    if (res.ok) { loadKycGrid(); closeKycDetail(); }
+  } catch (e) { showToast('Network error', 'error'); }
+}
+
+async function rejectKyc() {
+  if (!currentKycUid) return;
+  const reason = prompt("Enter rejection reason:");
+  if (reason === null) return;
+  try {
+    const res = await fetch(`${API}/api/Admin/kyc-action`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentKycUid, isApproved: false, adminNotes: reason || "Rejected by manual review" })
+    });
+    showToast(res.ok ? 'KYC Rejected' : 'Failed', res.ok ? 'info' : 'error');
+    if (res.ok) { loadKycGrid(); closeKycDetail(); }
+  } catch (e) { showToast('Network error', 'error'); }
+}
+
+loadKycGrid();
+
+// Auto-refresh data every 5 seconds
+setInterval(loadKycGrid, 5000);
+
+function openBulkNotificationModal() {
+  const users = window.currentFilteredKyc || [];
+  if (!users.length) {
+    showToast('No users in current list to send notifications to.', 'error');
+    return;
+  }
+  document.getElementById('bulkUserCount').textContent = users.length;
+  document.getElementById('bulkNotifTitle').value = 'KYC Verification Required';
+  document.getElementById('bulkNotifBody').value = 'Please complete your KYC to unlock all features in Aishwaryam.';
+  document.getElementById('bulkNotifModal').style.display = 'flex';
+}
+
+function closeBulkNotificationModal() {
+  document.getElementById('bulkNotifModal').style.display = 'none';
+}
+
+async function sendBulkNotifications() {
+  const users = window.currentFilteredKyc || [];
+  if (!users.length) return;
+
+  const title = document.getElementById('bulkNotifTitle').value.trim();
+  const message = document.getElementById('bulkNotifBody').value.trim();
+
+  if (!title || !message) {
+    showToast('Title and Message are required.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btnSendBulkSubmit');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  let successCount = 0;
+  let failCount = 0;
+
+  const promises = users.map(async (u) => {
+    try {
+      const res = await fetch(`${API}/api/Notifications/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: u.id,
+          title: title,
+          message: message,
+          type: 'KYC'
+        })
+      });
+      if (res.ok) {
+        successCount++;
+        await fetch(`${API}/api/Audit/report`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: u.id,
+            action: 'KYC_NUDGE_PUSH_BULK',
+            details: `Admin sent bulk KYC push notification: ${title}`,
+            status: 'SUCCESS'
+          })
+        });
+      } else {
+        failCount++;
+      }
+    } catch (e) {
+      failCount++;
+    }
+  });
+
+  await Promise.allSettled(promises);
+
+  showToast(`Sent successfully to ${successCount} users. Failed for ${failCount} users.`, successCount > 0 ? 'success' : 'error');
+  btn.disabled = false;
+  btn.textContent = 'Send to All';
+  closeBulkNotificationModal();
+}
+</script>
+
+<!-- Bulk Notification Modal -->
+<div id="bulkNotifModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); align-items:center; justify-content:center; z-index:1000;">
+  <div class="card" style="width: 90%; max-width: 500px; padding: 24px; border: 1px solid var(--border); background: var(--bg-1); border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+    <div class="card-head" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+      <span class="card-title" style="font-size: 16px; font-weight: 700;">Send Bulk Notification</span>
+      <button class="btn btn-ghost btn-xs" onclick="closeBulkNotificationModal()">✕</button>
+    </div>
+    <div class="card-body" style="display: flex; flex-direction: column; gap: 16px; padding: 0;">
+      <p style="font-size: 12px; color: var(--text-3); margin: 0;">This will send a push notification to all <strong id="bulkUserCount" style="color: var(--accent)">0</strong> currently filtered/showing users.</p>
+      <div class="form-group">
+        <label class="form-label">Notification Title</label>
+        <input type="text" class="form-control" id="bulkNotifTitle" value="KYC Verification Required" placeholder="Enter Title">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notification Message</label>
+        <textarea class="form-control" id="bulkNotifBody" rows="3" style="resize:none" placeholder="Enter message content...">Please complete your KYC to unlock all features in Aishwaryam.</textarea>
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px;">
+        <button class="btn btn-outline" onclick="closeBulkNotificationModal()">Cancel</button>
+        <button id="btnSendBulkSubmit" class="btn btn-primary" onclick="sendBulkNotifications()">Send to All</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body></html>
