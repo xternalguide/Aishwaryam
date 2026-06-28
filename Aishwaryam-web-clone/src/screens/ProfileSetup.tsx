@@ -32,7 +32,14 @@ export const ProfileSetup: React.FC = () => {
         // Setup done, redirect to KYC onboarding form
         navigate('/onboarding');
       } catch (err: any) {
-        setErrorMsg(err.response?.data?.message || err.message || 'Failed to update profile.');
+        const errorText = err.response?.data?.message || err.message || 'Failed to update profile.';
+        if (errorText.toLowerCase().includes('not found')) {
+          SessionManager.clearSession();
+          setErrorMsg('Session expired or user deleted. Redirecting to registration...');
+          setTimeout(() => navigate('/login'), 1500);
+        } else {
+          setErrorMsg(errorText);
+        }
       } finally {
         setIsLoading(false);
       }

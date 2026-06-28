@@ -308,7 +308,14 @@ export const Onboarding: React.FC = () => {
         await refreshData();
         setCurrentStep(2);
       } catch (err: any) {
-        setSaveError(err.message || 'Failed to save profile. Please try again.');
+        const errorText = err.response?.data?.message || err.message || 'Failed to save profile. Please try again.';
+        if (errorText.toLowerCase().includes('not found')) {
+          SessionManager.clearSession();
+          setSaveError('Session expired or user deleted. Redirecting to registration...');
+          setTimeout(() => navigate('/login'), 1500);
+        } else {
+          setSaveError(errorText);
+        }
       } finally {
         setIsSaving(false);
       }

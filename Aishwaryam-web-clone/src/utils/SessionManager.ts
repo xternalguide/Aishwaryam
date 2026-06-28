@@ -51,6 +51,8 @@ export class SessionManager {
     localStorage.removeItem(this.USER_ID_KEY);
     localStorage.removeItem(this.JWT_TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+    localStorage.removeItem(this.PHONE_NUMBER_KEY);
+    localStorage.removeItem(this.ONBOARDING_STAGE_KEY);
   }
 
   static saveOnboardingStage(stage: OnboardingStage): void {

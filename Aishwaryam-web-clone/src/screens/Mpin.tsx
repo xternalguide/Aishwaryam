@@ -133,16 +133,28 @@ export const Mpin: React.FC = () => {
       } else {
         const errorText = response.data.message || 'Incorrect PIN. Please try again.';
         AuditLogger.log('Error', '/mpin/verify', `Failed MPIN authentication attempt: ${errorText}`);
-        setErrorMsg(errorText);
-        setMpin('');
-        mpinInputRef.current?.focus();
+        if (errorText.toLowerCase().includes('not found')) {
+          SessionManager.clearSession();
+          setErrorMsg('User not found. Redirecting to registration...');
+          setTimeout(() => navigate('/login'), 1500);
+        } else {
+          setErrorMsg(errorText);
+          setMpin('');
+          mpinInputRef.current?.focus();
+        }
       }
     } catch (err: any) {
       const errorText = err.response?.data?.message || 'Incorrect PIN. Please try again.';
       AuditLogger.log('Error', '/mpin/verify', `MPIN verification error: ${errorText}`);
-      setErrorMsg(errorText);
-      setMpin('');
-      mpinInputRef.current?.focus();
+      if (errorText.toLowerCase().includes('not found')) {
+        SessionManager.clearSession();
+        setErrorMsg('User not found. Redirecting to registration...');
+        setTimeout(() => navigate('/login'), 1500);
+      } else {
+        setErrorMsg(errorText);
+        setMpin('');
+        mpinInputRef.current?.focus();
+      }
     } finally {
       setIsLoading(false);
     }
