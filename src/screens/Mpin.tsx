@@ -140,9 +140,21 @@ export const Mpin: React.FC = () => {
     } catch (err: any) {
       const errorText = err.response?.data?.message || 'Incorrect PIN. Please try again.';
       AuditLogger.log('Error', '/mpin/verify', `MPIN verification error: ${errorText}`);
-      setErrorMsg(errorText);
-      setMpin('');
-      mpinInputRef.current?.focus();
+      
+      const isUserNotFound = err.response?.status === 404 || 
+                             err.response?.status === 401 || 
+                             errorText.toLowerCase().includes('not found') || 
+                             errorText.toLowerCase().includes('unauthorized');
+                             
+      if (isUserNotFound) {
+        SessionManager.clearSession();
+        setErrorMsg(lang === 'ta' ? 'பயனர் கண்டறியப்படவில்லை. மீண்டும் பதிவு செய்யவும்...' : 'User not found. Redirecting to registration...');
+        setTimeout(() => navigate('/login'), 1500);
+      } else {
+        setErrorMsg(errorText);
+        setMpin('');
+        mpinInputRef.current?.focus();
+      }
     } finally {
       setIsLoading(false);
     }
