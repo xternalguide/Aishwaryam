@@ -94,9 +94,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
             return;
           } else if (reason.response.status === 404) {
-            console.warn('User profile not found on server. Redirecting to profile setup...');
-            SessionManager.saveOnboardingStage(OnboardingStage.MPIN_CREATED);
-            window.location.hash = '#/profile-setup';
+            console.warn('User profile not found on server. Clearing session and redirecting to login...');
+            SessionManager.clearSession();
+            clearData();
+            window.location.href = '/';
             return;
           }
         }

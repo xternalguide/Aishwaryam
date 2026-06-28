@@ -53,6 +53,18 @@ export class SessionManager {
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.PHONE_NUMBER_KEY);
     localStorage.removeItem(this.ONBOARDING_STAGE_KEY);
+    localStorage.removeItem('PARTIAL_NAME');
+    localStorage.removeItem('PARTIAL_EMAIL');
+    localStorage.removeItem('PARTIAL_DOB');
+    localStorage.removeItem('PARTIAL_IS_MARRIED');
+    localStorage.removeItem('PARTIAL_WEDDING_DATE');
+    localStorage.removeItem('PARTIAL_GENDER');
+    localStorage.removeItem('PARTIAL_PINCODE');
+    localStorage.removeItem('PARTIAL_STATE');
+    localStorage.removeItem('PARTIAL_CITY');
+    localStorage.removeItem('PARTIAL_AREA');
+    localStorage.removeItem('PARTIAL_IS_MANUAL_AREA');
+    localStorage.removeItem('PARTIAL_TERMS_ACCEPTED');
   }
 
   static saveOnboardingStage(stage: OnboardingStage): void {
