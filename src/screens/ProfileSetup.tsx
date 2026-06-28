@@ -32,6 +32,12 @@ export const ProfileSetup: React.FC = () => {
         // Setup done, redirect to KYC onboarding form
         navigate('/onboarding');
       } catch (err: any) {
+        if (err.response?.status === 404) {
+          console.warn('User not found on server during profile setup. Clearing session...');
+          SessionManager.clearSession();
+          window.location.href = '/';
+          return;
+        }
         setErrorMsg(err.response?.data?.message || err.message || 'Failed to update profile.');
       } finally {
         setIsLoading(false);
