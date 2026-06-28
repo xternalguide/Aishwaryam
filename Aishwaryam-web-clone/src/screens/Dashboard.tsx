@@ -181,7 +181,7 @@ export const Dashboard: React.FC = () => {
     }
     .kyc-toast {
       position: fixed;
-      top: 24px;
+      top: calc(100px + env(safe-area-inset-top, 0px));
       right: 24px;
       z-index: 9999;
       width: 340px;
@@ -196,6 +196,15 @@ export const Dashboard: React.FC = () => {
       font-family: var(--font-poppins);
       cursor: pointer;
       pointer-events: auto;
+    }
+    @media (max-width: 768px) {
+      .kyc-toast {
+        right: 20px;
+        left: 20px;
+        width: auto;
+        max-width: none;
+        top: calc(95px + env(safe-area-inset-top, 0px));
+      }
     }
     .kyc-toast.show {
       animation: kyc-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
