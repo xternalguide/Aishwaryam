@@ -148,6 +148,8 @@ export const Dashboard: React.FC = () => {
 
   const [userName, setUserName] = useState('');
   const [kycLevel, setKycLevel] = useState('BASIC');
+  const [showKycToast, setShowKycToast] = useState(false);
+  const [toastClass, setToastClass] = useState('');
 
   // ── THEME TOGGLE (Always Light) ───────────────────────────────────────────
   const isDark = false;
@@ -164,6 +166,66 @@ export const Dashboard: React.FC = () => {
     @keyframes theme-toggle-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .animate-spin { animation: spin 1s linear infinite; }
+    
+    @keyframes kyc-slide-in {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes kyc-slide-out {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(120%); opacity: 0; }
+    }
+    @keyframes kyc-progress {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+    .kyc-toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 9999;
+      width: 340px;
+      max-width: calc(100vw - 48px);
+      background: #FFFDF9;
+      border-radius: 16px;
+      border: 1.5px solid rgba(245, 158, 11, 0.45);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-family: var(--font-poppins);
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    .kyc-toast.show {
+      animation: kyc-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .kyc-toast.hide {
+      animation: kyc-slide-out 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .kyc-toast-content {
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      position: relative;
+    }
+    .kyc-toast-progress-container {
+      width: 100%;
+      height: 4px;
+      background: rgba(245, 158, 11, 0.15);
+      position: absolute;
+      bottom: 0;
+      left: 0;
+    }
+    .kyc-toast-progress-bar {
+      height: 100%;
+      background: #F59E0B;
+      width: 100%;
+    }
+    .kyc-toast.show .kyc-toast-progress-bar {
+      animation: kyc-progress 6s linear forwards;
+    }
     
     /* Prevent Tamil word fragmentation */
     * {
@@ -406,12 +468,32 @@ export const Dashboard: React.FC = () => {
   } = useApp();
 
   useEffect(() => {
-    if (profile) { setUserName(profile.fullName || 'User'); setKycLevel(profile.kycLevel || 'BASIC'); }
+    if (profile) {
+      setUserName(profile.fullName || 'User');
+      const level = profile.kycLevel || 'BASIC';
+      setKycLevel(level);
+      if ((level === 'BASIC' || level === 'PENDING') && !showKycToast && toastClass === '') {
+        setShowKycToast(true);
+        setToastClass('show');
+      }
+    }
     if (contextActiveSchemes) setActiveSchemes(contextActiveSchemes);
     if (contextTransactions) setTransactions(contextTransactions);
     if (contextUnreadNotifCount !== undefined) setUnreadNotifCount(contextUnreadNotifCount);
     if (offers && offers.length > 0) { setOfferTitle(offers[0].title); setOfferDesc(offers[0].description); }
   }, [profile, livePrice, contextActiveSchemes, contextAvailableSchemes, contextTransactions, contextUnreadNotifCount, offers]);
+
+  useEffect(() => {
+    if (showKycToast && toastClass === 'show') {
+      const timer = setTimeout(() => {
+        setToastClass('hide');
+        setTimeout(() => {
+          setShowKycToast(false);
+        }, 400);
+      }, 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [showKycToast, toastClass]);
 
   useEffect(() => {
     const stage = SessionManager.getOnboardingStage();
@@ -1291,17 +1373,6 @@ export const Dashboard: React.FC = () => {
           {selectedTab === 0 && (
             <div className="dash-fade-in" style={{ padding: isDesktop ? '20px' : '0 0 20px 0', display:'flex', flexDirection:'column', gap: isDesktop ? '20px' : '0' }}>
 
-              {/* KYC alert */}
-              {(kycLevel === 'BASIC' || kycLevel === 'PENDING') && (
-                <div onClick={()=>navigate('/onboarding')} style={{ background:'rgba(245,158,11,0.12)', border:'1px solid rgba(245,158,11,0.25)', borderRadius:'16px', padding:'14px 16px', display:'flex', gap:'12px', cursor:'pointer', alignItems:'center', margin: isDesktop ? '0' : '20px 20px 0 20px' }}>
-                  <AlertTriangle size={18} color="#F59E0B" />
-                  <div>
-                    <span style={{ fontFamily:DS.font, fontSize:'13px', fontWeight:'800', color:DS.textWhite, display:'block' }}>{t('kyc_required')}</span>
-                    <span style={{ fontFamily:DS.font, fontSize:'11px', color:DS.textSub }}>{t('kyc_required_desc')}</span>
-                  </div>
-                </div>
-              )}
-
               {isDesktop ? (
                 <div style={{ display:'grid', gridTemplateColumns:'1.2fr 0.8fr', gap:'24px', alignItems:'start' }}>
                   <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
@@ -1821,6 +1892,65 @@ export const Dashboard: React.FC = () => {
         >
           <Headset size={24} color="white" />
         </button>
+      )}
+
+      {/* Custom sliding KYC Toast with animated progress bar */}
+      {showKycToast && (kycLevel === 'BASIC' || kycLevel === 'PENDING') && (
+        <div 
+          className={`kyc-toast ${toastClass}`}
+          onClick={() => {
+            setToastClass('hide');
+            setTimeout(() => {
+              setShowKycToast(false);
+              navigate('/onboarding');
+            }, 400);
+          }}
+        >
+          <div className="kyc-toast-content">
+            <AlertTriangle size={20} color="#F59E0B" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, paddingRight: '20px' }}>
+              <span style={{ fontSize: '13px', fontWeight: '800', color: '#1F2937', display: 'block', lineHeight: '16px' }}>
+                {lang === 'ta' ? 'KYC சரிபார்ப்பு தேவை' : 'KYC Verification Required'}
+              </span>
+              <span style={{ fontSize: '11.5px', color: '#4B5563', lineHeight: '15px' }}>
+                {lang === 'ta' 
+                  ? 'உள்நுழைந்த பின், KYC பூர்த்தி செய்யப்படவில்லை, தயவுசெய்து அதை பூர்த்தி செய்யவும்.' 
+                  : 'Once user is logged in, the KYC is not completed, please complete it.'}
+              </span>
+            </div>
+            
+            {/* Close Button X */}
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setToastClass('hide');
+                setTimeout(() => setShowKycToast(false), 400);
+              }}
+              style={{
+                position: 'absolute',
+                top: '12px',
+                right: '12px',
+                background: 'transparent',
+                border: 'none',
+                color: '#9CA3AF',
+                cursor: 'pointer',
+                fontSize: '18px',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                lineHeight: 1
+              }}
+            >
+              &times;
+            </button>
+          </div>
+          
+          {/* Progress bar representing time remaining */}
+          <div className="kyc-toast-progress-container">
+            <div className="kyc-toast-progress-bar"></div>
+          </div>
+        </div>
       )}
     </div>
   );
