@@ -1,0 +1,20 @@
+@media (max-width: 767px) {
+  /* Pushes login, registration, and onboarding form contents down to prevent notch overlap */
+  .responsive-form-container {
+    padding-top: calc(54px + env(safe-area-inset-top, 0px)) !important;
+  }
+
+  .onboarding-form-container {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Pushes navigation header bars down on mobile devices */
+  .app-header-bar,
+  div[style*="height: 100vh"] > div[style*="border-bottom"],
+  div[style*="height: 100vh"] > div[style*="borderBottom"],
+  div[style*="height:100vh"] > div[style*="border-bottom"],
+  div[style*="height:100vh"] > div[style*="borderBottom"] {
+    padding-top: calc(10px + env(safe-area-inset-top, 0px)) !important;
+  }
+}

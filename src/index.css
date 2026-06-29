@@ -1,0 +1,256 @@
+:root {
+  /* Brand Magenta Tokens */
+  --brand-deep: #29001D;
+  --brand-dark: #4A0E4E;
+  --brand-mid: #7B1FA2;
+  --brand-accent: #C2185B;
+  --brand-glow: rgba(74, 14, 78, 0.15);
+
+  /* Gold Tokens */
+  --gold-primary: #FFD700;
+  --gold-warm: #FFB300;
+  --gold-deep: #B8860B;
+  --gold-soft: #FFF8E1;
+  --gold-glow: rgba(255, 215, 0, 0.15);
+
+  /* Gradients */
+  --gradient-brand: linear-gradient(135deg, var(--brand-deep) 0%, var(--brand-dark) 100%);
+  --gradient-gold: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-warm) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-mid) 100%);
+  --gradient-silver: linear-gradient(135deg, #78909C 0%, #CFD8DC 100%);
+
+  /* Surface / Background */
+  --surface-white: #FFFFFF;
+  --surface-light: #F8F9FA;
+  --surface-card: #F1F3F4;
+  --surface-gold: #FFF9F0;
+  --border-light: rgba(74, 14, 78, 0.08);
+
+  /* Semantic Colors */
+  --success-green: #10B981;
+  --success-light: #ECFDF5;
+  --warning-amber: #F59E0B;
+  --warning-light: #FEF3C7;
+  --error-red: #EF4444;
+  --error-light: #FEE2E2;
+
+  /* Typography / Text */
+  --text-primary: #1A1A2E;
+  --text-secondary: #4A4A68;
+  --text-muted: #6B7280;
+  --text-light: #A0A0AB;
+  --text-on-dark: #FFFFFF;
+
+  /* Fonts: Montserrat and Roman combination */
+  --font-playfair: 'Lora', 'Times New Roman', Times, Georgia, serif;
+  --font-poppins: 'Montserrat', sans-serif;
+  
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--surface-light);
+  font-family: var(--font-poppins);
+  color: var(--text-primary);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base mobile & tablet styling (fluid, full-screen) */
+#root {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  background: var(--surface-light);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: none;
+  border: none;
+  scrollbar-width: none; /* Firefox */
+}
+
+#root::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+/* Viewport-specific layout styles have been moved to android.css and web.css */
+
+
+/* Heading Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-playfair);
+  color: var(--brand-deep);
+  font-weight: 700;
+}
+
+/* Helper utility classes for general styling */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(74, 14, 78, 0.06);
+}
+
+.gold-gradient-text {
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-gradient-text {
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Hide default calendar icon and spin buttons in date inputs */
+input[type="date"] {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-clear-button {
+  display: none !important;
+  -webkit-appearance: none !important;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none !important;
+  -webkit-appearance: none !important;
+}
+
+/* Premium Splash Logo Animation */
+@keyframes floatLogo {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.04);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.splash-logo-animated {
+  animation: floatLogo 3s ease-in-out infinite;
+}
+
+/* Safe area offsets and top headers padding are now split in android.css and web.css */
+
+
+/* Disable default mobile browser blue highlight overlay on click/tap */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+  outline: none !important;
+}
+
+/* Disable text selection highlight globally on mobile to prevent blue highlighting on tap/hold */
+body, button, a, [role="button"], span, div, h1, h2, h3, h4, h5, h6 {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+input, textarea {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  user-select: text !important;
+}
+
+/* Transitions & Anim overlays */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes tickSuccess {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+.animate-tick-success {
+  animation: tickSuccess 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes spinY {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Force Razorpay Iframe to start at 0px top and bypass checkout.js injected safe area offsets */
+html body .razorpay-container,
+html body .razorpay-checkout-frame,
+html body iframe.razorpay-checkout-frame,
+html body iframe[src*="razorpay"] {
+  top: 0px !important;
+  height: 100% !important;
+  margin-top: 0px !important;
+  padding-top: 0px !important;
+}
+
+/* Tamil UI responsiveness, text wrapping and spacing fixes */
+body, button, p, span, div, h1, h2, h3, h4, h5, h6, label {
+  word-wrap: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+button, input, select {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Global nowrap utility classes */
+.no-wrap, .nowrap {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+/* Viewport scaling adjustments for small screens to prevent layout overflow and wrapping */
+@media (max-width: 360px) {
+  body {
+    zoom: 0.92 !important;
+  }
+}
+
+@media (max-width: 330px) {
+  body {
+    zoom: 0.86 !important;
+  }
+}
+
+
+

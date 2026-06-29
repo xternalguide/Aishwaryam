@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Aishwaryam@yourhome</string>
+    <string name="title_activity_main">Aishwaryam@yourhome</string>
+    <string name="package_name">com.aishwaryam.app</string>
+    <string name="custom_url_scheme">com.aishwaryam.app</string>
+</resources>

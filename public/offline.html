@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>No Internet Connection</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100vw;
+      background-color: white;
+      box-sizing: border-box;
+      text-align: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    @keyframes float-sat {
+      0% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(3deg); }
+      100% { transform: translateY(0px) rotate(0deg); }
+    }
+
+    .illustration-container {
+      animation: float-sat 4s ease-in-out infinite;
+      width: 220px;
+      height: 220px;
+      margin-bottom: 24px;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1A1200;
+      margin: 0 0 8px 0;
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      font-size: 12.5px;
+      color: #666666;
+      margin: 0 0 28px 0;
+      line-height: 18px;
+      max-width: 260px;
+    }
+
+    .retry-btn {
+      width: 180px;
+      height: 44px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #4A0E4E 0%, #29001D 100%);
+      color: white;
+      border: none;
+      font-weight: bold;
+      font-size: 13.5px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(74, 14, 78, 0.3);
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .retry-btn:active {
+      transform: scale(0.98);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated SVG Satellite Illustration matching the screenshot -->
+  <div class="illustration-container">
+    <svg width="100%" height="100%" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Earth/Signal lines in background -->
+      <path d="M40,150 Q100,120 160,150" stroke="#E0E0E0" stroke-width="2" stroke-dasharray="4 4" />
+      <path d="M60,165 Q100,140 140,165" stroke="#E0E0E0" stroke-width="2" stroke-dasharray="4 4" />
+
+      <!-- Left Solar Panel -->
+      <rect x="25" y="75" width="45" height="25" rx="3" fill="url(#panelGrad)" stroke="#1976D2" stroke-width="1.5" transform="rotate(-15 47 87)" />
+      <line x1="28" y1="84" x2="68" y2="74" stroke="rgba(255,255,255,0.4)" stroke-width="1" />
+      <line x1="32" y1="94" x2="63" y2="86" stroke="rgba(255,255,255,0.4)" stroke-width="1" />
+      
+      <!-- Right Solar Panel -->
+      <rect x="130" y="85" width="45" height="25" rx="3" fill="url(#panelGrad)" stroke="#1976D2" stroke-width="1.5" transform="rotate(15 152 97)" />
+      <line x1="132" y1="92" x2="172" y2="102" stroke="rgba(255,255,255,0.4)" stroke-width="1" />
+      <line x1="137" y1="83" x2="167" y2="91" stroke="rgba(255,255,255,0.4)" stroke-width="1" />
+
+      <!-- Panel connectors -->
+      <line x1="70" y1="92" x2="88" y2="98" stroke="#78909C" stroke-width="3" stroke-linecap="round" />
+      <line x1="112" y1="102" x2="130" y2="96" stroke="#78909C" stroke-width="3" stroke-linecap="round" />
+
+      <!-- Satellite Body -->
+      <rect x="85" y="80" width="30" height="42" rx="4" fill="url(#bodyGrad)" stroke="#B71C1C" stroke-width="2" transform="rotate(10 100 101)" />
+      <circle cx="100" cy="101" r="5" fill="#FFE082" />
+
+      <!-- Dish Antenna -->
+      <path d="M82,132 C82,118 118,118 118,132" fill="none" stroke="#5D4037" stroke-width="2.5" stroke-linecap="round" transform="rotate(10 100 126)" />
+      <line x1="100" y1="124" x2="100" y2="136" stroke="#5D4037" stroke-width="3" transform="rotate(10 100 126)" />
+      
+      <!-- Signal waves (fading/disabled) -->
+      <path d="M90,146 Q100,152 110,146" stroke="#B0BEC5" stroke-width="2" stroke-linecap="round" />
+      <path d="M85,154 Q100,162 115,154" stroke="#B0BEC5" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 2" />
+
+      <!-- Red Circle with "X" Badge overlaid at the bottom-right of the satellite -->
+      <circle cx="116" cy="122" r="15" fill="#EF4444" stroke="white" stroke-width="2.5" />
+      <path d="M111,117 L121,127 M121,117 L111,127" stroke="white" stroke-width="2.5" stroke-linecap="round" />
+
+      <!-- Gradients -->
+      <defs>
+        <linearGradient id="panelGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#42A5F5" />
+          <stop offset="100%" stop-color="#0D47A1" />
+        </linearGradient>
+        <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#FF7043" />
+          <stop offset="100%" stop-color="#D84315" />
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+
+  <h2 class="title">No Internet Connection</h2>
+  <p class="subtitle">Please check your connection or try again later.</p>
+
+  <button class="retry-btn" onclick="retryConnection()">Try Again</button>
+
+  <script>
+    function retryConnection() {
+      // Navigate directly to the live production server URL
+      window.location.href = 'https://aishwaryam-web.pages.dev';
+    }
+  </script>
+</body>
+</html>
