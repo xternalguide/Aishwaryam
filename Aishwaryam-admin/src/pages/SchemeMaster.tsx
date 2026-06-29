@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAdmin } from '../context/AdminContext';
-import { Plus, Edit2, Trash2, X, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, CheckCircle, X, Search, Upload } from 'lucide-react';
 
 interface Scheme {
   id: string;
@@ -8,7 +8,7 @@ interface Scheme {
   description?: string;
   installmentAmountPaise: number;
   totalInstallments: number;
-  frequency: string;
+  frequency: string; // Daily, Weekly, Monthly, Flexible
   isActive: boolean;
   durationUnit?: string;
   razorpayPlanId?: string;
@@ -46,9 +46,9 @@ export const SchemeMaster: React.FC = () => {
   const [multiplePerDay, setMultiplePerDay] = useState(true);
   const [earlyExitAfterDays, setEarlyExitAfterDays] = useState('180');
 
-  // JSON configs
-  const [bonusConfigJson, setBonusConfigJson] = useState('');
-  const [customSectionsJson, setCustomSectionsJson] = useState('');
+  // Parsed Tier & Section Builder States
+  const [bonusTiers, setBonusTiers] = useState<{ startDay: number; endDay: number; bonusPercentage: number }[]>([]);
+  const [customSections, setCustomSections] = useState<{ type: number; title: string; content: string }[]>([]);
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -85,8 +85,8 @@ export const SchemeMaster: React.FC = () => {
     setMaxAmount('50000');
     setMultiplePerDay(true);
     setEarlyExitAfterDays('180');
-    setBonusConfigJson('');
-    setCustomSectionsJson('');
+    setBonusTiers([]);
+    setCustomSections([]);
     setModalOpen(true);
   };
 
@@ -96,7 +96,7 @@ export const SchemeMaster: React.FC = () => {
     setDescription(s.description || '');
     setInstallmentAmount((s.installmentAmountPaise / 100).toString());
     setTotalInstallments(s.totalInstallments.toString());
-    setFrequency(s.frequency);
+    setFrequency(s.frequency || 'Daily');
     setIsActive(s.isActive);
     setDurationUnit(s.durationUnit || 'Days');
     setRazorpayPlanId(s.razorpayPlanId || '');
@@ -128,8 +128,24 @@ export const SchemeMaster: React.FC = () => {
       setEarlyExitAfterDays('180');
     }
 
-    setBonusConfigJson(s.bonusConfigJson || '');
-    setCustomSectionsJson(s.customSectionsJson || '');
+    // Parse tiers
+    let parsedTiers = [];
+    if (s.bonusConfigJson) {
+      try {
+        parsedTiers = JSON.parse(s.bonusConfigJson);
+      } catch (e) {}
+    }
+    setBonusTiers(Array.isArray(parsedTiers) ? parsedTiers : []);
+
+    // Parse sections
+    let parsedSections = [];
+    if (s.customSectionsJson) {
+      try {
+        parsedSections = JSON.parse(s.customSectionsJson);
+      } catch (e) {}
+    }
+    setCustomSections(Array.isArray(parsedSections) ? parsedSections : []);
+
     setModalOpen(true);
   };
 
@@ -151,8 +167,8 @@ export const SchemeMaster: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!planName || !installmentAmount) {
-      showToast('Name and Installment Amount are required.', 'error');
+    if (!planName || (frequency !== 'Flexible' && !installmentAmount)) {
+      showToast('Plan Name and Installment Amount are required.', 'error');
       return;
     }
 
@@ -173,21 +189,24 @@ export const SchemeMaster: React.FC = () => {
     };
     const paymentRulesJson = JSON.stringify(paymentRules);
 
+    const bonusConfigJson = bonusTiers.length > 0 ? JSON.stringify(bonusTiers) : null;
+    const customSectionsJson = customSections.length > 0 ? JSON.stringify(customSections) : null;
+
     const payload = {
       id: editId || undefined,
       planName,
       description,
-      installmentAmountPaise: Math.round(parseFloat(installmentAmount) * 100),
+      installmentAmountPaise: frequency === 'Flexible' ? 0 : Math.round(parseFloat(installmentAmount) * 100),
       totalInstallments: parseInt(totalInstallments),
       frequency,
       isActive,
       durationUnit,
-      razorpayPlanId: razorpayPlanId || null,
+      razorpayPlanId: frequency === 'Flexible' ? null : (razorpayPlanId || null),
       posterImageBase64: posterImageBase64 || null,
       keywordsJson,
       paymentRulesJson,
-      bonusConfigJson: bonusConfigJson || null,
-      customSectionsJson: customSectionsJson || null
+      bonusConfigJson,
+      customSectionsJson
     };
 
     try {
@@ -219,12 +238,12 @@ export const SchemeMaster: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this plan? This action cannot be undone.')) return;
+    if (!window.confirm('Are you sure you want to permanently delete this scheme?')) return;
 
     try {
-      const res = await fetch(`${apiBase}/api/Scheme/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${apiBase}/api/Scheme/admin/delete/${id}`, { method: 'DELETE' });
       if (res.ok) {
-        showToast('Plan deleted successfully', 'success');
+        showToast('Scheme deleted successfully', 'success');
         // Force version increment trigger
         const vRes = await fetch(`${apiBase}/api/Admin/db-version`);
         if (vRes.ok) {
@@ -233,20 +252,21 @@ export const SchemeMaster: React.FC = () => {
         }
         loadSchemes();
       } else {
-        showToast('Failed to delete savings plan', 'error');
+        showToast('Failed to delete scheme', 'error');
       }
     } catch (e) {
-      showToast('Network error while deleting plan', 'error');
+      showToast('Network error while deleting scheme', 'error');
     }
   };
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+      {/* Top Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2 style={{ fontSize: '24px', fontWeight: '800' }}>Schemes Master</h2>
           <p style={{ color: 'var(--text-2)', fontSize: '13px', marginTop: '4px' }}>
-            Configure savings programs, durations, rules, and promotional bonus structures.
+            Configure savings programs, durations, rules, and promotional yield milestones.
           </p>
         </div>
         <button className="btn btn-primary" onClick={handleOpenCreate}>
@@ -254,65 +274,85 @@ export const SchemeMaster: React.FC = () => {
         </button>
       </div>
 
-        {/* Plans list */}
-        <div className="card">
-          {isLoading ? (
-            <div style={{ textAlign: 'center', color: 'var(--text-2)', padding: '20px' }}>Loading savings schemes...</div>
-          ) : (
-            <div className="table-wrap">
-              <table>
-                <thead>
+      {/* Main List Table Card */}
+      <div className="card" style={{ marginTop: '24px' }}>
+        {isLoading ? (
+          <div style={{ color: 'var(--text-2)', padding: '20px', textAlign: 'center' }}>Loading active programs...</div>
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Scheme Name</th>
+                  <th>Type</th>
+                  <th>Installment (INR)</th>
+                  <th>Tenure</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {schemes.length === 0 ? (
                   <tr>
-                    <th>Scheme Name</th>
-                    <th>Installment</th>
-                    <th>Frequency</th>
-                    <th>Duration</th>
-                    <th>Razorpay ID</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <td colSpan={6} style={{ textAlign: 'center', color: 'var(--text-3)' }}>
+                      No gold savings schemes configured yet. Click 'Create Savings Scheme' to start.
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {schemes.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} style={{ textAlign: 'center', color: 'var(--text-3)' }}>
-                        No plan configurations active in database.
+                ) : (
+                  schemes.map((s) => (
+                    <tr key={s.id}>
+                      <td>
+                        <div style={{ fontWeight: '700', fontSize: '14px', color: 'var(--text)' }}>{s.planName}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '2px', maxWidth: '320px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {s.description || 'No description provided.'}
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`badge ${s.frequency === 'Flexible' ? 'badge-blue' : 'badge-green'}`} style={{ textTransform: 'uppercase' }}>
+                          {s.frequency}
+                        </span>
+                      </td>
+                      <td style={{ fontWeight: '600' }}>
+                        {s.frequency === 'Flexible' ? (
+                          <span style={{ color: 'var(--text-3)' }}>Flexible Amount</span>
+                        ) : (
+                          `₹${(s.installmentAmountPaise / 100).toFixed(2)}`
+                        )}
+                      </td>
+                      <td>
+                        <div style={{ fontWeight: '600' }}>{s.totalInstallments} {s.durationUnit || 'Months'}</div>
+                      </td>
+                      <td>
+                        <span className={`badge ${s.isActive ? 'badge-green' : 'badge-outline'}`}>
+                          {s.isActive ? 'ACTIVE' : 'INACTIVE'}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '16px' }}>
+                          <button
+                            className="btn btn-ghost btn-xs"
+                            onClick={() => handleOpenEdit(s)}
+                            style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 8px' }}
+                          >
+                            <Edit size={13} /> Edit
+                          </button>
+                          <button
+                            className="btn btn-ghost btn-xs"
+                            onClick={() => handleDelete(s.id)}
+                            style={{ color: 'var(--red)', display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 8px' }}
+                          >
+                            <Trash2 size={13} /> Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
-                  ) : (
-                    schemes.map((s) => (
-                      <tr key={s.id}>
-                        <td>
-                          <div style={{ fontWeight: '600' }}>{s.planName}</div>
-                          <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>{s.description || 'No description'}</div>
-                        </td>
-                        <td style={{ fontWeight: '700', color: 'var(--green)' }}>₹{(s.installmentAmountPaise / 100).toFixed(2)}</td>
-                        <td><span className="badge badge-blue">{s.frequency}</span></td>
-                        <td>{s.totalInstallments} {s.durationUnit || 'Months'}</td>
-                        <td style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--text-2)' }}>{s.razorpayPlanId || '—'}</td>
-                        <td>
-                          <span className={`badge ${s.isActive ? 'badge-green' : 'badge-red'}`}>
-                            {s.isActive ? 'ACTIVE' : 'INACTIVE'}
-                          </span>
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            <button className="btn btn-ghost btn-xs" onClick={() => handleOpenEdit(s)}>
-                              <Edit2 size={12} /> Edit
-                            </button>
-                            <button className="btn btn-ghost btn-xs" style={{ color: 'var(--red)' }} onClick={() => handleDelete(s.id)}>
-                              <Trash2 size={12} /> Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Edit/Create Modal */}
       {modalOpen && (
@@ -351,69 +391,107 @@ export const SchemeMaster: React.FC = () => {
 
               <div className="grid-cols-2" style={{ gap: '16px' }}>
                 <div className="form-group">
-                  <label className="form-label">Installment Size (INR)</label>
-                  <input
-                    className="form-control"
-                    type="number"
-                    step="0.01"
-                    placeholder="e.g. 1000.00"
-                    required
-                    value={installmentAmount}
-                    onChange={(e) => setInstallmentAmount(e.target.value)}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Total Installments</label>
-                  <input
-                    className="form-control"
-                    type="number"
-                    placeholder="e.g. 11"
-                    required
-                    value={totalInstallments}
-                    onChange={(e) => setTotalInstallments(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="grid-cols-2" style={{ gap: '16px' }}>
-                <div className="form-group">
                   <label className="form-label">Billing Frequency</label>
                   <select
                     className="form-control"
                     value={frequency}
-                    onChange={(e) => setFrequency(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFrequency(val);
+                      if (val === 'Flexible') {
+                        setDurationUnit('Days');
+                      }
+                    }}
                   >
                     <option value="Daily">Daily</option>
                     <option value="Weekly">Weekly</option>
                     <option value="Monthly">Monthly</option>
+                    <option value="Flexible">Flexible</option>
                   </select>
                 </div>
 
+                {frequency !== 'Flexible' && (
+                  <div className="form-group">
+                    <label className="form-label">Duration Unit</label>
+                    <select
+                      className="form-control"
+                      value={durationUnit}
+                      onChange={(e) => setDurationUnit(e.target.value)}
+                    >
+                      <option value="Days">Days</option>
+                      <option value="Weeks">Weeks</option>
+                      <option value="Months">Months</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {frequency !== 'Flexible' ? (
+                <div className="grid-cols-2" style={{ gap: '16px' }}>
+                  <div className="form-group">
+                    <label className="form-label">Installment Size (INR)</label>
+                    <input
+                      className="form-control"
+                      type="number"
+                      step="0.01"
+                      placeholder="e.g. 1000.00"
+                      required
+                      value={installmentAmount}
+                      onChange={(e) => setInstallmentAmount(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Total Installments</label>
+                    <input
+                      className="form-control"
+                      type="number"
+                      placeholder="e.g. 11"
+                      required
+                      value={totalInstallments}
+                      onChange={(e) => setTotalInstallments(e.target.value)}
+                    />
+                  </div>
+                </div>
+              ) : (
                 <div className="form-group">
-                  <label className="form-label">Duration Unit</label>
-                  <select
-                    className="form-control"
-                    value={durationUnit}
-                    onChange={(e) => setDurationUnit(e.target.value)}
-                  >
-                    <option value="Days">Days</option>
-                    <option value="Weeks">Weeks</option>
-                    <option value="Months">Months</option>
-                  </select>
+                  <label className="form-label">Scheme Duration / Tenure</label>
+                  <div style={{ display: 'flex', gap: '16px' }}>
+                    <input
+                      className="form-control"
+                      type="number"
+                      placeholder="e.g. 1 (for 1 Day) or 30 (for 30 Days)"
+                      required
+                      style={{ flex: 1 }}
+                      value={totalInstallments}
+                      onChange={(e) => setTotalInstallments(e.target.value)}
+                    />
+                    <select
+                      className="form-control"
+                      style={{ width: '150px' }}
+                      value={durationUnit}
+                      onChange={(e) => setDurationUnit(e.target.value)}
+                    >
+                      <option value="Days">Days</option>
+                      <option value="Weeks">Weeks</option>
+                      <option value="Months">Months</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="form-group">
-                <label className="form-label">Razorpay Plan ID (for AutoPay subscriptions)</label>
-                <input
-                  className="form-control"
-                  type="text"
-                  placeholder="e.g. plan_N1o9aH21sP45"
-                  value={razorpayPlanId}
-                  onChange={(e) => setRazorpayPlanId(e.target.value)}
-                />
-              </div>
+              {frequency !== 'Flexible' && (
+                <div className="form-group">
+                  <label className="form-label">Razorpay Plan ID (for AutoPay subscriptions)</label>
+                  <input
+                    className="form-control"
+                    type="text"
+                    placeholder="e.g. plan_N1o9aH21sP45"
+                    value={razorpayPlanId}
+                    onChange={(e) => setRazorpayPlanId(e.target.value)}
+                  />
+                </div>
+              )}
 
               <div className="form-group">
                 <label className="form-label">Search Keywords (Comma-separated list)</label>
@@ -497,50 +575,164 @@ export const SchemeMaster: React.FC = () => {
                 </div>
               </div>
 
+              {/* Visual Loyalty Bonus Tier Builder */}
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '8px' }}>
-                <h4 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '700' }}>Promotional & Bonus Configuration (JSON)</h4>
-                <p style={{ fontSize: '11px', color: 'var(--text-3)', margin: '0 0 8px 0' }}>
-                  {"Define custom bonus yield tiers (e.g. [{\"startDay\":1,\"endDay\":365,\"bonusPercentage\":7.5}])"}
-                </p>
-                <textarea
-                  className="form-control"
-                  style={{ fontFamily: 'monospace', fontSize: '12px', minHeight: '80px' }}
-                  placeholder='e.g. [{"startDay": 1, "endDay": 330, "bonusPercentage": 7.5}]'
-                  value={bonusConfigJson}
-                  onChange={(e) => setBonusConfigJson(e.target.value)}
-                />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '13px', fontWeight: '700' }}>Loyalty Bonus Structure (Tiers)</h4>
+                    <p style={{ fontSize: '11px', color: 'var(--text-3)', margin: '2px 0 0 0' }}>
+                      Define custom bonus yields earned at specific days (e.g. Day 1 to 75 = 7.5%).
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-xs"
+                    onClick={() => setBonusTiers([...bonusTiers, { startDay: 1, endDay: 30, bonusPercentage: 7.5 }])}
+                  >
+                    + Add Tier
+                  </button>
+                </div>
+                {bonusTiers.length === 0 ? (
+                  <p style={{ fontSize: '12px', color: 'var(--text-3)', margin: 0, fontStyle: 'italic' }}>
+                    No custom tiers added. Default scheme rules will apply.
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {bonusTiers.map((tier, idx) => (
+                      <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>Day</span>
+                        <input
+                          type="number"
+                          className="form-control"
+                          style={{ width: '80px', padding: '4px 8px' }}
+                          value={tier.startDay}
+                          onChange={(e) => {
+                            const newTiers = [...bonusTiers];
+                            newTiers[idx].startDay = parseInt(e.target.value) || 0;
+                            setBonusTiers(newTiers);
+                          }}
+                        />
+                        <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>to</span>
+                        <input
+                          type="number"
+                          className="form-control"
+                          style={{ width: '80px', padding: '4px 8px' }}
+                          value={tier.endDay}
+                          onChange={(e) => {
+                            const newTiers = [...bonusTiers];
+                            newTiers[idx].endDay = parseInt(e.target.value) || 0;
+                            setBonusTiers(newTiers);
+                          }}
+                        />
+                        <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>Bonus %:</span>
+                        <input
+                          type="number"
+                          step="0.1"
+                          className="form-control"
+                          style={{ width: '80px', padding: '4px 8px' }}
+                          value={tier.bonusPercentage}
+                          onChange={(e) => {
+                            const newTiers = [...bonusTiers];
+                            newTiers[idx].bonusPercentage = parseFloat(e.target.value) || 0;
+                            setBonusTiers(newTiers);
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-outline btn-xs"
+                          style={{ color: 'var(--red)', borderColor: 'var(--red)', padding: '4px 8px' }}
+                          onClick={() => setBonusTiers(bonusTiers.filter((_, i) => i !== idx))}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
+              {/* Visual Marketing Section Builder */}
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '8px' }}>
-                <h4 style={{ margin: '0 0 4px 0', fontSize: '13px', fontWeight: '700' }}>Custom Sections / Features Metadata (JSON)</h4>
-                <p style={{ fontSize: '11px', color: 'var(--text-3)', margin: '0 0 8px 0' }}>
-                  Define marketing attributes and tags for the details sheet.
-                </p>
-                <textarea
-                  className="form-control"
-                  style={{ fontFamily: 'monospace', fontSize: '12px', minHeight: '80px' }}
-                  placeholder='e.g. {"rating": 4.9, "attributes": [{"key": "maturity", "enabled": 1, "title": "Maturity benefits"}]}'
-                  value={customSectionsJson}
-                  onChange={(e) => setCustomSectionsJson(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group" style={{ display: 'flex', alignItems: 'center' }}>
-                <input
-                  type="checkbox"
-                  id="planActiveCheck"
-                  checked={isActive}
-                  onChange={(e) => setIsActive(e.target.checked)}
-                />
-                <label htmlFor="planActiveCheck" style={{ fontWeight: '600', cursor: 'pointer', fontSize: '13px', marginLeft: '8px' }}>
-                  Active & Displayed in App
-                </label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '13px', fontWeight: '700' }}>Marketing Sections & User Guides</h4>
+                    <p style={{ fontSize: '11px', color: 'var(--text-3)', margin: '2px 0 0 0' }}>
+                      Add details, benefits, FAQs, or steps to display in the mobile app.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-xs"
+                    onClick={() => setCustomSections([...customSections, { type: 0, title: 'FAQ', content: 'Double-tap lines to edit...' }])}
+                  >
+                    + Add Section
+                  </button>
+                </div>
+                {customSections.length === 0 ? (
+                  <p style={{ fontSize: '12px', color: 'var(--text-3)', margin: 0, fontStyle: 'italic' }}>
+                    No marketing sections added. User will only see the basic description.
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {customSections.map((sec, idx) => (
+                      <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '6px', border: '1px solid var(--border)', padding: '12px', borderRadius: '12px', background: 'var(--bg)' }}>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <select
+                            className="form-control"
+                            style={{ width: '160px', padding: '4px 8px' }}
+                            value={sec.type}
+                            onChange={(e) => {
+                              const newSecs = [...customSections];
+                              newSecs[idx].type = parseInt(e.target.value);
+                              setCustomSections(newSecs);
+                            }}
+                          >
+                            <option value="0">FAQ Accordion</option>
+                            <option value="1">Premium Highlight Card</option>
+                            <option value="2">Standard Info Card</option>
+                          </select>
+                          <input
+                            type="text"
+                            placeholder="Section Title (e.g. FAQ)"
+                            className="form-control"
+                            style={{ flex: 1, padding: '4px 8px' }}
+                            value={sec.title}
+                            onChange={(e) => {
+                              const newSecs = [...customSections];
+                              newSecs[idx].title = e.target.value;
+                              setCustomSections(newSecs);
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-outline btn-xs"
+                            style={{ color: 'var(--red)', borderColor: 'var(--red)', padding: '4px 8px' }}
+                            onClick={() => setCustomSections(customSections.filter((_, i) => i !== idx))}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <textarea
+                          placeholder="Content details or bullet points..."
+                          className="form-control"
+                          style={{ minHeight: '60px', fontSize: '12px' }}
+                          value={sec.content}
+                          onChange={(e) => {
+                            const newSecs = [...customSections];
+                            newSecs[idx].content = e.target.value;
+                            setCustomSections(newSecs);
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '10px' }}>
                 <button type="button" className="btn btn-outline" onClick={() => setModalOpen(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={isSaving}>
-                  {isSaving ? 'Saving...' : 'Save Scheme'}
+                  {isSaving ? 'Saving Plan...' : 'Save & Publish'}
                 </button>
               </div>
             </div>
