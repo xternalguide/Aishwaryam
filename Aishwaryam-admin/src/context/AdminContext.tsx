@@ -1,5 +1,112 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+// Define window.fetchWithCache globally
+window.fetchWithCache = async function (url: string, options: any = {}) {
+  const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5044'
+    : 'https://aishwaryam-production.up.railway.app';
+    
+  const isGet = !options.method || options.method.toUpperCase() === 'GET';
+
+  const reportFailure = async (response: Response) => {
+    try {
+      if (!url.includes('/api/Audit/report') && !url.includes('/api/Audit/logs')) {
+        const errorText = await response.clone().text().catch(() => '');
+        fetch(`${apiBase}/api/Audit/report`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'API_FAILURE',
+            details: `Failed API call: ${options.method || 'GET'} ${url} returned HTTP ${response.status}`,
+            status: 'FAILED',
+            errorMessage: errorText.substring(0, 1000)
+          })
+        }).catch(() => {});
+      }
+    } catch (e) {}
+  };
+
+  const reportNetworkError = async (err: any) => {
+    try {
+      if (!url.includes('/api/Audit/report')) {
+        fetch(`${apiBase}/api/Audit/report`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'API_FAILURE',
+            details: `Failed API call: ${options.method || 'GET'} ${url} encountered network error`,
+            status: 'FAILED',
+            errorMessage: err.message || String(err)
+          })
+        }).catch(() => {});
+      }
+    } catch (e) {}
+  };
+  
+  if (!isGet) {
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        await reportFailure(response);
+      } else {
+        try {
+          const vRes = await fetch(`${apiBase}/api/Admin/db-version`);
+          if (vRes.ok) {
+            const vData = await vRes.json();
+            sessionStorage.setItem('admin-db-version', String(vData.version));
+          }
+        } catch (e) {}
+      }
+      return response;
+    } catch (err: any) {
+      await reportNetworkError(err);
+      throw err;
+    }
+  }
+
+  const currentVersion = sessionStorage.getItem('admin-db-version') || '0';
+  const cacheKey = `cache:${url}`;
+  const cachedDataStr = sessionStorage.getItem(cacheKey);
+
+  if (cachedDataStr) {
+    try {
+      const cacheObj = JSON.parse(cachedDataStr);
+      if (cacheObj.version === currentVersion) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => cacheObj.data,
+          text: async () => JSON.stringify(cacheObj.data),
+          clone: function() { return this; }
+        } as any;
+      }
+    } catch (e) {
+      sessionStorage.removeItem(cacheKey);
+    }
+  }
+
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      await reportFailure(response);
+    } else {
+      try {
+        const clone = response.clone();
+        const data = await clone.json();
+        sessionStorage.setItem(cacheKey, JSON.stringify({
+          version: currentVersion,
+          data: data
+        }));
+      } catch (e) {}
+    }
+    return response;
+  } catch (err: any) {
+    await reportNetworkError(err);
+    throw err;
+  }
+};
+
+
 export interface ToastMessage {
   id: string;
   text: string;

@@ -27,20 +27,36 @@ interface Offer {
   expiresAt: string;
 }
 
+interface PriceLog {
+  createdAt: string;
+  buyPricePaise: number;
+  sellPricePaise: number;
+  isAdminOverride: boolean;
+}
+
 export const DashboardOverview: React.FC = () => {
   const { apiBase, globalReloadToken, showToast } = useAdmin();
   const [kpis, setKpis] = useState<KPIs | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
+  const [priceLogs, setPriceLogs] = useState<PriceLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isClearing, setIsClearing] = useState(false);
 
   const loadData = async () => {
     try {
-      const kpiRes = await window.fetchWithCache(`${apiBase}/api/Admin/kpis`);
-      const offerRes = await window.fetchWithCache(`${apiBase}/api/Offers/all-enriched`);
+      const [kpiRes, offerRes, priceLogsRes] = await Promise.all([
+        window.fetchWithCache(`${apiBase}/api/Admin/kpis`),
+        window.fetchWithCache(`${apiBase}/api/Offers/all-enriched`),
+        window.fetchWithCache(`${apiBase}/api/Gold/price-logs?limit=15`)
+      ]);
       
       if (kpiRes.ok) setKpis(await kpiRes.json());
       if (offerRes.ok) setOffers(await offerRes.json());
+      if (priceLogsRes.ok) {
+        const logs = await priceLogsRes.json();
+        // Reverse array to render chronologically left-to-right
+        setPriceLogs(Array.isArray(logs) ? [...logs].reverse() : []);
+      }
     } catch (e) {
       console.error('Failed to load dashboard KPIs', e);
     } finally {
@@ -85,6 +101,99 @@ export const DashboardOverview: React.FC = () => {
     } finally {
       setIsClearing(false);
     }
+  };
+
+  const renderChart = () => {
+    if (priceLogs.length === 0) return null;
+
+    const width = 1000;
+    const height = 240;
+    const padding = 50;
+
+    const prices = priceLogs.map(l => l.buyPricePaise / 100);
+    const maxPrice = Math.max(...prices) * 1.002;
+    const minPrice = Math.min(...prices) * 0.998;
+    const priceRange = maxPrice - minPrice || 1;
+
+    const getX = (index: number) => padding + (index / (priceLogs.length - 1)) * (width - padding * 2);
+    const getY = (price: number) => height - padding - ((price - minPrice) / priceRange) * (height - padding * 2);
+
+    let pathD = '';
+    let areaD = '';
+
+    priceLogs.forEach((log, i) => {
+      const x = getX(i);
+      const y = getY(log.buyPricePaise / 100);
+      if (i === 0) {
+        pathD = `M ${x} ${y}`;
+        areaD = `M ${x} ${height - padding} L ${x} ${y}`;
+      } else {
+        pathD += ` L ${x} ${y}`;
+      }
+      if (i === priceLogs.length - 1) {
+        areaD += ` L ${x} ${y} L ${x} ${height - padding} Z`;
+      } else if (i > 0) {
+        areaD += ` L ${x} ${y}`;
+      }
+    });
+
+    return (
+      <div className="card">
+        <div className="card-head">
+          <div>
+            <span className="card-title">Gold Rate Trend Ledger</span>
+            <p className="card-desc">Tracking historical 22K gold rates per gram (INR) fetched from The Jewellers Association.</p>
+          </div>
+        </div>
+        <div style={{ position: 'relative', width: '100%', overflowX: 'auto' }}>
+          <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: 'auto', minWidth: '650px' }}>
+            <defs>
+              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--amber)" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="var(--amber)" stopOpacity="0.00" />
+              </linearGradient>
+            </defs>
+
+            {/* Grid lines */}
+            {[0, 0.25, 0.5, 0.75, 1].map((ratio, index) => {
+              const val = minPrice + ratio * priceRange;
+              const y = getY(val);
+              return (
+                <g key={index}>
+                  <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="var(--border)" strokeDasharray="4 4" />
+                  <text x={padding - 10} y={y + 4} textAnchor="end" fontSize="10" fill="var(--text-3)">
+                    ₹{val.toFixed(2)}
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* Chart Area Fill */}
+            {areaD && <path d={areaD} fill="url(#chartGrad)" />}
+
+            {/* Trend Line */}
+            {pathD && <path d={pathD} fill="none" stroke="var(--amber)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
+
+            {/* Chart Dots */}
+            {priceLogs.map((log, i) => {
+              const x = getX(i);
+              const y = getY(log.buyPricePaise / 100);
+              const dateStr = new Date(log.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+              return (
+                <g key={i}>
+                  <circle cx={x} cy={y} r="4" fill="var(--surface)" stroke="var(--amber)" strokeWidth="2" />
+                  <circle cx={x} cy={y} r="12" fill="var(--amber)" fillOpacity="0" style={{ cursor: 'pointer' }}>
+                    <title>
+                      {dateStr} &#10; 22K Rate: ₹{(log.buyPricePaise / 100).toFixed(2)}/g
+                    </title>
+                  </circle>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -156,7 +265,7 @@ export const DashboardOverview: React.FC = () => {
             <Coins size={20} />
           </div>
           <div className="kpi-details">
-            <span className="kpi-title">Live 24K Price</span>
+            <span className="kpi-title">Live 22K Price</span>
             <span className="kpi-value" style={{ fontSize: '16px' }}>
               Buy: ₹{(kpis?.liveGoldPriceBuy || 0).toFixed(2)}/g <br />
               <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>
@@ -166,6 +275,9 @@ export const DashboardOverview: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Gold Price History Chart */}
+      {renderChart()}
 
       {/* Active Offers Card */}
       <div className="card">

@@ -30,7 +30,9 @@ export const MarketingAssets: React.FC = () => {
     try {
       const res = await window.fetchWithCache(`${apiBase}/api/Banner/admin/all`);
       if (res.ok) {
-        setAssets(await res.json());
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : (data.banners || []);
+        setAssets(list);
       }
     } catch (e) {
       console.error('Failed to load marketing assets', e);

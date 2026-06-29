@@ -39,7 +39,7 @@ export const TransactionsLedger: React.FC = () => {
 
       if (txsRes.ok) {
         const txsData = await txsRes.json();
-        const list = Array.isArray(txsData) ? txsData : [];
+        const list = Array.isArray(txsData) ? txsData : (txsData.transactions || []);
         const enriched = list.map((t: any) => {
           const u = usersMap[(t.userId || '').toLowerCase()];
           return {

@@ -15,7 +15,9 @@ import {
   Sun,
   Moon,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Menu,
+  X
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -35,6 +37,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentTab, setCurrent
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     return (localStorage.getItem('aishwaryam-admin-theme') as 'light' | 'dark') || 'dark';
   });
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -66,25 +69,48 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentTab, setCurrent
     }
   };
 
+  const handleNavSelect = (id: string) => {
+    setCurrentTab(id);
+    setIsMobileSidebarOpen(false);
+  };
+
   return (
     <div className="admin-layout">
+      {/* Mobile Backdrop */}
+      {isMobileSidebarOpen && (
+        <div className="sidebar-backdrop" onClick={() => setIsMobileSidebarOpen(false)} />
+      )}
+
       {/* Sidebar */}
-      <aside className="sidebar">
+      <aside className={`sidebar ${isMobileSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-logo">
           <div style={{
             width: '32px',
             height: '32px',
             borderRadius: '8px',
-            background: 'var(--accent)',
+            background: 'var(--accent-gradient)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: '900',
-            color: '#1c1d21'
+            color: '#ffffff'
           }}>
             A
           </div>
           <h1>Aishwaryam</h1>
+          <button
+            className="btn btn-ghost btn-xs"
+            onClick={() => setIsMobileSidebarOpen(false)}
+            style={{ marginLeft: 'auto', display: 'var(--mobile-close-btn, none)', padding: '4px', borderRadius: '50%' }}
+          >
+            <X size={18} />
+          </button>
+          {/* Inject style helper to render close button on small screens */}
+          <style>{`
+            @media (max-width: 1024px) {
+              .sidebar-logo button { display: block !important; }
+            }
+          `}</style>
         </div>
 
         <nav className="sidebar-nav">
@@ -92,11 +118,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentTab, setCurrent
             <div
               key={item.id}
               className={`nav-link ${currentTab === item.id ? 'active' : ''}`}
-              onClick={() => setCurrentTab(item.id)}
+              onClick={() => handleNavSelect(item.id)}
             >
               {item.icon}
               <span>{item.label}</span>
-              {currentTab === item.id && <ChevronRight size={14} style={{ marginLeft: 'auto' }} />}
             </div>
           ))}
         </nav>
@@ -117,12 +142,38 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentTab, setCurrent
       <div className="main-content">
         {/* Topbar */}
         <header className="top-bar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ color: 'var(--text-3)' }}>Admin</span>
-            <span style={{ color: 'var(--border)' }}>/</span>
-            <span style={{ fontWeight: '600' }}>
-              {navItems.find((n) => n.id === currentTab)?.label || 'Overview'}
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {/* Mobile Hamburger Toggle */}
+            <button
+              onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text)',
+                cursor: 'pointer',
+                display: 'none',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '6px',
+                borderRadius: '8px'
+              }}
+              className="mobile-toggle-btn"
+            >
+              <Menu size={22} />
+            </button>
+            <style>{`
+              @media (max-width: 1024px) {
+                .mobile-toggle-btn { display: flex !important; }
+              }
+            `}</style>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: 'var(--text-3)' }}>Admin</span>
+              <span style={{ color: 'var(--border)' }}>/</span>
+              <span style={{ fontWeight: '600' }}>
+                {navItems.find((n) => n.id === currentTab)?.label || 'Overview'}
+              </span>
+            </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -143,7 +194,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentTab, setCurrent
             </button>
 
             {/* Profile Info Chip */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} className="admin-profile-chip">
               <div style={{
                 width: '36px',
                 height: '36px',
@@ -159,11 +210,16 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentTab, setCurrent
               }}>
                 A
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontWeight: '700', fontSize: '13px' }}>Aishwaryam Administrator</span>
+              <div style={{ display: 'flex', flexDirection: 'column' }} className="admin-profile-details">
+                <span style={{ fontWeight: '700', fontSize: '13px' }}>Admin</span>
                 <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>blazewingwebs@gmail.com</span>
               </div>
             </div>
+            <style>{`
+              @media (max-width: 640px) {
+                .admin-profile-details { display: none !important; }
+              }
+            `}</style>
           </div>
         </header>
 
