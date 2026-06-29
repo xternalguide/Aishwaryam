@@ -812,7 +812,7 @@ export const SchemeDetail: React.FC = () => {
       fallbackGrams = (parsedVal / 1.03 * 1.075 * 100) / goldPrice22K;
     } else {
       const baseMetalVal = parsedVal * goldPrice22K;
-      amountPaise = Math.round(baseMetalVal * 1.18);
+      amountPaise = Math.round(baseMetalVal * 1.03);
       fallbackGrams = parsedVal * 1.075;
     }
 
@@ -1128,7 +1128,7 @@ export const SchemeDetail: React.FC = () => {
     joinAmountRupees = parsedJoinVal;
   } else {
     const baseMetalVal = (parsedJoinVal * goldPrice22K) / 100;
-    joinAmountRupees = baseMetalVal * 1.18;
+    joinAmountRupees = baseMetalVal * 1.03;
   }
   const isJoinAmountValid = parsedJoinVal > 0 && joinAmountRupees >= 100;
 
@@ -1912,8 +1912,8 @@ export const SchemeDetail: React.FC = () => {
                       <span style={{ fontWeight: 'bold' }}>₹{(parseFloat(joinAmount) * goldPrice22K / 100).toFixed(2)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      <span>GST (18%)</span>
-                      <span>₹{(parseFloat(joinAmount) * goldPrice22K / 100 * 0.18).toFixed(2)}</span>
+                      <span>{t('gst_3_percent')}</span>
+                      <span>₹{(parseFloat(joinAmount) * goldPrice22K / 100 * 0.03).toFixed(2)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--brand-mid)', fontWeight: 'bold' }}>
                       <span>{t('loyalty_bonus_structure')} (7.5%)</span>
@@ -1923,7 +1923,7 @@ export const SchemeDetail: React.FC = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
                       <span>{t('total_amount_payable')}</span>
                       <span style={{ color: 'var(--brand-dark)' }}>
-                        ₹{(parseFloat(joinAmount) * goldPrice22K / 100 * 1.18).toFixed(2)}
+                        ₹{(parseFloat(joinAmount) * goldPrice22K / 100 * 1.03).toFixed(2)}
                       </span>
                     </div>
                   </>
