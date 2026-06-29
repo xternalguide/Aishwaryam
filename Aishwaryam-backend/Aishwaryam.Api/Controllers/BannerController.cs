@@ -253,78 +253,8 @@ namespace Aishwaryam.Api.Controllers
 
         private string SaveImageFromBase64(string base64String)
         {
-            if (string.IsNullOrWhiteSpace(base64String))
-                return string.Empty;
-
-            // Check if it's already a URL (e.g. if the admin is updating a banner but keeping the same image URL)
-            if (base64String.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
-                base64String.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
-                base64String.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
-            {
-                return base64String;
-            }
-
-            try
-            {
-                // Remove base64 metadata headers if present (e.g., "data:image/png;base64,")
-                var cleanBase64 = base64String;
-                var extension = ".png"; // default
-
-                if (cleanBase64.Contains(","))
-                {
-                    var parts = cleanBase64.Split(',');
-                    var header = parts[0];
-                    cleanBase64 = parts[1];
-
-                    if (header.Contains("image/jpeg") || header.Contains("image/jpg"))
-                        extension = ".jpg";
-                    else if (header.Contains("image/webp"))
-                        extension = ".webp";
-                    else if (header.Contains("image/gif"))
-                        extension = ".gif";
-                }
-
-                cleanBase64 = cleanBase64.Replace(" ", "+");
-                var imageBytes = Convert.FromBase64String(cleanBase64);
-
-                // Ensure directories exist in wwwroot
-                var webRootPath = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
-                var absoluteDir = Path.Combine(webRootPath, "uploads", "banners");
-                if (!Directory.Exists(absoluteDir))
-                {
-                    Directory.CreateDirectory(absoluteDir);
-                }
-
-                var fileName = $"banner_{Guid.NewGuid()}{extension}";
-                var absoluteFilePath = Path.Combine(absoluteDir, fileName);
-
-                System.IO.File.WriteAllBytes(absoluteFilePath, imageBytes);
-
-                // Return relative path to be served statically
-                var request = HttpContext.Request;
-                var scheme = request.Scheme;
-                
-                // If requested host is the production host, force HTTPS scheme
-                if (request.Host.Host.Equals("aishwaryam-production.up.railway.app", StringComparison.OrdinalIgnoreCase) ||
-                    request.Host.Host.Equals("aishwaryam.blazewing.in", StringComparison.OrdinalIgnoreCase))
-                {
-                    scheme = "https";
-                }
-                // Also, if the request has X-Forwarded-Proto header, respect that
-                else if (request.Headers.TryGetValue("X-Forwarded-Proto", out var proto))
-                {
-                    scheme = proto.ToString();
-                }
-
-                var baseUrl = $"{scheme}://{request.Host}{request.PathBase}";
-                return $"{baseUrl}/uploads/banners/{fileName}";
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[SAVE-IMAGE-ERROR] {ex.Message}");
-                // Fallback to saving base64 to db if disk save fails (failsafe)
-                return base64String;
-            }
+            // Keep the base64 string raw in database for 100% persistency across ephemeral container environments like Railway
+            return base64String;
         }
     }
 }

@@ -433,7 +433,7 @@ export const Dashboard: React.FC = () => {
     refreshData(!profile);
     const fetchBanners = async () => {
       try {
-        const res = await ApiClient.get('api/Banner/active');
+        const res = await ApiClient.get('api/Banner/active?location=POSTER');
         if (res.data && res.data.success) setBanners(res.data.banners || []);
       } catch (err) { console.error('Failed to load active banners:', err); }
     };
