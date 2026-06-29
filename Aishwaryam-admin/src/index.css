@@ -562,7 +562,7 @@ tr:hover td {
   width: 90%;
   max-width: 640px;
   max-height: 85vh;
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
