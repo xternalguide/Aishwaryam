@@ -357,6 +357,7 @@ namespace Aishwaryam.Api.Controllers
                     createdAt = s.FetchedAt.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                     buyPricePaise = (long)(s.BuyPricePerGram * 100),
                     sellPricePaise = (long)(s.SellPricePerGram * 100),
+                    priceSilverPaise = (long)(s.PriceSilverPerGram * 100),
                     isAdminOverride = s.IsAdminOverride
                 })
                 .ToListAsync();

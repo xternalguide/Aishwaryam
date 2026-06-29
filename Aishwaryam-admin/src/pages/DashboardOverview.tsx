@@ -31,6 +31,7 @@ interface PriceLog {
   createdAt: string;
   buyPricePaise: number;
   sellPricePaise: number;
+  priceSilverPaise: number;
   isAdminOverride: boolean;
 }
 
@@ -42,6 +43,7 @@ export const DashboardOverview: React.FC = () => {
   const [livePrice, setLivePrice] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isClearing, setIsClearing] = useState(false);
+  const [activeMetric, setActiveMetric] = useState<'gold' | 'silver'>('gold');
 
   const loadData = async () => {
     try {
@@ -113,7 +115,15 @@ export const DashboardOverview: React.FC = () => {
     const height = 240;
     const padding = 50;
 
-    const prices = priceLogs.map(l => l.buyPricePaise / 100);
+    const prices = priceLogs.map(l => {
+      if (activeMetric === 'gold') {
+        return l.buyPricePaise / 100;
+      } else {
+        // Fallback older mock priceLogs without silver prices to 99.00
+        return l.priceSilverPaise > 0 ? l.priceSilverPaise / 100 : 99.00;
+      }
+    });
+
     const maxPrice = Math.max(...prices) * 1.002;
     const minPrice = Math.min(...prices) * 0.998;
     const priceRange = maxPrice - minPrice || 1;
@@ -125,8 +135,12 @@ export const DashboardOverview: React.FC = () => {
     let areaD = '';
 
     priceLogs.forEach((log, i) => {
+      const val = activeMetric === 'gold' 
+        ? log.buyPricePaise / 100 
+        : (log.priceSilverPaise > 0 ? log.priceSilverPaise / 100 : 99.00);
+
       const x = getX(i);
-      const y = getY(log.buyPricePaise / 100);
+      const y = getY(val);
       if (i === 0) {
         pathD = `M ${x} ${y}`;
         areaD = `M ${x} ${height - padding} L ${x} ${y}`;
@@ -140,20 +154,38 @@ export const DashboardOverview: React.FC = () => {
       }
     });
 
+    const colorVar = activeMetric === 'gold' ? 'var(--amber)' : 'var(--blue)';
+
     return (
-      <div className="card">
-        <div className="card-head">
+      <div className="card" style={{ marginTop: '24px' }}>
+        <div className="card-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <span className="card-title">Gold Rate Trend Ledger</span>
-            <p className="card-desc">Tracking historical 22K gold rates per gram (INR) fetched from The Jewellers Association.</p>
+            <span className="card-title">{activeMetric === 'gold' ? 'Gold Rate Trend Ledger' : 'Silver Rate Trend Ledger'}</span>
+            <p className="card-desc">Tracking historical rates per gram (INR) fetched from The Jewellers Association.</p>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button 
+              className={`btn btn-xs ${activeMetric === 'gold' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => setActiveMetric('gold')}
+              style={{ fontSize: '11px', padding: '4px 10px' }}
+            >
+              Gold (22K)
+            </button>
+            <button 
+              className={`btn btn-xs ${activeMetric === 'silver' ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => setActiveMetric('silver')}
+              style={{ fontSize: '11px', padding: '4px 10px' }}
+            >
+              Silver
+            </button>
           </div>
         </div>
         <div style={{ position: 'relative', width: '100%', overflowX: 'auto' }}>
           <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: 'auto', minWidth: '650px' }}>
             <defs>
               <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--amber)" stopOpacity="0.25" />
-                <stop offset="100%" stopColor="var(--amber)" stopOpacity="0.00" />
+                <stop offset="0%" stopColor={colorVar} stopOpacity="0.25" />
+                <stop offset="100%" stopColor={colorVar} stopOpacity="0.00" />
               </linearGradient>
             </defs>
 
@@ -175,19 +207,23 @@ export const DashboardOverview: React.FC = () => {
             {areaD && <path d={areaD} fill="url(#chartGrad)" />}
 
             {/* Trend Line */}
-            {pathD && <path d={pathD} fill="none" stroke="var(--amber)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
+            {pathD && <path d={pathD} fill="none" stroke={colorVar} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
 
             {/* Chart Dots */}
             {priceLogs.map((log, i) => {
+              const val = activeMetric === 'gold' 
+                ? log.buyPricePaise / 100 
+                : (log.priceSilverPaise > 0 ? log.priceSilverPaise / 100 : 99.00);
+
               const x = getX(i);
-              const y = getY(log.buyPricePaise / 100);
+              const y = getY(val);
               const dateStr = new Date(log.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
               return (
                 <g key={i}>
-                  <circle cx={x} cy={y} r="4" fill="var(--surface)" stroke="var(--amber)" strokeWidth="2" />
-                  <circle cx={x} cy={y} r="12" fill="var(--amber)" fillOpacity="0" style={{ cursor: 'pointer' }}>
+                  <circle cx={x} cy={y} r="4" fill="var(--surface)" stroke={colorVar} strokeWidth="2" />
+                  <circle cx={x} cy={y} r="12" fill={colorVar} fillOpacity="0" style={{ cursor: 'pointer' }}>
                     <title>
-                      {dateStr} &#10; 22K Rate: ₹{(log.buyPricePaise / 100).toFixed(2)}/g
+                      {dateStr} &#10; {activeMetric === 'gold' ? '22K Rate' : 'Silver Rate'}: ₹{val.toFixed(2)}/g
                     </title>
                   </circle>
                 </g>
@@ -232,7 +268,7 @@ export const DashboardOverview: React.FC = () => {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid-cols-4">
+      <div className="grid-cols-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
         <div className="kpi-card">
           <div className="kpi-icon-wrap" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
             <Users size={20} />
@@ -277,13 +313,28 @@ export const DashboardOverview: React.FC = () => {
             </span>
           </div>
         </div>
+
+        <div className="kpi-card">
+          <div className="kpi-icon-wrap" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
+            <Coins size={20} />
+          </div>
+          <div className="kpi-details">
+            <span className="kpi-title">Live Silver Price</span>
+            <span className="kpi-value" style={{ fontSize: '16px' }}>
+              Spot: ₹{livePrice ? (livePrice.priceSilverPaise / 100).toFixed(2) : '0.00'}/g <br />
+              <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>
+                Per Kg: ₹{livePrice ? ((livePrice.priceSilverPaise / 100) * 1000).toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0.00'}
+              </span>
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* Gold Price History Chart */}
+      {/* Gold/Silver Price History Chart */}
       {renderChart()}
 
       {/* Active Offers Card */}
-      <div className="card">
+      <div className="card" style={{ marginTop: '24px' }}>
         <div className="card-head">
           <span className="card-title">Active Events & Coupons</span>
           <span className="badge badge-green">{activeOffers.length} running</span>
