@@ -74,9 +74,10 @@ export const SchemeDetail: React.FC = () => {
     }
   }, [userSchemeId]);
 
-  // General configuration/metadata
   const [kycLevel, setKycLevel] = useState('BASIC');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingTitle, setProcessingTitle] = useState('Verifying Transaction...');
+  const [processingMsg, setProcessingMsg] = useState('Confirming your purchase. Please do not close the application or go back.');
 
   // Consume from AppContext
   const {
@@ -394,6 +395,8 @@ export const SchemeDetail: React.FC = () => {
 
   const launchRazorpayCheckout = async (amountPaise: number, isJoiningFlow: boolean, goldWeightGrams: number, customSchemeId?: string | null) => {
     if (!scheme) return;
+    setProcessingTitle('Verifying Transaction...');
+    setProcessingMsg('Confirming your purchase. Please do not close the application or go back.');
     setIsProcessing(true);
     try {
       const userId = SessionManager.getUserId() || 'user-id-999';
@@ -659,6 +662,8 @@ export const SchemeDetail: React.FC = () => {
       return;
     }
 
+    setProcessingTitle('Joining Scheme...');
+    setProcessingMsg('Enrolling you in the savings plan. Please wait...');
     setIsProcessing(true);
     try {
       const joinRes = await ApiClient.post('api/Scheme/join', {
@@ -686,6 +691,13 @@ export const SchemeDetail: React.FC = () => {
     if (!userId) return;
     
     const hasAddress = userAddresses && userAddresses.length > 0;
+    if (pendingAction === 'JOIN') {
+      setProcessingTitle('Joining Scheme...');
+      setProcessingMsg('Enrolling you in the savings plan. Please wait...');
+    } else {
+      setProcessingTitle('Saving Details...');
+      setProcessingMsg('Updating nominee and address details...');
+    }
     setIsProcessing(true);
     
     try {
@@ -809,6 +821,8 @@ export const SchemeDetail: React.FC = () => {
       return;
     }
 
+    setProcessingTitle('Verifying Transaction...');
+    setProcessingMsg('Confirming your purchase. Please do not close the application or go back.');
     setIsProcessing(true);
     try {
       const userId = SessionManager.getUserId() || 'user-id-999';
@@ -1981,7 +1995,7 @@ export const SchemeDetail: React.FC = () => {
             fontFamily: 'var(--font-poppins)',
             letterSpacing: '0.5px'
           }}>
-            Verifying Transaction...
+            {processingTitle}
           </h3>
           <p style={{
             fontSize: '13px',
@@ -1991,7 +2005,7 @@ export const SchemeDetail: React.FC = () => {
             lineHeight: '20px',
             fontFamily: 'var(--font-poppins)'
           }}>
-            Confirming your purchase. Please do not close the application or go back.
+            {processingMsg}
           </p>
         </div>
       )}
