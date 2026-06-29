@@ -701,7 +701,16 @@ export const Dashboard: React.FC = () => {
             <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {icon}
             </div>
-            <span style={{ fontFamily: DS.font, fontSize: '10px', fontWeight: '700', color: DS.textWhite, textAlign: 'center', lineHeight: 1.2 }}>
+            <span style={{ 
+              fontFamily: DS.font, 
+              fontSize: '9px', 
+              fontWeight: '700', 
+              color: DS.textWhite, 
+              textAlign: 'center', 
+              lineHeight: 1.1,
+              wordBreak: 'normal',
+              overflowWrap: 'anywhere'
+            }}>
               {label}
             </span>
           </div>
@@ -818,14 +827,14 @@ export const Dashboard: React.FC = () => {
         {/* Gold */}
         <div style={{ background: isDark ? 'rgba(255,215,0,0.08)' : 'rgba(184,134,11,0.08)', padding:'14px', borderRadius:'14px', border: isDark ? '1px solid rgba(255,215,0,0.2)' : '1px solid rgba(184,134,11,0.2)' }}>
           <span style={{ fontFamily:DS.font, fontSize:'10px', color: isDark ? 'rgba(255,215,0,0.8)' : '#996F00', display:'block', marginBottom:'6px', fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.3px' }}>{t('gold_22k')}</span>
-          <span style={{ fontFamily:DS.font, fontSize:'20px', fontWeight:'900', color:DS.gold, display:'block' }}>
+          <span style={{ fontFamily:DS.font, fontSize:'clamp(14px, 4.5vw, 20px)', fontWeight:'900', color:DS.gold, display:'block' }}>
             ₹{new Intl.NumberFormat('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}).format((livePrice?.price22KPaise||701000)/100)}
           </span>
         </div>
         {/* Silver */}
         <div style={{ background: isDark ? 'rgba(207,216,220,0.08)' : 'rgba(84,110,122,0.07)', padding:'14px', borderRadius:'14px', border: isDark ? '1px solid rgba(207,216,220,0.15)' : '1px solid rgba(84,110,122,0.18)' }}>
           <span style={{ fontFamily:DS.font, fontSize:'10px', color: isDark ? 'rgba(207,216,220,0.8)' : '#455A64', display:'block', marginBottom:'6px', fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.3px' }}>{t('silver_999')}</span>
-          <span style={{ fontFamily:DS.font, fontSize:'20px', fontWeight:'900', color: isDark ? '#CFD8DC' : '#546E7A', display:'block' }}>
+          <span style={{ fontFamily:DS.font, fontSize:'clamp(14px, 4.5vw, 20px)', fontWeight:'900', color: isDark ? '#CFD8DC' : '#546E7A', display:'block' }}>
             ₹{new Intl.NumberFormat('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}).format((livePrice?.priceSilverPaise||9900)/100)}
           </span>
         </div>
