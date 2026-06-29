@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SessionManager } from '../utils/SessionManager';
 import { ApiClient } from '../utils/ApiClient';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from '../utils/translation';
-import { ArrowLeft, ShieldCheck, MapPin, PlusCircle, Trash2, Edit } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, MapPin, PlusCircle, Trash2, Edit, Clock, AlertTriangle } from 'lucide-react';
 
 const ProfileHeader: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack }) => (
   <div className="app-header-bar" style={{
@@ -52,7 +52,7 @@ const PIN_PREFIXES: Record<string, string[]> = {
   "Mysuru": ["570"]
 };
 
-// ── PROFILE ADDRESS PAGE ──────────────────────────────────────────────────
+// ΓöÇΓöÇ PROFILE ADDRESS PAGE ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 export const ProfileAddress: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -478,7 +478,7 @@ export const ProfileAddress: React.FC = () => {
   );
 };
 
-// ── PROFILE KYC DETAILS PAGE ──────────────────────────────────────────────
+// ΓöÇΓöÇ PROFILE KYC DETAILS PAGE ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 export const ProfileKyc: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -594,11 +594,17 @@ export const ProfileKyc: React.FC = () => {
         
         {/* Status banner */}
         <div style={{
-          background: kycLevel === 'FULL' ? 'var(--success-light)' : 'var(--warning-light)',
-          border: `1.5px solid ${kycLevel === 'FULL' ? 'var(--success-green)' : 'var(--warning-amber)'}`,
+          background: kycLevel === 'FULL' ? 'var(--success-light)' : kycLevel === 'PENDING' ? 'var(--warning-light)' : 'var(--error-light)',
+          border: `1.5px solid ${kycLevel === 'FULL' ? 'var(--success-green)' : kycLevel === 'PENDING' ? 'var(--warning-amber)' : 'var(--error-red)'}`,
           padding: '18px', borderRadius: '16px', display: 'flex', gap: '14px', alignItems: 'flex-start'
         }}>
-          <ShieldCheck size={28} color={kycLevel === 'FULL' ? 'var(--success-green)' : 'var(--warning-amber)'} style={{ marginTop: '2px', flexShrink: 0 }} />
+          {kycLevel === 'FULL' ? (
+            <ShieldCheck size={28} color="var(--success-green)" style={{ marginTop: '2px', flexShrink: 0 }} />
+          ) : kycLevel === 'PENDING' ? (
+            <Clock size={28} color="var(--warning-amber)" style={{ marginTop: '2px', flexShrink: 0 }} />
+          ) : (
+            <AlertTriangle size={28} color="var(--error-red)" style={{ marginTop: '2px', flexShrink: 0 }} />
+          )}
           <div>
             <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--brand-dark)', display: 'block' }}>
               KYC Level: {kycLevel}
@@ -606,7 +612,9 @@ export const ProfileKyc: React.FC = () => {
             <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: '16px', display: 'block', marginTop: '2px' }}>
               {kycLevel === 'FULL' 
                 ? 'Your identity is fully verified. You can start physical gold redemptions.' 
-                : 'Please upload PAN and Aadhaar documents to complete verification.'}
+                : kycLevel === 'PENDING'
+                  ? 'Your documents have been submitted and are under review. Please wait for admin approval.'
+                  : 'Please upload PAN and Aadhaar documents to complete verification.'}
             </span>
           </div>
         </div>
@@ -690,7 +698,7 @@ export const ProfileKyc: React.FC = () => {
               {/* Inline error */}
               {nomineeError && (
                 <span style={{ fontSize: '12px', color: 'var(--error-red)', fontWeight: '600', display: 'block', background: 'var(--error-light)', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.2)' }}>
-                  ⚠ {nomineeError}
+                  ΓÜá {nomineeError}
                 </span>
               )}
 

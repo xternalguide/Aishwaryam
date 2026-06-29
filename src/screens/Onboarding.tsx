@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SessionManager, OnboardingStage } from '../utils/SessionManager';
 import { ApiClient } from '../utils/ApiClient';
@@ -8,10 +8,16 @@ import { useTranslation } from '../utils/translation';
 
 export const Onboarding: React.FC = () => {
   const navigate = useNavigate();
-  const { refreshData } = useApp();
+  const { profile, refreshData } = useApp();
   const { t, lang } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 2;
+
+  useEffect(() => {
+    if (profile?.kycLevel === 'PENDING' || profile?.kycLevel === 'FULL') {
+      navigate('/dashboard');
+    }
+  }, [profile, navigate]);
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -308,7 +314,14 @@ export const Onboarding: React.FC = () => {
         await refreshData();
         setCurrentStep(2);
       } catch (err: any) {
-        setSaveError(err.message || 'Failed to save profile. Please try again.');
+        const errorText = err.response?.data?.message || err.message || 'Failed to save profile. Please try again.';
+        if (errorText.toLowerCase().includes('not found')) {
+          SessionManager.clearSession();
+          setSaveError('Session expired or user deleted. Redirecting to registration...');
+          setTimeout(() => navigate('/login'), 1500);
+        } else {
+          setSaveError(errorText);
+        }
       } finally {
         setIsSaving(false);
       }
@@ -395,7 +408,7 @@ export const Onboarding: React.FC = () => {
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
           <span style={{ fontSize: '16px', fontWeight: 'bold', fontFamily: 'var(--font-poppins)' }}>
-            Aishwaryam · {lang === 'ta' ? `படி ${currentStep} / ${totalSteps}` : `Step ${currentStep} of ${totalSteps}`}
+            Aishwaryam ┬╖ {lang === 'ta' ? `α«¬α«ƒα«┐ ${currentStep} / ${totalSteps}` : `Step ${currentStep} of ${totalSteps}`}
           </span>
         </div>
       </div>
@@ -502,7 +515,7 @@ export const Onboarding: React.FC = () => {
                   </div>
                   {dob && isValidDateString(dob) && dobError === null && (
                     <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--brand-mid)', marginTop: '6px', display: 'block' }}>
-                      {lang === 'ta' ? 'வயது' : 'Age'}: {calculateAge(dob)} {lang === 'ta' ? 'ஆண்டுகள்' : 'years'}
+                      {lang === 'ta' ? 'α«╡α«»α«ñα»ü' : 'Age'}: {calculateAge(dob)} {lang === 'ta' ? 'α«åα«úα»ìα«ƒα»üα«òα«│α»ì' : 'years'}
                     </span>
                   )}
                   {dobError && <span style={{ fontSize: '11px', color: 'var(--error-red)', marginTop: '4px', display: 'block' }}>{dobError}</span>}
@@ -778,7 +791,7 @@ export const Onboarding: React.FC = () => {
                   >
                     {t('privacy_policy')}
                   </span>
-                  {lang === 'ta' ? ' ஆகியவற்றை ஒப்புக்கொள்கிறேன்.' : '.'}
+                  {lang === 'ta' ? ' α«åα«òα«┐α«»α«╡α«▒α»ìα«▒α»ê α«Æα«¬α»ìα«¬α»üα«òα»ìα«òα»èα«│α»ìα«òα«┐α«▒α»çα«⌐α»ì.' : '.'}
                 </span>
               </label>
             </div>
@@ -883,7 +896,7 @@ export const Onboarding: React.FC = () => {
                       if (raw.length === 12) {
                         setAadhaarError(null);
                       } else {
-                        setAadhaarError(lang === 'ta' ? 'ஆதார் எண் 12 இலக்கங்களாக இருக்க வேண்டும்' : 'Aadhaar number must be exactly 12 digits');
+                        setAadhaarError(lang === 'ta' ? 'α«åα«ñα«╛α«░α»ì α«Äα«úα»ì 12 α«çα«▓α«òα»ìα«òα«Öα»ìα«òα«│α«╛α«ò α«çα«░α»üα«òα»ìα«ò α«╡α»çα«úα»ìα«ƒα»üα««α»ì' : 'Aadhaar number must be exactly 12 digits');
                       }
                     }}
                     maxLength={14}
@@ -1004,7 +1017,7 @@ export const Onboarding: React.FC = () => {
                   fontSize: '15px'
                 }}
               >
-                {lang === 'ta' ? 'முந்தைய' : 'Previous'}
+                {lang === 'ta' ? 'α««α»üα«¿α»ìα«ñα»êα«»' : 'Previous'}
               </button>
             )}
 
@@ -1050,7 +1063,7 @@ export const Onboarding: React.FC = () => {
               {isSaving ? (
                 <div className="spinner" style={{ width: '20px', height: '20px', border: '2px solid white', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
               ) : (
-                currentStep === totalSteps ? (lang === 'ta' ? 'முடிக்கவும்' : 'Finish') : (lang === 'ta' ? 'அடுத்து' : 'Next')
+                currentStep === totalSteps ? (lang === 'ta' ? 'α««α»üα«ƒα«┐α«òα»ìα«òα«╡α»üα««α»ì' : 'Finish') : (lang === 'ta' ? 'α«àα«ƒα»üα«ñα»ìα«ñα»ü' : 'Next')
               )}
             </button>
           </div>
@@ -1072,7 +1085,7 @@ export const Onboarding: React.FC = () => {
                 transition: 'all 0.2s ease'
               }}
             >
-              {lang === 'ta' ? 'இந்தப்படியைத் தவிர்க்கவும்' : 'Skip this step'}
+              {lang === 'ta' ? 'α«çα«¿α»ìα«ñα«¬α»ìα«¬α«ƒα«┐α«»α»êα«ñα»ì α«ñα«╡α«┐α«░α»ìα«òα»ìα«òα«╡α»üα««α»ì' : 'Skip this step'}
             </button>
           )}
         </div>
@@ -1110,7 +1123,7 @@ export const Onboarding: React.FC = () => {
                 onClick={() => setShowTermsModal(false)}
                 style={{ background: 'transparent', border: 'none', fontSize: '20px', color: 'var(--text-light)', cursor: 'pointer', fontWeight: 'bold' }}
               >
-                ✕
+                Γ£ò
               </button>
             </div>
             <div style={{ padding: '20px', overflowY: 'auto', fontSize: '13px', lineHeight: '20px', color: 'var(--text-secondary)' }}>
@@ -1181,7 +1194,7 @@ export const Onboarding: React.FC = () => {
                 onClick={() => setShowPrivacyModal(false)}
                 style={{ background: 'transparent', border: 'none', fontSize: '20px', color: 'var(--text-light)', cursor: 'pointer', fontWeight: 'bold' }}
               >
-                ✕
+                Γ£ò
               </button>
             </div>
             <div style={{ padding: '20px', overflowY: 'auto', fontSize: '13px', lineHeight: '20px', color: 'var(--text-secondary)' }}>

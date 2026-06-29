@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SessionManager, OnboardingStage } from '../utils/SessionManager';
 import { ApiClient, BASE_URL } from '../utils/ApiClient';
@@ -36,10 +36,10 @@ import {
   Settings,
 } from 'lucide-react';
 
-/* ─────────────────────────────────────────────
-   INLINE STYLES  – design tokens kept in JS so
+/* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+   INLINE STYLES  ΓÇô design tokens kept in JS so
    we don't need to touch index.css
-───────────────────────────────────────────── */
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 
 
 const lightTheme = {
@@ -71,11 +71,11 @@ const lightTheme = {
   actionHoverCss: 'rgba(74,14,78,0.08)',
 };
 
-/* ── globalStyles is now injected dynamically inside the component ── */
+/* ΓöÇΓöÇ globalStyles is now injected dynamically inside the component ΓöÇΓöÇ */
 
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 // Interfaces
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 interface ActiveScheme {
   schemeId: string;
   planName: string;
@@ -127,9 +127,9 @@ interface TransactionItem {
   createdAt: string;
 }
 
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 // Component
-// ─────────────────────────────────────────────
+// ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const isAndroidApp = !!(window as any).Capacitor && /android/i.test(navigator.userAgent);
@@ -149,7 +149,7 @@ export const Dashboard: React.FC = () => {
   const [userName, setUserName] = useState('');
   const [kycLevel, setKycLevel] = useState('BASIC');
 
-  // ── THEME TOGGLE (Always Light) ───────────────────────────────────────────
+  // ΓöÇΓöÇ THEME TOGGLE (Always Light) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   const isDark = false;
   const DS = lightTheme;
   const globalStyles = `
@@ -172,7 +172,7 @@ export const Dashboard: React.FC = () => {
     }
   `;
 
-  // Ref for the tab scroll container — used to reset scroll on tab switch
+  // Ref for the tab scroll container ΓÇö used to reset scroll on tab switch
   const tabScrollRef = useRef<HTMLDivElement>(null);
 
   const [activeSchemes, setActiveSchemes] = useState<ActiveScheme[]>([]);
@@ -530,9 +530,9 @@ export const Dashboard: React.FC = () => {
 
   const totalBonusGoldMg = portfolio?.totalBonusGoldMg || 0;
 
-  // ═══════════════════════════════════════════
+  // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
   // RENDER HELPERS (MOBILE INTEGRATED DESIGN)
-  // ═══════════════════════════════════════════
+  // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 
   const renderKycWarningBanner = () => (
     <div 
@@ -555,18 +555,53 @@ export const Dashboard: React.FC = () => {
         <AlertTriangle size={20} color="#D97706" style={{ flexShrink: 0 }} />
         <div style={{ fontSize: '11.5px', color: '#374151', lineHeight: '16px', textAlign: 'left' }}>
           <strong style={{ fontWeight: '800', color: '#1F2937' }}>
-            {lang === 'ta' ? 'KYC சரிபார்ப்பு தேவை: ' : 'KYC Verification Required: '}
+            {lang === 'ta' ? 'KYC α«Üα«░α«┐α«¬α«╛α«░α»ìα«¬α»ìα«¬α»ü α«ñα»çα«╡α»ê: ' : 'KYC Verification Required: '}
           </strong>
           {lang === 'ta' 
-            ? 'உங்கள் கணக்கைப் பாதுகாக்க உங்கள் விவரங்களை பூர்த்தி செய்யவும்.' 
+            ? 'α«ëα«Öα»ìα«òα«│α»ì α«òα«úα«òα»ìα«òα»êα«¬α»ì α«¬α«╛α«ñα»üα«òα«╛α«òα»ìα«ò α«ëα«Öα»ìα«òα«│α»ì α«╡α«┐α«╡α«░α«Öα»ìα«òα«│α»ê α«¬α»éα«░α»ìα«ñα»ìα«ñα«┐ α«Üα»åα«»α»ìα«»α«╡α»üα««α»ì.' 
             : 'Complete your details to secure your account.'}
         </div>
       </div>
       <span style={{ fontSize: '12.5px', fontWeight: '800', color: '#D97706', whiteSpace: 'nowrap' }}>
-        {lang === 'ta' ? 'இப்போது முடிக்கவும்' : 'Complete Now'}
+        {lang === 'ta' ? 'α«çα«¬α»ìα«¬α»ïα«ñα»ü α««α»üα«ƒα«┐α«òα»ìα«òα«╡α»üα««α»ì' : 'Complete Now'}
       </span>
     </div>
   );
+
+  const renderKycPendingBanner = () => (
+    <div 
+      onClick={() => navigate('/profile/kyc')}
+      style={{
+        background: '#F0F9FF',
+        border: '1.5px solid rgba(2, 136, 209, 0.3)',
+        borderRadius: '16px',
+        padding: '16px',
+        cursor: 'pointer',
+        boxShadow: '0 8px 20px rgba(0, 0, 0, 0.05)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        marginTop: '8px'
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+        <Clock size={20} color="#0288D1" style={{ flexShrink: 0 }} />
+        <div style={{ fontSize: '11.5px', color: '#374151', lineHeight: '16px', textAlign: 'left' }}>
+          <strong style={{ fontWeight: '800', color: '#1F2937' }}>
+            {lang === 'ta' ? 'KYC α«Üα«░α«┐α«¬α«╛α«░α»ìα«¬α»ìα«¬α»ü α«¿α«┐α«▓α»üα«╡α»êα«»α«┐α«▓α»ì α«ëα«│α»ìα«│α«ñα»ü: ' : 'KYC Verification Pending: '}
+          </strong>
+          {lang === 'ta' 
+            ? 'α«ëα«Öα»ìα«òα«│α»ì α«╡α«┐α«╡α«░α«Öα»ìα«òα«│α»ì α«Üα««α«░α»ìα«¬α»ìα«¬α«┐α«òα»ìα«òα«¬α»ìα«¬α«ƒα»ìα«ƒα»üα«│α»ìα«│α«⌐. α«¿α«┐α«░α»ìα«╡α«╛α«ò α«Æα«¬α»ìα«¬α»üα«ñα«▓α»üα«òα»ìα«òα«╛α«ò α«òα«╛α«ñα»ìα«ñα«┐α«░α»üα«òα»ìα«òα«╡α»üα««α»ì.' 
+            : 'Your details are under review. Please wait for admin approval.'}
+        </div>
+      </div>
+      <span style={{ fontSize: '12.5px', fontWeight: '800', color: '#0288D1', whiteSpace: 'nowrap' }}>
+        {lang === 'ta' ? 'α«╡α«┐α«╡α«░α««α»ì' : 'View Info'}
+      </span>
+    </div>
+  );
+
 
   const renderMobileIntegratedHeader = () => {
     const totalBonusGoldMg = portfolio?.totalBonusGoldMg || 0;
@@ -608,8 +643,10 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Balance or Warning Display */}
-        {(kycLevel === 'BASIC' || kycLevel === 'PENDING') ? (
+        {kycLevel === 'BASIC' ? (
           renderKycWarningBanner()
+        ) : kycLevel === 'PENDING' ? (
+          renderKycPendingBanner()
         ) : (
           <>
             {/* Balance Display */}
@@ -780,8 +817,10 @@ export const Dashboard: React.FC = () => {
         <div style={{ width:'32px', height:'22px', borderRadius:'6px', background:'linear-gradient(135deg,#FFE082 0%,#FFB300 100%)', border:'1px solid #FFD54F', opacity:0.85 }} />
       </div>
 
-      {(kycLevel === 'BASIC' || kycLevel === 'PENDING') ? (
+      {kycLevel === 'BASIC' ? (
         renderKycWarningBanner()
+      ) : kycLevel === 'PENDING' ? (
+        renderKycPendingBanner()
       ) : (
         <>
           {/* balance */}
@@ -820,7 +859,7 @@ export const Dashboard: React.FC = () => {
         <span style={{ fontFamily:DS.font, fontSize:'13px', fontWeight:'700', color:DS.textWhite }}>{t('live_metal_rates')}</span>
         <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
           <span className="live-dot" style={{ width:'7px', height:'7px', borderRadius:'50%', background:'#10B981', display:'inline-block' }} />
-          <span style={{ fontFamily:DS.font, fontSize:'10px', color:'#10B981', fontWeight:'700', letterSpacing:'0.5px' }}>{lang === 'ta' ? 'லைவ்' : 'LIVE'}</span>
+          <span style={{ fontFamily:DS.font, fontSize:'10px', color:'#10B981', fontWeight:'700', letterSpacing:'0.5px' }}>{lang === 'ta' ? 'α«▓α»êα«╡α»ì' : 'LIVE'}</span>
         </div>
       </div>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
@@ -828,21 +867,21 @@ export const Dashboard: React.FC = () => {
         <div style={{ background: isDark ? 'rgba(255,215,0,0.08)' : 'rgba(184,134,11,0.08)', padding:'14px', borderRadius:'14px', border: isDark ? '1px solid rgba(255,215,0,0.2)' : '1px solid rgba(184,134,11,0.2)' }}>
           <span style={{ fontFamily:DS.font, fontSize:'10px', color: isDark ? 'rgba(255,215,0,0.8)' : '#996F00', display:'block', marginBottom:'6px', fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.3px' }}>{t('gold_22k')}</span>
           <span style={{ fontFamily:DS.font, fontSize:'clamp(14px, 4.5vw, 20px)', fontWeight:'900', color:DS.gold, display:'block' }}>
-            ₹{new Intl.NumberFormat('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}).format((livePrice?.price22KPaise||701000)/100)}
+            Γé╣{new Intl.NumberFormat('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}).format((livePrice?.price22KPaise||701000)/100)}
           </span>
         </div>
         {/* Silver */}
         <div style={{ background: isDark ? 'rgba(207,216,220,0.08)' : 'rgba(84,110,122,0.07)', padding:'14px', borderRadius:'14px', border: isDark ? '1px solid rgba(207,216,220,0.15)' : '1px solid rgba(84,110,122,0.18)' }}>
           <span style={{ fontFamily:DS.font, fontSize:'10px', color: isDark ? 'rgba(207,216,220,0.8)' : '#455A64', display:'block', marginBottom:'6px', fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.3px' }}>{t('silver_999')}</span>
           <span style={{ fontFamily:DS.font, fontSize:'clamp(14px, 4.5vw, 20px)', fontWeight:'900', color: isDark ? '#CFD8DC' : '#546E7A', display:'block' }}>
-            ₹{new Intl.NumberFormat('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}).format((livePrice?.priceSilverPaise||9900)/100)}
+            Γé╣{new Intl.NumberFormat('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}).format((livePrice?.priceSilverPaise||9900)/100)}
           </span>
         </div>
       </div>
     </div>
   );
 
-  /** Quick actions 3×1 grid */
+  /** Quick actions 3├ù1 grid */
   const renderQuickActionsGrid = () => {
     const actions = [
       { label:'Explore Schemes', icon:<TrendingUp size={22} color={isDark ? '#FFD700' : '#B8860B'} />, bg: isDark ? 'rgba(255,215,0,0.15)' : 'rgba(184,134,11,0.12)', onClick:()=>navigate('/scheme-explorer') },
@@ -883,7 +922,7 @@ export const Dashboard: React.FC = () => {
       <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <span style={{ fontFamily:DS.font, fontSize:'16px', fontWeight:'800', color:DS.textWhite }}>{t('active_schemes_title')}</span>
-          <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'600', color:DS.gold }}>{activeList.length} {lang === 'ta' ? 'செயலில் உள்ளது' : 'running'}</span>
+          <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'600', color:DS.gold }}>{activeList.length} {lang === 'ta' ? 'α«Üα»åα«»α«▓α«┐α«▓α»ì α«ëα«│α»ìα«│α«ñα»ü' : 'running'}</span>
         </div>
         {activeList.map((sch) => {
           const totalDays = (sch.schemeDayNumber||0) + (sch.remainingDaysForScheme||0);
@@ -898,12 +937,12 @@ export const Dashboard: React.FC = () => {
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'12px' }}>
                 <div>
                   <span style={{ fontFamily:DS.font, fontSize:'9px', color:DS.magenta, fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.8px', display:'block', marginBottom:'3px' }}>
-                    {sch.frequency === 'Daily' ? (lang === 'ta' ? 'தினசரி திட்டம்' : 'DAILY SCHEME') : (lang === 'ta' ? 'மாதாந்திர திட்டம்' : 'MONTHLY SCHEME')}
+                    {sch.frequency === 'Daily' ? (lang === 'ta' ? 'α«ñα«┐α«⌐α«Üα«░α«┐ α«ñα«┐α«ƒα»ìα«ƒα««α»ì' : 'DAILY SCHEME') : (lang === 'ta' ? 'α««α«╛α«ñα«╛α«¿α»ìα«ñα«┐α«░ α«ñα«┐α«ƒα»ìα«ƒα««α»ì' : 'MONTHLY SCHEME')}
                   </span>
                   <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'800', color:DS.textWhite }}>{autoT(sch.planName)}</span>
                 </div>
                 <span style={{ fontFamily:DS.font, fontSize:'10px', background:'rgba(255,215,0,0.15)', color:DS.gold, padding:'4px 10px', borderRadius:'20px', fontWeight:'700', border:'1px solid rgba(255,215,0,0.2)' }}>
-                  {lang === 'ta' ? 'நாள்' : 'Day'} {sch.schemeDayNumber||1}
+                  {lang === 'ta' ? 'α«¿α«╛α«│α»ì' : 'Day'} {sch.schemeDayNumber||1}
                 </span>
               </div>
 
@@ -995,7 +1034,7 @@ export const Dashboard: React.FC = () => {
                   <div style={{ display:'flex', gap:'6px', flexWrap:'wrap' }}>
                     {keywords.slice(0,2).map((kw, i) => (
                       <span key={i} style={{ fontFamily:DS.font, fontSize:'9px', color:DS.magenta, background:'rgba(194,24,91,0.12)', padding:'3px 8px', borderRadius:'6px', border:'1px solid rgba(194,24,91,0.15)', fontWeight:'600' }}>
-                        ✓ {kw}
+                        Γ£ô {kw}
                       </span>
                     ))}
                   </div>
@@ -1172,7 +1211,7 @@ export const Dashboard: React.FC = () => {
                       </span>
                     </div>
                     <span style={{ fontFamily:DS.font, fontSize:'10px', color:DS.textMuted }}>
-                      {tx.schemeName ? `${details.label} • ` : ''}{new Date(tx.createdAt).toLocaleDateString()} {new Date(tx.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+                      {tx.schemeName ? `${details.label} ΓÇó ` : ''}{new Date(tx.createdAt).toLocaleDateString()} {new Date(tx.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
                     </span>
                   </div>
                 </div>
@@ -1200,14 +1239,14 @@ export const Dashboard: React.FC = () => {
     );
   };
 
-  // ═══════════════════════════════════════════
+  // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
   // MAIN RENDER
-  // ═══════════════════════════════════════════
+  // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
   return (
     <div style={{ display:'flex', flexDirection:isDesktop?'row':'column', height:'100vh', width:'100vw', maxWidth:'100%', overflow:'hidden', background:DS.bgPage, fontFamily:DS.font, position:'relative' }}>
       <style>{globalStyles}</style>
 
-      {/* ── DESKTOP SIDEBAR ── */}
+      {/* ΓöÇΓöÇ DESKTOP SIDEBAR ΓöÇΓöÇ */}
       {isDesktop && (
         <div style={{ width:'260px', background:DS.sidebarBg, borderRight:DS.sidebarBorder, padding:'28px 20px', display:'flex', flexDirection:'column', justifyContent:'space-between', flexShrink:0 }}>
           <div style={{ display:'flex', flexDirection:'column', gap:'32px' }}>
@@ -1271,7 +1310,7 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* ── MAIN CONTENT ── */}
+      {/* ΓöÇΓöÇ MAIN CONTENT ΓöÇΓöÇ */}
       <div style={{ flex:1, display:'flex', flexDirection:'column', height:'100%', overflowY:'auto', overflowX:'hidden' }}>
 
         {/* TOP NAVBAR */}
@@ -1346,7 +1385,7 @@ export const Dashboard: React.FC = () => {
             </div>
           )}
 
-          {/* ── TAB 0: HOME ── */}
+          {/* ΓöÇΓöÇ TAB 0: HOME ΓöÇΓöÇ */}
           {selectedTab === 0 && (
             <div className="dash-fade-in" style={{ padding: isDesktop ? '20px' : '0 0 20px 0', display:'flex', flexDirection:'column', gap: isDesktop ? '20px' : '0' }}>
 
@@ -1380,10 +1419,10 @@ export const Dashboard: React.FC = () => {
             </div>
           )}
 
-          {/* ── TAB 1: LEDGER ── */}
+          {/* ΓöÇΓöÇ TAB 1: LEDGER ΓöÇΓöÇ */}
           {selectedTab === 1 && <div className="dash-fade-in">{renderLedgerSection()}</div>}
 
-          {/* ── TAB 2: PROFILE ── */}
+          {/* ΓöÇΓöÇ TAB 2: PROFILE ΓöÇΓöÇ */}
           {selectedTab === 2 && (
             <div className="dash-fade-in" style={{ minHeight:'calc(100vh - 64px)', display:'flex', flexDirection:'column', position:'relative', width:'100%', padding:0 }}>
 
@@ -1521,7 +1560,7 @@ export const Dashboard: React.FC = () => {
                     </div>
                     <div>
                       <span style={{ fontFamily:DS.font, fontSize:'13px', fontWeight:'800', color:DS.textWhite, display:'block' }}>{t('language')}</span>
-                      <span style={{ fontFamily:DS.font, fontSize:'11px', color:DS.textSub }}>{lang === 'ta' ? 'தமிழ் (Tamil)' : 'English'}</span>
+                      <span style={{ fontFamily:DS.font, fontSize:'11px', color:DS.textSub }}>{lang === 'ta' ? 'α«ñα««α«┐α«┤α»ì (Tamil)' : 'English'}</span>
                     </div>
                   </div>
                   <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
@@ -1532,7 +1571,7 @@ export const Dashboard: React.FC = () => {
                     >
                       <div style={{ width:'18px', height:'18px', borderRadius:'50%', background:'white', position:'absolute', top:'3px', left:lang==='ta'?'25px':'3px', transition:'left 0.2s ease', boxShadow:'0 1px 3px rgba(0,0,0,0.3)' }} />
                     </button>
-                    <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'700', color:lang==='ta'?DS.gold:DS.textMuted }}>தமிழ்</span>
+                    <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'700', color:lang==='ta'?DS.gold:DS.textMuted }}>α«ñα««α«┐α«┤α»ì</span>
                   </div>
                 </div>
 
@@ -1548,7 +1587,7 @@ export const Dashboard: React.FC = () => {
           )}
         </div>
 
-        {/* ── BOTTOM TAB BAR (mobile only) ── */}
+        {/* ΓöÇΓöÇ BOTTOM TAB BAR (mobile only) ΓöÇΓöÇ */}
         {!isDesktop && (
           <div style={{ background:DS.bottomBarBg, backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)', borderTop:DS.bottomBarBorder, height:`calc(64px + env(safe-area-inset-bottom, 0px))`, paddingBottom:'env(safe-area-inset-bottom, 0px)', display:'flex', justifyContent:'space-around', alignItems:'center', zIndex:10, boxSizing:'border-box' }}>
             {[
@@ -1572,7 +1611,7 @@ export const Dashboard: React.FC = () => {
         )}
       </div>
 
-      {/* ── TRANSACTION DETAIL MODAL ── */}
+      {/* ΓöÇΓöÇ TRANSACTION DETAIL MODAL ΓöÇΓöÇ */}
       {selectedTxDetail && (
         <div style={{ position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(0,0,0,0.75)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100 }}>
           <div style={{ width:'90%', maxWidth:'360px', background: isDark ? '#1A1A2E' : '#FFFFFF', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.1)', borderRadius:'24px', padding:'24px', display:'flex', flexDirection:'column', gap:'16px', boxShadow: isDark ? '0 20px 60px rgba(0,0,0,0.5)' : '0 20px 60px rgba(74,14,78,0.15)' }}>
@@ -1688,8 +1727,8 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* ── EDIT PROFILE MODAL ── */}
-      {/* ── EDIT PROFILE MODAL ── */}
+      {/* ΓöÇΓöÇ EDIT PROFILE MODAL ΓöÇΓöÇ */}
+      {/* ΓöÇΓöÇ EDIT PROFILE MODAL ΓöÇΓöÇ */}
       {showEditProfileModal && (
         <div style={{ position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(0,0,0,0.75)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100, overflowY:'auto' }}>
           <div style={{ width:'90%', maxWidth:'450px', background: isDark ? '#1A1A2E' : '#FFFFFF', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.1)', borderRadius:'24px', padding:'24px', display:'flex', flexDirection:'column', gap:'16px', boxShadow: isDark ? '0 20px 60px rgba(0,0,0,0.5)' : '0 20px 60px rgba(74,14,78,0.15)', maxHeight:'90vh', overflowY:'auto' }}>
@@ -1729,7 +1768,7 @@ export const Dashboard: React.FC = () => {
  
               <div style={{ display:'flex', gap:'12px' }}>
                 <div style={{ flex:1 }}>
-                  <label style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'700', color:DS.textSub }}>{t('dob_label')}{editDob&&calculatedAge>0?` (${lang==='ta'?'வயது':'Age'}: ${calculatedAge}${isMinor?` - ${lang==='ta'?'மைனர்':'Minor'}`:''})`:''}</label>
+                  <label style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'700', color:DS.textSub }}>{t('dob_label')}{editDob&&calculatedAge>0?` (${lang==='ta'?'α«╡α«»α«ñα»ü':'Age'}: ${calculatedAge}${isMinor?` - ${lang==='ta'?'α««α»êα«⌐α«░α»ì':'Minor'}`:''})`:''}</label>
                   <input type="date" value={editDob} onChange={(e)=>setEditDob(e.target.value)} onClick={(e)=>{try{(e.target as any).showPicker();}catch(err){}}}
                     style={{ width:'100%', height:'42px', borderRadius:'10px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.15)', padding:'0 14px', fontFamily:DS.font, fontSize:'13px', outline:'none', marginTop:'5px', background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.02)', color:DS.textWhite, boxSizing:'border-box' }}
                   />
@@ -1785,7 +1824,7 @@ export const Dashboard: React.FC = () => {
  
             <div style={{ display:'flex', gap:'12px', marginTop:'4px' }}>
               <button onClick={handleSaveProfile} disabled={isSavingProfile} style={{ flex:1, height:'46px', borderRadius:'12px', background:'linear-gradient(135deg,#29001D,#C2185B)', color:'white', border:'none', fontFamily:DS.font, fontWeight:'800', fontSize:'13px', cursor:'pointer', opacity:isSavingProfile?0.7:1, boxShadow:'0 4px 16px rgba(194,24,91,0.35)' }}>
-                {isSavingProfile ? (lang==='ta'?'சேமிக்கிறது...':'Saving...') : t('save_changes')}
+                {isSavingProfile ? (lang==='ta'?'α«Üα»çα««α«┐α«òα»ìα«òα«┐α«▒α«ñα»ü...':'Saving...') : t('save_changes')}
               </button>
               <button onClick={()=>setShowEditProfileModal(false)} style={{ flex:1, height:'46px', borderRadius:'12px', background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', color:DS.textWhite, border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.1)', fontFamily:DS.font, fontWeight:'700', fontSize:'13px', cursor:'pointer' }}>
                 {t('cancel')}
@@ -1795,7 +1834,7 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* ── CUSTOM ALERT POPUP ── */}
+      {/* ΓöÇΓöÇ CUSTOM ALERT POPUP ΓöÇΓöÇ */}
       {customAlert && (
         <div style={{ position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(0,0,0,0.6)', backdropFilter:'blur(4px)', WebkitBackdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:200 }}>
           <div className="dash-fade-in" style={{ width:'85%', maxWidth:'320px', background: isDark ? '#1A1A2E' : '#FFFFFF', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.1)', borderRadius:'20px', padding:'24px', display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', gap:'16px', boxShadow:'0 15px 45px rgba(0,0,0,0.35)' }}>
@@ -1842,7 +1881,7 @@ export const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* ── MOBILE CHATBOT FLOATING ACTION BUTTON ── */}
+      {/* ΓöÇΓöÇ MOBILE CHATBOT FLOATING ACTION BUTTON ΓöÇΓöÇ */}
       {!isDesktop && (
         <button
           onClick={() => navigate('/ai_assistant')}
