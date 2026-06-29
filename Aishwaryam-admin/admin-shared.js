@@ -275,15 +275,17 @@ async function getUsersMap() {
 
 // Global helper to setup auto-refresh of data pages using lightweight db-version polling
 window.setupAutoRefresh = function(callback, intervalMs = 5000) {
-  let localLastVersion = 0;
+  let localLastVersion = sessionStorage.getItem('admin-db-version') || '0';
   
   const check = async () => {
     try {
       const res = await fetch(`${API_BASE}/api/Admin/db-version`);
       if (!res.ok) return;
       const data = await res.json();
-      if (data.version !== localLastVersion) {
-        localLastVersion = data.version;
+      const serverVersion = String(data.version);
+      if (serverVersion !== localLastVersion) {
+        localLastVersion = serverVersion;
+        sessionStorage.setItem('admin-db-version', serverVersion);
         callback();
       }
     } catch (e) {
@@ -297,4 +299,61 @@ window.setupAutoRefresh = function(callback, intervalMs = 5000) {
   // Setup polling
   setInterval(check, intervalMs);
 };
+
+// Global helper to cache GET API requests across multiple page reloads
+window.fetchWithCache = async function(url, options = {}) {
+  const isGet = !options.method || options.method.toUpperCase() === 'GET';
+  
+  if (!isGet) {
+    // For modifying mutations (POST, PUT, DELETE, etc.), do the actual fetch
+    const response = await fetch(url, options);
+    
+    // Auto-invalidate database version so other tabs know to pull fresh data
+    try {
+      const vRes = await fetch(`${API_BASE}/api/Admin/db-version`);
+      if (vRes.ok) {
+        const vData = await vRes.json();
+        sessionStorage.setItem('admin-db-version', String(vData.version));
+      }
+    } catch (e) {}
+    
+    return response;
+  }
+
+  const currentVersion = sessionStorage.getItem('admin-db-version') || '0';
+  const cacheKey = `cache:${url}`;
+  const cachedDataStr = sessionStorage.getItem(cacheKey);
+
+  if (cachedDataStr) {
+    try {
+      const cacheObj = JSON.parse(cachedDataStr);
+      if (cacheObj.version === currentVersion) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => cacheObj.data,
+          text: async () => JSON.stringify(cacheObj.data),
+          clone: function() { return this; }
+        };
+      }
+    } catch (e) {
+      sessionStorage.removeItem(cacheKey);
+    }
+  }
+
+  // Fetch from network
+  const response = await fetch(url, options);
+  if (response.ok) {
+    try {
+      const clone = response.clone();
+      const data = await clone.json();
+      sessionStorage.setItem(cacheKey, JSON.stringify({
+        version: currentVersion,
+        data: data
+      }));
+    } catch (e) {}
+  }
+  return response;
+};
+
 

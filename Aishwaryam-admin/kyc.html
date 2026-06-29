@@ -125,6 +125,11 @@
         <div id="kycDocsContainer" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
           <!-- Dynamically populated document cards will be rendered here -->
         </div>
+        <!-- Custom Review Notes Textarea -->
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label class="form-label" style="font-weight:600">Review Notes / Notification Message</label>
+          <textarea class="form-control" id="kycReviewNotes" placeholder="Type custom review notes or a reason to send a notification (e.g. 'Blurry image', 'Wrong PAN card number')" style="height: 80px; resize: vertical; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 12px; width: 100%; border-radius: 8px; font-family: inherit; font-size: 13px; box-sizing: border-box;"></textarea>
+        </div>
         <div style="display: flex; gap: 10px">
           <button id="btnApproveKyc" class="btn btn-success" onclick="approveKyc()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Approve</button>
           <button id="btnRejectKyc" class="btn btn-danger" onclick="rejectKyc()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Reject</button>
@@ -138,6 +143,7 @@
 
 <script>
 const API = API_BASE;
+const fetch = window.fetchWithCache;
 let allKycUsers = [];
 let currentKycUid = '';
 
@@ -215,9 +221,11 @@ function renderKycGrid(users) {
       <td>
         <div style="display:flex;gap:6px">
           <button class="btn btn-ghost btn-xs" onclick="viewKyc('${u.id}', '${u.fullName}')">Review</button>
+          ${(u.kycLevel === 'BASIC' || u.kycLevel === 'NONE') ? `
           <button class="btn btn-outline btn-xs" onclick="sendPushNotification('${u.id}', '${u.fullName}')" title="Nudge to complete KYC">
             <svg viewBox="0 0 24 24" style="width:11px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           </button>
+          ` : ''}
         </div>
       </td>
     </tr>
@@ -251,27 +259,17 @@ async function viewKyc(uid, name) {
     const approveBtn = document.getElementById('btnApproveKyc');
     const rejectBtn = document.getElementById('btnRejectKyc');
     
-    if (isAlreadyApproved) {
-      approveBtn.disabled = true;
-      approveBtn.style.opacity = '0.5';
-      approveBtn.style.cursor = 'not-allowed';
-      approveBtn.title = "This user's KYC is already approved";
-      
-      rejectBtn.disabled = true;
-      rejectBtn.style.opacity = '0.5';
-      rejectBtn.style.cursor = 'not-allowed';
-      rejectBtn.title = "This user's KYC is already approved";
-    } else {
-      approveBtn.disabled = !hasDocs;
-      approveBtn.style.opacity = hasDocs ? '1' : '0.5';
-      approveBtn.style.cursor = hasDocs ? 'pointer' : 'not-allowed';
-      approveBtn.title = hasDocs ? "" : "Cannot approve KYC: No documents uploaded.";
-      
-      rejectBtn.disabled = false;
-      rejectBtn.style.opacity = '1';
-      rejectBtn.style.cursor = 'pointer';
-      rejectBtn.title = "";
-    }
+    document.getElementById('kycReviewNotes').value = '';
+
+    approveBtn.disabled = !hasDocs;
+    approveBtn.style.opacity = hasDocs ? '1' : '0.5';
+    approveBtn.style.cursor = hasDocs ? 'pointer' : 'not-allowed';
+    approveBtn.title = hasDocs ? "" : "Cannot approve KYC: No documents uploaded.";
+    
+    rejectBtn.disabled = false;
+    rejectBtn.style.opacity = '1';
+    rejectBtn.style.cursor = 'pointer';
+    rejectBtn.title = "";
     
     // Render dynamic attachments
     const docsContainer = document.getElementById('kycDocsContainer');
@@ -328,21 +326,24 @@ async function sendPushNotification(uid, name) {
   const targetName = name || document.getElementById('targetUserName').textContent;
   if (!targetId) return;
   
+  const customNotes = document.getElementById('kycReviewNotes').value.trim();
+  const message = customNotes || 'Please complete your KYC to unlock all features in Aishwaryam.';
+  
   try {
-    // Send real notification record for polling and triggering push FCM
     const res = await fetch(`${API}/api/Notifications/send`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         userId: targetId,
-        title: 'KYC Verification Pending',
-        message: 'Please complete your KYC to unlock all features in Aishwaryam.',
+        title: 'KYC Verification Update',
+        message: message,
         type: 'KYC'
       })
     });
 
     if (res.ok) {
       showToast(`Notification nudge sent to ${targetName}`, 'success');
+      document.getElementById('kycReviewNotes').value = '';
     } else {
       showToast('Failed to send notification nudge', 'error');
     }
@@ -354,7 +355,7 @@ async function sendPushNotification(uid, name) {
       body: JSON.stringify({
         userId: targetId,
         action: 'KYC_NUDGE_PUSH',
-        details: `Admin sent KYC completion push notification to user ${targetName}`,
+        details: `Admin sent KYC push notification to ${targetName}. Message: ${message}`,
         status: 'SUCCESS'
       })
     });
@@ -370,13 +371,13 @@ async function approveKyc() {
     showToast('Cannot approve KYC: User has not uploaded any documents.', 'error');
     return;
   }
+  const customNotes = document.getElementById('kycReviewNotes').value.trim();
   try {
     const res = await fetch(`${API}/api/Admin/kyc-action`, { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: currentKycUid, isApproved: true, adminNotes: "Approved by manual review" })
+        body: JSON.stringify({ userId: currentKycUid, isApproved: true, adminNotes: customNotes || "Approved by manual review" })
     });
-    // Handle error messages returned by API
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       showToast(data.message || data.error || 'Failed to approve KYC', 'error');
@@ -390,13 +391,17 @@ async function approveKyc() {
 
 async function rejectKyc() {
   if (!currentKycUid) return;
-  const reason = prompt("Enter rejection reason:");
-  if (reason === null) return;
+  const customNotes = document.getElementById('kycReviewNotes').value.trim();
+  if (!customNotes) {
+    showToast('Please enter a rejection reason in the Review Notes field first.', 'error');
+    document.getElementById('kycReviewNotes').focus();
+    return;
+  }
   try {
     const res = await fetch(`${API}/api/Admin/kyc-action`, { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: currentKycUid, isApproved: false, adminNotes: reason || "Rejected by manual review" })
+        body: JSON.stringify({ userId: currentKycUid, isApproved: false, adminNotes: customNotes })
     });
     showToast(res.ok ? 'KYC Rejected' : 'Failed', res.ok ? 'info' : 'error');
     if (res.ok) { loadKycGrid(); closeKycDetail(); }
