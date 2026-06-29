@@ -284,34 +284,44 @@ namespace Aishwaryam.Application.Services
                     { "entityId", receipt.TransactionId }
                 };
 
-                await _dispatcher.DispatchAsync(new NotificationPayload
+                _ = Task.Run(async () =>
                 {
-                    UserId = paymentRecord.UserId,
-                    ToPhone = user?.PhoneNumber,
-                    ToEmail = user?.Email,
-                    ToName = user?.FullName ?? "Customer",
-                    Title = title,
-                    Body = body,
-                    Type = "PAYMENT_SUCCESS",
-                    SendPush = true,
-                    PushData = pushData,
-                    SendSms = true, // Configured for fallback Fast2SMS currently
-                    SmsText = body,
-                    SendEmail = true,
-                    EmailTemplate = EmailTemplate.GoldPurchaseReceipt,
-                    EmailData = new {
-                        UserName = user?.FullName ?? "Customer",
-                        TransactionId = receipt.TransactionId,
-                        GoldWeightMg = receipt.GoldWeightMg.ToString(),
-                        AmountPaid = (paymentRecord.AmountPaise / 100.0).ToString("F2"),
-                        GoldRatePerGm = (receipt.PricePerGmPaise / 100.0).ToString("F2"),
-                        GstAmount = (receipt.TotalAmountPaise * 0.03 / 100.0).ToString("F2"), // Simplified GST calc for email UI
-                        BonusGoldMg = receipt.BonusGoldMg.ToString(),
-                        BonusPercent = receipt.BonusPercentage.ToString("F1"),
-                        NewGoldBalanceMg = "Check Portfolio", // Can't easily pull here without a query, will rely on app.
-                        TransactionDate = DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt"),
-                        MetalType = isSilver ? "Silver" : "Gold",
-                        DownloadUrl = downloadUrl
+                    try
+                    {
+                        await _dispatcher.DispatchAsync(new NotificationPayload
+                        {
+                            UserId = paymentRecord.UserId,
+                            ToPhone = user?.PhoneNumber,
+                            ToEmail = user?.Email,
+                            ToName = user?.FullName ?? "Customer",
+                            Title = title,
+                            Body = body,
+                            Type = "PAYMENT_SUCCESS",
+                            SendPush = true,
+                            PushData = pushData,
+                            SendSms = true, // Configured for fallback Fast2SMS currently
+                            SmsText = body,
+                            SendEmail = true,
+                            EmailTemplate = EmailTemplate.GoldPurchaseReceipt,
+                            EmailData = new {
+                                UserName = user?.FullName ?? "Customer",
+                                TransactionId = receipt.TransactionId,
+                                GoldWeightMg = receipt.GoldWeightMg.ToString(),
+                                AmountPaid = (paymentRecord.AmountPaise / 100.0).ToString("F2"),
+                                GoldRatePerGm = (receipt.PricePerGmPaise / 100.0).ToString("F2"),
+                                GstAmount = (receipt.TotalAmountPaise * 0.03 / 100.0).ToString("F2"), // Simplified GST calc for email UI
+                                BonusGoldMg = receipt.BonusGoldMg.ToString(),
+                                BonusPercent = receipt.BonusPercentage.ToString("F1"),
+                                NewGoldBalanceMg = "Check Portfolio", // Can't easily pull here without a query, will rely on app.
+                                TransactionDate = DateTime.UtcNow.ToString("dd MMM yyyy, hh:mm tt"),
+                                MetalType = isSilver ? "Silver" : "Gold",
+                                DownloadUrl = downloadUrl
+                            }
+                        });
+                    }
+                    catch (Exception nEx)
+                    {
+                        _logger.LogError(nEx, "Background dispatch of gold purchase receipt failed.");
                     }
                 });
 
