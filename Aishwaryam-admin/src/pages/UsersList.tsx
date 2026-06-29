@@ -131,6 +131,30 @@ export const UsersList: React.FC = () => {
     }
   };
 
+  const handleResetUserData = async (uid: string) => {
+    const confirm = window.confirm(
+      `Are you sure you want to reset all transaction history, gold balances, and schemes for ${selectedName} to zero? This will NOT delete their profile details, nominee info, addresses, or KYC documents. This action cannot be undone.`
+    );
+    if (!confirm) return;
+
+    try {
+      setIsDetailLoading(true);
+      const res = await fetch(`${apiBase}/api/Admin/users/${uid}/reset-data`, { method: 'POST' });
+      if (res.ok) {
+        showToast('User transactional activity data reset successfully', 'success');
+        // Refresh the detail panel
+        viewUser(uid, selectedName);
+      } else {
+        const err = await res.json();
+        showToast(err.message || 'Failed to reset user data', 'error');
+        setIsDetailLoading(false);
+      }
+    } catch (e) {
+      showToast('Network error while resetting user data', 'error');
+      setIsDetailLoading(false);
+    }
+  };
+
   const viewUser = async (uid: string, name: string) => {
     setSelectedUid(uid);
     setSelectedName(name);
@@ -294,13 +318,37 @@ export const UsersList: React.FC = () => {
           <div className="modal-content fade-in" style={{ maxWidth: '800px', width: '90%' }} onClick={(e) => e.stopPropagation()}>
             <div className="card-head" style={{ borderBottom: '1px solid var(--border)', padding: '20px 24px', margin: 0 }}>
               <span className="card-title" style={{ fontSize: '18px' }}>Manage Profile: {selectedName}</span>
-              <button
-                className="btn btn-ghost btn-xs"
-                onClick={() => setSelectedUid(null)}
-                style={{ padding: '4px', borderRadius: '50%' }}
-              >
-                <X size={18} />
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <button
+                  className="btn"
+                  onClick={() => handleResetUserData(selectedUid!)}
+                  disabled={isDetailLoading}
+                  style={{
+                    backgroundColor: '#C5A880',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '6px 14px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    opacity: isDetailLoading ? 0.6 : 1
+                  }}
+                >
+                  Reset User Activity
+                </button>
+                <button
+                  className="btn btn-ghost btn-xs"
+                  onClick={() => setSelectedUid(null)}
+                  style={{ padding: '4px', borderRadius: '50%' }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
             <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>

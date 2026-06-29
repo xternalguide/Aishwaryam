@@ -268,5 +268,76 @@ namespace Aishwaryam.Api.Controllers
                 return StatusCode(500, new { message = "Failed to clear database.", error = ex.Message });
             }
         }
+
+        [HttpPost("users/{userId}/reset-data")]
+        public async Task<IActionResult> ResetSpecificUserData(Guid userId, [FromServices] ApplicationDbContext dbContext)
+        {
+            try
+            {
+                var user = await dbContext.Users.FindAsync(userId);
+                if (user == null) return NotFound(new { message = "User not found" });
+
+                // 1. Delete user schemes
+                var schemes = await dbContext.UserSchemes.Where(s => s.UserId == userId).ToListAsync();
+                dbContext.UserSchemes.RemoveRange(schemes);
+
+                // 2. Delete gold transactions
+                var goldTxs = await dbContext.GoldTransactions.Where(t => t.UserId == userId).ToListAsync();
+                dbContext.GoldTransactions.RemoveRange(goldTxs);
+
+                // 3. Delete payments
+                var payments = await dbContext.Payments.Where(p => p.UserId == userId).ToListAsync();
+                dbContext.Payments.RemoveRange(payments);
+
+                // 4. Delete wallet ledger
+                var ledger = await dbContext.WalletLedgers.Where(w => w.UserId == userId).ToListAsync();
+                dbContext.WalletLedgers.RemoveRange(ledger);
+
+                // 5. Delete withdrawals / withdrawal requests
+                var withdrawals = await dbContext.WithdrawalRequests.Where(w => w.UserId == userId).ToListAsync();
+                dbContext.WithdrawalRequests.RemoveRange(withdrawals);
+
+                // 6. Delete scheme investments
+                var investments = await dbContext.SchemeInvestments.Where(i => i.UserId == userId).ToListAsync();
+                dbContext.SchemeInvestments.RemoveRange(investments);
+
+                // 7. Delete scheme redemptions
+                var redemptions = await dbContext.SchemeRedemptions.Where(r => r.UserId == userId).ToListAsync();
+                dbContext.SchemeRedemptions.RemoveRange(redemptions);
+
+                // 8. Delete user notifications
+                var notifications = await dbContext.UserNotifications.Where(n => n.UserId == userId).ToListAsync();
+                dbContext.UserNotifications.RemoveRange(notifications);
+
+                // 9. Reset Gold Holdings to zero
+                var goldHolding = await dbContext.GoldHoldings.FirstOrDefaultAsync(h => h.UserId == userId);
+                if (goldHolding != null)
+                {
+                    goldHolding.GoldBalanceMg = 0;
+                    goldHolding.BonusGoldBalanceMg = 0;
+                    goldHolding.UpdatedAt = DateTimeOffset.UtcNow;
+                    dbContext.GoldHoldings.Update(goldHolding);
+                }
+
+                // 10. Reset Wallet balance to zero
+                var wallet = await dbContext.Wallets.FirstOrDefaultAsync(w => w.UserId == userId);
+                if (wallet != null)
+                {
+                    wallet.InrBalancePaise = 0;
+                    wallet.UpdatedAt = DateTimeOffset.UtcNow;
+                    dbContext.Wallets.Update(wallet);
+                }
+
+                // Update database timestamp to force dashboard refresh
+                ApplicationDbContext.LastDbChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+                await dbContext.SaveChangesAsync();
+                return Ok(new { success = true, message = $"Successfully reset transactional activity data for user {user.FullName}." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error resetting user data", error = ex.Message });
+            }
+        }
     }
 }
