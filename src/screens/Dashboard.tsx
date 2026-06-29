@@ -148,8 +148,6 @@ export const Dashboard: React.FC = () => {
 
   const [userName, setUserName] = useState('');
   const [kycLevel, setKycLevel] = useState('BASIC');
-  const [showKycToast, setShowKycToast] = useState(false);
-  const [toastClass, setToastClass] = useState('');
 
   // ── THEME TOGGLE (Always Light) ───────────────────────────────────────────
   const isDark = false;
@@ -166,75 +164,6 @@ export const Dashboard: React.FC = () => {
     @keyframes theme-toggle-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .animate-spin { animation: spin 1s linear infinite; }
-    
-    @keyframes kyc-slide-in {
-      from { transform: translateX(120%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes kyc-slide-out {
-      from { transform: translateX(0); opacity: 1; }
-      to { transform: translateX(120%); opacity: 0; }
-    }
-    @keyframes kyc-progress {
-      from { width: 100%; }
-      to { width: 0%; }
-    }
-    .kyc-toast {
-      position: fixed;
-      top: calc(100px + env(safe-area-inset-top, 0px));
-      right: 24px;
-      z-index: 9999;
-      width: 340px;
-      max-width: calc(100vw - 48px);
-      background: #FFFDF9;
-      border-radius: 16px;
-      border: 1.5px solid rgba(245, 158, 11, 0.45);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.08);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      font-family: var(--font-poppins);
-      cursor: pointer;
-      pointer-events: auto;
-    }
-    @media (max-width: 768px) {
-      .kyc-toast {
-        right: 20px;
-        left: 20px;
-        width: auto;
-        max-width: none;
-        top: calc(95px + env(safe-area-inset-top, 0px));
-      }
-    }
-    .kyc-toast.show {
-      animation: kyc-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    .kyc-toast.hide {
-      animation: kyc-slide-out 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    .kyc-toast-content {
-      padding: 16px;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      position: relative;
-    }
-    .kyc-toast-progress-container {
-      width: 100%;
-      height: 4px;
-      background: rgba(245, 158, 11, 0.15);
-      position: absolute;
-      bottom: 0;
-      left: 0;
-    }
-    .kyc-toast-progress-bar {
-      height: 100%;
-      background: #F59E0B;
-      width: 100%;
-    }
-    .kyc-toast.show .kyc-toast-progress-bar {
-      animation: kyc-progress 6s linear forwards;
-    }
     
     /* Prevent Tamil word fragmentation */
     * {
@@ -479,30 +408,13 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     if (profile) {
       setUserName(profile.fullName || 'User');
-      const level = profile.kycLevel || 'BASIC';
-      setKycLevel(level);
-      if (!showKycToast && toastClass === '') {
-        setShowKycToast(true);
-        setToastClass('show');
-      }
+      setKycLevel(profile.kycLevel || 'BASIC');
     }
     if (contextActiveSchemes) setActiveSchemes(contextActiveSchemes);
     if (contextTransactions) setTransactions(contextTransactions);
     if (contextUnreadNotifCount !== undefined) setUnreadNotifCount(contextUnreadNotifCount);
     if (offers && offers.length > 0) { setOfferTitle(offers[0].title); setOfferDesc(offers[0].description); }
   }, [profile, livePrice, contextActiveSchemes, contextAvailableSchemes, contextTransactions, contextUnreadNotifCount, offers]);
-
-  useEffect(() => {
-    if (showKycToast && toastClass === 'show') {
-      const timer = setTimeout(() => {
-        setToastClass('hide');
-        setTimeout(() => {
-          setShowKycToast(false);
-        }, 400);
-      }, 6000);
-      return () => clearTimeout(timer);
-    }
-  }, [showKycToast, toastClass]);
 
   useEffect(() => {
     const stage = SessionManager.getOnboardingStage();
@@ -622,6 +534,40 @@ export const Dashboard: React.FC = () => {
   // RENDER HELPERS (MOBILE INTEGRATED DESIGN)
   // ═══════════════════════════════════════════
 
+  const renderKycWarningBanner = () => (
+    <div 
+      onClick={() => navigate('/profile/kyc')}
+      style={{
+        background: '#FFFDF0',
+        border: '1.5px solid rgba(217, 119, 6, 0.3)',
+        borderRadius: '16px',
+        padding: '16px',
+        cursor: 'pointer',
+        boxShadow: '0 8px 20px rgba(0, 0, 0, 0.05)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        marginTop: '8px'
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+        <AlertTriangle size={20} color="#D97706" style={{ flexShrink: 0 }} />
+        <div style={{ fontSize: '11.5px', color: '#374151', lineHeight: '16px', textAlign: 'left' }}>
+          <strong style={{ fontWeight: '800', color: '#1F2937' }}>
+            {lang === 'ta' ? 'KYC சரிபார்ப்பு தேவை: ' : 'KYC Verification Required: '}
+          </strong>
+          {lang === 'ta' 
+            ? 'உங்கள் கணக்கைப் பாதுகாக்க உங்கள் விவரங்களை பூர்த்தி செய்யவும்.' 
+            : 'Complete your details to secure your account.'}
+        </div>
+      </div>
+      <span style={{ fontSize: '12.5px', fontWeight: '800', color: '#D97706', whiteSpace: 'nowrap' }}>
+        {lang === 'ta' ? 'இப்போது முடிக்கவும்' : 'Complete Now'}
+      </span>
+    </div>
+  );
+
   const renderMobileIntegratedHeader = () => {
     const totalBonusGoldMg = portfolio?.totalBonusGoldMg || 0;
     return (
@@ -661,47 +607,54 @@ export const Dashboard: React.FC = () => {
           </button>
         </div>
 
-        {/* Balance Display */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '8px 0' }}>
-          <span style={{ fontFamily: DS.font, fontSize: '11px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>
-            {t('total_gold_saved')}
-          </span>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginTop: '4px' }}>
-            <span style={{ fontFamily: DS.font, fontSize: '36px', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-              {((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)}
-            </span>
-            <span style={{ fontFamily: DS.font, fontSize: '13px', fontWeight: '700', color: DS.gold, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-              {t('grams_label')}
-            </span>
-          </div>
-        </div>
-
-        {/* Mini stats glass panel */}
-        <div
-          style={{
-            background: 'rgba(255, 255, 255, 0.08)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: '16px',
-            padding: '10px 14px',
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr 1fr',
-            gap: '8px',
-            textAlign: 'center',
-          }}
-        >
-          {[
-            { label: t('current_value'), value: formatRupees(portfolio?.currentValuePaime || portfolio?.currentValuePaise || 0), color: DS.gold },
-            { label: t('total_invested'), value: formatRupees(portfolio?.investedAmountPaise || 0), color: '#FFFFFF' },
-            { label: t('bonus_gold'), value: `${(totalBonusGoldMg / 1000).toFixed(4)} g`, color: '#10B981' },
-          ].map(({ label, value, color }) => (
-            <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <span style={{ fontFamily: DS.font, fontSize: '8px', color: 'rgba(255, 255, 255, 0.45)', textTransform: 'uppercase', letterSpacing: '0.3px', fontWeight: '600' }}>{label}</span>
-              <span style={{ fontFamily: DS.font, fontSize: '11px', fontWeight: '800', color }}>{value}</span>
+        {/* Balance or Warning Display */}
+        {(kycLevel === 'BASIC' || kycLevel === 'PENDING') ? (
+          renderKycWarningBanner()
+        ) : (
+          <>
+            {/* Balance Display */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '8px 0' }}>
+              <span style={{ fontFamily: DS.font, fontSize: '11px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                {t('total_gold_saved')}
+              </span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginTop: '4px' }}>
+                <span style={{ fontFamily: DS.font, fontSize: '36px', fontWeight: '900', color: 'white', lineHeight: 1 }}>
+                  {((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)}
+                </span>
+                <span style={{ fontFamily: DS.font, fontSize: '13px', fontWeight: '700', color: DS.gold, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                  {t('grams_label')}
+                </span>
+              </div>
             </div>
-          ))}
-        </div>
+
+            {/* Mini stats glass panel */}
+            <div
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '16px',
+                padding: '10px 14px',
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: '8px',
+                textAlign: 'center',
+              }}
+            >
+              {[
+                { label: t('current_value'), value: formatRupees(portfolio?.currentValuePaime || portfolio?.currentValuePaise || 0), color: DS.gold },
+                { label: t('total_invested'), value: formatRupees(portfolio?.investedAmountPaise || 0), color: '#FFFFFF' },
+                { label: t('bonus_gold'), value: `${(totalBonusGoldMg / 1000).toFixed(4)} g`, color: '#10B981' },
+              ].map(({ label, value, color }) => (
+                <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span style={{ fontFamily: DS.font, fontSize: '8px', color: 'rgba(255, 255, 255, 0.45)', textTransform: 'uppercase', letterSpacing: '0.3px', fontWeight: '600' }}>{label}</span>
+                  <span style={{ fontFamily: DS.font, fontSize: '11px', fontWeight: '800', color }}>{value}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     );
   };
@@ -818,30 +771,36 @@ export const Dashboard: React.FC = () => {
         <div style={{ width:'32px', height:'22px', borderRadius:'6px', background:'linear-gradient(135deg,#FFE082 0%,#FFB300 100%)', border:'1px solid #FFD54F', opacity:0.85 }} />
       </div>
 
-      {/* balance */}
-      <div style={{ marginBottom:'8px' }}>
-        <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'600', color:'rgba(255,255,255,0.5)', letterSpacing:'0.5px', textTransform:'uppercase' }}>{t('total_gold_saved')}</span>
-        <div style={{ display:'flex', alignItems:'baseline', gap:'10px', marginTop:'6px' }}>
-          <span style={{ fontFamily:DS.font, fontSize:'40px', fontWeight:'900', color:'#FFFFFF', lineHeight:1 }}>
-            {((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)}
-          </span>
-          <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'700', color:DS.gold, letterSpacing:'1px', textTransform:'uppercase' }}>{t('grams_label')}</span>
-        </div>
-      </div>
-
-      {/* stats row */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'12px', borderTop:'1px solid rgba(255,255,255,0.1)', paddingTop:'16px', marginTop:'8px' }}>
-        {[
-          { label:t('current_value'), value:formatRupees(portfolio?.currentValuePaise||0), color:DS.gold },
-          { label:t('total_invested'), value:formatRupees(portfolio?.investedAmountPaise||0), color:'#FFFFFF' },
-          { label:t('bonus_gold'), value:`${(totalBonusGoldMg/1000).toFixed(4)} g`, color:'#10B981' },
-        ].map(({ label, value, color }) => (
-          <div key={label}>
-            <span style={{ fontFamily:DS.font, fontSize:'9px', color:'rgba(255,255,255,0.4)', display:'block', textTransform:'uppercase', letterSpacing:'0.3px', marginBottom:'3px' }}>{label}</span>
-            <span style={{ fontFamily:DS.font, fontSize:'12px', fontWeight:'800', color, display:'block' }}>{value}</span>
+      {(kycLevel === 'BASIC' || kycLevel === 'PENDING') ? (
+        renderKycWarningBanner()
+      ) : (
+        <>
+          {/* balance */}
+          <div style={{ marginBottom:'8px' }}>
+            <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'600', color:'rgba(255,255,255,0.5)', letterSpacing:'0.5px', textTransform:'uppercase' }}>{t('total_gold_saved')}</span>
+            <div style={{ display:'flex', alignItems:'baseline', gap:'10px', marginTop:'6px' }}>
+              <span style={{ fontFamily:DS.font, fontSize:'40px', fontWeight:'900', color:'#FFFFFF', lineHeight:1 }}>
+                {((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)}
+              </span>
+              <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'700', color:DS.gold, letterSpacing:'1px', textTransform:'uppercase' }}>{t('grams_label')}</span>
+            </div>
           </div>
-        ))}
-      </div>
+
+          {/* stats row */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'12px', borderTop:'1px solid rgba(255,255,255,0.1)', paddingTop:'16px', marginTop:'8px' }}>
+            {[
+              { label:t('current_value'), value:formatRupees(portfolio?.currentValuePaise||0), color:DS.gold },
+              { label:t('total_invested'), value:formatRupees(portfolio?.investedAmountPaise||0), color:'#FFFFFF' },
+              { label:t('bonus_gold'), value:`${(totalBonusGoldMg/1000).toFixed(4)} g`, color:'#10B981' },
+            ].map(({ label, value, color }) => (
+              <div key={label}>
+                <span style={{ fontFamily:DS.font, fontSize:'9px', color:'rgba(255,255,255,0.4)', display:'block', textTransform:'uppercase', letterSpacing:'0.3px', marginBottom:'3px' }}>{label}</span>
+                <span style={{ fontFamily:DS.font, fontSize:'12px', fontWeight:'800', color, display:'block' }}>{value}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 
@@ -1901,101 +1860,6 @@ export const Dashboard: React.FC = () => {
         >
           <Headset size={24} color="white" />
         </button>
-      )}
-
-      {/* Custom sliding KYC Toast or Gold Savings Toast with animated progress bar */}
-      {showKycToast && (
-        <div 
-          className={`kyc-toast ${toastClass}`}
-          onClick={() => {
-            setToastClass('hide');
-            setTimeout(() => {
-              setShowKycToast(false);
-              if (kycLevel === 'BASIC' || kycLevel === 'PENDING') {
-                navigate('/profile/kyc');
-              }
-            }, 400);
-          }}
-          style={{
-            background: (kycLevel === 'BASIC' || kycLevel === 'PENDING') ? '#FFFDF0' : '#F0FDF4',
-            border: (kycLevel === 'BASIC' || kycLevel === 'PENDING') 
-              ? '1.5px solid rgba(217, 119, 6, 0.3)' 
-              : '1.5px solid rgba(16, 185, 129, 0.3)',
-            borderRadius: '16px',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.05)',
-          }}
-        >
-          <div className="kyc-toast-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
-              {(kycLevel === 'BASIC' || kycLevel === 'PENDING') ? (
-                <AlertTriangle size={18} color="#D97706" style={{ flexShrink: 0 }} />
-              ) : (
-                <Award size={18} color="#10B981" style={{ flexShrink: 0 }} />
-              )}
-              <div style={{ fontSize: '11.5px', color: '#374151', lineHeight: '14px' }}>
-                {(kycLevel === 'BASIC' || kycLevel === 'PENDING') ? (
-                  <>
-                    <strong style={{ fontWeight: '800', color: '#1F2937' }}>{lang === 'ta' ? 'KYC சரிபார்ப்பு தேவை: ' : 'KYC Verification Required: '}</strong>
-                    {lang === 'ta' ? 'உங்கள் கணக்கைப் பாதுகாக்க உங்கள் விவரங்களை பூர்த்தி செய்யவும்.' : 'Complete your details to secure your account.'}
-                  </>
-                ) : (
-                  <>
-                    <strong style={{ fontWeight: '800', color: '#111827' }}>{lang === 'ta' ? 'மொத்த சேமிப்பு தங்கம்: ' : 'Total Gold Saved: '}</strong>
-                    {lang === 'ta' 
-                      ? `நீங்கள் வெற்றிகரமாக ${((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)} கிராம் தங்கம் சேமித்துள்ளீர்கள்!` 
-                      : `You have successfully saved ${((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)} grams of gold.`}
-                  </>
-                )}
-              </div>
-            </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {(kycLevel === 'BASIC' || kycLevel === 'PENDING') ? (
-                <span style={{ fontSize: '12px', fontWeight: '800', color: '#D97706', whiteSpace: 'nowrap' }}>
-                  {lang === 'ta' ? 'இப்போது முடிக்கவும்' : 'Complete Now'}
-                </span>
-              ) : (
-                <span style={{ fontSize: '12px', fontWeight: '800', color: '#10B981', whiteSpace: 'nowrap' }}>
-                  {lang === 'ta' ? 'வாழ்த்துக்கள்' : 'Congratulations'}
-                </span>
-              )}
-              
-              {/* Dismiss Button X */}
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setToastClass('hide');
-                  setTimeout(() => setShowKycToast(false), 400);
-                }}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#9CA3AF',
-                  cursor: 'pointer',
-                  fontSize: '18px',
-                  padding: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  lineHeight: 1,
-                  marginLeft: '4px'
-                }}
-              >
-                &times;
-              </button>
-            </div>
-          </div>
-          
-          {/* Progress bar representing time remaining */}
-          <div className="kyc-toast-progress-container">
-            <div 
-              className="kyc-toast-progress-bar" 
-              style={{ 
-                background: (kycLevel === 'BASIC' || kycLevel === 'PENDING') ? '#D97706' : '#10B981' 
-              }}
-            ></div>
-          </div>
-        </div>
       )}
     </div>
   );
