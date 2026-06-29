@@ -20,6 +20,7 @@ namespace Aishwaryam.Infrastructure.Services
         public BrevoSmsService(IHttpClientFactory httpFactory, IConfiguration config, ILogger<BrevoSmsService> logger)
         {
             _httpClient = httpFactory.CreateClient();
+            _httpClient.Timeout = TimeSpan.FromSeconds(5);
             _apiKey = config["Sms:ApiKey"] ?? config["Email:ApiKey"] ?? "FAKE_KEY_FOR_DEV";
             _senderName = config["Sms:Sender"] ?? "Aishwaryam";
             _logger = logger;

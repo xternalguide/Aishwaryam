@@ -65,6 +65,7 @@ namespace Aishwaryam.Infrastructure.Services
             ILogger<BrevoEmailService> logger)
         {
             _http             = httpFactory.CreateClient();
+            _http.Timeout     = TimeSpan.FromSeconds(5);
             _context          = context;
             _logger           = logger;
 

@@ -16,6 +16,7 @@ namespace Aishwaryam.Infrastructure.Services
         public Fast2SmsService(IConfiguration config, ILogger<Fast2SmsService> logger)
         {
             _httpClient = new HttpClient();
+            _httpClient.Timeout = TimeSpan.FromSeconds(5);
             _apiKey = config["Sms:ApiKey"] ?? "FAKE_KEY_FOR_DEV";
             _logger = logger;
         }
