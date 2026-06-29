@@ -39,19 +39,22 @@ export const DashboardOverview: React.FC = () => {
   const [kpis, setKpis] = useState<KPIs | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [priceLogs, setPriceLogs] = useState<PriceLog[]>([]);
+  const [livePrice, setLivePrice] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isClearing, setIsClearing] = useState(false);
 
   const loadData = async () => {
     try {
-      const [kpiRes, offerRes, priceLogsRes] = await Promise.all([
+      const [kpiRes, offerRes, priceLogsRes, livePriceRes] = await Promise.all([
         window.fetchWithCache(`${apiBase}/api/Admin/kpis`),
         window.fetchWithCache(`${apiBase}/api/Offers/all-enriched`),
-        window.fetchWithCache(`${apiBase}/api/Gold/price-logs?limit=15`)
+        window.fetchWithCache(`${apiBase}/api/Gold/price-logs?limit=15`),
+        window.fetchWithCache(`${apiBase}/api/Gold/price`)
       ]);
       
       if (kpiRes.ok) setKpis(await kpiRes.json());
       if (offerRes.ok) setOffers(await offerRes.json());
+      if (livePriceRes.ok) setLivePrice(await livePriceRes.json());
       if (priceLogsRes.ok) {
         const logs = await priceLogsRes.json();
         // Reverse array to render chronologically left-to-right
@@ -267,9 +270,9 @@ export const DashboardOverview: React.FC = () => {
           <div className="kpi-details">
             <span className="kpi-title">Live 22K Price</span>
             <span className="kpi-value" style={{ fontSize: '16px' }}>
-              Buy: ₹{(kpis?.liveGoldPriceBuy || 0).toFixed(2)}/g <br />
+              Buy: ₹{livePrice ? (livePrice.price22KPaise / 100).toFixed(2) : '0.00'}/g <br />
               <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>
-                Sell: ₹{(kpis?.liveGoldPriceSell || 0).toFixed(2)}/g
+                Sell: ₹{livePrice ? (livePrice.sellPricePaise / 100).toFixed(2) : '0.00'}/g
               </span>
             </span>
           </div>
