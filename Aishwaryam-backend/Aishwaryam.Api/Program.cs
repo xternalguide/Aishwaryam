@@ -145,6 +145,7 @@ builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 builder.Services.AddScoped<ITranslationService, GoogleTranslationService>();
 
 // Gold Price Provider Chain (priority-ordered fallback)
+builder.Services.AddSingleton<IGoldPriceProvider, Aishwaryam.Infrastructure.Services.PriceProviders.TheJewellersAssociationProvider>();
 builder.Services.AddSingleton<IGoldPriceProvider, Aishwaryam.Infrastructure.Services.PriceProviders.MetalPriceApiProvider>();
 builder.Services.AddSingleton<IGoldPriceProvider, Aishwaryam.Infrastructure.Services.PriceProviders.StaticFallbackProvider>();
 builder.Services.AddSingleton<IGoldPriceManager, Aishwaryam.Infrastructure.Services.GoldPriceManager>();

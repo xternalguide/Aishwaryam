@@ -42,7 +42,7 @@ namespace Aishwaryam.Infrastructure.Services
                 {
                     var html = await response.Content.ReadAsStringAsync();
                     
-                    var match22 = Regex.Match(html, @"\$\('#goldrate_22ct'\)\.html\(""([\d.]+?)""\);", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                    var match22 = Regex.Match(html, @"\$\('#goldrate_22ct'\)\.html\(\s*['""]([\d\.]+)['""]\s*\)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
 
                     if (match22.Success)
                     {
@@ -65,7 +65,7 @@ namespace Aishwaryam.Infrastructure.Services
                             }
                             else
                             {
-                                var matchSilverJs = Regex.Match(html, @"\$\('#silverrate_1gm'\)\.html\(""([\d.]+?)""\);", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+                                var matchSilverJs = Regex.Match(html, @"\$\('#silverrate_1gm'\)\.html\(\s*['""]([\d\.]+)['""]\s*\)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
                                 if (matchSilverJs.Success)
                                 {
                                     var priceSilverStr = matchSilverJs.Groups[1].Value.Replace(",", "");
