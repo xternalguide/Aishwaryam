@@ -81,6 +81,12 @@ namespace Aishwaryam.Application.Services
             var user = await _authRepository.GetUserByIdAsync(request.UserId);
             if (user == null) return false;
 
+            var docs = await _kycRepository.GetUserKycDocumentsAsync(request.UserId);
+            if (request.IsApproved && (docs == null || !docs.Any()))
+            {
+                throw new InvalidOperationException("Cannot approve KYC: User has not uploaded any documents.");
+            }
+
             if (request.IsApproved)
             {
                 user.KycLevel = "FULL";
@@ -93,7 +99,6 @@ namespace Aishwaryam.Application.Services
             await _authRepository.UpdateUserAsync(user);
 
             // Update all KycDocuments if exist
-            var docs = await _kycRepository.GetUserKycDocumentsAsync(request.UserId);
             if (docs != null && docs.Any())
             {
                 foreach (var doc in docs)

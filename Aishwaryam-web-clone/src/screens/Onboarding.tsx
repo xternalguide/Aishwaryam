@@ -8,10 +8,16 @@ import { useTranslation } from '../utils/translation';
 
 export const Onboarding: React.FC = () => {
   const navigate = useNavigate();
-  const { refreshData } = useApp();
+  const { profile, refreshData } = useApp();
   const { t, lang } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 2;
+
+  useEffect(() => {
+    if (profile?.kycLevel === 'PENDING' || profile?.kycLevel === 'FULL') {
+      navigate('/dashboard');
+    }
+  }, [profile, navigate]);
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);

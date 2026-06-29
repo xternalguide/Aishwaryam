@@ -568,6 +568,41 @@ export const Dashboard: React.FC = () => {
     </div>
   );
 
+  const renderKycPendingBanner = () => (
+    <div 
+      onClick={() => navigate('/profile/kyc')}
+      style={{
+        background: '#F0F9FF',
+        border: '1.5px solid rgba(2, 136, 209, 0.3)',
+        borderRadius: '16px',
+        padding: '16px',
+        cursor: 'pointer',
+        boxShadow: '0 8px 20px rgba(0, 0, 0, 0.05)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        marginTop: '8px'
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+        <Clock size={20} color="#0288D1" style={{ flexShrink: 0 }} />
+        <div style={{ fontSize: '11.5px', color: '#374151', lineHeight: '16px', textAlign: 'left' }}>
+          <strong style={{ fontWeight: '800', color: '#1F2937' }}>
+            {lang === 'ta' ? 'KYC சரிபார்ப்பு நிலுவையில் உள்ளது: ' : 'KYC Verification Pending: '}
+          </strong>
+          {lang === 'ta' 
+            ? 'உங்கள் விவரங்கள் சமர்ப்பிக்கப்பட்டுள்ளன. நிர்வாக ஒப்புதலுக்காக காத்திருக்கவும்.' 
+            : 'Your details are under review. Please wait for admin approval.'}
+        </div>
+      </div>
+      <span style={{ fontSize: '12.5px', fontWeight: '800', color: '#0288D1', whiteSpace: 'nowrap' }}>
+        {lang === 'ta' ? 'விவரம்' : 'View Info'}
+      </span>
+    </div>
+  );
+
+
   const renderMobileIntegratedHeader = () => {
     const totalBonusGoldMg = portfolio?.totalBonusGoldMg || 0;
     return (
@@ -608,8 +643,10 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Balance or Warning Display */}
-        {(kycLevel === 'BASIC' || kycLevel === 'PENDING') ? (
+        {kycLevel === 'BASIC' ? (
           renderKycWarningBanner()
+        ) : kycLevel === 'PENDING' ? (
+          renderKycPendingBanner()
         ) : (
           <>
             {/* Balance Display */}
@@ -780,8 +817,10 @@ export const Dashboard: React.FC = () => {
         <div style={{ width:'32px', height:'22px', borderRadius:'6px', background:'linear-gradient(135deg,#FFE082 0%,#FFB300 100%)', border:'1px solid #FFD54F', opacity:0.85 }} />
       </div>
 
-      {(kycLevel === 'BASIC' || kycLevel === 'PENDING') ? (
+      {kycLevel === 'BASIC' ? (
         renderKycWarningBanner()
+      ) : kycLevel === 'PENDING' ? (
+        renderKycPendingBanner()
       ) : (
         <>
           {/* balance */}

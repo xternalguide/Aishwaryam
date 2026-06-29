@@ -238,6 +238,12 @@ async function viewKyc(uid, name) {
     document.getElementById('kycDocNum').value = docNum;
     document.getElementById('kycStatus').value = d.status || '—';
     
+    const docsToRender = (d.documents && d.documents.length) 
+      ? d.documents 
+      : (d.documentUrl ? [{ documentType: d.documentType, documentNumber: d.documentNumber, documentUrl: d.documentUrl }] : []);
+
+    const hasDocs = docsToRender.length > 0;
+    
     // Check if the user is already approved in local allKycUsers list
     const foundUser = allKycUsers.find(u => u.id === uid);
     const isAlreadyApproved = foundUser && (foundUser.kycLevel === 'FULL' || foundUser.kycLevel === 'VERIFIED');
@@ -256,10 +262,10 @@ async function viewKyc(uid, name) {
       rejectBtn.style.cursor = 'not-allowed';
       rejectBtn.title = "This user's KYC is already approved";
     } else {
-      approveBtn.disabled = false;
-      approveBtn.style.opacity = '1';
-      approveBtn.style.cursor = 'pointer';
-      approveBtn.title = "";
+      approveBtn.disabled = !hasDocs;
+      approveBtn.style.opacity = hasDocs ? '1' : '0.5';
+      approveBtn.style.cursor = hasDocs ? 'pointer' : 'not-allowed';
+      approveBtn.title = hasDocs ? "" : "Cannot approve KYC: No documents uploaded.";
       
       rejectBtn.disabled = false;
       rejectBtn.style.opacity = '1';
@@ -270,10 +276,6 @@ async function viewKyc(uid, name) {
     // Render dynamic attachments
     const docsContainer = document.getElementById('kycDocsContainer');
     docsContainer.innerHTML = '';
-    
-    const docsToRender = (d.documents && d.documents.length) 
-      ? d.documents 
-      : (d.documentUrl ? [{ documentType: d.documentType, documentNumber: d.documentNumber, documentUrl: d.documentUrl }] : []);
       
     if (docsToRender.length) {
       docsToRender.forEach(doc => {
@@ -363,14 +365,26 @@ async function sendPushNotification(uid, name) {
 
 async function approveKyc() {
   if (!currentKycUid) return;
+  const docsContainer = document.getElementById('kycDocsContainer');
+  if (docsContainer && docsContainer.textContent.includes('No document files uploaded')) {
+    showToast('Cannot approve KYC: User has not uploaded any documents.', 'error');
+    return;
+  }
   try {
     const res = await fetch(`${API}/api/Admin/kyc-action`, { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: currentKycUid, isApproved: true, adminNotes: "Approved by manual review" })
     });
-    showToast(res.ok ? 'KYC Approved' : 'Failed', res.ok ? 'success' : 'error');
-    if (res.ok) { loadKycGrid(); closeKycDetail(); }
+    // Handle error messages returned by API
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      showToast(data.message || data.error || 'Failed to approve KYC', 'error');
+      return;
+    }
+    showToast('KYC Approved', 'success');
+    loadKycGrid(); 
+    closeKycDetail();
   } catch (e) { showToast('Network error', 'error'); }
 }
 
