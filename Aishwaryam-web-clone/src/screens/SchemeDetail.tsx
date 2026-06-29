@@ -636,6 +636,29 @@ export const SchemeDetail: React.FC = () => {
       return;
     }
 
+    if (!isJoinFormCompleted) {
+      setSetupNomineeName(profile?.nomineeName || '');
+      setSetupNomineePhone(profile?.nomineePhoneNumber || '');
+      setSetupNomineeRelationship(profile?.nomineeRelationship || '');
+
+      if (userAddresses && userAddresses.length > 0) {
+        const defaultAddr = userAddresses.find(a => a.isDefault) || userAddresses[0];
+        setSetupState(defaultAddr.state || '');
+        setSetupCity(defaultAddr.city || '');
+        setSetupStreet(defaultAddr.streetAddress || defaultAddr.street || '');
+        setSetupPincode(defaultAddr.pincode || '');
+      } else {
+        setSetupState('');
+        setSetupCity('');
+        setSetupStreet('');
+        setSetupPincode('');
+      }
+
+      setPendingAction('JOIN');
+      setShowSetupModal(true);
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const joinRes = await ApiClient.post('api/Scheme/join', {
