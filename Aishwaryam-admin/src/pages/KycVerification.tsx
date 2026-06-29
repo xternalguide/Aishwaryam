@@ -1,0 +1,457 @@
+import React, { useEffect, useState } from 'react';
+import { useAdmin } from '../context/AdminContext';
+import {
+  Search,
+  Bell,
+  Check,
+  X,
+  FileText,
+  Clock,
+  ExternalLink,
+  ChevronRight
+} from 'lucide-react';
+
+interface KycUser {
+  id: string;
+  fullName: string;
+  phoneNumber: string;
+  kycLevel: string;
+  createdAt: string;
+}
+
+interface KycDetails {
+  documentType: string;
+  documentNumber: string;
+  status: string;
+  documents: Array<{
+    documentType: string;
+    documentNumber: string;
+    documentUrl: string;
+  }>;
+}
+
+export const KycVerification: React.FC = () => {
+  const { apiBase, globalReloadToken, showToast } = useAdmin();
+  const [users, setUsers] = useState<KycUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<KycUser[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Detail view state
+  const [selectedUid, setSelectedUid] = useState<string | null>(null);
+  const [selectedName, setSelectedName] = useState('');
+  const [details, setDetails] = useState<KycDetails | null>(null);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [reviewNotes, setReviewNotes] = useState('');
+
+  const loadKycList = async () => {
+    try {
+      const res = await window.fetchWithCache(`${apiBase}/api/Kyc/all`);
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(data);
+        setFilteredUsers(data);
+      }
+    } catch (e) {
+      console.error('Failed to load KYC lists', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadKycList();
+  }, [globalReloadToken]);
+
+  useEffect(() => {
+    const q = searchQuery.toLowerCase();
+    const filtered = users.filter((u) => {
+      const matchQuery =
+        (u.fullName || '').toLowerCase().includes(q) ||
+        (u.phoneNumber || '').includes(q);
+
+      const matchStatus =
+        statusFilter === 'All' ||
+        u.kycLevel === statusFilter;
+
+      return matchQuery && matchStatus;
+    });
+    setFilteredUsers(filtered);
+  }, [searchQuery, statusFilter, users]);
+
+  const viewKycDetails = async (uid: string, name: string) => {
+    setSelectedUid(uid);
+    setSelectedName(name);
+    setIsDetailLoading(true);
+    setDetails(null);
+    setReviewNotes('');
+
+    try {
+      const res = await fetch(`${apiBase}/api/Kyc/status/${uid}`);
+      if (res.ok) {
+        const d = await res.json();
+        const docs = d.documents && d.documents.length
+          ? d.documents
+          : d.documentUrl
+          ? [{ documentType: d.documentType, documentNumber: d.documentNumber, documentUrl: d.documentUrl }]
+          : [];
+        
+        setDetails({
+          documentType: d.documentType || '—',
+          documentNumber: d.documentNumber || '—',
+          status: d.status || '—',
+          documents: docs
+        });
+      }
+    } catch (e) {
+      showToast('Failed to retrieve document details', 'error');
+    } finally {
+      setIsDetailLoading(false);
+    }
+  };
+
+  const handleSendNudge = async (uid: string, name: string, isFromDetail = false) => {
+    const message = isFromDetail && reviewNotes.trim()
+      ? reviewNotes.trim()
+      : 'Please complete your KYC to unlock all features in Aishwaryam.';
+
+    try {
+      const res = await fetch(`${apiBase}/api/Notifications/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: uid,
+          title: 'KYC Verification Update',
+          message: message,
+          type: 'KYC'
+        })
+      });
+
+      if (res.ok) {
+        showToast(`Notification nudge sent to ${name}`, 'success');
+        if (isFromDetail) setReviewNotes('');
+      } else {
+        showToast('Failed to send notification nudge', 'error');
+      }
+
+      // Log audits
+      await fetch(`${apiBase}/api/Audit/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: uid,
+          action: 'KYC_NUDGE_PUSH',
+          details: `Admin sent KYC push notification to ${name}. Message: ${message}`,
+          status: 'SUCCESS'
+        })
+      });
+    } catch (e) {
+      showToast('Network error while nudging user', 'error');
+    }
+  };
+
+  const handleKycAction = async (isApproved: boolean) => {
+    if (!selectedUid) return;
+
+    if (!isApproved && !reviewNotes.trim()) {
+      showToast('Please enter a rejection reason in the Review Notes field first.', 'error');
+      return;
+    }
+
+    const docsCount = details?.documents?.length || 0;
+    if (isApproved && docsCount === 0) {
+      showToast('Cannot approve KYC: User has not uploaded any documents.', 'error');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${apiBase}/api/Admin/kyc-action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: selectedUid,
+          isApproved,
+          adminNotes: reviewNotes.trim() || (isApproved ? 'Approved by manual review' : 'Rejected by manual review')
+        })
+      });
+
+      if (res.ok) {
+        showToast(`KYC ${isApproved ? 'Approved' : 'Rejected'} successfully`, 'success');
+        setSelectedUid(null);
+        
+        // Invalidate cache version
+        const vRes = await fetch(`${apiBase}/api/Admin/db-version`);
+        if (vRes.ok) {
+          const vData = await vRes.json();
+          sessionStorage.setItem('admin-db-version', String(vData.version));
+        }
+        loadKycList();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        showToast(data.message || 'Failed to update KYC status', 'error');
+      }
+    } catch (e) {
+      showToast('Network error while updating KYC', 'error');
+    }
+  };
+
+  return (
+    <>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '24px', fontWeight: '800' }}>KYC Approvals</h2>
+          <p style={{ color: 'var(--text-2)', fontSize: '13px', marginTop: '4px' }}>
+            Review user identity verifications, PAN/Aadhaar document files, and approve/reject profiles.
+          </p>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="card" style={{ padding: '16px 24px' }}>
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
+            <Search size={16} style={{ position: 'absolute', left: '12px', top: '14px', color: 'var(--text-3)' }} />
+            <input
+              type="text"
+              className="form-control"
+              style={{ paddingLeft: '38px', width: '100%' }}
+              placeholder="Search by client name or phone number..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="form-label" style={{ whiteSpace: 'nowrap' }}>KYC Status:</span>
+            <select
+              className="form-control"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="All">All Documents</option>
+              <option value="PENDING">Pending Approval</option>
+              <option value="FULL">Completed (FULL)</option>
+              <option value="BASIC">Not Verified (BASIC)</option>
+              <option value="NONE">Not Started</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* KYC Table Grid */}
+      <div className="grid-cols-3" style={{ alignItems: 'start' }}>
+        <div className="card" style={{ gridColumn: selectedUid ? 'span 2' : 'span 3' }}>
+          <div className="card-head">
+            <span className="card-title">KYC Submissions List</span>
+            <span className="badge badge-amber">{filteredUsers.length} shown</span>
+          </div>
+
+          {isLoading ? (
+            <div style={{ textAlign: 'center', color: 'var(--text-2)', padding: '20px' }}>Loading KYC records...</div>
+          ) : (
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>User Name</th>
+                    <th>Phone</th>
+                    <th>KYC Level</th>
+                    <th>Registered</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-3)' }}>
+                        No KYC records match the current filters.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredUsers.map((u) => (
+                      <tr key={u.id}>
+                        <td><div style={{ fontWeight: '600' }}>{u.fullName || 'Unknown'}</div></td>
+                        <td>{u.phoneNumber}</td>
+                        <td>
+                          <span className={`badge ${
+                            u.kycLevel === 'FULL'
+                              ? 'badge-green'
+                              : u.kycLevel === 'PENDING'
+                              ? 'badge-amber'
+                              : u.kycLevel === 'BASIC'
+                              ? 'badge-blue'
+                              : 'badge-red'
+                          }`}>
+                            {u.kycLevel}
+                          </span>
+                        </td>
+                        <td className="text-xs" style={{ color: 'var(--text-3)' }}>
+                          {new Date(u.createdAt).toLocaleDateString()}
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button className="btn btn-ghost btn-xs" onClick={() => viewKycDetails(u.id, u.fullName)}>
+                              Review
+                            </button>
+                            {(u.kycLevel === 'BASIC' || u.kycLevel === 'NONE') && (
+                              <button
+                                className="btn btn-outline btn-xs"
+                                onClick={() => handleSendNudge(u.id, u.fullName)}
+                                title="Nudge to complete KYC"
+                              >
+                                <Bell size={12} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Selected KYC Detail Side Panel */}
+        {selectedUid && (
+          <div className="card fade-in" style={{ gridColumn: 'span 1' }}>
+            <div className="card-head">
+              <span className="card-title" style={{ fontSize: '15px' }}>KYC: {selectedName}</span>
+              <button
+                className="btn btn-ghost btn-xs"
+                onClick={() => setSelectedUid(null)}
+                style={{ padding: '4px', borderRadius: '50%' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {isDetailLoading ? (
+              <div style={{ color: 'var(--text-2)', textAlign: 'center', padding: '30px' }}>Loading attachments...</div>
+            ) : details ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div className="form-group">
+                  <label className="form-label">Document Details</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px' }}>
+                    <div><strong>Type:</strong> {details.documentType}</div>
+                    <div><strong>Number:</strong> {details.documentNumber}</div>
+                    <div><strong>Status:</strong> {details.status}</div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <label className="form-label">Uploaded Document Files</label>
+                  {details.documents.length === 0 ? (
+                    <div style={{ padding: '12px', background: 'var(--surface2)', border: '1px dashed var(--border)', textAlign: 'center', borderRadius: '8px', color: 'var(--text-3)' }}>
+                      No files uploaded by user.
+                    </div>
+                  ) : (
+                    details.documents.map((doc, idx) => {
+                      const isImg =
+                        doc.documentUrl.toLowerCase().includes('.jpg') ||
+                        doc.documentUrl.toLowerCase().includes('.jpeg') ||
+                        doc.documentUrl.toLowerCase().includes('.png') ||
+                        doc.documentUrl.toLowerCase().includes('.webp') ||
+                        doc.documentUrl.startsWith('data:image');
+
+                      return (
+                        <div
+                          key={idx}
+                          style={{
+                            padding: '12px',
+                            background: 'var(--surface2)',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontWeight: '700', fontSize: '12px', color: 'var(--blue)' }}>
+                              {doc.documentType || 'Identity File'}
+                            </span>
+                            <a
+                              href={doc.documentUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--text-2)' }}
+                            >
+                              Open <ExternalLink size={10} />
+                            </a>
+                          </div>
+                          {isImg ? (
+                            <img
+                              src={doc.documentUrl}
+                              alt="Document Preview"
+                              style={{
+                                width: '100%',
+                                maxHeight: '180px',
+                                background: '#000',
+                                objectFit: 'contain',
+                                borderRadius: '4px'
+                              }}
+                            />
+                          ) : (
+                            <div style={{ fontSize: '11.5px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <FileText size={14} /> PDF File attached
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Review Notes Area */}
+                <div className="form-group">
+                  <label className="form-label">Review Notes / Rejection Reason</label>
+                  <textarea
+                    className="form-control"
+                    placeholder="Type details if documents are blurry or wrong to notify the user..."
+                    rows={3}
+                    style={{ resize: 'vertical' }}
+                    value={reviewNotes}
+                    onChange={(e) => setReviewNotes(e.target.value)}
+                  />
+                </div>
+
+                {/* Actions Panel */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      className="btn btn-success"
+                      style={{ flex: 1 }}
+                      onClick={() => handleKycAction(true)}
+                      disabled={!details.documents.length}
+                    >
+                      <Check size={14} /> Approve
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      style={{ flex: 1 }}
+                      onClick={() => handleKycAction(false)}
+                    >
+                      <X size={14} /> Reject
+                    </button>
+                  </div>
+                  <button
+                    className="btn btn-primary"
+                    style={{ width: '100%' }}
+                    onClick={() => handleSendNudge(selectedUid, selectedName, true)}
+                  >
+                    <Bell size={14} /> Send Custom Nudge
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', color: 'var(--text-3)' }}>Failed to load parameters.</div>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
