@@ -276,7 +276,7 @@ namespace Aishwaryam.Application.Services
                 }
             }
 
-            DateTime maturityDate = CalculateMaturityDate(master.Frequency, master.TotalInstallments);
+            DateTime maturityDate = CalculateMaturityDate(master.Frequency, master.TotalInstallments, master.DurationUnit);
 
             var userScheme = new UserScheme
             {
@@ -472,8 +472,17 @@ namespace Aishwaryam.Application.Services
             return true;
         }
 
-        private DateTime CalculateMaturityDate(string frequency, int installments)
+        private DateTime CalculateMaturityDate(string frequency, int installments, string durationUnit)
         {
+            if (string.Equals(durationUnit, "Days", StringComparison.OrdinalIgnoreCase))
+            {
+                return DateTime.UtcNow.AddDays(installments);
+            }
+            if (string.Equals(durationUnit, "Months", StringComparison.OrdinalIgnoreCase))
+            {
+                return DateTime.UtcNow.AddMonths(installments);
+            }
+
             if (string.Equals(frequency, "Daily", StringComparison.OrdinalIgnoreCase))
             {
                 return DateTime.UtcNow.AddDays(installments);
@@ -1010,37 +1019,53 @@ namespace Aishwaryam.Application.Services
             }
             else
             {
-                // Fallback to original hardcoded 330-day scheme rules
-                if (dayNumber <= 75)
+                int totalSchemeDays = (int)Math.Max(1, Math.Round((maturityDate - createdAt).TotalDays));
+                if (totalSchemeDays <= 30)
                 {
                     currentBonusPercent = 7.5m;
-                    remainingDaysForCurrentTier = 75 - dayNumber;
-                }
-                else if (dayNumber <= 150)
-                {
-                    currentBonusPercent = 5.5m;
-                    remainingDaysForCurrentTier = 150 - dayNumber;
-                }
-                else if (dayNumber <= 225)
-                {
-                    currentBonusPercent = 3.5m;
-                    remainingDaysForCurrentTier = 225 - dayNumber;
-                }
-                else if (dayNumber <= 330)
-                {
-                    currentBonusPercent = 1.5m;
-                    remainingDaysForCurrentTier = 330 - dayNumber;
+                    remainingDaysForCurrentTier = Math.Max(0, totalSchemeDays - dayNumber);
+                    
+                    milestones.Add(new { 
+                        Name = $"Maturity Completion (7.5%)", 
+                        TargetDay = totalSchemeDays, 
+                        BonusPercentage = 7.5, 
+                        IsAchieved = dayNumber >= totalSchemeDays 
+                    });
                 }
                 else
                 {
-                    currentBonusPercent = 0m;
-                    remainingDaysForCurrentTier = 0;
-                }
+                    // Fallback to original hardcoded 330-day scheme rules
+                    if (dayNumber <= 75)
+                    {
+                        currentBonusPercent = 7.5m;
+                        remainingDaysForCurrentTier = 75 - dayNumber;
+                    }
+                    else if (dayNumber <= 150)
+                    {
+                        currentBonusPercent = 5.5m;
+                        remainingDaysForCurrentTier = 150 - dayNumber;
+                    }
+                    else if (dayNumber <= 225)
+                    {
+                        currentBonusPercent = 3.5m;
+                        remainingDaysForCurrentTier = 225 - dayNumber;
+                    }
+                    else if (dayNumber <= 330)
+                    {
+                        currentBonusPercent = 1.5m;
+                        remainingDaysForCurrentTier = 330 - dayNumber;
+                    }
+                    else
+                    {
+                        currentBonusPercent = 0m;
+                        remainingDaysForCurrentTier = 0;
+                    }
 
-                milestones.Add(new { Name = "Tier 1 (7.5%)", TargetDay = 75, BonusPercentage = 7.5, IsAchieved = dayNumber >= 75 });
-                milestones.Add(new { Name = "Tier 2 (5.5%)", TargetDay = 150, BonusPercentage = 5.5, IsAchieved = dayNumber >= 150 });
-                milestones.Add(new { Name = "Tier 3 (3.5%)", TargetDay = 225, BonusPercentage = 3.5, IsAchieved = dayNumber >= 225 });
-                milestones.Add(new { Name = "Tier 4 (1.5%)", TargetDay = 330, BonusPercentage = 1.5, IsAchieved = dayNumber >= 330 });
+                    milestones.Add(new { Name = "Tier 1 (7.5%)", TargetDay = 75, BonusPercentage = 7.5, IsAchieved = dayNumber >= 75 });
+                    milestones.Add(new { Name = "Tier 2 (5.5%)", TargetDay = 150, BonusPercentage = 5.5, IsAchieved = dayNumber >= 150 });
+                    milestones.Add(new { Name = "Tier 3 (3.5%)", TargetDay = 225, BonusPercentage = 3.5, IsAchieved = dayNumber >= 225 });
+                    milestones.Add(new { Name = "Tier 4 (1.5%)", TargetDay = 330, BonusPercentage = 1.5, IsAchieved = dayNumber >= 330 });
+                }
             }
 
             int remainingDaysForScheme = (int)Math.Max(0, Math.Ceiling((maturityDate - DateTime.UtcNow).TotalDays));
