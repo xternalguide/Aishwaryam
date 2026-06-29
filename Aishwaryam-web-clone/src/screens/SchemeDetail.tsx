@@ -1128,7 +1128,7 @@ export const SchemeDetail: React.FC = () => {
     joinAmountRupees = parsedJoinVal;
   } else {
     const baseMetalVal = (parsedJoinVal * goldPrice22K) / 100;
-    joinAmountRupees = (baseMetalVal * 1.03) / 100;
+    joinAmountRupees = baseMetalVal * 1.03;
   }
   const isJoinAmountValid = parsedJoinVal > 0 && joinAmountRupees >= 100;
 
