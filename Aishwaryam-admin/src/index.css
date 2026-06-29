@@ -280,6 +280,8 @@ h1, h2, h3, h4, h5, h6 {
   flex-direction: column;
   gap: 24px;
   padding-bottom: 40px;
+  position: relative;
+  z-index: 200;
 }
 
 /* Elegant Cards */
