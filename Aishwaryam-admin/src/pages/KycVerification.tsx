@@ -43,6 +43,7 @@ export const KycVerification: React.FC = () => {
   const [selectedName, setSelectedName] = useState('');
   const [details, setDetails] = useState<KycDetails | null>(null);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [reviewNotes, setReviewNotes] = useState('');
 
   const loadKycList = async () => {
@@ -152,7 +153,7 @@ export const KycVerification: React.FC = () => {
   };
 
   const handleKycAction = async (isApproved: boolean) => {
-    if (!selectedUid) return;
+    if (!selectedUid || isProcessing) return;
 
     if (!isApproved && !reviewNotes.trim()) {
       showToast('Please enter a rejection reason in the Review Notes field first.', 'error');
@@ -165,6 +166,7 @@ export const KycVerification: React.FC = () => {
       return;
     }
 
+    setIsProcessing(true);
     try {
       const res = await fetch(`${apiBase}/api/Admin/kyc-action`, {
         method: 'POST',
@@ -193,6 +195,8 @@ export const KycVerification: React.FC = () => {
       }
     } catch (e) {
       showToast('Network error while updating KYC', 'error');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -425,22 +429,24 @@ export const KycVerification: React.FC = () => {
                       className="btn btn-success"
                       style={{ flex: 1 }}
                       onClick={() => handleKycAction(true)}
-                      disabled={!details.documents.length}
+                      disabled={!details.documents.length || isProcessing}
                     >
-                      <Check size={14} /> Approve
+                      {isProcessing ? 'Processing...' : <><Check size={14} /> Approve</>}
                     </button>
                     <button
                       className="btn btn-danger"
                       style={{ flex: 1 }}
                       onClick={() => handleKycAction(false)}
+                      disabled={isProcessing}
                     >
-                      <X size={14} /> Reject
+                      {isProcessing ? 'Processing...' : <><X size={14} /> Reject</>}
                     </button>
                   </div>
                   <button
                     className="btn btn-primary"
                     style={{ width: '100%' }}
                     onClick={() => handleSendNudge(selectedUid, selectedName, true)}
+                    disabled={isProcessing}
                   >
                     <Bell size={14} /> Send Custom Nudge
                   </button>
