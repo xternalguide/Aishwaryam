@@ -481,7 +481,7 @@ export const Dashboard: React.FC = () => {
       setUserName(profile.fullName || 'User');
       const level = profile.kycLevel || 'BASIC';
       setKycLevel(level);
-      if ((level === 'BASIC' || level === 'PENDING') && !showKycToast && toastClass === '') {
+      if (!showKycToast && toastClass === '') {
         setShowKycToast(true);
         setToastClass('show');
       }
@@ -1903,37 +1903,62 @@ export const Dashboard: React.FC = () => {
         </button>
       )}
 
-      {/* Custom sliding KYC Toast with animated progress bar */}
-      {showKycToast && (kycLevel === 'BASIC' || kycLevel === 'PENDING') && (
+      {/* Custom sliding KYC Toast or Gold Savings Toast with animated progress bar */}
+      {showKycToast && (
         <div 
           className={`kyc-toast ${toastClass}`}
           onClick={() => {
             setToastClass('hide');
             setTimeout(() => {
               setShowKycToast(false);
-              navigate('/profile/kyc');
+              if (kycLevel === 'BASIC' || kycLevel === 'PENDING') {
+                navigate('/profile/kyc');
+              }
             }, 400);
           }}
           style={{
-            background: '#FFFDF0',
-            border: '1.5px solid rgba(217, 119, 6, 0.3)',
+            background: (kycLevel === 'BASIC' || kycLevel === 'PENDING') ? '#FFFDF0' : '#F0FDF4',
+            border: (kycLevel === 'BASIC' || kycLevel === 'PENDING') 
+              ? '1.5px solid rgba(217, 119, 6, 0.3)' 
+              : '1.5px solid rgba(16, 185, 129, 0.3)',
             borderRadius: '16px',
             boxShadow: '0 10px 25px rgba(0, 0, 0, 0.05)',
           }}
         >
           <div className="kyc-toast-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
-              <AlertTriangle size={18} color="#D97706" style={{ flexShrink: 0 }} />
+              {(kycLevel === 'BASIC' || kycLevel === 'PENDING') ? (
+                <AlertTriangle size={18} color="#D97706" style={{ flexShrink: 0 }} />
+              ) : (
+                <Award size={18} color="#10B981" style={{ flexShrink: 0 }} />
+              )}
               <div style={{ fontSize: '11.5px', color: '#374151', lineHeight: '14px' }}>
-                <strong style={{ fontWeight: '800', color: '#1F2937' }}>{lang === 'ta' ? 'KYC சரிபார்ப்பு தேவை: ' : 'KYC Verification Required: '}</strong>
-                {lang === 'ta' ? 'உங்கள் கணக்கைப் பாதுகாக்க உங்கள் விவரங்களை பூர்த்தி செய்யவும்.' : 'Complete your details to secure your account.'}
+                {(kycLevel === 'BASIC' || kycLevel === 'PENDING') ? (
+                  <>
+                    <strong style={{ fontWeight: '800', color: '#1F2937' }}>{lang === 'ta' ? 'KYC சரிபார்ப்பு தேவை: ' : 'KYC Verification Required: '}</strong>
+                    {lang === 'ta' ? 'உங்கள் கணக்கைப் பாதுகாக்க உங்கள் விவரங்களை பூர்த்தி செய்யவும்.' : 'Complete your details to secure your account.'}
+                  </>
+                ) : (
+                  <>
+                    <strong style={{ fontWeight: '800', color: '#111827' }}>{lang === 'ta' ? 'மொத்த சேமிப்பு தங்கம்: ' : 'Total Gold Saved: '}</strong>
+                    {lang === 'ta' 
+                      ? `நீங்கள் வெற்றிகரமாக ${((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)} கிராம் தங்கம் சேமித்துள்ளீர்கள்!` 
+                      : `You have successfully saved ${((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)} grams of gold.`}
+                  </>
+                )}
               </div>
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '12px', fontWeight: '800', color: '#D97706', whiteSpace: 'nowrap' }}>
-                {lang === 'ta' ? 'இப்போது முடிக்கவும்' : 'Complete Now'}
-              </span>
+              {(kycLevel === 'BASIC' || kycLevel === 'PENDING') ? (
+                <span style={{ fontSize: '12px', fontWeight: '800', color: '#D97706', whiteSpace: 'nowrap' }}>
+                  {lang === 'ta' ? 'இப்போது முடிக்கவும்' : 'Complete Now'}
+                </span>
+              ) : (
+                <span style={{ fontSize: '12px', fontWeight: '800', color: '#10B981', whiteSpace: 'nowrap' }}>
+                  {lang === 'ta' ? 'வாழ்த்துக்கள்' : 'Congratulations'}
+                </span>
+              )}
               
               {/* Dismiss Button X */}
               <button 
@@ -1963,7 +1988,12 @@ export const Dashboard: React.FC = () => {
           
           {/* Progress bar representing time remaining */}
           <div className="kyc-toast-progress-container">
-            <div className="kyc-toast-progress-bar" style={{ background: '#D97706' }}></div>
+            <div 
+              className="kyc-toast-progress-bar" 
+              style={{ 
+                background: (kycLevel === 'BASIC' || kycLevel === 'PENDING') ? '#D97706' : '#10B981' 
+              }}
+            ></div>
           </div>
         </div>
       )}
