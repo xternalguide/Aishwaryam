@@ -811,7 +811,7 @@ export const SchemeDetail: React.FC = () => {
       amountPaise = Math.round(parsedVal * 100);
       fallbackGrams = (parsedVal / 1.03 * 1.075 * 100) / goldPrice22K;
     } else {
-      const baseMetalVal = (parsedVal * goldPrice22K) / 100;
+      const baseMetalVal = parsedVal * goldPrice22K;
       amountPaise = Math.round(baseMetalVal * 1.03);
       fallbackGrams = parsedVal * 1.075;
     }
