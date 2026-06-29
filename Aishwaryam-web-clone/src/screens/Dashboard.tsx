@@ -1911,53 +1911,59 @@ export const Dashboard: React.FC = () => {
             setToastClass('hide');
             setTimeout(() => {
               setShowKycToast(false);
-              navigate('/onboarding');
+              navigate('/profile/kyc');
             }, 400);
           }}
+          style={{
+            background: '#FFFDF0',
+            border: '1.5px solid rgba(217, 119, 6, 0.3)',
+            borderRadius: '16px',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.05)',
+          }}
         >
-          <div className="kyc-toast-content">
-            <AlertTriangle size={20} color="#F59E0B" style={{ flexShrink: 0, marginTop: '2px' }} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1, paddingRight: '20px' }}>
-              <span style={{ fontSize: '13px', fontWeight: '800', color: '#1F2937', display: 'block', lineHeight: '16px' }}>
-                {lang === 'ta' ? 'KYC சரிபார்ப்பு தேவை' : 'KYC Verification Required'}
-              </span>
-              <span style={{ fontSize: '11.5px', color: '#4B5563', lineHeight: '15px' }}>
-                {lang === 'ta' 
-                  ? 'உள்நுழைந்த பின், KYC பூர்த்தி செய்யப்படவில்லை, தயவுசெய்து அதை பூர்த்தி செய்யவும்.' 
-                  : 'Once user is logged in, the KYC is not completed, please complete it.'}
-              </span>
+          <div className="kyc-toast-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+              <AlertTriangle size={18} color="#D97706" style={{ flexShrink: 0 }} />
+              <div style={{ fontSize: '11.5px', color: '#374151', lineHeight: '14px' }}>
+                <strong style={{ fontWeight: '800', color: '#1F2937' }}>{lang === 'ta' ? 'KYC சரிபார்ப்பு தேவை: ' : 'KYC Verification Required: '}</strong>
+                {lang === 'ta' ? 'உங்கள் கணக்கைப் பாதுகாக்க உங்கள் விவரங்களை பூர்த்தி செய்யவும்.' : 'Complete your details to secure your account.'}
+              </div>
             </div>
             
-            {/* Close Button X */}
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                setToastClass('hide');
-                setTimeout(() => setShowKycToast(false), 400);
-              }}
-              style={{
-                position: 'absolute',
-                top: '12px',
-                right: '12px',
-                background: 'transparent',
-                border: 'none',
-                color: '#9CA3AF',
-                cursor: 'pointer',
-                fontSize: '18px',
-                padding: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                lineHeight: 1
-              }}
-            >
-              &times;
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '12px', fontWeight: '800', color: '#D97706', whiteSpace: 'nowrap' }}>
+                {lang === 'ta' ? 'இப்போது முடிக்கவும்' : 'Complete Now'}
+              </span>
+              
+              {/* Dismiss Button X */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setToastClass('hide');
+                  setTimeout(() => setShowKycToast(false), 400);
+                }}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#9CA3AF',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  lineHeight: 1,
+                  marginLeft: '4px'
+                }}
+              >
+                &times;
+              </button>
+            </div>
           </div>
           
           {/* Progress bar representing time remaining */}
           <div className="kyc-toast-progress-container">
-            <div className="kyc-toast-progress-bar"></div>
+            <div className="kyc-toast-progress-bar" style={{ background: '#D97706' }}></div>
           </div>
         </div>
       )}
