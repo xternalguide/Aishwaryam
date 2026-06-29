@@ -17,7 +17,7 @@ export const NotificationPanel: React.FC = () => {
     try {
       const [settingRes, snapshotRes] = await Promise.all([
         window.fetchWithCache(`${apiBase}/api/Admin/daily-notification-setting`),
-        window.fetchWithCache(`${apiBase}/api/Gold/snapshot`)
+        window.fetchWithCache(`${apiBase}/api/Gold/price`)
       ]);
 
       if (settingRes.ok) {
@@ -26,7 +26,12 @@ export const NotificationPanel: React.FC = () => {
       }
 
       if (snapshotRes.ok) {
-        setPriceSnapshot(await snapshotRes.json());
+        const priceData = await snapshotRes.json();
+        setPriceSnapshot({
+          raw24KPrice: priceData.price24KPaise / 100,
+          raw22KPrice: priceData.price22KPaise / 100,
+          timestamp: priceData.updatedAt
+        });
       }
     } catch (e) {
       console.error('Failed to load notifications state', e);
