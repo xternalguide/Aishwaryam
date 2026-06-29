@@ -318,8 +318,8 @@ export const SchemeMaster: React.FC = () => {
       {modalOpen && (
         <div className="modal-backdrop" onClick={() => setModalOpen(false)}>
           <form className="modal-content fade-in" onSubmit={handleSave} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '650px' }}>
-            <div className="card-head" style={{ padding: '20px 24px', margin: 0, borderBottom: '1px solid var(--border)' }}>
-              <span className="card-title">{editId ? 'Edit Savings Plan' : 'Create Savings Plan'}</span>
+            <div className="card-head" style={{ padding: '24px 24px 16px 24px', margin: 0, borderBottom: '1px solid var(--border)' }}>
+              <span className="card-title" style={{ lineHeight: '1.4' }}>{editId ? 'Edit Savings Plan' : 'Create Savings Plan'}</span>
               <button type="button" className="btn btn-ghost btn-xs" onClick={() => setModalOpen(false)} style={{ padding: '4px', borderRadius: '50%' }}>
                 <X size={18} />
               </button>
