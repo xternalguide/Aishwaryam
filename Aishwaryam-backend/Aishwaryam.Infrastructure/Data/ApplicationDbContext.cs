@@ -9,6 +9,32 @@ namespace Aishwaryam.Infrastructure.Data
         {
         }
 
+        public static long LastDbChangeTimestamp { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        public override int SaveChanges()
+        {
+            LastDbChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            return base.SaveChanges();
+        }
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            LastDbChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override System.Threading.Tasks.Task<int> SaveChangesAsync(System.Threading.CancellationToken cancellationToken = default)
+        {
+            LastDbChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        public override System.Threading.Tasks.Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, System.Threading.CancellationToken cancellationToken = default)
+        {
+            LastDbChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
         // Auth
         public DbSet<User> Users { get; set; }
         public DbSet<Address> Addresses { get; set; }

@@ -41,6 +41,12 @@ namespace Aishwaryam.Api.Controllers
             _adminService = adminService;
         }
 
+        [HttpGet("db-version")]
+        public IActionResult GetDatabaseVersion()
+        {
+            return Ok(new { version = ApplicationDbContext.LastDbChangeTimestamp });
+        }
+
         [HttpGet("kpis")]
         public async Task<IActionResult> GetOperationalKpis()
         {

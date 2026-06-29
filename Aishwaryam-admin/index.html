@@ -337,9 +337,7 @@ async function clearUserData() {
   }
 }
 
-loadStats();
-loadActiveOffers();
-setInterval(() => {
+setupAutoRefresh(() => {
     loadStats();
     loadActiveOffers();
 }, 6000);

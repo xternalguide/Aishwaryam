@@ -418,10 +418,9 @@ let currentEditOfferId = null;
 // Initialize Form fields
 document.addEventListener('DOMContentLoaded', () => {
     switchFormMode('BULK');
-    loadOffersList();
     populateUsersDropdown();
     loadReferralSettings();
-    setInterval(loadOffersList, 6000);
+    setupAutoRefresh(loadOffersList, 6000);
 });
 
 async function loadReferralSettings() {

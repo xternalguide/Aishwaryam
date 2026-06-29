@@ -253,8 +253,48 @@ async function getUsersMap() {
     }
   }
 
-  // Start polling every 5 seconds
-  setInterval(checkNewKycAlerts, 5000);
-  // Run initial check slightly delayed to let page render
-  setTimeout(checkNewKycAlerts, 1000);
+  // Start polling alerts check every 5 seconds using db-version check
+  let lastAlertsVersion = 0;
+  async function runAlertsCheckWithVersion() {
+    try {
+      const res = await fetch(`${API_BASE}/api/Admin/db-version`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.version !== lastAlertsVersion) {
+        lastAlertsVersion = data.version;
+        await checkNewKycAlerts();
+      }
+    } catch (e) {
+      console.error("Failed to check KYC alerts database version", e);
+    }
+  }
+
+  setInterval(runAlertsCheckWithVersion, 5000);
+  setTimeout(runAlertsCheckWithVersion, 1000);
 })();
+
+// Global helper to setup auto-refresh of data pages using lightweight db-version polling
+window.setupAutoRefresh = function(callback, intervalMs = 5000) {
+  let localLastVersion = 0;
+  
+  const check = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/Admin/db-version`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.version !== localLastVersion) {
+        localLastVersion = data.version;
+        callback();
+      }
+    } catch (e) {
+      console.error("Failed to check database version for page refresh", e);
+    }
+  };
+  
+  // Run once immediately
+  check();
+  
+  // Setup polling
+  setInterval(check, intervalMs);
+};
+

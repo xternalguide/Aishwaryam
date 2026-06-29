@@ -409,8 +409,11 @@ async function submitReject() {
 }
 
 // Init & Polling
-init();
-setInterval(loadData, 5000);
+async function initAndRefresh() {
+  await loadUsersMap();
+  setupAutoRefresh(loadData, 5000);
+}
+initAndRefresh();
 </script>
 </body>
 </html>

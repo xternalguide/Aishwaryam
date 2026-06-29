@@ -579,16 +579,13 @@ async function toggleUserActive() {
 
 let currentUserActiveState = true;
 
-loadAllUsers();
-
 window.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const uid = params.get('userId');
   if (uid) viewUser(uid);
 });
 
-// Auto-refresh data every 6 seconds
-setInterval(() => {
+setupAutoRefresh(() => {
   if (document.getElementById('gridSection').style.display !== 'none') {
     loadAllUsers();
   }

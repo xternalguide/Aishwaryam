@@ -297,10 +297,7 @@ function closeDetailsModal() {
   document.getElementById('detailsModal').style.display = 'none';
 }
 
-loadData();
-
-// Auto-refresh data every 5 seconds
-setInterval(loadData, 5000);
+setupAutoRefresh(loadData, 5000);
 </script>
 
 <!-- Enrollment Details Modal -->

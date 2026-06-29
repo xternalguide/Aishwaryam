@@ -240,8 +240,7 @@ function renderLogs(logs) {
   }).join('');
 }
 
-loadLogs();
-setInterval(loadLogs, 5000);
+setupAutoRefresh(loadLogs, 5000);
 </script>
 </body></html>
 

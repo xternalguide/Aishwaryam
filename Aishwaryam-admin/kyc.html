@@ -403,10 +403,7 @@ async function rejectKyc() {
   } catch (e) { showToast('Network error', 'error'); }
 }
 
-loadKycGrid();
-
-// Auto-refresh data every 5 seconds
-setInterval(loadKycGrid, 5000);
+setupAutoRefresh(loadKycGrid, 5000);
 
 function openBulkNotificationModal() {
   const users = window.currentFilteredKyc || [];

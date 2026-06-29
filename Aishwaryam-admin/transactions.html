@@ -212,10 +212,7 @@ function downloadReceipt(transactionId) {
   window.open(`${API}/api/Gold/receipt/download/${transactionId}`, '_blank');
 }
 
-loadAllTransactions();
-
-// Auto-refresh data every 5 seconds
-setInterval(loadAllTransactions, 5000);
+setupAutoRefresh(loadAllTransactions, 5000);
 </script>
 </body></html>
 
