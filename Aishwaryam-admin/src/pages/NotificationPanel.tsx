@@ -158,9 +158,9 @@ export const NotificationPanel: React.FC = () => {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface2)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
               <div>
-                <div style={{ fontWeight: '700', fontSize: '13.5px' }}>Daily Installment Reminders</div>
+                <div style={{ fontWeight: '700', fontSize: '13.5px' }}>Daily Live Gold &amp; Silver Price Alerts</div>
                 <div style={{ fontSize: '11.5px', color: 'var(--text-3)', marginTop: '4px' }}>
-                  Automatically triggers nudge pushes at 9:00 AM for schemes due today.
+                  Automatically triggers live price pushes to all user apps when the market opens (9:30 AM IST).
                 </div>
               </div>
               <button

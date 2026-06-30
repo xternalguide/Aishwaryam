@@ -796,6 +796,22 @@ catch (Exception ex)
     Console.WriteLine($"[SELF-HEAL] Failed to self-heal database bonus tiers: {ex.Message}");
 }
 
+// SELF-HEAL: Ensure promotional_offers table has banner_url and min_purchase_gold_mg columns
+try
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await db.Database.ExecuteSqlRawAsync("ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS banner_url text;");
+        await db.Database.ExecuteSqlRawAsync("ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS min_purchase_gold_mg bigint NOT NULL DEFAULT 0;");
+        Console.WriteLine("[SELF-HEAL] Verified promotional_offers schema columns are present.");
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[SELF-HEAL] Failed to verify promotional_offers columns: {ex.Message}");
+}
+
 try
 {
     Log.Information("Starting Aishwaryam Digital Gold API Host...");

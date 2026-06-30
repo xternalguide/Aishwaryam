@@ -338,52 +338,77 @@ namespace Aishwaryam.Application.Services
                 
                 if (activeScheme == null)
                 {
-                    var activeEventOffer = await _goldRepository.GetActiveEventOfferAsync(request.UserId);
+                    var activeOffers = await _goldRepository.GetActiveOffersAsync(request.UserId);
 
-                    if (activeEventOffer != null)
+                    foreach (var offer in activeOffers)
                     {
-                        var alreadyClaimed = await _goldRepository.IsOfferClaimedAsync(request.UserId, activeEventOffer.Id);
+                        var alreadyClaimed = await _goldRepository.IsOfferClaimedAsync(request.UserId, offer.Id);
+                        if (alreadyClaimed) continue;
 
-                        if (!alreadyClaimed && request.TotalAmountPaise >= activeEventOffer.MinPurchaseAmountPaise)
+                        // Check Thresholds (rupees or grams/mg)
+                        bool isEligible = true;
+                        if (offer.MinPurchaseAmountPaise > 0 && request.TotalAmountPaise < offer.MinPurchaseAmountPaise)
                         {
-                            if (activeEventOffer.BonusGoldMg > 0)
+                            isEligible = false;
+                        }
+                        if (offer.MinPurchaseGoldMg > 0 && goldWeightMg < offer.MinPurchaseGoldMg)
+                        {
+                            isEligible = false;
+                        }
+
+                        if (isEligible)
+                        {
+                            long offerBonusGoldMg = 0;
+                            long offerBonusAmountPaise = 0;
+
+                            if (offer.BonusWorthPaise > 0)
                             {
-                                // Flat Gold Weight Offer (e.g. 5 grams free)
-                                promotionalBonusGoldMg = activeEventOffer.BonusGoldMg;
-                                promotionalBonusAmountPaise = (promotionalBonusGoldMg * effectiveBuyPricePaise) / 1000;
+                                // Flat Rupee Worth Offer (e.g. ₹500 worth of gold bonus)
+                                offerBonusAmountPaise = offer.BonusWorthPaise;
+                                var bonusBaseAmountPaise = (offerBonusAmountPaise * 100) / 103;
+                                offerBonusGoldMg = (bonusBaseAmountPaise * 1000) / effectiveBuyPricePaise;
                             }
-                            else if (activeEventOffer.BonusPercent > 0)
+                            else if (offer.BonusGoldMg > 0)
+                            {
+                                // Flat Gold Weight Offer (e.g. 500mg free)
+                                offerBonusGoldMg = offer.BonusGoldMg;
+                                offerBonusAmountPaise = (offerBonusGoldMg * effectiveBuyPricePaise) / 1000;
+                            }
+                            else if (offer.BonusPercent > 0)
                             {
                                 // Percentage-based Offer
-                                promotionalBonusAmountPaise = (long)(request.TotalAmountPaise * (double)(activeEventOffer.BonusPercent / 100m));
-                                var bonusBaseAmountPaise = (promotionalBonusAmountPaise * 100) / 103;
-                                promotionalBonusGoldMg = (bonusBaseAmountPaise * 1000) / effectiveBuyPricePaise;
+                                offerBonusAmountPaise = (long)(request.TotalAmountPaise * (double)(offer.BonusPercent / 100m));
+                                var bonusBaseAmountPaise = (offerBonusAmountPaise * 100) / 103;
+                                offerBonusGoldMg = (bonusBaseAmountPaise * 1000) / effectiveBuyPricePaise;
                             }
 
-                            if (promotionalBonusGoldMg > 0)
+                            if (offerBonusGoldMg > 0)
                             {
-                                await _goldRepository.IncrementBonusGoldBalanceAsync(request.UserId, promotionalBonusGoldMg);
+                                promotionalBonusGoldMg += offerBonusGoldMg;
+                                promotionalBonusAmountPaise += offerBonusAmountPaise;
+
+                                await _goldRepository.IncrementBonusGoldBalanceAsync(request.UserId, offerBonusGoldMg);
 
                                 await _goldRepository.RecordGoldTransactionAsync(new GoldTransaction
                                 {
                                     Id = Guid.NewGuid(),
                                     UserId = request.UserId,
                                     TransactionType = "EVENT_BONUS",
-                                    GoldWeightMg = promotionalBonusGoldMg,
+                                    GoldWeightMg = offerBonusGoldMg,
                                     PricePerGmPaise = effectiveBuyPricePaise,
                                     TotalAmountPaise = 0,
                                     IpAddress = request.IpAddress,
                                     DeviceFingerprint = request.DeviceFingerprint,
-                                    RateSource = $"{activeEventOffer.OfferType}_OFFER",
+                                    RateSource = $"{offer.OfferType}_OFFER",
                                     RateTimestamp = DateTimeOffset.UtcNow,
-                                    BonusAmountPaise = promotionalBonusAmountPaise,
-                                    BonusGoldMg = promotionalBonusGoldMg,
+                                    BonusAmountPaise = offerBonusAmountPaise,
+                                    BonusGoldMg = offerBonusGoldMg,
                                     CreatedAt = DateTime.UtcNow
                                 });
 
                                 await _goldRepository.RecordClaimedOfferAsync(new UserClaimedOffer
                                 {
-                                    OfferId = activeEventOffer.Id,
+                                    OfferId = offer.Id,
                                     UserId = request.UserId,
                                     ClaimedAt = DateTime.UtcNow
                                 });
@@ -391,17 +416,22 @@ namespace Aishwaryam.Application.Services
                                 await _goldRepository.RecordAuditLogAsync(new PlatformAuditLog
                                 {
                                     UserId = request.UserId,
-                                    Action = $"{activeEventOffer.OfferType}_BONUS_CREDITED",
-                                    Details = $"{activeEventOffer.BonusPercent}% bonus = ₹{promotionalBonusAmountPaise / 100.0:F2} → {promotionalBonusGoldMg}mg bonus gold credited (separate balance)",
+                                    Action = $"{offer.OfferType}_BONUS_CREDITED",
+                                    Details = $"Offer '{offer.Title}' applied: {offer.BonusPercent}% / ₹{offerBonusAmountPaise / 100.0:F2} → {offerBonusGoldMg}mg bonus gold credited (separate balance)",
                                     IpAddress = request.IpAddress ?? "SYSTEM",
                                     Status = "SUCCESS"
                                 });
 
                                 try
                                 {
+                                    var notifTitle = $"🎁 Offer Bonus Credited: {offer.Title}!";
+                                    var notifBody = offer.BonusWorthPaise > 0 
+                                        ? $"You received ₹{offer.BonusWorthPaise / 100} worth of bonus gold ({offerBonusGoldMg / 1000.0:F4}g) from the campaign!"
+                                        : $"You received {offerBonusGoldMg / 1000.0:F4}g of bonus gold from the campaign!";
+                                    
                                     await _notificationService.SendNotificationAsync(request.UserId,
-                                        $"🎁 {activeEventOffer.BonusPercent}% Bonus Gold Credited!",
-                                        $"You received {promotionalBonusGoldMg / 1000.0:F4}g of bonus gold from your {activeEventOffer.OfferType.ToLower()} offer!",
+                                        notifTitle,
+                                        notifBody,
                                         "OFFER_BONUS_CREDITED");
                                 }
                                 catch { }

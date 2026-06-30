@@ -35,6 +35,12 @@ namespace Aishwaryam.Domain.Entities
         [Column("min_purchase_amount_paise")]
         public long MinPurchaseAmountPaise { get; set; } = 0; // Min purchase to get bonus
 
+        [Column("min_purchase_gold_mg")]
+        public long MinPurchaseGoldMg { get; set; } = 0; // Min purchase gold weight in mg to get bonus
+
+        [Column("banner_url")]
+        public string? BannerUrl { get; set; } // Custom poster/image for the offer campaign
+
         [Column("duration_hours")]
         public int DurationHours { get; set; } = 24; // How long the offer is valid after firing
 

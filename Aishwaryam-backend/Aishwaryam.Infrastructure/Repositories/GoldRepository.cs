@@ -135,16 +135,12 @@ namespace Aishwaryam.Infrastructure.Repositories
                 .FirstOrDefaultAsync(t => t.RazorpayPaymentId == paymentId);
         }
 
-        public async Task<PromotionalOffer?> GetActiveEventOfferAsync(Guid userId)
+        public async Task<System.Collections.Generic.List<PromotionalOffer>> GetActiveOffersAsync(Guid userId)
         {
             var now = DateTime.UtcNow;
             return await _context.PromotionalOffers
-                .Where(o => o.IsActive && o.ExpiresAt > now && o.TargetUserId == userId
-                    && (o.OfferType == "BIRTHDAY" || o.OfferType == "ANNIVERSARY")
-                    && (o.BonusPercent > 0 || o.BonusGoldMg > 0))
-                .OrderByDescending(o => o.BonusPercent)
-                .ThenByDescending(o => o.BonusGoldMg)
-                .FirstOrDefaultAsync();
+                .Where(o => o.IsActive && o.ExpiresAt > now && (o.TargetUserId == null || o.TargetUserId == userId))
+                .ToListAsync();
         }
 
         public async Task<bool> IsOfferClaimedAsync(Guid userId, Guid offerId)

@@ -392,6 +392,55 @@ namespace Aishwaryam.Api.Controllers
             return Ok(new { bonusApplied = true, bonusGoldMg, bonusAmountPaise, offerType = activeEventOffer.OfferType });
         }
 
+        // ─── ADMIN: Get list of users who claimed offers ─────────────────────────
+        [HttpGet("claimed-users")]
+        public async Task<IActionResult> GetClaimedUsers()
+        {
+            var claims = await _context.UserClaimedOffers
+                .OrderByDescending(c => c.ClaimedAt)
+                .ToListAsync();
+
+            var userIds = claims.Select(c => c.UserId).Distinct().ToList();
+            var offerIds = claims.Select(c => c.OfferId).Distinct().ToList();
+
+            var users = await _context.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id, u => new { u.FullName, u.PhoneNumber });
+
+            var offers = await _context.PromotionalOffers
+                .Where(o => offerIds.Contains(o.Id))
+                .ToDictionaryAsync(o => o.Id);
+
+            var transactions = await _context.GoldTransactions
+                .Where(t => t.TransactionType == "EVENT_BONUS" && userIds.Contains(t.UserId))
+                .ToListAsync();
+
+            var result = claims.Select(c =>
+            {
+                var user = users.ContainsKey(c.UserId) ? users[c.UserId] : null;
+                var offer = offers.ContainsKey(c.OfferId) ? offers[c.OfferId] : null;
+
+                var tx = transactions.FirstOrDefault(t => t.UserId == c.UserId 
+                    && Math.Abs((t.CreatedAt - c.ClaimedAt).TotalSeconds) < 20);
+
+                return new
+                {
+                    c.Id,
+                    c.UserId,
+                    UserName = user?.FullName ?? "Unknown",
+                    UserPhone = user?.PhoneNumber ?? "N/A",
+                    c.OfferId,
+                    OfferTitle = offer?.Title ?? "Deleted Offer",
+                    OfferType = offer?.OfferType ?? "N/A",
+                    c.ClaimedAt,
+                    AwardedGoldMg = tx?.GoldWeightMg ?? 0L,
+                    AwardedAmountPaise = tx?.BonusAmountPaise ?? 0L
+                };
+            }).ToList();
+
+            return Ok(result);
+        }
+
         // ─── TOGGLE: Activate/Deactivate offer ────────────────────────────────────
         [HttpPost("{offerId}/toggle")]
         public async Task<IActionResult> ToggleOffer(Guid offerId)
@@ -416,6 +465,8 @@ namespace Aishwaryam.Api.Controllers
             if (req.BonusPercent.HasValue) offer.BonusPercent = req.BonusPercent.Value;
             if (req.BonusWorthPaise.HasValue) offer.BonusWorthPaise = req.BonusWorthPaise.Value;
             if (req.MinPurchaseAmountPaise.HasValue) offer.MinPurchaseAmountPaise = req.MinPurchaseAmountPaise.Value;
+            if (req.MinPurchaseGoldMg.HasValue) offer.MinPurchaseGoldMg = req.MinPurchaseGoldMg.Value;
+            if (req.BannerUrl != null) offer.BannerUrl = req.BannerUrl.Trim();
             if (req.DurationHours.HasValue) offer.DurationHours = req.DurationHours.Value;
             if (req.ExpiresAt.HasValue) offer.ExpiresAt = req.ExpiresAt.Value;
             if (req.IsActive.HasValue) offer.IsActive = req.IsActive.Value;
@@ -494,6 +545,8 @@ namespace Aishwaryam.Api.Controllers
         public decimal? BonusPercent { get; set; }
         public long? BonusWorthPaise { get; set; }
         public long? MinPurchaseAmountPaise { get; set; }
+        public long? MinPurchaseGoldMg { get; set; }
+        public string? BannerUrl { get; set; }
         public int? DurationHours { get; set; }
         public DateTime? ExpiresAt { get; set; }
         public bool? IsActive { get; set; }

@@ -1179,7 +1179,7 @@ export const Dashboard: React.FC = () => {
             <span style={{ fontFamily:DS.font, fontSize:'11px', color:DS.textSub }}>{offerDesc}</span>
           </div>
           <button
-            onClick={() => navigate('/buy-gold')}
+            onClick={() => navigate('/offers')}
             style={{ background:'linear-gradient(135deg,#C2185B,#4A0E4E)', color:'white', border:'none', padding:'8px 16px', borderRadius:'10px', fontFamily:DS.font, fontSize:'11px', fontWeight:'700', cursor:'pointer' }}
           >
             {t('claim')}

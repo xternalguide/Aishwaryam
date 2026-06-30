@@ -12,7 +12,7 @@ namespace Aishwaryam.Application.Interfaces.Repositories
         Task<GoldTransaction> RecordGoldTransactionAsync(GoldTransaction transaction);
         Task<(long LockedMg, long MaturedRedeemableMg, long RedeemableMg, long RedeemedMg)> GetGoldStatusAsync(Guid userId);
         Task<GoldTransaction?> GetTransactionByPaymentIdAsync(string paymentId);
-        Task<PromotionalOffer?> GetActiveEventOfferAsync(Guid userId);
+        Task<System.Collections.Generic.List<PromotionalOffer>> GetActiveOffersAsync(Guid userId);
         Task<bool> IsOfferClaimedAsync(Guid userId, Guid offerId);
         Task RecordClaimedOfferAsync(UserClaimedOffer claimedOffer);
         Task RecordAuditLogAsync(PlatformAuditLog auditLog);
