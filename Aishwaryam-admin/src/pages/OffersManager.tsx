@@ -13,6 +13,7 @@ interface Offer {
   couponCode?: string;
   isActive: boolean;
   expiresAt: string;
+  bonusWorthPaise: number;
 }
 
 export const OffersManager: React.FC = () => {
@@ -27,7 +28,7 @@ export const OffersManager: React.FC = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [offerType, setOfferType] = useState('BULK'); // BULK, COUPON, SCHEME
-  const [discountPercentage, setDiscountPercentage] = useState('');
+  const [bonusWorthRupees, setBonusWorthRupees] = useState('500');
   const [couponCode, setCouponCode] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -116,7 +117,7 @@ export const OffersManager: React.FC = () => {
     setTitle('');
     setDescription('');
     setOfferType('BULK');
-    setDiscountPercentage('');
+    setBonusWorthRupees('500');
     setCouponCode('');
     setExpiresAt(new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0]);
     setBannerUrl('');
@@ -127,8 +128,8 @@ export const OffersManager: React.FC = () => {
 
   const handleSaveOffer = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !discountPercentage) {
-      showToast('Title and Discount Percentage are required.', 'error');
+    if (!title || !bonusWorthRupees) {
+      showToast('Title and Reward Bonus are required.', 'error');
       return;
     }
 
@@ -137,13 +138,14 @@ export const OffersManager: React.FC = () => {
       title,
       description,
       offerType,
-      discountPercentage: parseInt(discountPercentage),
+      discountPercentage: 0, 
       maxDiscountPaise: 50000, // 500 INR default max
       minTransactionAmountPaise: 10000, // 100 INR default min
       couponCode: offerType === 'COUPON' ? couponCode : undefined,
       expiresAt: new Date(expiresAt).toISOString(),
       bannerUrl: bannerUrl || undefined,
-      minPurchaseGoldMg: minPurchaseGoldMg ? Math.round(parseFloat(minPurchaseGoldMg) * 1000) : 0
+      minPurchaseGoldMg: minPurchaseGoldMg ? Math.round(parseFloat(minPurchaseGoldMg) * 1000) : 0,
+      bonusWorthPaise: Math.round(parseFloat(bonusWorthRupees) * 100)
     };
 
     try {
@@ -272,7 +274,7 @@ export const OffersManager: React.FC = () => {
                   <tr>
                     <th>Campaign Rule</th>
                     <th>Type</th>
-                    <th>Discount</th>
+                    <th>Reward Value</th>
                     <th>Expires</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -295,7 +297,7 @@ export const OffersManager: React.FC = () => {
                           </div>
                         </td>
                         <td><span className="badge badge-blue">{o.offerType}</span></td>
-                        <td style={{ color: 'var(--green)', fontWeight: '700' }}>{o.discountPercentage}%</td>
+                        <td style={{ color: 'var(--green)', fontWeight: '700' }}>₹{o.bonusWorthPaise ? o.bonusWorthPaise / 100 : 0} Gold</td>
                         <td className="text-xs">{new Date(o.expiresAt).toLocaleDateString()}</td>
                         <td>
                           <span className={`badge ${o.isActive ? 'badge-green' : 'badge-red'}`}>
@@ -379,16 +381,15 @@ export const OffersManager: React.FC = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Bonus Percentage (%)</label>
+                  <label className="form-label">Reward Gold Bonus (₹)</label>
                   <input
                     className="form-control"
                     type="number"
                     min="1"
-                    max="100"
-                    placeholder="e.g. 5"
+                    placeholder="e.g. 500"
                     required
-                    value={discountPercentage}
-                    onChange={(e) => setDiscountPercentage(e.target.value)}
+                    value={bonusWorthRupees}
+                    onChange={(e) => setBonusWorthRupees(e.target.value)}
                   />
                 </div>
               </div>
