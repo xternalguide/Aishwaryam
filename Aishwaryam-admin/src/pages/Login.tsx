@@ -18,7 +18,7 @@ export const Login: React.FC = () => {
     // Mimic the backend admin login check or static login checks
     setTimeout(() => {
       setIsLoading(false);
-      if (email.toLowerCase() === 'blazewingwebs@gmail.com' && password === 'aishwaryam2026') {
+      if (email.toLowerCase() === 'blazewingwebs@gmail.com' && password === '12345@6789') {
         login();
       } else if (email.toLowerCase() === 'admin@aishwaryam.com' && password === 'admin123') {
         login();
