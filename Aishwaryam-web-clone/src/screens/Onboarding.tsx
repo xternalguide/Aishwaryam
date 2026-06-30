@@ -292,6 +292,73 @@ export const Onboarding: React.FC = () => {
     return basicInfo && dobValid && marriageValid;
   };
 
+  const triggerDigioKyc = (docType: 'AADHAAR' | 'PAN') => {
+    if (!(window as any).Digio) {
+      const script = document.createElement('script');
+      script.src = "https://ext.digio.in/sdk/v2/digio.js";
+      script.onload = () => startDigioSession(docType);
+      document.body.appendChild(script);
+    } else {
+      startDigioSession(docType);
+    }
+  };
+
+  const startDigioSession = async (docType: 'AADHAAR' | 'PAN') => {
+    const userId = SessionManager.getUserId();
+    if (!userId) return;
+
+    try {
+      setIsSaving(true);
+      setSaveError(null);
+      const res = await ApiClient.post('api/Kyc/digio/initiate', {
+        userId: userId,
+        documentType: docType
+      });
+
+      if (res.data && res.data.success) {
+        const { kycRequestId, customerIdentifier } = res.data;
+        
+        const options = {
+          environment: 'sandbox', 
+          callback: async function(response: any) {
+            if (response.status === 'success') {
+              try {
+                const verifyRes = await ApiClient.post(`api/Kyc/digio/verify/${kycRequestId}`);
+                if (verifyRes.data && verifyRes.data.success) {
+                  alert('KYC Verified successfully!');
+                  await refreshData();
+                  // Complete onboarding stages
+                  SessionManager.saveOnboardingStage(OnboardingStage.FULLY_VERIFIED);
+                  navigate('/dashboard');
+                } else {
+                  alert(verifyRes.data.message || 'KYC Verification failed or is under review.');
+                }
+              } catch (e) {
+                console.error(e);
+                alert('Error completing KYC verification.');
+              } finally {
+                setIsSaving(false);
+              }
+            } else {
+              alert('KYC process was cancelled or failed.');
+              setIsSaving(false);
+            }
+          }
+        };
+
+        const digioInstance = new (window as any).Digio(options);
+        digioInstance.submit(kycRequestId, customerIdentifier);
+      } else {
+        alert(res.data.message || 'Failed to initiate instant verification.');
+        setIsSaving(false);
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert('Error connecting to KYC service.');
+      setIsSaving(false);
+    }
+  };
+
   const handleNext = async () => {
     const userId = SessionManager.getUserId() || 'user-id-999';
     if (currentStep === 1) {
@@ -802,6 +869,49 @@ export const Onboarding: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <ShieldCheck color="var(--brand-accent)" size={24} />
                 <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>{t('step_2_kyc_verification')}</h2>
+              </div>
+
+              <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', border: '1.5px solid rgba(255, 215, 0, 0.4)', textAlign: 'center', alignItems: 'center' }}>
+                <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
+                  ⚡ Instant Automatic Verification
+                </span>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  Skip manual document uploads and approve your KYC instantly.
+                </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+                  <button
+                    onClick={() => triggerDigioKyc('AADHAAR')}
+                    type="button"
+                    style={{
+                      width: '100%', padding: '12px 20px', borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #D4AF37 0%, #AA7C11 100%)', color: 'white',
+                      border: 'none', fontSize: '13.5px', fontWeight: 'bold', cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(170, 124, 17, 0.2)'
+                    }}
+                  >
+                    Verify Instantly via Aadhaar
+                  </button>
+                  <button
+                    onClick={() => triggerDigioKyc('PAN')}
+                    type="button"
+                    style={{
+                      width: '100%', padding: '12px 20px', borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #4A5568 0%, #2D3748 100%)', color: 'white',
+                      border: 'none', fontSize: '13.5px', fontWeight: 'bold', cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                    }}
+                  >
+                    Verify Instantly via PAN
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '6px 0' }}>
+                <div style={{ height: '1px', flex: 1, background: 'rgba(0,0,0,0.08)' }}></div>
+                <span style={{ margin: '0 12px', fontSize: '11px', fontWeight: 'bold', color: 'var(--text-light)', textTransform: 'uppercase' }}>
+                  Or Continue Manually
+                </span>
+                <div style={{ height: '1px', flex: 1, background: 'rgba(0,0,0,0.08)' }}></div>
               </div>
 
               {/* PAN Verification */}
