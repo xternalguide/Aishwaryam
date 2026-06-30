@@ -103,17 +103,29 @@ export const KycVerification: React.FC = () => {
           ? [{ documentType: d.documentType, documentNumber: d.documentNumber, documentUrl: d.documentUrl }]
           : [];
         
+        const selUser = users.find((u) => u.id === uid);
+        const isUserPending = selUser?.kycLevel === 'PENDING';
+        
+        const mappedDocs = docs.map((doc: any) => {
+          if (isUserPending && (doc.status === 'VERIFIED' || doc.status === 'APPROVED')) {
+            return { ...doc, status: 'PENDING' };
+          }
+          return doc;
+        });
+        
+        const displayStatus = isUserPending ? 'PENDING' : (d.status || '—');
+
         setDetails({
           documentType: d.documentType || '—',
           documentNumber: d.documentNumber || '—',
-          status: d.status || '—',
-          documents: docs
+          status: displayStatus,
+          documents: mappedDocs
         });
 
         // Dynamically select the tab to show based on which documents are present
-        const hasPending = docs.some((doc: any) => doc.status === 'PENDING' || !doc.status || doc.status === '—' || doc.status === 'UNDER_REVIEW');
-        const hasApproved = docs.some((doc: any) => doc.status === 'APPROVED' || doc.status === 'VERIFIED');
-        const hasRejected = docs.some((doc: any) => doc.status === 'REJECTED');
+        const hasPending = mappedDocs.some((doc: any) => doc.status === 'PENDING' || !doc.status || doc.status === '—' || doc.status === 'UNDER_REVIEW');
+        const hasApproved = mappedDocs.some((doc: any) => doc.status === 'APPROVED' || doc.status === 'VERIFIED');
+        const hasRejected = mappedDocs.some((doc: any) => doc.status === 'REJECTED');
 
         if (hasPending) {
           setActiveDocTab('pending');
@@ -363,7 +375,7 @@ export const KycVerification: React.FC = () => {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px' }}>
                     <div><strong>Type:</strong> {details.documentType}</div>
                     <div><strong>Number:</strong> {details.documentNumber}</div>
-                    <div><strong>Status:</strong> {details.status}</div>
+                    <div><strong>Status:</strong> {details.status === 'PENDING' || details.status === 'UNDER_REVIEW' ? 'Waiting for Approval' : details.status}</div>
                   </div>
                 </div>
 
@@ -526,7 +538,7 @@ export const KycVerification: React.FC = () => {
                   );
                 })()}
 
-                {selectedUser?.kycLevel !== 'FULL' && selectedUser?.kycLevel !== 'VERIFIED' && (
+                {activeDocTab === 'pending' && selectedUser?.kycLevel !== 'FULL' && selectedUser?.kycLevel !== 'VERIFIED' && (
                   <>
                     {/* Review Notes Area */}
                     <div className="form-group">
