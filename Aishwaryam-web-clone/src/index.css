@@ -69,6 +69,13 @@ html, body {
   text-size-adjust: 100%;
 }
 
+/* Globally force viewport height to use percentage in mobile WebView to fix bottom spacing/scaling zoom bugs */
+*[style*="100vh"],
+*[style*="100vh" i] {
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
 /* Base mobile & tablet styling (fluid, full-screen) */
 #root {
   width: 100%;
