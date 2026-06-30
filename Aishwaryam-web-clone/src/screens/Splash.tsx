@@ -60,7 +60,7 @@ export const Splash: React.FC = () => {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      height: '100vh',
+      minHeight: '100vh',
       background: 'var(--gradient-brand)',
       color: 'white',
       textAlign: 'center'

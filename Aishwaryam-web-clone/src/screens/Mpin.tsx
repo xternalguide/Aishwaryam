@@ -275,7 +275,7 @@ export const Mpin: React.FC = () => {
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      height: '100vh',
+      minHeight: '100vh',
       background: 'var(--gradient-brand)',
       boxSizing: 'border-box',
       position: 'relative'
