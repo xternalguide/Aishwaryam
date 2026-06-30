@@ -580,6 +580,27 @@ export const Referral: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* How it works description card */}
+        <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <h4 style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            {lang === 'ta' ? 'பரிந்துரை எவ்வாறு செயல்படுகிறது?' : 'How Referrals & Rewards Work'}
+          </h4>
+          <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '18px' }}>
+            {lang === 'ta' 
+              ? 'உங்கள் நண்பர் உங்கள் பரிந்துரை குறியீட்டைப் பயன்படுத்திப் பதிவு செய்து, தங்களின் முதல் தங்கச் சேமிப்பை அல்லது கொள்முதலைச் செய்யும்போது, உங்களுக்கு ₹500 மதிப்புள்ள தங்கம் உடனடியாகப் பரிசாகக் கணக்கில் சேர்க்கப்படும்.' 
+              : 'When your referred friend signs up and makes their very first purchase or gold scheme installment payment, you will instantly earn gold worth ₹500.'}
+          </p>
+          <div style={{ height: '1px', background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--brand-accent)', fontWeight: 'bold' }}>
+            <span>⚡</span>
+            <span>
+              {lang === 'ta' 
+                ? 'தங்கத்தின் எடை தற்போதைய நேரடி சந்தை விலையின் அடிப்படையில் தானாகவே கணக்கிடப்பட்டு உங்கள் லெட்ஜரில் சேர்க்கப்படும்.' 
+                : 'The gold grams earned are dynamically calculated based on the current live gold price at the time of purchase.'}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
