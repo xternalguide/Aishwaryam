@@ -196,6 +196,7 @@ export const OffersManager: React.FC = () => {
   };
 
   const handleToggleOffer = async (id: string) => {
+    if (!window.confirm('Are you sure you want to suspend or change the active status of this promotional offer?')) return;
     try {
       const res = await fetch(`${apiBase}/api/Offers/${id}/toggle`, { method: 'POST' });
       if (res.ok) {
@@ -362,7 +363,7 @@ export const OffersManager: React.FC = () => {
             </div>
             <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div className="form-group">
-                <label className="form-label">Campaign Title</label>
+                <label className="form-label">Campaign Title <span style={{ color: 'red' }}>*</span></label>
                 <input
                   className="form-control"
                   type="text"
@@ -374,7 +375,7 @@ export const OffersManager: React.FC = () => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Description / Subtitle</label>
+                <label className="form-label">Description / Subtitle <span style={{ color: 'red' }}>*</span></label>
                 
                 {/* Rich Text Toolbar */}
                 <div style={{
@@ -464,7 +465,7 @@ export const OffersManager: React.FC = () => {
 
               <div className="grid-cols-2" style={{ gap: '16px' }}>
                 <div className="form-group">
-                  <label className="form-label">Campaign Scope Type</label>
+                  <label className="form-label">Campaign Scope Type <span style={{ color: 'red' }}>*</span></label>
                   <select
                     className="form-control"
                     value={offerType}
@@ -476,7 +477,7 @@ export const OffersManager: React.FC = () => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Reward Gold Bonus (₹)</label>
+                  <label className="form-label">Reward Gold Bonus (₹) <span style={{ color: 'red' }}>*</span></label>
                   <input
                     className="form-control"
                     type="number"
@@ -533,7 +534,7 @@ export const OffersManager: React.FC = () => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Expiration Date</label>
+                <label className="form-label">Expiration Date <span style={{ color: 'red' }}>*</span></label>
                 <input
                   className="form-control"
                   type="date"

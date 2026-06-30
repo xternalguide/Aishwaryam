@@ -40,7 +40,12 @@ export const AuditLogs: React.FC = () => {
       if (logsRes.ok) {
         const logsData = await logsRes.json();
         const list = Array.isArray(logsData) ? logsData : [];
-        const enriched = list.map((l: any) => {
+        const failedList = list.filter((l: any) => 
+          (l.status && l.status !== 'SUCCESS') || 
+          (l.action && l.action.toLowerCase().includes('error')) ||
+          (l.details && l.details.toLowerCase().includes('fail'))
+        );
+        const enriched = failedList.map((l: any) => {
           const u = l.userId ? usersMap[l.userId.toLowerCase()] : null;
           return {
             ...l,
@@ -84,9 +89,9 @@ export const AuditLogs: React.FC = () => {
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2 style={{ fontSize: '24px', fontWeight: '800' }}>Platform Audit Trail</h2>
+          <h2 style={{ fontSize: '24px', fontWeight: '800' }}>API Failures & System Error Logs</h2>
           <p style={{ color: 'var(--text-2)', fontSize: '13px', marginTop: '4px' }}>
-            Browse transaction events, API error traces, KYC overrides, and administrative audit logs.
+            Monitor failed payment gateway transactions, internal API errors, platform exceptions, and failed background cron operations.
           </p>
         </div>
       </div>
@@ -100,14 +105,14 @@ export const AuditLogs: React.FC = () => {
               type="text"
               className="form-control"
               style={{ paddingLeft: '38px', width: '100%' }}
-              placeholder="Search by action keyword, details description, or user name..."
+              placeholder="Search by action keyword, error details description, or user name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="form-label" style={{ whiteSpace: 'nowrap' }}>Log Source:</span>
+            <span className="form-label" style={{ whiteSpace: 'nowrap' }}>Error Source:</span>
             <select
               className="form-control"
               value={sourceFilter}
@@ -124,8 +129,8 @@ export const AuditLogs: React.FC = () => {
       {/* Grid List */}
       <div className="card">
         <div className="card-head">
-          <span className="card-title">Security & System Events</span>
-          <span className="badge badge-amber">Enforced Audit Enabled</span>
+          <span className="card-title">Failed Operations & API Exception Log</span>
+          <span className="badge badge-red" style={{ background: '#FEE2E2', color: '#EF4444' }}>System Failures Enforced Logs</span>
         </div>
 
         {isLoading ? (

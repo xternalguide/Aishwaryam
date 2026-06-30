@@ -14,6 +14,7 @@ interface Enrollment {
   status: string;
   autoPayEnabled: boolean;
   createdAt: string;
+  maturityDate?: string;
   fullName?: string;
   phoneNumber?: string;
   email?: string;
@@ -160,27 +161,45 @@ export const SchemeEnrollments: React.FC = () => {
                   </tr>
                 ) : (
                   filteredEnrollments.map((e) => {
-                    const progressPercent = Math.min(100, Math.round((e.installmentsPaid / e.totalInstallments) * 100));
+                    const isFlexible = e.planName?.toLowerCase().includes('silver') || e.planName?.toLowerCase().includes('daily') || e.planName?.toLowerCase().includes('testing');
+                    let progressPercent = 0;
+                    let displayMilestone = '';
+
+                    if (isFlexible) {
+                      const start = new Date(e.createdAt).getTime();
+                      const end = e.maturityDate ? new Date(e.maturityDate).getTime() : (start + (330 * 86400000));
+                      const now = Date.now();
+                      const isTesting = e.planName?.toLowerCase().includes('testing');
+                      const unit = isTesting ? 'Min' : 'Days';
+                      const divisor = isTesting ? 60000 : 86400000;
+                      const totalDuration = Math.max(1, Math.round((end - start) / divisor));
+                      const durationPassed = Math.max(0, Math.round((now - start) / divisor));
+                      progressPercent = Math.min(100, Math.round((durationPassed / totalDuration) * 100));
+                      displayMilestone = `${Math.min(totalDuration, durationPassed)} / ${totalDuration} ${unit}`;
+                    } else {
+                      progressPercent = Math.min(100, Math.round((e.installmentsPaid / e.totalInstallments) * 100));
+                      displayMilestone = `${e.installmentsPaid} / ${e.totalInstallments}`;
+                    }
                     
                     return (
-                      <tr key={e.schemeId}>
-                        <td>
-                          <div style={{ fontWeight: '600' }}>{e.fullName}</div>
-                          <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>{e.phoneNumber}</div>
-                        </td>
-                        <td>{e.planName}</td>
-                        <td>{e.installmentsPaid} / {e.totalInstallments}</td>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '120px' }}>
-                            <div style={{ flex: 1, height: '6px', background: 'var(--surface3)', borderRadius: '4px', overflow: 'hidden' }}>
-                              <div style={{ width: `${progressPercent}%`, height: '100%', background: 'var(--green)', borderRadius: '4px' }} />
-                            </div>
-                            <span style={{ fontSize: '11px', fontWeight: '700' }}>{progressPercent}%</span>
-                          </div>
-                        </td>
-                        <td className="text-xs" style={{ color: 'var(--text-2)' }}>
-                          {new Date(e.nextDueDate).toLocaleDateString()}
-                        </td>
+                       <tr key={e.schemeId}>
+                         <td>
+                           <div style={{ fontWeight: '600' }}>{e.fullName}</div>
+                           <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>{e.phoneNumber}</div>
+                         </td>
+                         <td>{e.planName}</td>
+                         <td>{displayMilestone}</td>
+                         <td>
+                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: '120px' }}>
+                             <div style={{ flex: 1, height: '6px', background: 'var(--surface3)', borderRadius: '4px', overflow: 'hidden' }}>
+                               <div style={{ width: `${progressPercent}%`, height: '100%', background: 'var(--green)', borderRadius: '4px' }} />
+                             </div>
+                             <span style={{ fontSize: '11px', fontWeight: '700' }}>{progressPercent}%</span>
+                           </div>
+                         </td>
+                         <td className="text-xs" style={{ color: 'var(--text-2)' }}>
+                           {isFlexible ? 'N/A (Flexible)' : new Date(e.nextDueDate).toLocaleDateString()}
+                         </td>
                         <td>
                           <span className={`badge ${e.autoPayEnabled ? 'badge-green' : 'badge-red'}`}>
                             {e.autoPayEnabled ? 'ENABLED' : 'MANUAL'}
@@ -230,7 +249,7 @@ export const SchemeEnrollments: React.FC = () => {
                   <span style={{ fontWeight: '700' }}>{selectedEnrollment.planName}</span>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border2)', paddingBottom: '8px' }}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border2)', paddingBottom: '8px' }}>
                   <span style={{ color: 'var(--text-2)' }}>Installment Amount</span>
                   <span style={{ fontWeight: '700', color: 'var(--green)' }}>₹{(selectedEnrollment.installmentAmountPaise / 100).toFixed(2)}</span>
                 </div>
@@ -238,7 +257,7 @@ export const SchemeEnrollments: React.FC = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border2)', paddingBottom: '8px' }}>
                   <span style={{ color: 'var(--text-2)' }}>Milestone Payments</span>
                   <span style={{ fontWeight: '700' }}>
-                    {selectedEnrollment.frequency?.toLowerCase() === 'daily' || selectedEnrollment.planName?.toLowerCase().includes('silver') || selectedEnrollment.planName?.toLowerCase().includes('gold')
+                    {selectedEnrollment.planName?.toLowerCase().includes('silver') || selectedEnrollment.planName?.toLowerCase().includes('daily') || selectedEnrollment.planName?.toLowerCase().includes('testing')
                       ? 'Daily Weight Accumulation (Flexible)'
                       : `${selectedEnrollment.installmentsPaid} of ${selectedEnrollment.totalInstallments} paid`}
                   </span>
@@ -254,9 +273,20 @@ export const SchemeEnrollments: React.FC = () => {
                   <span style={{ fontWeight: '700' }}>{new Date(selectedEnrollment.createdAt).toLocaleDateString()}</span>
                 </div>
 
+                {selectedEnrollment.maturityDate && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border2)', paddingBottom: '8px' }}>
+                    <span style={{ color: 'var(--text-2)' }}>Maturity Date</span>
+                    <span style={{ fontWeight: '700', color: 'var(--green)' }}>{new Date(selectedEnrollment.maturityDate).toLocaleDateString()}</span>
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border2)', paddingBottom: '8px' }}>
                   <span style={{ color: 'var(--text-2)' }}>Upcoming Due Date</span>
-                  <span style={{ fontWeight: '700', color: 'var(--amber)' }}>{new Date(selectedEnrollment.nextDueDate).toLocaleDateString()}</span>
+                  <span style={{ fontWeight: '700', color: 'var(--amber)' }}>
+                    {selectedEnrollment.planName?.toLowerCase().includes('silver') || selectedEnrollment.planName?.toLowerCase().includes('daily') || selectedEnrollment.planName?.toLowerCase().includes('testing')
+                      ? 'N/A (Flexible)'
+                      : new Date(selectedEnrollment.nextDueDate).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             </div>

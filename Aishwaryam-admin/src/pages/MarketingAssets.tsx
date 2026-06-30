@@ -226,7 +226,7 @@ export const MarketingAssets: React.FC = () => {
             </div>
             <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div className="form-group">
-                <label className="form-label">Asset Title</label>
+                <label className="form-label">Asset Title <span style={{ color: 'red' }}>*</span></label>
                 <input
                   className="form-control"
                   type="text"
@@ -239,7 +239,7 @@ export const MarketingAssets: React.FC = () => {
 
               <div className="grid-cols-2" style={{ gap: '16px' }}>
                 <div className="form-group">
-                  <label className="form-label">Display Sequence Order</label>
+                  <label className="form-label">Display Sequence Order <span style={{ color: 'red' }}>*</span></label>
                   <input
                     className="form-control"
                     type="number"

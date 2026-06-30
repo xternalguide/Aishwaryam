@@ -400,7 +400,7 @@ export const SchemeMaster: React.FC = () => {
             
             <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '75vh', overflowY: 'auto' }}>
               <div className="form-group">
-                <label className="form-label">Plan Scheme Name</label>
+                <label className="form-label">Plan Scheme Name <span style={{ color: 'red' }}>*</span></label>
                 <input
                   className="form-control"
                   type="text"
@@ -424,7 +424,7 @@ export const SchemeMaster: React.FC = () => {
 
               <div className="grid-cols-2" style={{ gap: '16px' }}>
                 <div className="form-group">
-                  <label className="form-label">Billing Frequency</label>
+                  <label className="form-label">Billing Frequency <span style={{ color: 'red' }}>*</span></label>
                   <select
                     className="form-control"
                     value={frequency}
@@ -445,7 +445,7 @@ export const SchemeMaster: React.FC = () => {
 
                 {frequency !== 'Flexible' && (
                   <div className="form-group">
-                    <label className="form-label">Duration Unit</label>
+                    <label className="form-label">Duration Unit <span style={{ color: 'red' }}>*</span></label>
                     <select
                       className="form-control"
                       value={durationUnit}
@@ -462,7 +462,7 @@ export const SchemeMaster: React.FC = () => {
               {frequency !== 'Flexible' ? (
                 <div className="grid-cols-2" style={{ gap: '16px' }}>
                   <div className="form-group">
-                    <label className="form-label">Installment Size (INR)</label>
+                    <label className="form-label">Installment Size (INR) <span style={{ color: 'red' }}>*</span></label>
                     <input
                       className="form-control"
                       type="number"
@@ -475,7 +475,7 @@ export const SchemeMaster: React.FC = () => {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Total Installments</label>
+                    <label className="form-label">Total Installments <span style={{ color: 'red' }}>*</span></label>
                     <input
                       className="form-control"
                       type="number"
@@ -488,7 +488,7 @@ export const SchemeMaster: React.FC = () => {
                 </div>
               ) : (
                 <div className="form-group">
-                  <label className="form-label">Scheme Duration / Tenure</label>
+                  <label className="form-label">Scheme Duration / Tenure <span style={{ color: 'red' }}>*</span></label>
                   <div style={{ display: 'flex', gap: '16px' }}>
                     <input
                       className="form-control"
