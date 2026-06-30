@@ -1261,27 +1261,26 @@ export const SchemeDetail: React.FC = () => {
             {autoT(scheme.description)}
           </p>
  
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'flex-start',
-            marginTop: '16px', 
-            flexWrap: 'nowrap',
-            gap: '8px' 
-          }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--text-muted)', display: 'block', whiteSpace: 'nowrap' }}>{t('tenure').toUpperCase()}</span>
-              <div style={{ fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{scheme.totalInstallments} {scheme.durationUnit ? (scheme.durationUnit.toLowerCase().startsWith('day') ? t('days') : t('months')) : (scheme.frequency === 'Daily' ? t('days') : t('months'))}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px', background: '#F8F9FA', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.03)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('tenure')}</span>
+              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
+                {scheme.totalInstallments} {scheme.durationUnit ? (scheme.durationUnit.toLowerCase().startsWith('day') ? t('days') : t('months')) : (scheme.frequency === 'Daily' ? t('days') : t('months'))}
+              </span>
             </div>
-            <div style={{ width: '1px', height: '24px', background: 'rgba(0,0,0,0.1)', alignSelf: 'center', flexShrink: 0 }} />
-            <div style={{ flex: 1.4, minWidth: 0, paddingLeft: '4px' }}>
-              <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--text-muted)', display: 'block', whiteSpace: 'nowrap' }}>{t('min_investment')}</span>
-              <div style={{ fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{t('start_from')} {formatRupees(scheme.installmentAmountPaise)}</div>
+            <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('min_investment')}</span>
+              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
+                {t('start_from')} {formatRupees(scheme.installmentAmountPaise)}
+              </span>
             </div>
-            <div style={{ width: '1px', height: '24px', background: 'rgba(0,0,0,0.1)', alignSelf: 'center', flexShrink: 0 }} />
-            <div style={{ flex: 1, minWidth: 0, paddingLeft: '4px' }}>
-              <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--text-muted)', display: 'block', whiteSpace: 'nowrap' }}>{t('frequency').toUpperCase()}</span>
-              <div style={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'capitalize', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{autoT(scheme.frequency)}</div>
+            <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('frequency')}</span>
+              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', textTransform: 'capitalize' }}>
+                {autoT(scheme.frequency)}
+              </span>
             </div>
           </div>
         </div>
