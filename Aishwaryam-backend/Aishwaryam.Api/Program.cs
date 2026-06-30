@@ -662,23 +662,24 @@ try
     {
         var db = scope.ServiceProvider.GetRequiredService<Aishwaryam.Infrastructure.Data.ApplicationDbContext>();
         
-        // Remove all old schemes
-        var allSchemes = await db.SchemesMaster.ToListAsync();
-        if (allSchemes.Any(s => s.PlanName != "Swarna Varshini Gold Scheme" && s.PlanName != "Rajatha Varshini Silver Scheme"))
-        {
-            db.SchemesMaster.RemoveRange(allSchemes);
-            await db.SaveChangesAsync();
-            allSchemes = new List<SchemeMaster>();
-        }
+        var uniquePlanNames = await db.UserSchemes.Select(us => us.PlanName).Distinct().ToListAsync();
+        Console.WriteLine("---------------------------------------------");
+        Console.WriteLine("[DB-INFO] UNIQUE PLAN NAMES IN USER SCHEMES: " + string.Join(", ", uniquePlanNames));
+        Console.WriteLine("---------------------------------------------");
 
-        // Also clean up any user scheme subscriptions pointing to non-seeded plan names
-        var userSchemes = await db.UserSchemes.ToListAsync();
-        var invalidUserSchemes = userSchemes.Where(us => us.PlanName != "Swarna Varshini Gold Scheme" && us.PlanName != "Rajatha Varshini Silver Scheme").ToList();
-        if (invalidUserSchemes.Any())
+        // Remove old schemes ONLY if they are not part of our 3 core seeded schemes
+        var coreNames = new[] { 
+            "Aishwaryam Swarna Varshini Gold Scheme", 
+            "Aishwaryam Rajadha Varshini Silver Scheme", 
+            "Aishwaryam Flex Saving Plan" 
+        };
+        var allSchemes = await db.SchemesMaster.ToListAsync();
+        var obsoleteSchemes = allSchemes.Where(s => !coreNames.Contains(s.PlanName)).ToList();
+        if (obsoleteSchemes.Any())
         {
-            db.UserSchemes.RemoveRange(invalidUserSchemes);
+            db.SchemesMaster.RemoveRange(obsoleteSchemes);
             await db.SaveChangesAsync();
-            Console.WriteLine("[SEED] Cleaned up invalid user chits (like One Day VIP Savings Plan) from database.");
+            allSchemes = await db.SchemesMaster.ToListAsync();
         }
 
         var goldScheme = allSchemes.FirstOrDefault(s => s.Id == Guid.Parse("11111111-1111-1111-1111-111111111111"));
@@ -687,7 +688,7 @@ try
             goldScheme = new SchemeMaster
             {
                 Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-                PlanName = "Swarna Varshini Gold Scheme",
+                PlanName = "Aishwaryam Swarna Varshini Gold Scheme",
                 Description = "A monthly gold savings plan to save systematically over 11 months with zero wastage and zero making charges.",
                 InstallmentAmountPaise = 100000,
                 TotalInstallments = 11,
@@ -702,7 +703,7 @@ try
             };
             db.SchemesMaster.Add(goldScheme);
             await db.SaveChangesAsync();
-            Console.WriteLine("[SEED] Recovered Swarna Varshini Gold Scheme.");
+            Console.WriteLine("[SEED] Recovered Aishwaryam Swarna Varshini Gold Scheme.");
         }
 
         var silverScheme = allSchemes.FirstOrDefault(s => s.Id == Guid.Parse("22222222-2222-2222-2222-222222222222"));
@@ -711,7 +712,7 @@ try
             silverScheme = new SchemeMaster
             {
                 Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
-                PlanName = "Rajatha Varshini Silver Scheme",
+                PlanName = "Aishwaryam Rajadha Varshini Silver Scheme",
                 Description = "Systematic silver saving plan to accumulate pure silver articles and coins over 11 months with special loyalty bonus.",
                 InstallmentAmountPaise = 50000,
                 TotalInstallments = 11,
@@ -726,7 +727,31 @@ try
             };
             db.SchemesMaster.Add(silverScheme);
             await db.SaveChangesAsync();
-            Console.WriteLine("[SEED] Recovered Rajatha Varshini Silver Scheme.");
+            Console.WriteLine("[SEED] Recovered Aishwaryam Rajadha Varshini Silver Scheme.");
+        }
+
+        var flexScheme = allSchemes.FirstOrDefault(s => s.Id == Guid.Parse("33333333-3333-3333-3333-333333333333"));
+        if (flexScheme == null)
+        {
+            flexScheme = new SchemeMaster
+            {
+                Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                PlanName = "Aishwaryam Flex Saving Plan",
+                Description = "Flexible gold savings plan starting from ₹100. Save at your convenience and redeem as pure gold jewelry or coins at maturity.",
+                InstallmentAmountPaise = 10000,
+                TotalInstallments = 11,
+                Frequency = "Flexible",
+                IsActive = true,
+                DurationUnit = "Months",
+                PosterImageBase64 = "/gold_scheme_banner.png",
+                KeywordsJson = "[\"Flexible Plan\", \"7.5% Bonus Gold\", \"Min. ₹100/mo\", \"Save Any Time\"]",
+                BonusConfigJson = "[{\"StartDay\":0,\"EndDay\":330,\"BonusPercentage\":7.5}]",
+                PaymentRulesJson = "{\"minAmountPaise\":10000,\"maxAmountPaise\":5000000,\"multiplePerDay\":true,\"earlyExitAfterDays\":180,\"rating\":4.9}",
+                CustomSectionsJson = "[\r\n  {\r\n    \"title\": \"Flexible Overview\",\r\n    \"content\": \"• **Maturity & Duration:** This is an 11-month flexible gold saving scheme.\\n• **Minimum Investment:** Pay a minimum fixed monthly installment of ₹100. Higher options are available.\\n• **Gold Accumulation:** Gold weight is credited based on prevailing gold market prices on your payment days.\\n• **Withdrawal Mode:** At maturity, redeem your accumulated gold grams for beautiful physical jewelry with 100% discount on Value Added (V.A.) making charges up to 18%, or collect gold coins.\\n• **Maturity Bonus:** Receive a special loyalty bonus of 7.5% extra gold weight automatically added upon completing all 11 installments.\",\r\n    \"type\": 0\r\n  }\r\n]"
+            };
+            db.SchemesMaster.Add(flexScheme);
+            await db.SaveChangesAsync();
+            Console.WriteLine("[SEED] Recovered Aishwaryam Flex Saving Plan.");
         }
 
         var masterSchemes = await db.SchemesMaster.ToListAsync();
