@@ -70,6 +70,39 @@ namespace Aishwaryam.Api.Controllers
             return Ok(new { message = $"Successfully updated and matured {silverSchemes.Count} silver schemes.", schemes = silverSchemes });
         }
 
+        [HttpPost("mature-sri-venkatesh-silver")]
+        public async Task<IActionResult> MatureSriVenkateshSilver()
+        {
+            var context = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+            
+            // 1. Find the user named 'Sri Venkatesh'
+            var user = await context.Users
+                .FirstOrDefaultAsync(u => u.FullName.ToLower().Contains("sri venkatesh"));
+                
+            if (user == null)
+            {
+                return NotFound(new { message = "User Sri Venkatesh not found." });
+            }
+
+            // 2. Find the active silver scheme for this user
+            var silverScheme = await context.UserSchemes
+                .FirstOrDefaultAsync(s => s.UserId == user.Id && s.Status == "Active" && s.PlanName.ToLower().Contains("silver"));
+
+            if (silverScheme == null)
+            {
+                return NotFound(new { message = "No active silver scheme found for Sri Venkatesh." });
+            }
+
+            // 3. Set CreatedAt to 334 days ago, and MaturityDate to today
+            silverScheme.CreatedAt = DateTime.UtcNow.AddDays(-334);
+            silverScheme.MaturityDate = DateTime.UtcNow;
+            silverScheme.Status = "Matured"; // Mark it matured directly so it instantly unlocks
+            silverScheme.UpdatedAt = DateTime.UtcNow;
+
+            await context.SaveChangesAsync();
+            return Ok(new { message = "Successfully updated Sri Venkatesh silver scheme to 334 days matured.", scheme = silverScheme });
+        }
+
         [HttpGet("kpis")]
         public async Task<IActionResult> GetOperationalKpis()
         {
