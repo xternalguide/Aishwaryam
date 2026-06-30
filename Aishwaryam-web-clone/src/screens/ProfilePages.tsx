@@ -791,10 +791,10 @@ export const ProfileKyc: React.FC = () => {
                       </div>
                       <span style={{
                         fontSize: '11px', fontWeight: 'bold', padding: '3px 8px', borderRadius: '6px',
-                        background: doc.status === 'APPROVED' ? 'var(--success-light)' : doc.status === 'REJECTED' ? 'var(--error-light)' : 'var(--warning-light)',
-                        color: doc.status === 'APPROVED' ? 'var(--success-green)' : doc.status === 'REJECTED' ? 'var(--error-red)' : 'var(--warning-amber)'
+                        background: (doc.status === 'APPROVED' || doc.status === 'VERIFIED') ? 'var(--success-light)' : doc.status === 'REJECTED' ? 'var(--error-light)' : 'var(--warning-light)',
+                        color: (doc.status === 'APPROVED' || doc.status === 'VERIFIED') ? 'var(--success-green)' : doc.status === 'REJECTED' ? 'var(--error-red)' : 'var(--warning-amber)'
                       }}>
-                        {doc.status === 'APPROVED' ? t('approved_status') : doc.status === 'REJECTED' ? t('rejected_status') : t('review_status')}
+                        {(doc.status === 'APPROVED' || doc.status === 'VERIFIED') ? t('approved_status') : doc.status === 'REJECTED' ? t('rejected_status') : t('review_status')}
                       </span>
                     </div>
 

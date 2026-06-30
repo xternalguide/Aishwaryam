@@ -220,6 +220,8 @@ export const KycVerification: React.FC = () => {
     }
   };
 
+  const selectedUser = users.find((u) => u.id === selectedUid);
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -524,48 +526,52 @@ export const KycVerification: React.FC = () => {
                   );
                 })()}
 
-                {/* Review Notes Area */}
-                <div className="form-group">
-                  <label className="form-label">Review Notes / Rejection Reason</label>
-                  <textarea
-                    className="form-control"
-                    placeholder="Type details if documents are blurry or wrong to notify the user..."
-                    rows={3}
-                    style={{ resize: 'vertical' }}
-                    value={reviewNotes}
-                    onChange={(e) => setReviewNotes(e.target.value)}
-                  />
-                </div>
+                {selectedUser?.kycLevel !== 'FULL' && selectedUser?.kycLevel !== 'VERIFIED' && (
+                  <>
+                    {/* Review Notes Area */}
+                    <div className="form-group">
+                      <label className="form-label">Review Notes / Rejection Reason</label>
+                      <textarea
+                        className="form-control"
+                        placeholder="Type details if documents are blurry or wrong to notify the user..."
+                        rows={3}
+                        style={{ resize: 'vertical' }}
+                        value={reviewNotes}
+                        onChange={(e) => setReviewNotes(e.target.value)}
+                      />
+                    </div>
 
-                {/* Actions Panel */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      className="btn btn-success"
-                      style={{ flex: 1 }}
-                      onClick={() => handleKycAction(true)}
-                      disabled={!details.documents.length || isProcessing}
-                    >
-                      {isProcessing ? 'Processing...' : <><Check size={14} /> Approve</>}
-                    </button>
-                    <button
-                      className="btn btn-danger"
-                      style={{ flex: 1 }}
-                      onClick={() => handleKycAction(false)}
-                      disabled={isProcessing}
-                    >
-                      {isProcessing ? 'Processing...' : <><X size={14} /> Reject</>}
-                    </button>
-                  </div>
-                  <button
-                    className="btn btn-primary"
-                    style={{ width: '100%' }}
-                    onClick={() => handleSendNudge(selectedUid, selectedName, true)}
-                    disabled={isProcessing}
-                  >
-                    <Bell size={14} /> Send Custom Nudge
-                  </button>
-                </div>
+                    {/* Actions Panel */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          className="btn btn-success"
+                          style={{ flex: 1 }}
+                          onClick={() => handleKycAction(true)}
+                          disabled={!details.documents.length || isProcessing}
+                        >
+                          {isProcessing ? 'Processing...' : <><Check size={14} /> Approve</>}
+                        </button>
+                        <button
+                          className="btn btn-danger"
+                          style={{ flex: 1 }}
+                          onClick={() => handleKycAction(false)}
+                          disabled={isProcessing}
+                        >
+                          {isProcessing ? 'Processing...' : <><X size={14} /> Reject</>}
+                        </button>
+                      </div>
+                      <button
+                        className="btn btn-primary"
+                        style={{ width: '100%' }}
+                        onClick={() => handleSendNudge(selectedUid, selectedName, true)}
+                        disabled={isProcessing}
+                      >
+                        <Bell size={14} /> Send Custom Nudge
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
               <div style={{ textAlign: 'center', color: 'var(--text-3)' }}>Failed to load parameters.</div>
