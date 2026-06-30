@@ -93,6 +93,12 @@ namespace Aishwaryam.Infrastructure.Repositories
             var scheme = await _context.SchemesMaster.FindAsync(id);
             if (scheme == null) return false;
 
+            var hasUsers = await _context.UserSchemes.AnyAsync(us => us.SchemeMasterId == id);
+            if (hasUsers)
+            {
+                throw new InvalidOperationException("We could not delete this scheme because the scheme is active, the users are already joined and invested it. You can suspend this scheme for upcoming users.");
+            }
+
             _context.SchemesMaster.Remove(scheme);
             await _context.SaveChangesAsync();
             return true;

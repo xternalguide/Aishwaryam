@@ -284,7 +284,8 @@ export const SchemeMaster: React.FC = () => {
         }
         loadSchemes();
       } else {
-        showToast('Failed to delete scheme', 'error');
+        const errData = await res.json().catch(() => ({}));
+        showToast(errData.message || errData.Message || 'Failed to delete scheme', 'error');
       }
     } catch (e) {
       showToast('Network error while deleting scheme', 'error');

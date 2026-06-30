@@ -33,7 +33,6 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle2,
-  Settings,
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────
@@ -1642,7 +1641,6 @@ export const Dashboard: React.FC = () => {
                       { label:t('address_label'), icon:<MapPin size={20} />, iconBg:'rgba(156,39,176,0.15)', iconColor:'#9C27B0', onClick:()=>navigate('/profile/address') },
                       { label:t('kyc_details'), icon:<ShieldCheck size={20} />, iconBg:'rgba(2,136,209,0.15)', iconColor:'#0288D1', onClick:()=>navigate('/profile/kyc') },
                       { label:t('change_mpin'), icon:<Lock size={20} />, iconBg:'rgba(230,81,0,0.15)', iconColor:'#E65100', onClick:()=>navigate('/mpin/change') },
-                      { label: 'Super Admin Portal', icon:<Settings size={20} />, iconBg:'rgba(255,215,0,0.15)', iconColor:'#B8860B', onClick:()=>navigate('/super-admin') },
                     ].map(({ label, icon, iconBg, iconColor, onClick }) => (
                       <div key={label} onClick={onClick} className="dash-card-hover" style={{ ...DS.glass, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 18px', cursor:'pointer', transition:'all 0.2s ease' }}>
                         <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>

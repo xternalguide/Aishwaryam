@@ -220,9 +220,16 @@ namespace Aishwaryam.Api.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> DeleteScheme(Guid id)
         {
-            var success = await _schemeService.DeleteSchemeMasterAsync(id);
-            if (!success) return NotFound("Scheme not found.");
-            return Ok(new { Message = "Scheme deleted successfully." });
+            try
+            {
+                var success = await _schemeService.DeleteSchemeMasterAsync(id);
+                if (!success) return NotFound("Scheme not found.");
+                return Ok(new { Message = "Scheme deleted successfully." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
         }
 
         // Phase 3 Scheme Ledger & Redemption API
