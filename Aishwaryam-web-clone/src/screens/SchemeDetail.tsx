@@ -61,6 +61,11 @@ export const SchemeDetail: React.FC = () => {
   const [openTabs, setOpenTabs] = useState<Record<number, boolean>>({});
   const [showTermsCollapse, setShowTermsCollapse] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [isPincodeReadOnly, setIsPincodeReadOnly] = useState(true);
+  const [isCityReadOnly, setIsCityReadOnly] = useState(true);
+  const [isStateReadOnly, setIsStateReadOnly] = useState(true);
+  const [isStreetReadOnly, setIsStreetReadOnly] = useState(true);
+  const [setupPinError, setSetupPinError] = useState<string | null>(null);
 
   useEffect(() => {
     if (userSchemeId) {
@@ -157,6 +162,34 @@ export const SchemeDetail: React.FC = () => {
     }
   }, [showSetupModal]);
 
+  const handleSetupPincodeChange = (value: string) => {
+    const numericValue = value.replace(/\D/g, '').slice(0, 6);
+    setSetupPincode(numericValue);
+
+    if (numericValue.length === 6) {
+      fetch(`https://api.postalpincode.in/pincode/${numericValue}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice) {
+            const postOffice = data[0].PostOffice[0];
+            setSetupState(postOffice.State || '');
+            setSetupCity(postOffice.District || postOffice.Block || '');
+            setSetupPinError(null);
+          } else {
+            setSetupPinError("Invalid PIN Code.");
+          }
+        })
+        .catch(() => {
+          setSetupPinError("Invalid PIN Code.");
+        });
+    } else {
+      if (numericValue.length > 0 && numericValue.length < 6) {
+        setSetupPinError("PIN Code must be exactly 6 digits.");
+      } else {
+        setSetupPinError(null);
+      }
+    }
+  };
 
   const parseMilestones = (
     bonusConfigJson: string | null,
@@ -513,11 +546,19 @@ export const SchemeDetail: React.FC = () => {
         setSetupCity(defaultAddr.city || '');
         setSetupStreet(defaultAddr.streetAddress || defaultAddr.street || '');
         setSetupPincode(defaultAddr.pincode || '');
+        setIsPincodeReadOnly(!!defaultAddr.pincode);
+        setIsCityReadOnly(!!defaultAddr.city);
+        setIsStateReadOnly(!!defaultAddr.state);
+        setIsStreetReadOnly(!!(defaultAddr.streetAddress || defaultAddr.street));
       } else {
         setSetupState('');
         setSetupCity('');
         setSetupStreet('');
         setSetupPincode('');
+        setIsPincodeReadOnly(false);
+        setIsCityReadOnly(false);
+        setIsStateReadOnly(false);
+        setIsStreetReadOnly(false);
       }
  
       setPendingAction('PAY');
@@ -555,11 +596,19 @@ export const SchemeDetail: React.FC = () => {
         setSetupCity(defaultAddr.city || '');
         setSetupStreet(defaultAddr.streetAddress || defaultAddr.street || '');
         setSetupPincode(defaultAddr.pincode || '');
+        setIsPincodeReadOnly(!!defaultAddr.pincode);
+        setIsCityReadOnly(!!defaultAddr.city);
+        setIsStateReadOnly(!!defaultAddr.state);
+        setIsStreetReadOnly(!!(defaultAddr.streetAddress || defaultAddr.street));
       } else {
         setSetupState('');
         setSetupCity('');
         setSetupStreet('');
         setSetupPincode('');
+        setIsPincodeReadOnly(false);
+        setIsCityReadOnly(false);
+        setIsStateReadOnly(false);
+        setIsStreetReadOnly(false);
       }
 
       setPendingAction('JOIN');
@@ -592,6 +641,36 @@ export const SchemeDetail: React.FC = () => {
   };
 
   const handleSaveSetup = async () => {
+    // 0. Perform validation checks
+    if (!setupNomineeName.trim()) {
+      alert("Nominee Name is required. Please fill it.");
+      return;
+    }
+    if (!setupNomineeRelationship) {
+      alert("Nominee Relationship is required. Please select it.");
+      return;
+    }
+    if (!isPincodeReadOnly && (!setupPincode || setupPincode.length !== 6)) {
+      alert("A valid 6-digit Pincode is required.");
+      return;
+    }
+    if (!isCityReadOnly && !setupCity.trim()) {
+      alert("City is required.");
+      return;
+    }
+    if (!isStateReadOnly && !setupState.trim()) {
+      alert("State is required.");
+      return;
+    }
+    if (!isStreetReadOnly && !setupStreet.trim()) {
+      alert("Street Address is required.");
+      return;
+    }
+    if (!agreedToTerms) {
+      alert("You must agree to the Terms & Conditions to proceed.");
+      return;
+    }
+
     const userId = SessionManager.getUserId();
     if (!userId) return;
     
@@ -1591,32 +1670,75 @@ export const SchemeDetail: React.FC = () => {
                   <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Mobile Number</label>
                   <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{profile?.phoneNumber || 'N/A'}</span>
                 </div>
-                <div>
+                <div style={{ gridColumn: 'span 2' }}>
                   <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Email ID</label>
-                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', wordBreak: 'break-all' }}>{profile?.email || 'N/A'}</span>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', overflowWrap: 'break-word', wordBreak: 'break-word', display: 'block' }}>{profile?.email || 'N/A'}</span>
                 </div>
-                <div>
+                <div style={{ gridColumn: 'span 2' }}>
                   <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Date of Birth</label>
                   <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
                     {profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString(lang === 'ta' ? 'ta-IN' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
                   </span>
                 </div>
                 <div>
-                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Pincode</label>
-                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupPincode || 'N/A'}</span>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Pincode {!isPincodeReadOnly && '*'}</label>
+                  {isPincodeReadOnly ? (
+                    <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupPincode || 'N/A'}</span>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="6-digit PIN"
+                      value={setupPincode}
+                      onChange={(e) => handleSetupPincodeChange(e.target.value)}
+                      style={{ width: '100%', height: '30px', borderRadius: '6px', border: setupPinError ? '1px solid var(--error-red)' : '1px solid rgba(0,0,0,0.1)', padding: '0 8px', fontSize: '12px', outline: 'none', marginTop: '2px' }}
+                    />
+                  )}
+                  {setupPinError && !isPincodeReadOnly && (
+                    <span style={{ fontSize: '9px', color: 'var(--error-red)', display: 'block', marginTop: '2px' }}>{setupPinError}</span>
+                  )}
                 </div>
                 <div>
-                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>City</label>
-                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupCity || 'N/A'}</span>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>City {!isCityReadOnly && '*'}</label>
+                  {isCityReadOnly ? (
+                    <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupCity || 'N/A'}</span>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="City"
+                      value={setupCity}
+                      onChange={(e) => setSetupCity(e.target.value)}
+                      style={{ width: '100%', height: '30px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 8px', fontSize: '12px', outline: 'none', marginTop: '2px' }}
+                    />
+                  )}
                 </div>
                 <div>
-                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>State</label>
-                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupState || 'N/A'}</span>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>State {!isStateReadOnly && '*'}</label>
+                  {isStateReadOnly ? (
+                    <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupState || 'N/A'}</span>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="State"
+                      value={setupState}
+                      onChange={(e) => setSetupState(e.target.value)}
+                      style={{ width: '100%', height: '30px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 8px', fontSize: '12px', outline: 'none', marginTop: '2px' }}
+                    />
+                  )}
                 </div>
               </div>
               <div style={{ marginTop: '6px', borderTop: '1px solid #ECECEC', paddingTop: '6px' }}>
-                <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Street Address</label>
-                <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', display: 'block' }}>{setupStreet || 'N/A'}</span>
+                <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Street Address {!isStreetReadOnly && '*'}</label>
+                {isStreetReadOnly ? (
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', display: 'block' }}>{setupStreet || 'N/A'}</span>
+                ) : (
+                  <input
+                    type="text"
+                    placeholder="Flat, building, street, area details"
+                    value={setupStreet}
+                    onChange={(e) => setSetupStreet(e.target.value)}
+                    style={{ width: '100%', height: '32px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 8px', fontSize: '12px', outline: 'none', marginTop: '4px' }}
+                  />
+                )}
               </div>
             </div>
 
@@ -1702,22 +1824,12 @@ export const SchemeDetail: React.FC = () => {
             {/* Save & Proceed button */}
             <button
               onClick={handleSaveSetup}
-              disabled={
-                isProcessing ||
-                !setupNomineeName.trim() ||
-                !setupNomineeRelationship ||
-                !agreedToTerms
-              }
+              disabled={isProcessing}
               style={{
                 width: '100%', height: '46px', borderRadius: '12px', background: 'var(--brand-dark)',
                 color: 'white', border: 'none', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer',
                 marginTop: '6px', boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
-                opacity: (
-                  isProcessing ||
-                  !setupNomineeName.trim() ||
-                  !setupNomineeRelationship ||
-                  !agreedToTerms
-                ) ? 0.5 : 1
+                opacity: isProcessing ? 0.5 : 1
               }}
             >
               {isProcessing ? t('saving') : 'PROCEED'}
