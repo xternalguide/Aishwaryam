@@ -334,7 +334,7 @@ export const OffersManager: React.FC = () => {
       {/* Create Offer Modal */}
       {modalOpen && (
         <div className="modal-backdrop" onClick={() => setModalOpen(false)}>
-          <form className="modal-content fade-in" onSubmit={handleSaveOffer} onClick={(e) => e.stopPropagation()}>
+          <form className="modal-content fade-in" onSubmit={handleSaveOffer} onClick={(e) => e.stopPropagation()} style={{ maxHeight: '90vh', overflowY: 'auto' }}>
             <div className="card-head" style={{ padding: '20px 24px', margin: 0, borderBottom: '1px solid var(--border)' }}>
               <span className="card-title">Configure Promotional Offer</span>
               <button type="button" className="btn btn-ghost btn-xs" onClick={() => setModalOpen(false)} style={{ padding: '4px', borderRadius: '50%' }}>
