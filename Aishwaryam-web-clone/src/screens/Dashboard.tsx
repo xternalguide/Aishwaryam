@@ -199,6 +199,7 @@ export const Dashboard: React.FC = () => {
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [offerTitle, setOfferTitle] = useState<string | null>(null);
   const [offerDesc, setOfferDesc] = useState<string | null>(null);
+  const [offerBanner, setOfferBanner] = useState<string | null>(null);
   const [activeBannerIdx, setActiveBannerIdx] = useState(0);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [isDownloading, setIsDownloading] = useState(false);
@@ -439,7 +440,15 @@ export const Dashboard: React.FC = () => {
     if (contextActiveSchemes) setActiveSchemes(contextActiveSchemes);
     if (contextTransactions) setTransactions(contextTransactions);
     if (contextUnreadNotifCount !== undefined) setUnreadNotifCount(contextUnreadNotifCount);
-    if (offers && offers.length > 0) { setOfferTitle(offers[0].title); setOfferDesc(offers[0].description); }
+    if (offers && offers.length > 0) {
+      setOfferTitle(offers[0].title);
+      setOfferDesc(offers[0].description);
+      setOfferBanner(offers[0].bannerUrl || null);
+    } else {
+      setOfferTitle(null);
+      setOfferDesc(null);
+      setOfferBanner(null);
+    }
   }, [profile, livePrice, contextActiveSchemes, contextAvailableSchemes, contextTransactions, contextUnreadNotifCount, offers]);
 
   useEffect(() => {
@@ -1173,18 +1182,30 @@ export const Dashboard: React.FC = () => {
   const renderPromosAndBanners = () => (
     <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
       {offerTitle && (
-        <div style={{ ...DS.glass, padding:'16px', display:'flex', justifyContent:'space-between', alignItems:'center', borderColor:'rgba(255,215,0,0.2)' }}>
-          <div>
-            <span style={{ fontFamily:DS.font, fontSize:'13px', fontWeight:'800', color:DS.textWhite, display:'block' }}>{offerTitle}</span>
-            <span style={{ fontFamily:DS.font, fontSize:'11px', color:DS.textSub }}>{offerDesc}</span>
-          </div>
-          <button
+        offerBanner ? (
+          <div 
             onClick={() => navigate('/offers')}
-            style={{ background:'linear-gradient(135deg,#C2185B,#4A0E4E)', color:'white', border:'none', padding:'8px 16px', borderRadius:'10px', fontFamily:DS.font, fontSize:'11px', fontWeight:'700', cursor:'pointer' }}
+            style={{ width: '100%', height: '150px', borderRadius: '16px', overflow: 'hidden', cursor: 'pointer', border: '1px solid rgba(255,215,0,0.2)', position: 'relative' }}
           >
-            {t('claim')}
-          </button>
-        </div>
+            <img src={offerBanner} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Active Campaign" />
+            <div style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'linear-gradient(135deg,#C2185B,#4A0E4E)', color: 'white', padding: '6px 12px', borderRadius: '8px', fontSize: '10px', fontWeight: 'bold' }}>
+              View Details
+            </div>
+          </div>
+        ) : (
+          <div style={{ ...DS.glass, padding:'16px', display:'flex', justifyContent:'space-between', alignItems:'center', borderColor:'rgba(255,215,0,0.2)' }}>
+            <div>
+              <span style={{ fontFamily:DS.font, fontSize:'13px', fontWeight:'800', color:DS.textWhite, display:'block' }}>{offerTitle}</span>
+              <span style={{ fontFamily:DS.font, fontSize:'11px', color:DS.textSub }} dangerouslySetInnerHTML={{ __html: offerDesc || '' }} />
+            </div>
+            <button
+              onClick={() => navigate('/offers')}
+              style={{ background:'linear-gradient(135deg,#C2185B,#4A0E4E)', color:'white', border:'none', padding:'8px 16px', borderRadius:'10px', fontFamily:DS.font, fontSize:'11px', fontWeight:'700', cursor:'pointer' }}
+            >
+              {t('claim')}
+            </button>
+          </div>
+        )
       )}
       {banners.length > 0 && (
         <>
