@@ -12,6 +12,7 @@ namespace Aishwaryam.Application.DTOs.Gold
         public string? PriceLockId { get; set; }
         public string? RazorpayPaymentId { get; set; }
         public bool SkipEmail { get; set; }
+        public bool SkipNotification { get; set; }
         public string? BaseUrl { get; set; }
     }
 

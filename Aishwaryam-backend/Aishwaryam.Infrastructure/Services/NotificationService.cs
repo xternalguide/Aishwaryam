@@ -58,6 +58,13 @@ namespace Aishwaryam.Infrastructure.Services
                     .Where(d => d.UserId == userId && d.IsActive)
                     .ToListAsync();
 
+                devices = System.Linq.Enumerable.ToList(
+                    System.Linq.Enumerable.Select(
+                        System.Linq.Enumerable.GroupBy(devices, d => d.FcmToken),
+                        g => System.Linq.Enumerable.First(g)
+                    )
+                );
+
                 if (devices.Any())
                 {
                     // Ensure the 'type' is set in pushData, this is a fallback
@@ -270,6 +277,12 @@ namespace Aishwaryam.Infrastructure.Services
 
                 // 3. Get all active devices
                 var devices = await _context.UserDevices.Where(d => d.IsActive).ToListAsync();
+                devices = System.Linq.Enumerable.ToList(
+                    System.Linq.Enumerable.Select(
+                        System.Linq.Enumerable.GroupBy(devices, d => d.FcmToken),
+                        g => System.Linq.Enumerable.First(g)
+                    )
+                );
                 if (devices.Any())
                 {
                     foreach (var device in devices)

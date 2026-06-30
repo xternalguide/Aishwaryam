@@ -239,7 +239,8 @@ namespace Aishwaryam.Application.Services
                     IpAddress = paymentRecord.IpAddress,
                     DeviceFingerprint = paymentRecord.DeviceFingerprint,
                     RazorpayPaymentId = razorpayPaymentId,
-                    SkipEmail = true
+                    SkipEmail = true,
+                    SkipNotification = true
                 });
 
                 if (!receipt.Success)

@@ -16,6 +16,8 @@ using Google.Apis.Auth.OAuth2;
 using Serilog;
 using Serilog.Events;
 
+using Aishwaryam.Domain.Entities;
+
 System.AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 

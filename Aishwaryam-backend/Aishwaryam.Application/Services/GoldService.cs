@@ -494,10 +494,13 @@ namespace Aishwaryam.Application.Services
 
                 await _unitOfWork.CommitAsync();
 
-                await _notificationService.SendNotificationAsync(request.UserId, 
-                    isSilverScheme ? "Silver Purchased! ✨" : "Gold Purchased! ✨", 
-                    $"Successfully purchased {(goldWeightMg / 1000.0):F4}g of {(isSilverScheme ? "silver" : "gold")}.", 
-                    isSilverScheme ? "SILVER_BUY" : "GOLD_BUY");
+                if (!request.SkipNotification)
+                {
+                    await _notificationService.SendNotificationAsync(request.UserId, 
+                        isSilverScheme ? "Silver Purchased! ✨" : "Gold Purchased! ✨", 
+                        $"Successfully purchased {(goldWeightMg / 1000.0):F4}g of {(isSilverScheme ? "silver" : "gold")}.", 
+                        isSilverScheme ? "SILVER_BUY" : "GOLD_BUY");
+                }
 
                 if (!request.SkipEmail)
                 {
