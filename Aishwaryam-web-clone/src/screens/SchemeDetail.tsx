@@ -51,7 +51,7 @@ export const SchemeDetail: React.FC = () => {
   const [totalBonusEarnedPaise, setTotalBonusEarnedPaise] = useState(0);
   const [totalBonusGoldMg, setTotalBonusGoldMg] = useState(0);
   const [milestones, setMilestones] = useState<MilestoneItem[]>([]);
-  const [autoPayEnabled, setAutoPayEnabled] = useState(false);
+
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [remainingDaysForScheme, setRemainingDaysForScheme] = useState(0);
   const [ledger, setLedger] = useState<any[]>([]);
@@ -311,7 +311,7 @@ export const SchemeDetail: React.FC = () => {
       setTotalSavingsAddedPaise(userActiveScheme.totalSavingsAddedPaise || 0);
       setTotalBonusEarnedPaise(userActiveScheme.totalBonusEarnedPaise || 0);
       setTotalBonusGoldMg(userActiveScheme.totalBonusGoldMg || 0);
-      setAutoPayEnabled(userActiveScheme.autoPayEnabled || false);
+
       setRemainingDaysForScheme(userActiveScheme.remainingDaysForScheme || 0);
       setJoinedAt(userActiveScheme.joinedAt || userActiveScheme.JoinedAt || '');
       setMaturityDate(userActiveScheme.maturityDate || userActiveScheme.MaturityDate || '');
@@ -1451,13 +1451,13 @@ export const SchemeDetail: React.FC = () => {
                 </span>
               </div>
               <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', textAlign: 'left', minWidth: '340px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', textAlign: 'left', minWidth: '500px' }}>
                   <thead>
                     <tr style={{ borderBottom: '1.5px solid #ECECEC', background: '#F3F4F6' }}>
-                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>{t('date_and_time')}</th>
-                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>{t('amount')}</th>
-                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>{t('gold_purchased')}</th>
-                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>{t('bonus_gold')}</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{t('date_and_time')}</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right', whiteSpace: 'nowrap' }}>{t('amount')}</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right', whiteSpace: 'nowrap' }}>{t('gold_purchased')}</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right', whiteSpace: 'nowrap' }}>{t('bonus_gold')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1481,13 +1481,13 @@ export const SchemeDetail: React.FC = () => {
                           return (
                             <tr key={item.id || index} style={{ borderBottom: '1px solid #ECECEC' }}>
                               <td style={{ padding: '10px 12px', color: 'var(--brand-dark)', whiteSpace: 'nowrap' }}>{formattedDate}</td>
-                              <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+                              <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 'bold', color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
                                 {formatRupeesFull(amt)}
                               </td>
-                              <td style={{ padding: '10px 12px', textAlign: 'right', color: '#FFB300', fontWeight: 'bold' }}>
+                              <td style={{ padding: '10px 12px', textAlign: 'right', color: '#FFB300', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                                 {mgToGrams(goldMg)}
                               </td>
-                              <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--brand-accent)', fontWeight: 'bold' }}>
+                              <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--brand-accent)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                                 {mgToGrams(bonusMg)}
                               </td>
                             </tr>
@@ -1495,7 +1495,7 @@ export const SchemeDetail: React.FC = () => {
                         })
                     ) : (
                       <tr>
-                        <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                           {t('no_transactions_found')}
                         </td>
                       </tr>
@@ -1503,35 +1503,6 @@ export const SchemeDetail: React.FC = () => {
                   </tbody>
                 </table>
               </div>
-            </div>
-  
-            {/* Autopay Subscription config */}
-            <div className="glass-card" style={{
-              borderRadius: '16px', padding: '16px', background: 'white',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-            }}>
-              <div>
-                <span style={{ fontSize: '13px', fontWeight: 'bold', display: 'block' }}>{t('autopay_subscription')}</span>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('autopay_desc')}</span>
-              </div>
-              <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '40px', height: '22px' }}>
-                <input
-                  type="checkbox"
-                  checked={autoPayEnabled}
-                  onChange={(e) => setAutoPayEnabled(e.target.checked)}
-                  style={{ opacity: 0, width: 0, height: 0 }}
-                />
-                <span className="slider-switch" style={{
-                  position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundColor: autoPayEnabled ? 'var(--brand-mid)' : '#ccc', borderRadius: '34px',
-                  transition: '0.4s'
-                }}>
-                  <span style={{
-                    position: 'absolute', content: '""', height: '16px', width: '16px', left: autoPayEnabled ? '20px' : '4px', bottom: '3px',
-                    backgroundColor: 'white', borderRadius: '50%', transition: '0.4s'
-                  }} />
-                </span>
-              </label>
             </div>
           </div>
         ) : (
