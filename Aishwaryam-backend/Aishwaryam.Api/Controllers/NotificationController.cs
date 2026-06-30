@@ -64,6 +64,17 @@ namespace Aishwaryam.Api.Controllers
             return Ok(new { Message = "Notification marked as read" });
         }
 
+        [HttpPut("read-all")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> MarkAllAsRead()
+        {
+            var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            await _notificationService.MarkAllAsReadAsync(userId);
+            return Ok(new { Message = "All notifications marked as read" });
+        }
+
         [HttpDelete("{id}")]
         [Microsoft.AspNetCore.Authorization.Authorize]
         public async Task<IActionResult> DeleteNotification(Guid id)
@@ -73,6 +84,17 @@ namespace Aishwaryam.Api.Controllers
 
             await _notificationService.DeleteNotificationAsync(id, userId);
             return Ok(new { Message = "Notification deleted" });
+        }
+
+        [HttpDelete("clear-all")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> ClearAllNotifications()
+        {
+            var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            await _notificationService.DeleteAllNotificationsAsync(userId);
+            return Ok(new { Message = "All notifications cleared" });
         }
 
         [HttpPost("broadcast")]

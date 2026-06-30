@@ -735,7 +735,15 @@ export const Notifications: React.FC = () => {
   const [localNotifs, setLocalNotifs] = useState<any[]>([]);
 
   useEffect(() => {
-    refreshData().catch(err => console.error("Error refreshing notifications:", err));
+    const markAllAsReadOnEntry = async () => {
+      try {
+        await ApiClient.put('api/Notification/read-all');
+      } catch (err) {
+        console.error("Error marking all read on entry:", err);
+      }
+      refreshData(true).catch(err => console.error("Error refreshing notifications:", err));
+    };
+    markAllAsReadOnEntry();
   }, []);
 
   useEffect(() => {
@@ -758,6 +766,17 @@ export const Notifications: React.FC = () => {
     }
   };
 
+  const handleMarkAllAsRead = async () => {
+    setLocalNotifs(prev => prev.map(n => ({ ...n, isRead: true })));
+    try {
+      await ApiClient.put('api/Notification/read-all');
+      refreshData(true);
+    } catch (err) {
+      console.error("Error marking all read:", err);
+      refreshData();
+    }
+  };
+
   const handleClearNotification = async (id: string) => {
     // Optimistic UI update
     setLocalNotifs(prev => prev.filter(n => n.id !== id));
@@ -772,12 +791,48 @@ export const Notifications: React.FC = () => {
     }
   };
 
+  const handleClearAllNotifications = async () => {
+    setLocalNotifs([]);
+    try {
+      await ApiClient.delete('api/Notification/clear-all');
+      refreshData(true);
+    } catch (err) {
+      console.error("Error clearing all notifications:", err);
+      refreshData();
+    }
+  };
+
   const displayNotifs = localNotifs;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
       <Header title="Notifications" onBack={() => navigate(-1)} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {localNotifs.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px', marginBottom: '4px' }}>
+            <button 
+              onClick={handleMarkAllAsRead}
+              style={{
+                background: 'rgba(74, 14, 78, 0.06)', border: '1px solid rgba(74, 14, 78, 0.12)',
+                borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: 'bold',
+                color: 'var(--brand-dark)', cursor: 'pointer'
+              }}
+            >
+              Read All
+            </button>
+            <button 
+              onClick={handleClearAllNotifications}
+              style={{
+                background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.15)',
+                borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: 'bold',
+                color: '#EF4444', cursor: 'pointer'
+              }}
+            >
+              Clear All
+            </button>
+          </div>
+        )}
+
         {displayNotifs.map((n) => (
           <div 
             key={n.id} 

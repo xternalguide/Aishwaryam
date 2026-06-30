@@ -228,6 +228,23 @@ namespace Aishwaryam.Infrastructure.Services
             }
         }
 
+        public async Task MarkAllAsReadAsync(Guid userId)
+        {
+            var unreadNotifications = await _context.UserNotifications
+                .Where(n => n.UserId == userId && !n.IsRead && !n.IsDeleted)
+                .ToListAsync();
+
+            if (unreadNotifications.Any())
+            {
+                foreach (var n in unreadNotifications)
+                {
+                    n.IsRead = true;
+                }
+                _context.UserNotifications.UpdateRange(unreadNotifications);
+                await _context.SaveChangesAsync();
+            }
+        }
+
         public async Task DeleteNotificationAsync(Guid notificationId, Guid userId)
         {
             var notification = await _context.UserNotifications
@@ -237,6 +254,23 @@ namespace Aishwaryam.Infrastructure.Services
             {
                 notification.IsDeleted = true;
                 _context.UserNotifications.Update(notification);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task DeleteAllNotificationsAsync(Guid userId)
+        {
+            var activeNotifications = await _context.UserNotifications
+                .Where(n => n.UserId == userId && !n.IsDeleted)
+                .ToListAsync();
+
+            if (activeNotifications.Any())
+            {
+                foreach (var n in activeNotifications)
+                {
+                    n.IsDeleted = true;
+                }
+                _context.UserNotifications.UpdateRange(activeNotifications);
                 await _context.SaveChangesAsync();
             }
         }

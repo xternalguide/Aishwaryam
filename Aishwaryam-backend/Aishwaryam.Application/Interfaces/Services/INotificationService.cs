@@ -11,7 +11,9 @@ namespace Aishwaryam.Application.Interfaces.Services
         Task UnregisterDeviceTokenAsync(string token);
         Task<System.Collections.Generic.List<Aishwaryam.Domain.Entities.UserNotification>> GetUserNotificationsAsync(Guid userId);
         Task MarkAsReadAsync(Guid notificationId, Guid userId);
+        Task MarkAllAsReadAsync(Guid userId);
         Task DeleteNotificationAsync(Guid notificationId, Guid userId);
+        Task DeleteAllNotificationsAsync(Guid userId);
         Task<int> GetUnreadCountAsync(Guid userId);
         Task BroadcastNotificationAsync(string title, string message, string type = "GENERAL", System.Collections.Generic.Dictionary<string, string>? pushData = null, string? imageUrl = null);
     }
