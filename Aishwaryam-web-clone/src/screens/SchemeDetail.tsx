@@ -1261,20 +1261,27 @@ export const SchemeDetail: React.FC = () => {
             {autoT(scheme.description)}
           </p>
  
-          <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
-            <div>
-              <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('tenure').toUpperCase()}</span>
-              <div style={{ fontSize: '13px', fontWeight: 'bold' }}>{scheme.totalInstallments} {scheme.durationUnit ? (scheme.durationUnit.toLowerCase().startsWith('day') ? t('days') : t('months')) : (scheme.frequency === 'Daily' ? t('days') : t('months'))}</div>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'flex-start',
+            marginTop: '16px', 
+            flexWrap: 'nowrap',
+            gap: '8px' 
+          }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--text-muted)', display: 'block', whiteSpace: 'nowrap' }}>{t('tenure').toUpperCase()}</span>
+              <div style={{ fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{scheme.totalInstallments} {scheme.durationUnit ? (scheme.durationUnit.toLowerCase().startsWith('day') ? t('days') : t('months')) : (scheme.frequency === 'Daily' ? t('days') : t('months'))}</div>
             </div>
-            <div style={{ width: '1px', height: '20px', background: 'rgba(0,0,0,0.1)' }} />
-            <div>
-              <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('min_investment')}</span>
-              <div style={{ fontSize: '13px', fontWeight: 'bold' }}>{t('start_from')} {formatRupees(scheme.installmentAmountPaise)}</div>
+            <div style={{ width: '1px', height: '24px', background: 'rgba(0,0,0,0.1)', alignSelf: 'center', flexShrink: 0 }} />
+            <div style={{ flex: 1.4, minWidth: 0, paddingLeft: '4px' }}>
+              <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--text-muted)', display: 'block', whiteSpace: 'nowrap' }}>{t('min_investment')}</span>
+              <div style={{ fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{t('start_from')} {formatRupees(scheme.installmentAmountPaise)}</div>
             </div>
-            <div style={{ width: '1px', height: '20px', background: 'rgba(0,0,0,0.1)' }} />
-            <div>
-              <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('frequency').toUpperCase()}</span>
-              <div style={{ fontSize: '13px', fontWeight: 'bold', textTransform: 'capitalize' }}>{autoT(scheme.frequency)}</div>
+            <div style={{ width: '1px', height: '24px', background: 'rgba(0,0,0,0.1)', alignSelf: 'center', flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0, paddingLeft: '4px' }}>
+              <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--text-muted)', display: 'block', whiteSpace: 'nowrap' }}>{t('frequency').toUpperCase()}</span>
+              <div style={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'capitalize', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{autoT(scheme.frequency)}</div>
             </div>
           </div>
         </div>

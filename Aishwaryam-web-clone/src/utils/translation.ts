@@ -1054,7 +1054,7 @@ export const translations = {
     choose_savings_plan: "தங்க சேமிப்புத் திட்டத்தைத் தேர்ந்தெடுக்கவும்",
     accumulate_metals_desc: "சான்றளிக்கப்பட்ட தங்கம் மற்றும் வெள்ளியைத் தொடர்ந்து சேமித்து முதிர்வு காலத்தில் போனஸ் பெறுங்கள்.",
     min_investment: "குறைந்தபட்ச முதலீடு",
-    start_from: "இங்கிருந்து தொடங்கவும்",
+    start_from: "முதல்",
     active_badge: "செயலில் உள்ளது",
 
     // Scheme Detail Additional
