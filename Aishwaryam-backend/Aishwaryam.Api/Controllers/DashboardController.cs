@@ -40,13 +40,28 @@ namespace Aishwaryam.Api.Controllers
             long sellPricePaise = (long)(price.SellPrice * 100);
             long price24KPaise = (long)(price.Price24K * 100);
             long price22KPaise = (long)(price.Price22K * 100);
+            long priceSilverPaise = (long)(price.PriceSilver * 100);
             string priceUpdatedAt = price.Timestamp.ToString("yyyy-MM-ddTHH:mm:ssZ");
 
-            // 2. Get Gold Holding
-            var holding = await _context.GoldHoldings.FirstOrDefaultAsync(h => h.UserId == userId);
-            long goldBalanceMg = holding?.GoldBalanceMg ?? 0;
-            long investedAmountPaise = (goldBalanceMg * buyPricePaise) / 1000;
-            long currentValuePaise = investedAmountPaise;
+            // 2. Get Balances Separately
+            long silverBalanceMg = await (from t in _context.GoldTransactions
+                                          join s in _context.UserSchemes on t.UserSchemeId equals s.Id
+                                          where t.UserId == userId && s.PlanName.ToLower().Contains("silver")
+                                          select t.TransactionType == "SELL" ? -t.GoldWeightMg : t.GoldWeightMg)
+                                         .SumAsync();
+
+            long goldBalanceMg = await (from t in _context.GoldTransactions
+                                        join s in _context.UserSchemes on t.UserSchemeId equals s.Id into sj
+                                        from s in sj.DefaultIfEmpty()
+                                        where t.UserId == userId && (s == null || !s.PlanName.ToLower().Contains("silver"))
+                                        select t.TransactionType == "SELL" ? -t.GoldWeightMg : t.GoldWeightMg)
+                                       .SumAsync();
+
+            long investedAmountPaise = await _context.GoldTransactions
+                .Where(t => t.UserId == userId)
+                .SumAsync(t => t.TransactionType == "SELL" ? -t.TotalAmountPaise : t.TotalAmountPaise);
+
+            long currentValuePaise = (long)(((goldBalanceMg * buyPricePaise) / 1000.0) + ((silverBalanceMg * priceSilverPaise) / 1000.0));
 
             // 3. Get Recent Transactions
             var paginatedOverviewTxs = _context.GoldTransactions
@@ -99,10 +114,12 @@ namespace Aishwaryam.Api.Controllers
 
             return Ok(new {
                 goldBalanceMg,
+                silverBalanceMg,
                 buyPricePaise,
                 sellPricePaise,
                 price24KPaise,
                 price22KPaise,
+                priceSilverPaise,
                 priceUpdatedAt,
                 investedAmountPaise,
                 currentValuePaise,
@@ -123,13 +140,25 @@ namespace Aishwaryam.Api.Controllers
         [HttpGet("portfolio/{userId}")]
         public async Task<IActionResult> GetPortfolio(Guid userId)
         {
-            var holding = await _context.GoldHoldings.FirstOrDefaultAsync(h => h.UserId == userId);
-            long goldBalanceMg = holding?.GoldBalanceMg ?? 0;
-
             var price = await _priceManager.GetPriceAsync();
             long buyPricePaise = (long)(price.BuyPrice * 100);
+            long priceSilverPaise = (long)(price.PriceSilver * 100);
 
-            // 1. Calculate actual dynamic invested amount (sum of all BUY transactions minus SELL transactions)
+            // 1. Get Balances Separately
+            long silverBalanceMg = await (from t in _context.GoldTransactions
+                                          join s in _context.UserSchemes on t.UserSchemeId equals s.Id
+                                          where t.UserId == userId && s.PlanName.ToLower().Contains("silver")
+                                          select t.TransactionType == "SELL" ? -t.GoldWeightMg : t.GoldWeightMg)
+                                         .SumAsync();
+
+            long goldBalanceMg = await (from t in _context.GoldTransactions
+                                        join s in _context.UserSchemes on t.UserSchemeId equals s.Id into sj
+                                        from s in sj.DefaultIfEmpty()
+                                        where t.UserId == userId && (s == null || !s.PlanName.ToLower().Contains("silver"))
+                                        select t.TransactionType == "SELL" ? -t.GoldWeightMg : t.GoldWeightMg)
+                                       .SumAsync();
+
+            // 2. Calculate actual dynamic invested amount (sum of all BUY transactions minus SELL transactions)
             long totalBuyAmount = await _context.GoldTransactions
                 .Where(t => t.UserId == userId && t.TransactionType == "BUY")
                 .SumAsync(t => (long?)t.TotalAmountPaise) ?? 0L;
@@ -139,7 +168,7 @@ namespace Aishwaryam.Api.Controllers
                 .SumAsync(t => (long?)t.TotalAmountPaise) ?? 0L;
 
             long investedAmountPaise = totalBuyAmount - totalSellAmount;
-            long currentValuePaise = (long)((goldBalanceMg * buyPricePaise) / 1000.0);
+            long currentValuePaise = (long)(((goldBalanceMg * buyPricePaise) / 1000.0) + ((silverBalanceMg * priceSilverPaise) / 1000.0));
 
             // Safety fallback for test/migration users who have gold balance but no transaction history
             if (investedAmountPaise <= 0 && goldBalanceMg > 0)
@@ -159,7 +188,7 @@ namespace Aishwaryam.Api.Controllers
 
             var status = await _goldService.GetGoldStatusAsync(userId);
 
-            // 2. Reconstruct monthly balances over the last 6 months for real graph data
+            // 3. Reconstruct monthly balances over the last 6 months for real graph data
             var transactions = await _context.GoldTransactions
                 .Where(t => t.UserId == userId)
                 .OrderBy(t => t.CreatedAt)
@@ -183,6 +212,7 @@ namespace Aishwaryam.Api.Controllers
             return Ok(new {
                 userId = userId.ToString(),
                 goldBalanceMg,
+                silverBalanceMg,
                 investedAmountPaise,
                 currentValuePaise,
                 returnPercentage,

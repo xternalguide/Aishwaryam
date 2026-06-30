@@ -759,17 +759,32 @@ export const Dashboard: React.FC = () => {
         ) : (
           <>
             {/* Balance Display */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '8px 0' }}>
-              <span style={{ fontFamily: DS.font, fontSize: '11px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                {t('total_gold_saved')}
-              </span>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginTop: '4px' }}>
-                <span style={{ fontFamily: DS.font, fontSize: '36px', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-                  {((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', margin: '8px 0', width: '100%' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <span style={{ fontFamily: DS.font, fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: '700', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                  {t('total_gold_saved')}
                 </span>
-                <span style={{ fontFamily: DS.font, fontSize: '13px', fontWeight: '700', color: DS.gold, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                  {t('grams_label')}
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginTop: '4px' }}>
+                  <span style={{ fontFamily: DS.font, fontSize: '26px', fontWeight: '900', color: 'white', lineHeight: 1 }}>
+                    {((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)}
+                  </span>
+                  <span style={{ fontFamily: DS.font, fontSize: '11px', fontWeight: '700', color: DS.gold, textTransform: 'uppercase' }}>
+                    {t('grams_label')}
+                  </span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderLeft: '1px solid rgba(255, 255, 255, 0.1)', width: '100%' }}>
+                <span style={{ fontFamily: DS.font, fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: '700', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                  {lang === 'ta' ? 'மொத்த வெள்ளி' : 'Total Silver'}
                 </span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginTop: '4px' }}>
+                  <span style={{ fontFamily: DS.font, fontSize: '26px', fontWeight: '900', color: '#E0E0E0', lineHeight: 1 }}>
+                    {((portfolio?.silverBalanceMg || 0) / 1000).toFixed(4)}
+                  </span>
+                  <span style={{ fontFamily: DS.font, fontSize: '11px', fontWeight: '700', color: '#C0C0C0', textTransform: 'uppercase' }}>
+                    {t('grams_label')}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -935,13 +950,24 @@ export const Dashboard: React.FC = () => {
       ) : (
         <>
           {/* balance */}
-          <div style={{ marginBottom:'8px' }}>
-            <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'600', color:'rgba(255,255,255,0.5)', letterSpacing:'0.5px', textTransform:'uppercase' }}>{t('total_gold_saved')}</span>
-            <div style={{ display:'flex', alignItems:'baseline', gap:'10px', marginTop:'6px' }}>
-              <span style={{ fontFamily:DS.font, fontSize:'40px', fontWeight:'900', color:'#FFFFFF', lineHeight:1 }}>
-                {((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)}
-              </span>
-              <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'700', color:DS.gold, letterSpacing:'1px', textTransform:'uppercase' }}>{t('grams_label')}</span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom:'8px' }}>
+            <div>
+              <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'600', color:'rgba(255,255,255,0.5)', letterSpacing:'0.5px', textTransform:'uppercase' }}>{t('total_gold_saved')}</span>
+              <div style={{ display:'flex', alignItems:'baseline', gap:'6px', marginTop:'6px' }}>
+                <span style={{ fontFamily:DS.font, fontSize:'28px', fontWeight:'900', color:'#FFFFFF', lineHeight:1 }}>
+                  {((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)}
+                </span>
+                <span style={{ fontFamily:DS.font, fontSize:'12px', fontWeight:'700', color:DS.gold, letterSpacing:'0.5px', textTransform:'uppercase' }}>{t('grams_label')}</span>
+              </div>
+            </div>
+            <div style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '16px' }}>
+              <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'600', color:'rgba(255,255,255,0.5)', letterSpacing:'0.5px', textTransform:'uppercase' }}>{lang === 'ta' ? 'மொத்த சேமிப்பு வெள்ளி' : 'Total Silver Saved'}</span>
+              <div style={{ display:'flex', alignItems:'baseline', gap:'6px', marginTop:'6px' }}>
+                <span style={{ fontFamily:DS.font, fontSize:'28px', fontWeight:'900', color:'#E0E0E0', lineHeight:1 }}>
+                  {((portfolio?.silverBalanceMg || 0) / 1000).toFixed(4)}
+                </span>
+                <span style={{ fontFamily:DS.font, fontSize:'12px', fontWeight:'700', color:'#C0C0C0', letterSpacing:'0.5px', textTransform:'uppercase' }}>{t('grams_label')}</span>
+              </div>
             </div>
           </div>
 
