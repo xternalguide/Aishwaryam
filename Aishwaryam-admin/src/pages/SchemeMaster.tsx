@@ -172,6 +172,12 @@ export const SchemeMaster: React.FC = () => {
       return;
     }
 
+    const tenureVal = parseInt(totalInstallments) || 0;
+    if (tenureVal <= 0) {
+      showToast('Scheme Duration / Tenure must be greater than 0.', 'error');
+      return;
+    }
+
     // Validate Loyalty Bonus Structure Tiers
     for (let i = 0; i < bonusTiers.length; i++) {
       const tier = bonusTiers[i];
