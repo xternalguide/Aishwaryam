@@ -35,8 +35,8 @@ export const OffersManager: React.FC = () => {
   const loadData = async () => {
     try {
       const [configRes, offersRes] = await Promise.all([
-        window.fetchWithCache(`${apiBase}/api/User/config`),
-        window.fetchWithCache(`${apiBase}/api/Offers/all-enriched`)
+        fetch(`${apiBase}/api/User/config`),
+        fetch(`${apiBase}/api/Offers/all-enriched`)
       ]);
 
       if (configRes.ok) {

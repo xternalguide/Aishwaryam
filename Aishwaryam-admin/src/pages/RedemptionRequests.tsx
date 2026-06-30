@@ -39,8 +39,8 @@ export const RedemptionRequests: React.FC = () => {
   const loadRedemptions = async () => {
     try {
       const [usersRes, redRes] = await Promise.all([
-        window.fetchWithCache(`${apiBase}/api/User/all`),
-        window.fetchWithCache(`${apiBase}/api/Scheme/admin/redemptions`)
+        fetch(`${apiBase}/api/User/all`),
+        fetch(`${apiBase}/api/Scheme/admin/redemptions`)
       ]);
 
       let usersMap: Record<string, any> = {};

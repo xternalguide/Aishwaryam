@@ -33,8 +33,8 @@ export const SchemeEnrollments: React.FC = () => {
   const loadEnrollments = async () => {
     try {
       const [usersRes, enrollRes] = await Promise.all([
-        window.fetchWithCache(`${apiBase}/api/User/all`),
-        window.fetchWithCache(`${apiBase}/api/Scheme/enrollments`)
+        fetch(`${apiBase}/api/User/all`),
+        fetch(`${apiBase}/api/Scheme/enrollments`)
       ]);
 
       let usersMap: Record<string, any> = {};

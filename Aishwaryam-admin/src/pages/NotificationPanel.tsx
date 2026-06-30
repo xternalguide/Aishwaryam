@@ -16,8 +16,8 @@ export const NotificationPanel: React.FC = () => {
   const loadData = async () => {
     try {
       const [settingRes, snapshotRes] = await Promise.all([
-        window.fetchWithCache(`${apiBase}/api/Admin/daily-notification-setting`),
-        window.fetchWithCache(`${apiBase}/api/Gold/price`)
+        fetch(`${apiBase}/api/Admin/daily-notification-setting`),
+        fetch(`${apiBase}/api/Gold/price`)
       ]);
 
       if (settingRes.ok) {

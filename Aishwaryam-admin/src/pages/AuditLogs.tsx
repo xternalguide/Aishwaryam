@@ -25,8 +25,8 @@ export const AuditLogs: React.FC = () => {
   const loadLogs = async () => {
     try {
       const [usersRes, logsRes] = await Promise.all([
-        window.fetchWithCache(`${apiBase}/api/User/all`),
-        window.fetchWithCache(`${apiBase}/api/Audit/logs?limit=100`)
+        fetch(`${apiBase}/api/User/all`),
+        fetch(`${apiBase}/api/Audit/logs?limit=100`)
       ]);
 
       let usersMap: Record<string, any> = {};

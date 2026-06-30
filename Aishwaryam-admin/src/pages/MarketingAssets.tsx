@@ -28,7 +28,7 @@ export const MarketingAssets: React.FC = () => {
 
   const loadAssets = async () => {
     try {
-      const res = await window.fetchWithCache(`${apiBase}/api/Banner/admin/all`);
+      const res = await fetch(`${apiBase}/api/Banner/admin/all`);
       if (res.ok) {
         const data = await res.json();
         const list = Array.isArray(data) ? data : (data.banners || []);

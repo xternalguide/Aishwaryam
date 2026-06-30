@@ -48,10 +48,10 @@ export const DashboardOverview: React.FC = () => {
   const loadData = async () => {
     try {
       const [kpiRes, offerRes, priceLogsRes, livePriceRes] = await Promise.all([
-        window.fetchWithCache(`${apiBase}/api/Admin/kpis`),
-        window.fetchWithCache(`${apiBase}/api/Offers/all-enriched`),
-        window.fetchWithCache(`${apiBase}/api/Gold/price-logs?limit=15`),
-        window.fetchWithCache(`${apiBase}/api/Gold/price`)
+        fetch(`${apiBase}/api/Admin/kpis`),
+        fetch(`${apiBase}/api/Offers/all-enriched`),
+        fetch(`${apiBase}/api/Gold/price-logs?limit=15`),
+        fetch(`${apiBase}/api/Gold/price`)
       ]);
       
       if (kpiRes.ok) setKpis(await kpiRes.json());

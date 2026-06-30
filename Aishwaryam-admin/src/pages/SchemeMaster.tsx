@@ -54,7 +54,7 @@ export const SchemeMaster: React.FC = () => {
 
   const loadSchemes = async () => {
     try {
-      const res = await window.fetchWithCache(`${apiBase}/api/Scheme/admin/list`);
+      const res = await fetch(`${apiBase}/api/Scheme/admin/list`);
       if (res.ok) {
         setSchemes(await res.json());
       }

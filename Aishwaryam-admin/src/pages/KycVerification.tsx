@@ -48,7 +48,7 @@ export const KycVerification: React.FC = () => {
 
   const loadKycList = async () => {
     try {
-      const res = await window.fetchWithCache(`${apiBase}/api/Kyc/all`);
+      const res = await fetch(`${apiBase}/api/Kyc/all`);
       if (res.ok) {
         const data = await res.json();
         setUsers(data);

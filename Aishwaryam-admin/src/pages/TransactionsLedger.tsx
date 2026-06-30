@@ -25,8 +25,8 @@ export const TransactionsLedger: React.FC = () => {
   const loadTransactions = async () => {
     try {
       const [usersRes, txsRes] = await Promise.all([
-        window.fetchWithCache(`${apiBase}/api/User/all`),
-        window.fetchWithCache(`${apiBase}/api/Gold/transactions/all`)
+        fetch(`${apiBase}/api/User/all`),
+        fetch(`${apiBase}/api/Gold/transactions/all`)
       ]);
 
       let usersMap: Record<string, any> = {};
