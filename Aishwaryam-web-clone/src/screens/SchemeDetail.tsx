@@ -59,6 +59,8 @@ export const SchemeDetail: React.FC = () => {
 
   // UI Interactive States
   const [openTabs, setOpenTabs] = useState<Record<number, boolean>>({});
+  const [showTermsCollapse, setShowTermsCollapse] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   useEffect(() => {
     if (userSchemeId) {
@@ -102,29 +104,8 @@ export const SchemeDetail: React.FC = () => {
   const [setupCity, setSetupCity] = useState('');
   const [setupStreet, setSetupStreet] = useState('');
   const [setupPincode, setSetupPincode] = useState('');
-  const [setupPinError, setSetupPinError] = useState<string | null>(null);
 
   const RELATIONSHIPS = ["Father", "Mother", "Wife", "Husband", "Son", "Daughter", "Brother", "Guardian"];
-  const CITIES_BY_STATE: Record<string, string[]> = {
-    "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Salem", "Trichy", "Tirunelveli"],
-    "Puducherry": ["Puducherry", "Karaikal"],
-    "Kerala": ["Kochi", "Thiruvananthapuram"],
-    "Karnataka": ["Bengaluru", "Mysuru"]
-  };
-  const PIN_PREFIXES: Record<string, string[]> = {
-    "Chennai": ["600"],
-    "Coimbatore": ["641"],
-    "Madurai": ["625"],
-    "Salem": ["636"],
-    "Trichy": ["620"],
-    "Tirunelveli": ["627"],
-    "Puducherry": ["605"],
-    "Karaikal": ["609"],
-    "Kochi": ["682"],
-    "Thiruvananthapuram": ["695"],
-    "Bengaluru": ["560"],
-    "Mysuru": ["570"]
-  };
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -176,82 +157,6 @@ export const SchemeDetail: React.FC = () => {
     }
   }, [showSetupModal]);
 
-  const handleSetupPincodeChange = (value: string) => {
-    const numericValue = value.replace(/\D/g, '').slice(0, 6);
-    setSetupPincode(numericValue);
-
-    if (numericValue.length === 6) {
-      fetch(`https://api.postalpincode.in/pincode/${numericValue}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice) {
-            const postOffice = data[0].PostOffice[0];
-            setSetupState(postOffice.State || '');
-            setSetupCity(postOffice.District || postOffice.Block || '');
-            setSetupPinError(null);
-          } else {
-            // Static prefix fallback
-            const prefix = numericValue.substring(0, 3);
-            let foundCity = '';
-            let foundState = '';
-            for (const [city, prefixes] of Object.entries(PIN_PREFIXES)) {
-              if (prefixes.includes(prefix)) {
-                foundCity = city;
-                break;
-              }
-            }
-            if (foundCity) {
-              for (const [state, cities] of Object.entries(CITIES_BY_STATE)) {
-                if (cities.includes(foundCity)) {
-                  foundState = state;
-                  break;
-                }
-              }
-            }
-            if (foundCity && foundState) {
-              setSetupCity(foundCity);
-              setSetupState(foundState);
-              setSetupPinError(null);
-            } else {
-              setSetupPinError("Invalid PIN Code.");
-            }
-          }
-        })
-        .catch(() => {
-          // Static prefix fallback
-          const prefix = numericValue.substring(0, 3);
-          let foundCity = '';
-          let foundState = '';
-          for (const [city, prefixes] of Object.entries(PIN_PREFIXES)) {
-            if (prefixes.includes(prefix)) {
-              foundCity = city;
-              break;
-            }
-          }
-          if (foundCity) {
-            for (const [state, cities] of Object.entries(CITIES_BY_STATE)) {
-              if (cities.includes(foundCity)) {
-                foundState = state;
-                break;
-              }
-            }
-          }
-          if (foundCity && foundState) {
-            setSetupCity(foundCity);
-            setSetupState(foundState);
-            setSetupPinError(null);
-          } else {
-            setSetupPinError("Invalid PIN Code.");
-          }
-        });
-    } else {
-      if (numericValue.length > 0 && numericValue.length < 6) {
-        setSetupPinError("PIN Code must be exactly 6 digits.");
-      } else {
-        setSetupPinError(null);
-      }
-    }
-  };
 
   const parseMilestones = (
     bonusConfigJson: string | null,
@@ -748,7 +653,7 @@ export const SchemeDetail: React.FC = () => {
           setUserSchemeId(newSchemeId);
           await refreshData();
           setShowSetupModal(false);
-          setShowSuccessPopup(true);
+          setShowJoinSheet(true); // Proceed to payment page/sheet directly!
         } else {
           alert(joinRes.data?.message || 'Failed to join scheme.');
         }
@@ -917,14 +822,45 @@ export const SchemeDetail: React.FC = () => {
   };
 
   const renderCustomSections = () => {
-    if (!scheme || !scheme.customSectionsJson) return null;
+    if (!scheme) return null;
     try {
-      const sections = JSON.parse(scheme.customSectionsJson);
-      if (!Array.isArray(sections) || sections.length === 0) return null;
+      let dbSections: any[] = [];
+      if (scheme.customSectionsJson) {
+        try {
+          dbSections = JSON.parse(scheme.customSectionsJson);
+        } catch (e) {}
+      }
+      if (!Array.isArray(dbSections)) dbSections = [];
+
+      const defaultSections = [
+        {
+          title: lang === 'ta' ? 'ஏன் தங்கம் சேமிக்க வேண்டும்? (Why Save Gold?)' : 'Why Save Gold? Benefits of Aishwaryam DigiGold',
+          content: lang === 'ta' ? 
+            '• **விலையேற்றம் பாதுகாப்பு:** தங்கம் எப்போதும் பணவீக்கத்திலிருந்து பாதுகாப்பை வழங்கும் சிறந்த முதலீடு ஆகும்.\n• **0% வேஸ்டேஜ் & சேதாரம்:** இந்த திட்டத்தின் மூலம் முதிர்வில் தங்கம் வாங்கும்போது 18% வரை சேதாரம் மற்றும் செய்கூலி சேமிக்கலாம்.\n• **சிறிய அளவில் முதலீடு:** தினமும் அல்லது மாதந்தோறும் வெறும் ₹100 முதல் சேமிக்கலாம்.\n• **நெகிழ்வான விநியோகம்:** சேமித்த தங்கத்தை நாணயங்களாகவோ அல்லது நகைகளாகவோ மாற்றிக்கொள்ளலாம்.' :
+            '• **Inflation Protection:** Gold is a timeless asset that hedges against inflation and market volatility.\n• **Zero Wastage Benefit:** Save up to 18% on making charges and Value Addition (V.A.) charges at maturity.\n• **Micro-Savings:** Start accumulating physical gold weight from just ₹100.\n• **Flexible Redemption:** Redeem your accumulated weight for premium jewelry or raw gold coins.',
+          type: 0
+        },
+        {
+          title: lang === 'ta' ? 'திட்டம் எப்படி செயல்படுகிறது & போனஸ் விவரம்' : 'How the Scheme Works & Loyalty Bonus Details',
+          content: lang === 'ta' ?
+            '• **திட்ட காலம்:** 11 மாதங்கள் (300 நாட்கள் சேமிப்பு காலம் + 30 நாட்கள் முதிர்வு காலம்).\n• **போனஸ் கணக்கீடு:** போனஸ் என்பது தங்கம் எடையின் மூலமாக வராது, உங்கள் சேமிப்பு தொகைக்கு தகுந்த போனஸ் தொகையாக கணக்கிடப்படும். பின்னர் அந்த போனஸ் தொகைக்கு நிகரான தங்க எடை உங்கள் கணக்கில் சேர்க்கப்படும்.\n• **போனஸ் சலுகை (0-75 நாட்கள்):** முதல் 75 நாட்களுக்குள் செலுத்தப்படும் அனைத்து தொகைகளுக்கும் 7.5% போனஸ் வழங்கப்படும். உதாரணமாக ₹10,000 செலுத்தினால் ₹750 போனஸ் மதிப்புள்ள தங்க எடை கணக்கில் சேர்க்கப்படும்.\n• **போனஸ் சலுகை (76-150 நாட்கள்):** 5.0% போனஸ்.\n• **போனஸ் சலுகை (151-225 நாட்கள்):** 3.0% போனஸ்.\n• **போனஸ் சலுகை (226-300 நாட்கள்):** 1.0% போனஸ்.' :
+            '• **Plan Duration:** 11 Months (300 days accumulation period + 30 days lock-in/maturity period).\n• **Bonus Calculation:** Bonus is credited as an additional cash value equivalent, which is instantly converted to gold weight at prevailing market rates.\n• **0 to 75 Days Payment:** Get a high 7.5% bonus on all payments made within the first 75 days. (e.g. ₹10,000 paid yields a bonus value of ₹750, adding equivalent gold weight to your account).\n• **76 to 150 Days Payment:** 5.0% bonus added to your payments.\n• **151 to 225 Days Payment:** 3.0% bonus added to your payments.\n• **226 to 300 Days Payment:** 1.0% bonus added to your payments.',
+          type: 0
+        },
+        {
+          title: lang === 'ta' ? 'அடிக்கடி கேட்கப்படும் கேள்விகள் (FAQs)' : 'Frequently Asked Questions (FAQs)',
+          content: lang === 'ta' ?
+            '**1. இந்த தங்கத்தை வாங்க யார் தகுதியானவர்?**\n18 வயது நிரம்பிய இந்திய குடிமக்கள் அனைவரும் இந்த திட்டத்தில் இணைய தகுதியானவர்கள்.\n\n**2. குறைந்தபட்ச சேமிப்பு தொகை எவ்வளவு?**\nவெறும் ₹100 முதல் நீங்கள் இந்த திட்டத்தில் சேமிக்க ஆரம்பிக்கலாம்.\n\n**3. முதிர்வில் என்னால் சிறப்பு ஆபரணங்கள் வாங்க முடியுமா?**\nஆம், உங்கள் எடையை எந்தவித செய்கூலியும் இன்றி அழகான தங்க நகைகளாகவோ அல்லது நாணயங்களாகவோ மாற்றிக் கொள்ளலாம்.\n\n**4. எனது தங்கம் எடையை நான் எப்படி கண்காணிப்பது?**\nஉங்கள் மொபைல் ஆப்பில் உள்ள "Ledger" பக்கத்தில் உங்கள் சேமிப்பு மற்றும் போனஸ் எடையை உடனுக்குடன் தெரிந்துகொள்ளலாம்.' :
+            '**1. Who is eligible to buy this gold?**\nAny Indian citizen above 18 years of age is eligible to enroll in Aishwaryam DigiGold.\n\n**2. What is the minimum amount of enrolling Aishwaryam DigiGold?**\nYou can start saving in this scheme from as low as ₹100.\n\n**3. Can I purchase special items like jewelry under this plan?**\nYes, at maturity you can redeem your accumulated gold grams for beautiful physical jewelry with up to 18% discount on making/wastage charges.\n\n**4. How do I know the weight of accumulated gold?**\nYou can view your real-time accumulated gold and silver balances instantly in your mobile application ledger under the history tab.',
+          type: 0
+        }
+      ];
+
+      const allSections = [...dbSections, ...defaultSections];
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {sections.map((sec: any, idx: number) => {
+          {allSections.map((sec: any, idx: number) => {
             const type = sec.type !== undefined ? sec.type : 0;
             
             if (type === 0) {
@@ -1575,7 +1511,7 @@ export const SchemeDetail: React.FC = () => {
         )}
       </div>
 
-      {/* Nominee & Address Setup Modal */}
+      {/* Nominee & Address Setup Modal (Aishwaryam Join Form) */}
       {showSetupModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)',
@@ -1583,12 +1519,12 @@ export const SchemeDetail: React.FC = () => {
           backdropFilter: 'blur(4px)', overflowY: 'auto', padding: '20px 0'
         }}>
           <div className="glass-card" style={{
-            width: '90%', maxWidth: '400px', background: 'white', borderRadius: '24px', padding: '24px',
+            width: '95%', maxWidth: '440px', background: 'white', borderRadius: '24px', padding: '24px',
             display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
             margin: 'auto'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 {t('scheme_join_form')}
               </h3>
               <button onClick={() => setShowSetupModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
@@ -1596,15 +1532,66 @@ export const SchemeDetail: React.FC = () => {
               </button>
             </div>
 
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '16px' }}>
-              {t('scheme_join_form_desc')}
-            </span>
+            <div style={{ borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '8px' }}>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '16px' }}>
+                Please review your profile details and provide nominee information to enroll.
+              </span>
+            </div>
 
-            {/* Nominee details */}
+            {/* Read-Only Profile & Address Details Section */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#F9FAFB', borderRadius: '16px', padding: '16px', border: '1px solid #F3F4F6' }}>
+              <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--brand-dark)', textTransform: 'uppercase', letterSpacing: '0.2px', display: 'block', marginBottom: '4px' }}>
+                {lang === 'ta' ? 'சுயவிவர விவரங்கள்' : 'Profile Details'} (Read-Only)
+              </span>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px' }}>
+                <div>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Scheme Plan</label>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{scheme?.planName || 'N/A'}</span>
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Full Name</label>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{profile?.fullName || 'N/A'}</span>
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Mobile Number</label>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{profile?.phoneNumber || 'N/A'}</span>
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Email ID</label>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', wordBreak: 'break-all' }}>{profile?.email || 'N/A'}</span>
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Date of Birth</label>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                    {profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString(lang === 'ta' ? 'ta-IN' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                  </span>
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Pincode</label>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupPincode || 'N/A'}</span>
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>City</label>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupCity || 'N/A'}</span>
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>State</label>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupState || 'N/A'}</span>
+                </div>
+              </div>
+              <div style={{ marginTop: '6px', borderTop: '1px solid #ECECEC', paddingTop: '6px' }}>
+                <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Street Address</label>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', display: 'block' }}>{setupStreet || 'N/A'}</span>
+              </div>
+            </div>
+
+            {/* Editable Nominee Details */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>{t('nominee_information')}</span>
+              
               <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('nominee_name_label')}</label>
+                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('nominee_name_label')} *</label>
                 <input
                   type="text"
                   placeholder={t('enter_nominee_name')}
@@ -1615,18 +1602,7 @@ export const SchemeDetail: React.FC = () => {
               </div>
 
               <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('nominee_mobile')}</label>
-                <input
-                  type="text"
-                  placeholder={t('ten_digit_mobile')}
-                  value={setupNomineePhone}
-                  onChange={(e) => setSetupNomineePhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('relationship')}</label>
+                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('relationship')} *</label>
                 <select
                   value={setupNomineeRelationship}
                   onChange={(e) => setSetupNomineeRelationship(e.target.value)}
@@ -1640,58 +1616,53 @@ export const SchemeDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Address details */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '8px', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '12px' }}>
-              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>{t('primary_address')}</span>
-              
-              <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('pincode_label')}</label>
+            {/* Terms and Conditions expanded section */}
+            <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '12px', marginTop: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <input
-                  type="text"
-                  placeholder={t('enter_pincode')}
-                  value={setupPincode}
-                  onChange={(e) => handleSetupPincodeChange(e.target.value)}
-                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: setupPinError ? '1px solid var(--error-red)' : '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px' }}
+                  type="checkbox"
+                  id="agree-checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                 />
-                {setupPinError && (
-                  <span style={{ fontSize: '11px', color: 'var(--error-red)', marginTop: '4px', display: 'block' }}>
-                    {setupPinError}
+                <label htmlFor="agree-checkbox" style={{ fontSize: '12px', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                  By continuing, you agree to the{' '}
+                  <span
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowTermsCollapse(!showTermsCollapse);
+                    }}
+                    style={{ color: 'var(--brand-mid)', fontWeight: 'bold', textDecoration: 'underline', cursor: 'pointer' }}
+                  >
+                    Terms & Conditions
                   </span>
-                )}
+                </label>
               </div>
 
-              <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('state_label')}</label>
-                <input
-                  type="text"
-                  readOnly
-                  placeholder="Auto-populated on Pincode entry..."
-                  value={setupState}
-                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px', background: '#F3F4F6', color: '#1F2937' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('city_label')}</label>
-                <input
-                  type="text"
-                  readOnly
-                  placeholder="Auto-populated on Pincode entry..."
-                  value={setupCity}
-                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px', background: '#F3F4F6', color: '#1F2937' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('street_address')}</label>
-                <input
-                  type="text"
-                  placeholder={t('street_address_placeholder')}
-                  value={setupStreet}
-                  onChange={(e) => setSetupStreet(e.target.value)}
-                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px' }}
-                />
-              </div>
+              {/* Expandable Terms Details Container */}
+              {showTermsCollapse && (
+                <div style={{
+                  marginTop: '10px',
+                  background: '#FFFDF9',
+                  border: '1px dashed #FFD700',
+                  borderRadius: '12px',
+                  padding: '12px',
+                  maxHeight: '160px',
+                  overflowY: 'auto',
+                  fontSize: '11px',
+                  color: 'var(--text-secondary)',
+                  lineHeight: '15px'
+                }}>
+                  <strong style={{ display: 'block', marginBottom: '4px', color: 'var(--brand-dark)' }}>Scheme Rules & Terms:</strong>
+                  1. **Duration:** 11 Months plan (300 days systematic accumulation + 30 days lock-in / maturity period).<br />
+                  2. **Micro-Savings:** Save as frequently as you wish, with a minimum payment starting from ₹100.<br />
+                  3. **Loyalty Bonus:** Earn instant cash-equivalent gold value bonuses up to 7.5% depending on when payment is made (0-75 days: 7.5%, 76-150 days: 5.0%, 151-225 days: 3.0%, 226-300 days: 1.0%).<br />
+                  4. **No Cash Refunds:** Accumulation must be redeemed for physical gold jewelry/coins at Aishwaryam Swarna Mahal. Wastage & making charges are waived up to 18%.<br />
+                  5. **Pre-closure:** Pre-closure is allowed but forfeits all accumulated loyalty bonus gold weight.
+                </div>
+              )}
             </div>
 
             {/* Save & Proceed button */}
@@ -1700,32 +1671,22 @@ export const SchemeDetail: React.FC = () => {
               disabled={
                 isProcessing ||
                 !setupNomineeName.trim() ||
-                setupNomineePhone.length !== 10 ||
                 !setupNomineeRelationship ||
-                !setupState || 
-                !setupCity || 
-                !setupStreet.trim() || 
-                setupPincode.length !== 6 || 
-                setupPinError !== null
+                !agreedToTerms
               }
               style={{
-                width: '100%', height: '46px', borderRadius: '12px', background: 'var(--gradient-brand)',
+                width: '100%', height: '46px', borderRadius: '12px', background: 'var(--brand-dark)',
                 color: 'white', border: 'none', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer',
-                marginTop: '10px', boxShadow: '0 4px 10px var(--brand-glow)',
+                marginTop: '6px', boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
                 opacity: (
                   isProcessing ||
                   !setupNomineeName.trim() ||
-                  setupNomineePhone.length !== 10 ||
                   !setupNomineeRelationship ||
-                  !setupState || 
-                  !setupCity || 
-                  !setupStreet.trim() || 
-                  setupPincode.length !== 6 || 
-                  setupPinError !== null
+                  !agreedToTerms
                 ) ? 0.5 : 1
               }}
             >
-              {isProcessing ? t('saving') : t('save_proceed')}
+              {isProcessing ? t('saving') : 'PROCEED'}
             </button>
           </div>
         </div>
