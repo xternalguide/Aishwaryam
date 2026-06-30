@@ -273,7 +273,7 @@ export const SchemeMaster: React.FC = () => {
     if (!window.confirm('Are you sure you want to permanently delete this scheme?')) return;
 
     try {
-      const res = await fetch(`${apiBase}/api/Scheme/admin/delete/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${apiBase}/api/Scheme/${id}`, { method: 'DELETE' });
       if (res.ok) {
         showToast('Scheme deleted successfully', 'success');
         // Force version increment trigger
