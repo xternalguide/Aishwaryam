@@ -564,25 +564,6 @@ export const Dashboard: React.FC = () => {
         expandedList.push(tx);
       }
       
-      // 3. Dynamically insert a separate companion virtual bonus transaction if the purchase contains a bonus
-      const hasBonus = (tx.transactionType === 'BUY' || tx.transactionType === 'INSTALLMENT' || tx.type === 'BUY' || tx.type === 'INSTALLMENT') && (tx.bonusGoldMg || 0) > 0;
-      if (hasBonus) {
-        const virtualBonus = {
-          ...tx,
-          id: `${tx.id}_virtual_bonus`,
-          transactionType: 'BONUS',
-          type: 'BONUS',
-          goldWeightMg: tx.bonusGoldMg || 0,
-          amountPaise: 0,
-          schemeName: tx.schemeName ? `Loyalty Bonus (${tx.schemeName})` : 'Installment Loyalty Bonus',
-          isVirtualBonus: true
-        };
-        
-        // Show virtual bonus under ALL and BONUS filters
-        if (txFilter === 'ALL' || txFilter === 'BONUS') {
-          expandedList.push(virtualBonus);
-        }
-      }
     });
 
     let list = expandedList;

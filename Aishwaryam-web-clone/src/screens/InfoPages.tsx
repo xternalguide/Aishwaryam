@@ -688,7 +688,6 @@ export const MyBonuses: React.FC = () => {
   };
 
   const bonusTransactions = transactions.filter(t => 
-    ((t.transactionType === 'BUY' || t.transactionType === 'INSTALLMENT') && t.bonusGoldMg > 0) ||
     t.transactionType === 'EVENT_BONUS' ||
     t.transactionType === 'BONUS' ||
     t.type === 'BONUS' ||

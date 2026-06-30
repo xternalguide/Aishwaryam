@@ -417,6 +417,11 @@ export const SchemeDetail: React.FC = () => {
                 type: 'BUY',
                 amountPaise,
                 goldWeightMg: verifyRes.data.goldWeightMg || Math.round(goldWeightGrams * 1000),
+                pricePerGmPaise: verifyRes.data.pricePerGmPaise,
+                bonusGoldMg: verifyRes.data.bonusGoldMg,
+                bonusPercentage: verifyRes.data.bonusPercentage,
+                baseAmountPaise: verifyRes.data.baseAmountPaise,
+                gstAmountPaise: verifyRes.data.gstAmountPaise,
                 createdAt: new Date().toISOString(),
                 rateSource: 'Live',
                 schemeName: scheme.planName
@@ -480,6 +485,11 @@ export const SchemeDetail: React.FC = () => {
                     type: 'BUY',
                     amountPaise,
                     goldWeightMg: verifyRes.data.goldWeightMg || Math.round(goldWeightGrams * 1000),
+                    pricePerGmPaise: verifyRes.data.pricePerGmPaise,
+                    bonusGoldMg: verifyRes.data.bonusGoldMg,
+                    bonusPercentage: verifyRes.data.bonusPercentage,
+                    baseAmountPaise: verifyRes.data.baseAmountPaise,
+                    gstAmountPaise: verifyRes.data.gstAmountPaise,
                     createdAt: new Date().toISOString(),
                     rateSource: 'Live',
                     schemeName: scheme.planName
