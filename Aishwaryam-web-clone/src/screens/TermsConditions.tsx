@@ -1,15 +1,32 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from '../utils/translation';
 
 export const TermsConditions: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
 
   const handleBack = () => {
-    localStorage.setItem('DASHBOARD_ACTIVE_TAB', '2');
-    navigate('/dashboard');
+    const s = location.state as any;
+    if (s && s.fromJoinForm && s.schemeId) {
+      navigate(`/scheme/${s.schemeId}`, {
+        state: {
+          fromJoinForm: true,
+          nomineeName: s.nomineeName,
+          nomineePhone: s.nomineePhone,
+          nomineeRelationship: s.nomineeRelationship,
+          pincode: s.pincode,
+          city: s.city,
+          state: s.state,
+          street: s.street
+        }
+      });
+    } else {
+      localStorage.setItem('DASHBOARD_ACTIVE_TAB', '2');
+      navigate('/dashboard');
+    }
   };
 
   const sections = [
