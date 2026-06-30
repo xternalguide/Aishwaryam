@@ -1243,7 +1243,7 @@ export const Dashboard: React.FC = () => {
   // MAIN RENDER
   // ═══════════════════════════════════════════
   return (
-    <div style={{ display:'flex', flexDirection:isDesktop?'row':'column', height:'100vh', width:'100vw', maxWidth:'100%', overflow:'hidden', background:DS.bgPage, fontFamily:DS.font, position:'relative' }}>
+    <div style={{ display:'flex', flexDirection:isDesktop?'row':'column', height:'100%', width:'100%', overflow:'hidden', background:DS.bgPage, fontFamily:DS.font, position:'relative' }}>
       <style>{globalStyles}</style>
 
       {/* ── DESKTOP SIDEBAR ── */}
