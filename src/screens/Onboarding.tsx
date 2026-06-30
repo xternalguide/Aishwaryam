@@ -16,6 +16,8 @@ export const Onboarding: React.FC = () => {
   useEffect(() => {
     if (profile?.kycLevel === 'PENDING' || profile?.kycLevel === 'FULL') {
       navigate('/dashboard');
+    } else if (profile?.kycLevel === 'REJECTED' || (profile?.fullName && profile?.fullName.trim() !== '')) {
+      setCurrentStep(2);
     }
   }, [profile, navigate]);
 
@@ -291,6 +293,8 @@ export const Onboarding: React.FC = () => {
     const marriageValid = !isMarried || (isValidDateString(weddingDate) && weddingDateError === null);
     return basicInfo && dobValid && marriageValid;
   };
+
+
 
   const handleNext = async () => {
     const userId = SessionManager.getUserId() || 'user-id-999';
@@ -803,6 +807,8 @@ export const Onboarding: React.FC = () => {
                 <ShieldCheck color="var(--brand-accent)" size={24} />
                 <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>{t('step_2_kyc_verification')}</h2>
               </div>
+
+
 
               {/* PAN Verification */}
               <div className="glass-card" style={{ borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>

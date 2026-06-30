@@ -172,20 +172,238 @@ instance.interceptors.response.use(
   }
 );
 
+const mockKycRequests = (method: string, url: string, data?: any): any => {
+  // Normalize URL
+  const path = url.replace(/^\/+|\/+$/g, ''); // strip leading/trailing slashes
+  const userId = SessionManager.getUserId() || 'user_123';
+
+  // Helper to load/save documents
+  const getDocs = () => {
+    try {
+      const raw = localStorage.getItem('CACHE_KYC_DOCUMENTS');
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  };
+  const saveDocs = (docs: any[]) => {
+    localStorage.setItem('CACHE_KYC_DOCUMENTS', JSON.stringify(docs));
+    // Trigger storage event to update components in real time
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  // Helper to update profile status
+  const updateProfileKycLevel = (targetUserId: string, level: string) => {
+    try {
+      const profileRaw = localStorage.getItem('CACHE_PROFILE');
+      if (profileRaw) {
+        const profile = JSON.parse(profileRaw);
+        if (profile.userId === targetUserId || !profile.userId) {
+          profile.kycLevel = level;
+          localStorage.setItem('CACHE_PROFILE', JSON.stringify(profile));
+          window.dispatchEvent(new Event('storage'));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // 1. GET api/Kyc/status/:userId
+  if (method === 'GET' && path.startsWith('api/Kyc/status/')) {
+    const targetUserId = path.substring('api/Kyc/status/'.length);
+    const docs = getDocs().filter((d: any) => d.userId === targetUserId);
+    
+    // Determine overall status
+    let status = 'PENDING';
+    const profileRaw = localStorage.getItem('CACHE_PROFILE');
+    if (profileRaw) {
+      try {
+        const profile = JSON.parse(profileRaw);
+        status = profile.kycLevel || 'PENDING';
+      } catch {}
+    }
+
+    return {
+      data: {
+        success: true,
+        status,
+        documents: docs
+      },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {}
+    };
+  }
+
+  // 2. POST api/Kyc/submit
+  if (method === 'POST' && path === 'api/Kyc/submit') {
+    const { userId: bodyUserId, documentType, documentNumber, documentUrl } = data;
+    const targetUserId = bodyUserId || userId;
+    const docs = getDocs();
+
+    // Mark any existing PENDING document of this type as REPLACED to show history
+    const updatedDocs = docs.map((d: any) => {
+      if (d.userId === targetUserId && d.documentType === documentType && d.status === 'PENDING') {
+        return { ...d, status: 'REPLACED' };
+      }
+      return d;
+    });
+
+    const newDoc = {
+      id: 'kyc_' + Math.random().toString(36).substring(2, 9),
+      userId: targetUserId,
+      documentType,
+      documentNumber,
+      documentUrl: documentUrl || 'https://placeholder.url/document.jpg',
+      status: 'PENDING',
+      submittedAt: new Date().toISOString()
+    };
+
+    updatedDocs.push(newDoc);
+    saveDocs(updatedDocs);
+
+    return {
+      data: { success: true, message: 'KYC Document submitted successfully', document: newDoc },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {}
+    };
+  }
+
+  // 3. POST api/Kyc/update-status
+  if (method === 'POST' && path === 'api/Kyc/update-status') {
+    const { userId: bodyUserId, newLevel } = data;
+    const targetUserId = bodyUserId || userId;
+    updateProfileKycLevel(targetUserId, newLevel);
+    return {
+      data: { success: true, message: `Status updated to ${newLevel}` },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {}
+    };
+  }
+
+  // 4. GET api/Kyc/admin/pending
+  if (method === 'GET' && path === 'api/Kyc/admin/pending') {
+    const docs = getDocs();
+    
+    // Get the current profile so the admin sees the user
+    let userProfile = { userId, fullName: 'User', phoneNumber: '9876543210', kycLevel: 'PENDING' };
+    const profileRaw = localStorage.getItem('CACHE_PROFILE');
+    if (profileRaw) {
+      try {
+        const profile = JSON.parse(profileRaw);
+        userProfile = {
+          userId: profile.userId || userId,
+          fullName: profile.fullName || 'User',
+          phoneNumber: profile.phoneNumber || '9876543210',
+          kycLevel: profile.kycLevel || 'PENDING'
+        };
+      } catch {}
+    }
+
+    // Wrap the user profile in a list
+    const users = [
+      {
+        ...userProfile,
+        documents: docs.filter((d: any) => d.userId === userProfile.userId)
+      }
+    ];
+
+    return {
+      data: { success: true, users },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {}
+    };
+  }
+
+  // 5. POST api/Kyc/admin/verify
+  if (method === 'POST' && path === 'api/Kyc/admin/verify') {
+    const { userId: bodyUserId, documentId, status, rejectedReason } = data;
+    const targetUserId = bodyUserId || userId;
+    const docs = getDocs();
+
+    const updatedDocs = docs.map((d: any) => {
+      if (d.id === documentId) {
+        return {
+          ...d,
+          status,
+          rejectedReason: status === 'REJECTED' ? rejectedReason || 'Blurry document' : undefined,
+          verifiedAt: new Date().toISOString()
+        };
+      }
+      return d;
+    });
+
+    saveDocs(updatedDocs);
+
+    // Calculate user's overall kycLevel
+    const userDocs = updatedDocs.filter((d: any) => d.userId === targetUserId && d.status !== 'REPLACED');
+    const pan = userDocs.find((d: any) => d.documentType === 'PAN');
+    const aadhaarFront = userDocs.find((d: any) => d.documentType === 'AADHAAR_FRONT');
+    const aadhaarBack = userDocs.find((d: any) => d.documentType === 'AADHAAR_BACK');
+
+    let overallStatus = 'PENDING';
+    if (
+      pan?.status === 'APPROVED' &&
+      aadhaarFront?.status === 'APPROVED' &&
+      aadhaarBack?.status === 'APPROVED'
+    ) {
+      overallStatus = 'FULL';
+    } else if (
+      pan?.status === 'REJECTED' ||
+      aadhaarFront?.status === 'REJECTED' ||
+      aadhaarBack?.status === 'REJECTED'
+    ) {
+      overallStatus = 'REJECTED';
+    } else if (
+      pan?.status === 'PENDING' ||
+      aadhaarFront?.status === 'PENDING' ||
+      aadhaarBack?.status === 'PENDING'
+    ) {
+      overallStatus = 'PENDING';
+    }
+
+    updateProfileKycLevel(targetUserId, overallStatus);
+
+    return {
+      data: { success: true, message: `Document verification saved as ${status}`, kycLevel: overallStatus },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {}
+    };
+  }
+
+  return null;
+};
+
 export const ApiClient = {
   getDeviceFingerprint,
   // GET wraps Axios request
   get: async <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+    const mock = mockKycRequests('GET', url);
+    if (mock) return mock;
     return await instance.get<T>(url, config);
   },
 
   // POST wraps Axios request
   post: async <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+    const mock = mockKycRequests('POST', url, data);
+    if (mock) return mock;
     return await instance.post<T>(url, data, config);
   },
 
   // PUT wraps Axios request
   put: async <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+    const mock = mockKycRequests('PUT', url, data);
+    if (mock) return mock;
     return await instance.put<T>(url, data, config);
   },
 

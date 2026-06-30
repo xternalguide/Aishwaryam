@@ -28,9 +28,9 @@ export const Welcome: React.FC = () => {
   useEffect(() => {
     const fetchWelcomeSlides = async () => {
       try {
-        const res = await ApiClient.get('api/Welcome/slides');
-        if (res.data && res.data.success && res.data.slides && res.data.slides.length > 0) {
-          setSlides(res.data.slides);
+        const res = await ApiClient.get('api/Banner/active?location=ONBOARDING');
+        if (res.data && res.data.success && res.data.banners && res.data.banners.length > 0) {
+          setSlides(res.data.banners);
         } else {
           // If no sliders are configured in the admin panel, skip completely
           SessionManager.markWelcomeOnboardingSeen();

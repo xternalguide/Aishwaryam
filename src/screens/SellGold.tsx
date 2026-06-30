@@ -8,8 +8,15 @@ import { ArrowLeft, AlertTriangle } from 'lucide-react';
 
 export const SellGold: React.FC = () => {
   const navigate = useNavigate();
-  const { portfolio, livePrice, refreshData } = useApp();
+  const { portfolio, livePrice, refreshData, profile } = useApp();
   const { t, lang } = useTranslation();
+
+  useEffect(() => {
+    if (profile && profile.kycLevel === 'REJECTED') {
+      alert(t('kyc_rejected_block') || 'Your KYC is rejected. Please re-submit your KYC.');
+      navigate('/onboarding');
+    }
+  }, [profile, navigate]);
 
   const [goldBalanceMg, setGoldBalanceMg] = useState(19800); // 19.8 grams
   const [redeemableGoldMg, setRedeemableGoldMg] = useState(19800);

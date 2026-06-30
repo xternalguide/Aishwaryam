@@ -34,6 +34,9 @@ public class MainActivity extends BridgeActivity {
             webView.getSettings().setSupportMultipleWindows(true);
             webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
             
+            // Disable Android OS text zoom scaling to keep layout responsive and clean
+            webView.getSettings().setTextZoom(100);
+            
             // Enable DOM storage and database on main WebView (CRITICAL for Razorpay session persistence)
             webView.getSettings().setDomStorageEnabled(true);
             webView.getSettings().setDatabaseEnabled(true);

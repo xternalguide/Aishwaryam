@@ -8,8 +8,15 @@ import { ArrowLeft, Info } from 'lucide-react';
 
 export const BuyGold: React.FC = () => {
   const navigate = useNavigate();
-  const { livePrice, refreshData } = useApp();
+  const { livePrice, refreshData, profile } = useApp();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (profile && profile.kycLevel === 'REJECTED') {
+      alert(t('kyc_rejected_block') || 'Your KYC is rejected. Please re-submit your KYC.');
+      navigate('/onboarding');
+    }
+  }, [profile, navigate]);
 
   const [buyPricePaise, setBuyPricePaise] = useState(754200); // ₹7,542.00 paise fallback
   const [priceUpdatedAt, setPriceUpdatedAt] = useState<string | null>(null);

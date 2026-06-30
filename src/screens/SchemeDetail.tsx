@@ -74,9 +74,10 @@ export const SchemeDetail: React.FC = () => {
     }
   }, [userSchemeId]);
 
-  // General configuration/metadata
   const [kycLevel, setKycLevel] = useState('BASIC');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingTitle, setProcessingTitle] = useState('Verifying Transaction...');
+  const [processingMsg, setProcessingMsg] = useState('Confirming your purchase. Please do not close the application or go back.');
 
   // Consume from AppContext
   const {
@@ -104,7 +105,6 @@ export const SchemeDetail: React.FC = () => {
   const [setupPinError, setSetupPinError] = useState<string | null>(null);
 
   const RELATIONSHIPS = ["Father", "Mother", "Wife", "Husband", "Son", "Daughter", "Brother", "Guardian"];
-  const STATES = ["Tamil Nadu", "Puducherry", "Kerala", "Karnataka"];
   const CITIES_BY_STATE: Record<string, string[]> = {
     "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Salem", "Trichy", "Tirunelveli"],
     "Puducherry": ["Puducherry", "Karaikal"],
@@ -180,49 +180,76 @@ export const SchemeDetail: React.FC = () => {
     const numericValue = value.replace(/\D/g, '').slice(0, 6);
     setSetupPincode(numericValue);
 
-    if (numericValue.length >= 3) {
-      const prefix = numericValue.substring(0, 3);
-      let foundCity = '';
-      let foundState = '';
-      for (const [city, prefixes] of Object.entries(PIN_PREFIXES)) {
-        if (prefixes.includes(prefix)) {
-          foundCity = city;
-          break;
-        }
-      }
-      if (foundCity) {
-        for (const [state, cities] of Object.entries(CITIES_BY_STATE)) {
-          if (cities.includes(foundCity)) {
-            foundState = state;
-            break;
+    if (numericValue.length === 6) {
+      fetch(`https://api.postalpincode.in/pincode/${numericValue}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice) {
+            const postOffice = data[0].PostOffice[0];
+            setSetupState(postOffice.State || '');
+            setSetupCity(postOffice.District || postOffice.Block || '');
+            setSetupPinError(null);
+          } else {
+            // Static prefix fallback
+            const prefix = numericValue.substring(0, 3);
+            let foundCity = '';
+            let foundState = '';
+            for (const [city, prefixes] of Object.entries(PIN_PREFIXES)) {
+              if (prefixes.includes(prefix)) {
+                foundCity = city;
+                break;
+              }
+            }
+            if (foundCity) {
+              for (const [state, cities] of Object.entries(CITIES_BY_STATE)) {
+                if (cities.includes(foundCity)) {
+                  foundState = state;
+                  break;
+                }
+              }
+            }
+            if (foundCity && foundState) {
+              setSetupCity(foundCity);
+              setSetupState(foundState);
+              setSetupPinError(null);
+            } else {
+              setSetupPinError("Invalid PIN Code.");
+            }
           }
-        }
-      }
-      if (foundCity && foundState) {
-        setSetupCity(foundCity);
-        setSetupState(foundState);
-        setSetupPinError(null);
-      }
-    }
-
-    if (numericValue.length > 0) {
-      if (numericValue.length < 6) {
+        })
+        .catch(() => {
+          // Static prefix fallback
+          const prefix = numericValue.substring(0, 3);
+          let foundCity = '';
+          let foundState = '';
+          for (const [city, prefixes] of Object.entries(PIN_PREFIXES)) {
+            if (prefixes.includes(prefix)) {
+              foundCity = city;
+              break;
+            }
+          }
+          if (foundCity) {
+            for (const [state, cities] of Object.entries(CITIES_BY_STATE)) {
+              if (cities.includes(foundCity)) {
+                foundState = state;
+                break;
+              }
+            }
+          }
+          if (foundCity && foundState) {
+            setSetupCity(foundCity);
+            setSetupState(foundState);
+            setSetupPinError(null);
+          } else {
+            setSetupPinError("Invalid PIN Code.");
+          }
+        });
+    } else {
+      if (numericValue.length > 0 && numericValue.length < 6) {
         setSetupPinError("PIN Code must be exactly 6 digits.");
       } else {
-        if (setupCity) {
-          const prefixes = PIN_PREFIXES[setupCity] || [];
-          const isValidPrefix = prefixes.some(prefix => numericValue.startsWith(prefix));
-          if (!isValidPrefix) {
-            setSetupPinError(`PIN Code must start with ${prefixes.join(', ')} for ${setupCity}.`);
-          } else {
-            setSetupPinError(null);
-          }
-        } else {
-          setSetupPinError(null);
-        }
+        setSetupPinError(null);
       }
-    } else {
-      setSetupPinError(null);
     }
   };
 
@@ -368,6 +395,8 @@ export const SchemeDetail: React.FC = () => {
 
   const launchRazorpayCheckout = async (amountPaise: number, isJoiningFlow: boolean, goldWeightGrams: number, customSchemeId?: string | null) => {
     if (!scheme) return;
+    setProcessingTitle('Verifying Transaction...');
+    setProcessingMsg('Confirming your purchase. Please do not close the application or go back.');
     setIsProcessing(true);
     try {
       const userId = SessionManager.getUserId() || 'user-id-999';
@@ -610,6 +639,31 @@ export const SchemeDetail: React.FC = () => {
       return;
     }
 
+    if (!isJoinFormCompleted) {
+      setSetupNomineeName(profile?.nomineeName || '');
+      setSetupNomineePhone(profile?.nomineePhoneNumber || '');
+      setSetupNomineeRelationship(profile?.nomineeRelationship || '');
+
+      if (userAddresses && userAddresses.length > 0) {
+        const defaultAddr = userAddresses.find(a => a.isDefault) || userAddresses[0];
+        setSetupState(defaultAddr.state || '');
+        setSetupCity(defaultAddr.city || '');
+        setSetupStreet(defaultAddr.streetAddress || defaultAddr.street || '');
+        setSetupPincode(defaultAddr.pincode || '');
+      } else {
+        setSetupState('');
+        setSetupCity('');
+        setSetupStreet('');
+        setSetupPincode('');
+      }
+
+      setPendingAction('JOIN');
+      setShowSetupModal(true);
+      return;
+    }
+
+    setProcessingTitle('Joining Scheme...');
+    setProcessingMsg('Enrolling you in the savings plan. Please wait...');
     setIsProcessing(true);
     try {
       const joinRes = await ApiClient.post('api/Scheme/join', {
@@ -637,6 +691,13 @@ export const SchemeDetail: React.FC = () => {
     if (!userId) return;
     
     const hasAddress = userAddresses && userAddresses.length > 0;
+    if (pendingAction === 'JOIN') {
+      setProcessingTitle('Joining Scheme...');
+      setProcessingMsg('Enrolling you in the savings plan. Please wait...');
+    } else {
+      setProcessingTitle('Saving Details...');
+      setProcessingMsg('Updating nominee and address details...');
+    }
     setIsProcessing(true);
     
     try {
@@ -750,7 +811,7 @@ export const SchemeDetail: React.FC = () => {
       amountPaise = Math.round(parsedVal * 100);
       fallbackGrams = (parsedVal / 1.03 * 1.075 * 100) / goldPrice22K;
     } else {
-      const baseMetalVal = (parsedVal * goldPrice22K) / 100;
+      const baseMetalVal = parsedVal * goldPrice22K;
       amountPaise = Math.round(baseMetalVal * 1.03);
       fallbackGrams = parsedVal * 1.075;
     }
@@ -760,6 +821,8 @@ export const SchemeDetail: React.FC = () => {
       return;
     }
 
+    setProcessingTitle('Verifying Transaction...');
+    setProcessingMsg('Confirming your purchase. Please do not close the application or go back.');
     setIsProcessing(true);
     try {
       const userId = SessionManager.getUserId() || 'user-id-999';
@@ -1065,7 +1128,7 @@ export const SchemeDetail: React.FC = () => {
     joinAmountRupees = parsedJoinVal;
   } else {
     const baseMetalVal = (parsedJoinVal * goldPrice22K) / 100;
-    joinAmountRupees = (baseMetalVal * 1.03) / 100;
+    joinAmountRupees = baseMetalVal * 1.03;
   }
   const isJoinAmountValid = parsedJoinVal > 0 && joinAmountRupees >= 100;
 
@@ -1599,40 +1662,24 @@ export const SchemeDetail: React.FC = () => {
 
               <div>
                 <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('state_label')}</label>
-                <select
+                <input
+                  type="text"
+                  readOnly
+                  placeholder="Auto-populated on Pincode entry..."
                   value={setupState}
-                  onChange={(e) => {
-                    setSetupState(e.target.value);
-                    setSetupCity('');
-                    setSetupPincode('');
-                    setSetupPinError(null);
-                  }}
-                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px', background: 'white' }}
-                >
-                  <option value="">{t('select_state')}</option>
-                  {STATES.map((st) => (
-                    <option key={st} value={st}>{autoT(st)}</option>
-                  ))}
-                </select>
+                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px', background: '#F3F4F6', color: '#1F2937' }}
+                />
               </div>
 
               <div>
                 <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('city_label')}</label>
-                <select
+                <input
+                  type="text"
+                  readOnly
+                  placeholder="Auto-populated on Pincode entry..."
                   value={setupCity}
-                  onChange={(e) => {
-                    setSetupCity(e.target.value);
-                    setSetupPincode('');
-                    setSetupPinError(null);
-                  }}
-                  disabled={!setupState}
-                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px', background: !setupState ? '#F3F4F6' : 'white' }}
-                >
-                  <option value="">{t('select_city')}</option>
-                  {(CITIES_BY_STATE[setupState] || []).map((ct) => (
-                    <option key={ct} value={ct}>{autoT(ct)}</option>
-                  ))}
-                </select>
+                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px', background: '#F3F4F6', color: '#1F2937' }}
+                />
               </div>
 
               <div>
@@ -1948,7 +1995,7 @@ export const SchemeDetail: React.FC = () => {
             fontFamily: 'var(--font-poppins)',
             letterSpacing: '0.5px'
           }}>
-            Verifying Transaction...
+            {processingTitle}
           </h3>
           <p style={{
             fontSize: '13px',
@@ -1958,7 +2005,7 @@ export const SchemeDetail: React.FC = () => {
             lineHeight: '20px',
             fontFamily: 'var(--font-poppins)'
           }}>
-            Confirming your purchase. Please do not close the application or go back.
+            {processingMsg}
           </p>
         </div>
       )}

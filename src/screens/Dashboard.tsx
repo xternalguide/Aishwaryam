@@ -433,7 +433,7 @@ export const Dashboard: React.FC = () => {
     refreshData(!profile);
     const fetchBanners = async () => {
       try {
-        const res = await ApiClient.get('api/Banner/active');
+        const res = await ApiClient.get('api/Banner/active?location=POSTER');
         if (res.data && res.data.success) setBanners(res.data.banners || []);
       } catch (err) { console.error('Failed to load active banners:', err); }
     };
@@ -533,6 +533,24 @@ export const Dashboard: React.FC = () => {
   // ═══════════════════════════════════════════
   // RENDER HELPERS (MOBILE INTEGRATED DESIGN)
   // ═══════════════════════════════════════════
+  
+  const handleActionClick = (onClick: () => void) => {
+    if (kycLevel === 'BASIC') {
+      alert(t('kyc_basic_block'));
+      navigate('/onboarding');
+      return;
+    }
+    if (kycLevel === 'PENDING') {
+      alert(t('kyc_pending_block'));
+      return;
+    }
+    if (kycLevel === 'REJECTED') {
+      alert(lang === 'ta' ? 'Resubmit the KYC. உங்கள் KYC நிராகரிக்கப்பட்டுள்ளது.' : 'KYC Rejected. Please resubmit your KYC.');
+      navigate('/onboarding');
+      return;
+    }
+    onClick();
+  };
 
   const renderKycWarningBanner = () => (
     <div 
@@ -602,6 +620,40 @@ export const Dashboard: React.FC = () => {
     </div>
   );
 
+  const renderKycRejectedBanner = () => (
+    <div 
+      onClick={() => navigate('/onboarding')}
+      style={{
+        background: '#FEF2F2',
+        border: '1.5px solid rgba(239, 68, 68, 0.3)',
+        borderRadius: '16px',
+        padding: '16px',
+        cursor: 'pointer',
+        boxShadow: '0 8px 20px rgba(239, 68, 68, 0.08)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        marginTop: '8px'
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+        <AlertCircle size={20} color="#EF4444" style={{ flexShrink: 0 }} />
+        <div style={{ fontSize: '11.5px', color: '#374151', lineHeight: '16px', textAlign: 'left' }}>
+          <strong style={{ fontWeight: '800', color: '#EF4444' }}>
+            {lang === 'ta' ? 'KYC நிராகரிக்கப்பட்டது ❌' : 'KYC Rejected ❌'}
+          </strong>
+          <span style={{ display: 'block', marginTop: '2px', color: '#EF4444', fontWeight: 'bold' }}>
+            {lang === 'ta' ? 'Resubmit the KYC. சரியான ஆவணங்களை மீண்டும் சமர்ப்பிக்கவும்.' : 'Resubmit the KYC. Please re-upload valid documents.'}
+          </span>
+        </div>
+      </div>
+      <span style={{ fontSize: '12.5px', fontWeight: '800', color: '#EF4444', whiteSpace: 'nowrap' }}>
+        {lang === 'ta' ? 'மீண்டும் சமர்ப்பி' : 'Resubmit'}
+      </span>
+    </div>
+  );
+
 
   const renderMobileIntegratedHeader = () => {
     const totalBonusGoldMg = portfolio?.totalBonusGoldMg || 0;
@@ -642,11 +694,12 @@ export const Dashboard: React.FC = () => {
           </button>
         </div>
 
-        {/* Balance or Warning Display */}
         {kycLevel === 'BASIC' ? (
           renderKycWarningBanner()
         ) : kycLevel === 'PENDING' ? (
           renderKycPendingBanner()
+        ) : kycLevel === 'REJECTED' ? (
+          renderKycRejectedBanner()
         ) : (
           <>
             {/* Balance Display */}
@@ -698,10 +751,10 @@ export const Dashboard: React.FC = () => {
 
   const renderMobileQuickActions = () => {
     const actions = [
-      { label: t('action_schemes'), icon: <TrendingUp size={20} color="#C2185B" />, bg: 'rgba(194, 24, 91, 0.12)', onClick: () => navigate('/scheme-explorer') },
-      { label: t('my_bonuses'), icon: <Award size={20} color="#FFB300" />, bg: 'rgba(255, 179, 0, 0.12)', onClick: () => navigate('/my-bonuses') },
-      { label: t('action_referral'), icon: <Gift size={20} color="#10B981" />, bg: 'rgba(16, 185, 129, 0.12)', onClick: () => navigate('/referral') },
-      { label: t('action_calculator'), icon: <Calculator size={20} color="#0288D1" />, bg: 'rgba(2, 136, 209, 0.12)', onClick: () => navigate('/profile/price-calculator') },
+      { label: t('action_schemes'), icon: <TrendingUp size={20} color="#C2185B" />, bg: 'rgba(194, 24, 91, 0.12)', onClick: () => handleActionClick(() => navigate('/scheme-explorer')) },
+      { label: t('my_bonuses'), icon: <Award size={20} color="#FFB300" />, bg: 'rgba(255, 179, 0, 0.12)', onClick: () => handleActionClick(() => navigate('/my-bonuses')) },
+      { label: t('action_referral'), icon: <Gift size={20} color="#10B981" />, bg: 'rgba(16, 185, 129, 0.12)', onClick: () => handleActionClick(() => navigate('/referral')) },
+      { label: t('action_calculator'), icon: <Calculator size={20} color="#0288D1" />, bg: 'rgba(2, 136, 209, 0.12)', onClick: () => handleActionClick(() => navigate('/profile/price-calculator')) },
     ];
 
     return (
@@ -821,6 +874,8 @@ export const Dashboard: React.FC = () => {
         renderKycWarningBanner()
       ) : kycLevel === 'PENDING' ? (
         renderKycPendingBanner()
+      ) : kycLevel === 'REJECTED' ? (
+        renderKycRejectedBanner()
       ) : (
         <>
           {/* balance */}
@@ -884,9 +939,9 @@ export const Dashboard: React.FC = () => {
   /** Quick actions 3×1 grid */
   const renderQuickActionsGrid = () => {
     const actions = [
-      { label:'Explore Schemes', icon:<TrendingUp size={22} color={isDark ? '#FFD700' : '#B8860B'} />, bg: isDark ? 'rgba(255,215,0,0.15)' : 'rgba(184,134,11,0.12)', onClick:()=>navigate('/scheme-explorer') },
-      { label:'My Bonuses',      icon:<Award size={22} color="#C2185B" />,      bg:'rgba(194,24,91,0.15)',  onClick:()=>navigate('/my-bonuses') },
-      { label:'Refer & Earn',   icon:<Gift size={22} color="#10B981" />,        bg:'rgba(16,185,129,0.15)', onClick:()=>navigate('/referral') },
+      { label:'Explore Schemes', icon:<TrendingUp size={22} color={isDark ? '#FFD700' : '#B8860B'} />, bg: isDark ? 'rgba(255,215,0,0.15)' : 'rgba(184,134,11,0.12)', onClick:()=>handleActionClick(()=>navigate('/scheme-explorer')) },
+      { label:'My Bonuses',      icon:<Award size={22} color="#C2185B" />,      bg:'rgba(194,24,91,0.15)',  onClick:()=>handleActionClick(()=>navigate('/my-bonuses')) },
+      { label:'Refer & Earn',   icon:<Gift size={22} color="#10B981" />,        bg:'rgba(16,185,129,0.15)', onClick:()=>handleActionClick(()=>navigate('/referral')) },
     ];
     return (
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'12px' }}>
@@ -1243,7 +1298,7 @@ export const Dashboard: React.FC = () => {
   // MAIN RENDER
   // ═══════════════════════════════════════════
   return (
-    <div style={{ display:'flex', flexDirection:isDesktop?'row':'column', height:'100vh', width:'100vw', maxWidth:'100%', overflow:'hidden', background:DS.bgPage, fontFamily:DS.font, position:'relative' }}>
+    <div style={{ display:'flex', flexDirection:isDesktop?'row':'column', height:'100%', width:'100%', overflow:'hidden', background:DS.bgPage, fontFamily:DS.font, position:'relative' }}>
       <style>{globalStyles}</style>
 
       {/* ── DESKTOP SIDEBAR ── */}
