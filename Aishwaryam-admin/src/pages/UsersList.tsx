@@ -46,7 +46,7 @@ export const UsersList: React.FC = () => {
 
   const loadUsers = async () => {
     try {
-      const res = await window.fetchWithCache(`${apiBase}/api/User/all`);
+      const res = await fetch(`${apiBase}/api/User/all`);
       if (res.ok) {
         const data = await res.json();
         setUsers(data);
@@ -163,10 +163,10 @@ export const UsersList: React.FC = () => {
 
     try {
       const [profileRes, portfolioRes, schemesRes, txsRes] = await Promise.all([
-        window.fetchWithCache(`${apiBase}/api/User/profile/${uid}`),
-        window.fetchWithCache(`${apiBase}/api/Dashboard/portfolio/${uid}`),
-        window.fetchWithCache(`${apiBase}/api/Scheme/dashboard/${uid}`),
-        window.fetchWithCache(`${apiBase}/api/Dashboard/transactions/${uid}`)
+        fetch(`${apiBase}/api/User/profile/${uid}`),
+        fetch(`${apiBase}/api/Dashboard/portfolio/${uid}`),
+        fetch(`${apiBase}/api/Scheme/dashboard/${uid}`),
+        fetch(`${apiBase}/api/Dashboard/transactions/${uid}`)
       ]);
 
       let profileData = {};
