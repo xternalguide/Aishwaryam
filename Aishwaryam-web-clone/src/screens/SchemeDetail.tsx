@@ -218,19 +218,22 @@ export const SchemeDetail: React.FC = () => {
     bonusConfigJson: string | null,
     activeDays: number
   ): MilestoneItem[] => {
-    if (!bonusConfigJson) {
-      return [
-        { name: 'Join Bonus', targetDay: 1, bonusPercentage: 7.5, isAchieved: activeDays >= 1 },
-        { name: 'Month 3 Milestone', targetDay: 90, bonusPercentage: 5.5, isAchieved: activeDays >= 90 },
-        { name: 'Month 6 Milestone', targetDay: 180, bonusPercentage: 3.5, isAchieved: activeDays >= 180 },
-        { name: 'Maturity Bonus', targetDay: 330, bonusPercentage: 1.5, isAchieved: activeDays >= 330 }
-      ];
+    const defaultTiers = [
+      { name: lang === 'ta' ? 'அடுக்கு 1 (7.5%)' : 'Tier 1 (7.5%)', targetDay: 75, bonusPercentage: 7.5, isAchieved: activeDays >= 75 },
+      { name: lang === 'ta' ? 'அடுக்கு 2 (5.5%)' : 'Tier 2 (5.5%)', targetDay: 150, bonusPercentage: 5.5, isAchieved: activeDays >= 150 },
+      { name: lang === 'ta' ? 'அடுக்கு 3 (3.5%)' : 'Tier 3 (3.5%)', targetDay: 225, bonusPercentage: 3.5, isAchieved: activeDays >= 225 },
+      { name: lang === 'ta' ? 'அடுக்கு 4 (1.5%)' : 'Tier 4 (1.5%)', targetDay: 330, bonusPercentage: 1.5, isAchieved: activeDays >= 330 }
+    ];
+
+    if (!bonusConfigJson || bonusConfigJson === '[]') {
+      return defaultTiers;
     }
 
     try {
       const config = JSON.parse(bonusConfigJson);
       
       if (Array.isArray(config)) {
+        if (config.length === 0) return defaultTiers;
         return config.map((tier: any) => {
           const start = tier.startDay ?? tier.StartDay ?? 0;
           const end = tier.endDay ?? tier.EndDay ?? 0;
