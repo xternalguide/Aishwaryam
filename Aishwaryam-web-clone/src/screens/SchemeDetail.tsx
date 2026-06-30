@@ -772,11 +772,70 @@ export const SchemeDetail: React.FC = () => {
 
   const renderContentWithTable = (text: string) => {
     if (!text) return null;
+
+    const renderFormattedText = (rawText: string) => {
+      const lines = rawText.split('\n');
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {lines.map((line, li) => {
+            const trimmed = line.trim();
+            if (!trimmed) return <div key={li} style={{ height: '4px' }} />;
+
+            // Detect bullets
+            const isBullet = trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*');
+            // Detect numbered list (e.g. "1. ", "2. ")
+            const matchNum = trimmed.match(/^(\d+)\.\s(.*)/);
+
+            const formatBold = (str: string) => {
+              const parts = str.split('**');
+              return parts.map((part, index) => {
+                if (index % 2 === 1) {
+                  return <strong key={index} style={{ color: 'var(--brand-dark)', fontWeight: '700' }}>{part}</strong>;
+                }
+                return part;
+              });
+            };
+
+            if (isBullet) {
+              const cleanLine = trimmed.replace(/^[•\-\*]\s*/, '');
+              return (
+                <div key={li} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', margin: '2px 0' }}>
+                  <span style={{ color: 'var(--brand-accent)', fontSize: '14px', lineHeight: '1.2' }}>•</span>
+                  <span style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '18px', textAlign: 'left' }}>
+                    {formatBold(cleanLine)}
+                  </span>
+                </div>
+              );
+            }
+
+            if (matchNum) {
+              const num = matchNum[1];
+              const cleanLine = matchNum[2];
+              return (
+                <div key={li} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', margin: '4px 0' }}>
+                  <span style={{ color: 'var(--brand-dark)', fontWeight: '700', fontSize: '12.5px' }}>{num}.</span>
+                  <span style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '18px', textAlign: 'left' }}>
+                    {formatBold(cleanLine)}
+                  </span>
+                </div>
+              );
+            }
+
+            return (
+              <p key={li} style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '18px', margin: 0, textAlign: 'left' }}>
+                {formatBold(trimmed)}
+              </p>
+            );
+          })}
+        </div>
+      );
+    };
+
     const startIdx = text.indexOf('[TABLE]');
     const endIdx = text.indexOf('[/TABLE]');
 
     if (startIdx === -1 || endIdx === -1) {
-      return <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '20px', margin: 0, whiteSpace: 'pre-line' }}>{text}</p>;
+      return renderFormattedText(text);
     }
 
     const cleanText = text.substring(0, startIdx).trim();
@@ -787,7 +846,7 @@ export const SchemeDetail: React.FC = () => {
     
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {cleanText && <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '20px', margin: 0, whiteSpace: 'pre-line' }}>{cleanText}</p>}
+        {cleanText && renderFormattedText(cleanText)}
         
         {lines.length > 0 && (
           <div style={{ overflowX: 'auto', border: '1px solid #ECECEC', borderRadius: '8px', marginTop: '6px' }}>
@@ -816,7 +875,7 @@ export const SchemeDetail: React.FC = () => {
           </div>
         )}
         
-        {restText && <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '20px', margin: 0, whiteSpace: 'pre-line' }}>{restText}</p>}
+        {restText && renderFormattedText(restText)}
       </div>
     );
   };
@@ -832,31 +891,32 @@ export const SchemeDetail: React.FC = () => {
       }
       if (!Array.isArray(dbSections)) dbSections = [];
 
-      const defaultSections = [
-        {
-          title: lang === 'ta' ? 'ஏன் தங்கம் சேமிக்க வேண்டும்? (Why Save Gold?)' : 'Why Save Gold? Benefits of Aishwaryam DigiGold',
-          content: lang === 'ta' ? 
-            '• **விலையேற்றம் பாதுகாப்பு:** தங்கம் எப்போதும் பணவீக்கத்திலிருந்து பாதுகாப்பை வழங்கும் சிறந்த முதலீடு ஆகும்.\n• **0% வேஸ்டேஜ் & சேதாரம்:** இந்த திட்டத்தின் மூலம் முதிர்வில் தங்கம் வாங்கும்போது 18% வரை சேதாரம் மற்றும் செய்கூலி சேமிக்கலாம்.\n• **சிறிய அளவில் முதலீடு:** தினமும் அல்லது மாதந்தோறும் வெறும் ₹100 முதல் சேமிக்கலாம்.\n• **நெகிழ்வான விநியோகம்:** சேமித்த தங்கத்தை நாணயங்களாகவோ அல்லது நகைகளாகவோ மாற்றிக்கொள்ளலாம்.' :
-            '• **Inflation Protection:** Gold is a timeless asset that hedges against inflation and market volatility.\n• **Zero Wastage Benefit:** Save up to 18% on making charges and Value Addition (V.A.) charges at maturity.\n• **Micro-Savings:** Start accumulating physical gold weight from just ₹100.\n• **Flexible Redemption:** Redeem your accumulated weight for premium jewelry or raw gold coins.',
-          type: 0
-        },
-        {
-          title: lang === 'ta' ? 'திட்டம் எப்படி செயல்படுகிறது & போனஸ் விவரம்' : 'How the Scheme Works & Loyalty Bonus Details',
-          content: lang === 'ta' ?
-            '• **திட்ட காலம்:** 11 மாதங்கள் (300 நாட்கள் சேமிப்பு காலம் + 30 நாட்கள் முதிர்வு காலம்).\n• **போனஸ் கணக்கீடு:** போனஸ் என்பது தங்கம் எடையின் மூலமாக வராது, உங்கள் சேமிப்பு தொகைக்கு தகுந்த போனஸ் தொகையாக கணக்கிடப்படும். பின்னர் அந்த போனஸ் தொகைக்கு நிகரான தங்க எடை உங்கள் கணக்கில் சேர்க்கப்படும்.\n• **போனஸ் சலுகை (0-75 நாட்கள்):** முதல் 75 நாட்களுக்குள் செலுத்தப்படும் அனைத்து தொகைகளுக்கும் 7.5% போனஸ் வழங்கப்படும். உதாரணமாக ₹10,000 செலுத்தினால் ₹750 போனஸ் மதிப்புள்ள தங்க எடை கணக்கில் சேர்க்கப்படும்.\n• **போனஸ் சலுகை (76-150 நாட்கள்):** 5.0% போனஸ்.\n• **போனஸ் சலுகை (151-225 நாட்கள்):** 3.0% போனஸ்.\n• **போனஸ் சலுகை (226-300 நாட்கள்):** 1.0% போனஸ்.' :
-            '• **Plan Duration:** 11 Months (300 days accumulation period + 30 days lock-in/maturity period).\n• **Bonus Calculation:** Bonus is credited as an additional cash value equivalent, which is instantly converted to gold weight at prevailing market rates.\n• **0 to 75 Days Payment:** Get a high 7.5% bonus on all payments made within the first 75 days. (e.g. ₹10,000 paid yields a bonus value of ₹750, adding equivalent gold weight to your account).\n• **76 to 150 Days Payment:** 5.0% bonus added to your payments.\n• **151 to 225 Days Payment:** 3.0% bonus added to your payments.\n• **226 to 300 Days Payment:** 1.0% bonus added to your payments.',
-          type: 0
-        },
-        {
-          title: lang === 'ta' ? 'அடிக்கடி கேட்கப்படும் கேள்விகள் (FAQs)' : 'Frequently Asked Questions (FAQs)',
-          content: lang === 'ta' ?
-            '**1. இந்த தங்கத்தை வாங்க யார் தகுதியானவர்?**\n18 வயது நிரம்பிய இந்திய குடிமக்கள் அனைவரும் இந்த திட்டத்தில் இணைய தகுதியானவர்கள்.\n\n**2. குறைந்தபட்ச சேமிப்பு தொகை எவ்வளவு?**\nவெறும் ₹100 முதல் நீங்கள் இந்த திட்டத்தில் சேமிக்க ஆரம்பிக்கலாம்.\n\n**3. முதிர்வில் என்னால் சிறப்பு ஆபரணங்கள் வாங்க முடியுமா?**\nஆம், உங்கள் எடையை எந்தவித செய்கூலியும் இன்றி அழகான தங்க நகைகளாகவோ அல்லது நாணயங்களாகவோ மாற்றிக் கொள்ளலாம்.\n\n**4. எனது தங்கம் எடையை நான் எப்படி கண்காணிப்பது?**\nஉங்கள் மொபைல் ஆப்பில் உள்ள "Ledger" பக்கத்தில் உங்கள் சேமிப்பு மற்றும் போனஸ் எடையை உடனுக்குடன் தெரிந்துகொள்ளலாம்.' :
-            '**1. Who is eligible to buy this gold?**\nAny Indian citizen above 18 years of age is eligible to enroll in Aishwaryam DigiGold.\n\n**2. What is the minimum amount of enrolling Aishwaryam DigiGold?**\nYou can start saving in this scheme from as low as ₹100.\n\n**3. Can I purchase special items like jewelry under this plan?**\nYes, at maturity you can redeem your accumulated gold grams for beautiful physical jewelry with up to 18% discount on making/wastage charges.\n\n**4. How do I know the weight of accumulated gold?**\nYou can view your real-time accumulated gold and silver balances instantly in your mobile application ledger under the history tab.',
-          type: 0
-        }
-      ];
+      const whySaveGoldSec = {
+        title: lang === 'ta' ? 'ஏன் தங்கம் சேமிக்க வேண்டும்? (Why Save Gold?)' : 'Why Save Gold? Benefits of Aishwaryam DigiGold',
+        content: lang === 'ta' ? 
+          '• **விலையேற்றம் பாதுகாப்பு:** தங்கம் எப்போதும் பணவீக்கத்திலிருந்து பாதுகாப்பை வழங்கும் சிறந்த முதலீடு ஆகும்.\n• **0% வேஸ்டேஜ் & சேதாரம்:** இந்த திட்டத்தின் மூலம் முதிர்வில் தங்கம் வாங்கும்போது 18% வரை சேதாரம் மற்றும் செய்கூலி சேமிக்கலாம்.\n• **சிறிய அளவில் முதலீடு:** தினமும் அல்லது மாதந்தோறும் வெறும் ₹100 முதல் சேமிக்கலாம்.\n• **நெகிழ்வான விநியோகம்:** சேமித்த தங்கத்தை நாணயங்களாகவோ அல்லது நகைகளாகவோ மாற்றிக்கொள்ளலாம்.' :
+          '• **Inflation Protection:** Gold is a timeless asset that hedges against inflation and market volatility.\n• **Zero Wastage Benefit:** Save up to 18% on making charges and Value Addition (V.A.) charges at maturity.\n• **Micro-Savings:** Start accumulating physical gold weight from just ₹100.\n• **Flexible Redemption:** Redeem your accumulated weight for premium jewelry or raw gold coins.',
+        type: 0
+      };
 
-      const allSections = [...dbSections, ...defaultSections];
+      const howItWorksSec = {
+        title: lang === 'ta' ? 'திட்டம் எப்படி செயல்படுகிறது & போனஸ் விவரம்' : 'How the Scheme Works & Loyalty Bonus Details',
+        content: lang === 'ta' ?
+          '• **திட்ட காலம்:** 11 மாதங்கள் (300 நாட்கள் சேமிப்பு காலம் + 30 நாட்கள் முதிர்வு காலம்).\n• **போனஸ் கணக்கீடு:** போனஸ் என்பது தங்கம் எடையின் மூலமாக வராது, உங்கள் சேமிப்பு தொகைக்கு தகுந்த போனஸ் தொகையாக கணக்கிடப்படும். பின்னர் அந்த போனஸ் தொகைக்கு நிகரான தங்க எடை உங்கள் கணக்கில் சேர்க்கப்படும்.\n• **போனஸ் சலுகை (0-75 நாட்கள்):** முதல் 75 நாட்களுக்குள் செலுத்தப்படும் அனைத்து தொகைகளுக்கும் 7.5% போனஸ் வழங்கப்படும். உதாரணமாக ₹10,000 செலுத்தினால் ₹750 போனஸ் மதிப்புள்ள தங்க எடை கணக்கில் சேர்க்கப்படும்.\n• **போனஸ் சலுகை (76-150 நாட்கள்):** 5.0% போனஸ்.\n• **போனஸ் சலுகை (151-225 நாட்கள்):** 3.0% போனஸ்.\n• **போனஸ் சலுகை (226-300 நாட்கள்):** 1.0% போனஸ்.' :
+          '• **Plan Duration:** 11 Months (300 days accumulation period + 30 days lock-in/maturity period).\n• **Bonus Calculation:** Bonus is credited as an additional cash value equivalent, which is instantly converted to gold weight at prevailing market rates.\n• **0 to 75 Days Payment:** Get a high 7.5% bonus on all payments made within the first 75 days. (e.g. ₹10,000 paid yields a bonus value of ₹750, adding equivalent gold weight to your account).\n• **76 to 150 Days Payment:** 5.0% bonus added to your payments.\n• **151 to 225 Days Payment:** 3.0% bonus added to your payments.\n• **226 to 300 Days Payment:** 1.0% bonus added to your payments.',
+        type: 0
+      };
+
+      const faqSec = {
+        title: lang === 'ta' ? 'அடிக்கடி கேட்கப்படும் கேள்விகள் (FAQs)' : 'Frequently Asked Questions (FAQs)',
+        content: lang === 'ta' ?
+          '1. **இந்த தங்கத்தை வாங்க யார் தகுதியானவர்?**\n18 வயது நிரம்பிய இந்திய குடிமக்கள் அனைவரும் இந்த திட்டத்தில் இணைய தகுதியானவர்கள்.\n\n2. **குறைந்தபட்ச சேமிப்பு தொகை எவ்வளவு?**\nவெறும் ₹100 முதல் நீங்கள் இந்த திட்டத்தில் சேமிக்க ஆரம்பிக்கலாம்.\n\n3. **முதிர்வில் என்னால் சிறப்பு ஆபரணங்கள் வாங்க முடியுமா?**\nஆம், உங்கள் எடையை எந்தவித செய்கூலியும் இன்றி அழகான தங்க நகைகளாகவோ அல்லது நாணயங்களாகவோ மாற்றிக் கொள்ளலாம்.\n\n4. **எனது தங்கம் எடையை நான் எப்படி கண்காணிப்பது?**\nஉங்கள் மொபைல் ஆப்பில் உள்ள "Ledger" பக்கத்தில் உங்கள் சேமிப்பு மற்றும் போனஸ் எடையை உடனுக்குடன் தெரிந்துகொள்ளலாம்.' :
+          '1. **Who is eligible to buy this gold?**\nAny Indian citizen above 18 years of age is eligible to enroll in Aishwaryam DigiGold.\n\n2. **What is the minimum amount of enrolling Aishwaryam DigiGold?**\nYou can start saving in this scheme from as low as ₹100.\n\n3. **Can I purchase special items like jewelry under this plan?**\nYes, at maturity you can redeem your accumulated gold grams for beautiful physical jewelry with up to 18% discount on making/wastage charges.\n\n4. **How do I know the weight of accumulated gold?**\nYou can view your real-time accumulated gold and silver balances instantly in your mobile application ledger under the history tab.',
+        type: 0
+      };
+
+      // Order tabs correctly: Why Save Gold first, How It Works second, then database configs, and FAQ last
+      const allSections = [whySaveGoldSec, howItWorksSec, ...dbSections, faqSec];
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -950,92 +1010,66 @@ export const SchemeDetail: React.FC = () => {
 
   const renderLoyaltyBonusStructure = () => {
     if (!scheme) return null;
-    if (!scheme.bonusConfigJson) {
+
+    let config: any[] = [];
+    let hasConfig = false;
+    if (scheme.bonusConfigJson) {
+      try {
+        const parsed = JSON.parse(scheme.bonusConfigJson);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          config = parsed;
+          hasConfig = true;
+        }
+      } catch (e) {}
+    }
+
+    if (!hasConfig) {
+      // Fallback tabular column of the default 4 tiers:
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold' }}>
-            <span>{t('payment_day')}</span>
-            <span>{t('bonus_credited')}</span>
-          </div>
-          <div style={{ height: '1px', background: '#F3F4F6' }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-            <span>Day 1 to 75</span>
-            <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>7.5% Bonus weight</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '8px', background: '#FFFDF9', padding: '16px', borderRadius: '12px', border: '1px solid #F5E6C4' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 'bold', color: 'var(--brand-dark)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '6px' }}>
+            <span>PAYMENT INTERVAL</span>
+            <span>BONUS ACCUMULATED</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-            <span>Day 76 to 150</span>
-            <span style={{ color: 'var(--warning-amber)', fontWeight: 'bold' }}>5.5% Bonus weight</span>
+            <span>Day 1 to 75 (First 75 Days)</span>
+            <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>7.5% Instant Bonus</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-            <span>Day 151 to 330</span>
-            <span style={{ color: 'var(--brand-accent)', fontWeight: 'bold' }}>3.5% Bonus weight</span>
+            <span>Day 76 to 150 (Second 75 Days)</span>
+            <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>5.0% Instant Bonus</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+            <span>Day 151 to 225 (Third 75 Days)</span>
+            <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>3.0% Instant Bonus</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+            <span>Day 226 to 300 (Last 75 Days)</span>
+            <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>1.0% Instant Bonus</span>
           </div>
         </div>
       );
     }
 
-    try {
-      const config = JSON.parse(scheme.bonusConfigJson);
-      if (Array.isArray(config)) {
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold' }}>
-              <span>{t('payment_interval')}</span>
-              <span>{t('bonus_credited')}</span>
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '8px', background: '#FFFDF9', padding: '16px', borderRadius: '12px', border: '1px solid #F5E6C4' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 'bold', color: 'var(--brand-dark)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '6px' }}>
+          <span>PAYMENT INTERVAL</span>
+          <span>BONUS ACCUMULATED</span>
+        </div>
+        {config.map((tier: any, idx: number) => {
+          const start = tier.startDay ?? tier.StartDay ?? 0;
+          const end = tier.endDay ?? tier.EndDay ?? 0;
+          const pct = tier.bonusPercentage ?? tier.BonusPercentage ?? 0;
+          return (
+            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+              <span>Day {start} to {end}</span>
+              <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>{pct}% Instant Bonus</span>
             </div>
-            <div style={{ height: '1px', background: '#F3F4F6' }} />
-            {config.map((tier: any, idx: number) => {
-              const start = tier.startDay ?? tier.StartDay ?? 0;
-              const end = tier.endDay ?? tier.EndDay ?? 0;
-              const pct = tier.bonusPercentage ?? tier.BonusPercentage ?? 0;
-              return (
-                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  <span>Day {start} to {end}</span>
-                  <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>{pct}% Bonus weight</span>
-                </div>
-              );
-            })}
-          </div>
-        );
-      }
-      
-      if (typeof config === 'object') {
-        const startPct = config.startingBonusPercent ?? 7.5;
-        const milestones = config.milestones || [];
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold' }}>
-              <span>{t('milestone_target')}</span>
-              <span>{t('bonus_value')}</span>
-            </div>
-            <div style={{ height: '1px', background: '#F3F4F6' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-              <span>Starting Loyalty Bonus</span>
-              <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>{startPct}% Bonus weight</span>
-            </div>
-            {milestones.map((ms: any, idx: number) => {
-              let label = '';
-              let val = '';
-              if (ms.days !== undefined) {
-                label = `Day ${ms.days} Completed`;
-                val = `+${ms.bonusPercent}% Bonus`;
-              } else if (ms.installment !== undefined) {
-                label = `Installment ${ms.installment} Reached`;
-                val = ms.flatGoldBonusMg ? `+${ms.flatGoldBonusMg} mg Gold` : `+${ms.bonusPercent || ms.freeMonthBonusPercent}%`;
-              }
-              return (
-                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  <span>{label}</span>
-                  <span style={{ color: 'var(--brand-accent)', fontWeight: 'bold' }}>{val}</span>
-                </div>
-              );
-            })}
-          </div>
-        );
-      }
-    } catch (e) {
-      return <span style={{ color: 'red', fontSize: '11px' }}>Failed to parse bonus methodology</span>;
-    }
+          );
+        })}
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -1541,11 +1575,11 @@ export const SchemeDetail: React.FC = () => {
             {/* Read-Only Profile & Address Details Section */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#F9FAFB', borderRadius: '16px', padding: '16px', border: '1px solid #F3F4F6' }}>
               <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--brand-dark)', textTransform: 'uppercase', letterSpacing: '0.2px', display: 'block', marginBottom: '4px' }}>
-                {lang === 'ta' ? 'சுயவிவர விவரங்கள்' : 'Profile Details'} (Read-Only)
+                {lang === 'ta' ? 'சுயவிவர விவரங்கள்' : 'Profile Details'}
               </span>
               
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px' }}>
-                <div>
+                <div style={{ gridColumn: 'span 2' }}>
                   <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Scheme Plan</label>
                   <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{scheme?.planName || 'N/A'}</span>
                 </div>
