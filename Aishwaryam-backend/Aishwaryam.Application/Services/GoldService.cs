@@ -154,8 +154,8 @@ namespace Aishwaryam.Application.Services
 
                 if (activeScheme != null)
                 {
-                    schemeDayNumber = (int)(DateTime.UtcNow - activeScheme.CreatedAt).TotalDays;
-                    if (schemeDayNumber < 0) schemeDayNumber = 0;
+                    schemeDayNumber = (int)(DateTime.UtcNow - activeScheme.CreatedAt).TotalDays + 1;
+                    if (schemeDayNumber <= 0) schemeDayNumber = 1;
 
                     var master = await _schemeRepository.GetSchemeMasterByPlanNameAsync(activeScheme.PlanName);
                     Console.WriteLine($"[LOYALTY_AUDIT] master plan found: {master?.PlanName}, id: {master?.Id}");

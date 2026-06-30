@@ -980,8 +980,8 @@ namespace Aishwaryam.Application.Services
 
         private async Task<(decimal CurrentBonusPercent, int RemainingDaysForCurrentTier, int RemainingDaysForScheme, List<object> Milestones)> GetDynamicBonusDetailsAsync(string planName, DateTime createdAt, DateTime maturityDate)
         {
-            int dayNumber = (int)(DateTime.UtcNow - createdAt).TotalDays;
-            if (dayNumber < 0) dayNumber = 0;
+            int dayNumber = (int)(DateTime.UtcNow - createdAt).TotalDays + 1;
+            if (dayNumber <= 0) dayNumber = 1;
 
             // Resolve SchemeMaster
             var master = await _schemeRepository.GetSchemeMasterByPlanNameAsync(planName);
