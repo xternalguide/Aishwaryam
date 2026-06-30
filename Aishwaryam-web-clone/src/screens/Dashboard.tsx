@@ -165,14 +165,23 @@ export const Dashboard: React.FC = () => {
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .animate-spin { animation: spin 1s linear infinite; }
     
-    @keyframes swipeGuidanceAnimation {
-      0% { transform: translateX(12px); opacity: 0; }
-      20% { opacity: 1; }
-      80% { transform: translateX(-12px); opacity: 1; }
-      100% { transform: translateX(-12px); opacity: 0; }
+    @keyframes swipeHand {
+      0% { transform: translateX(24px) scale(1); opacity: 0; }
+      15% { opacity: 1; }
+      50% { transform: translateX(-24px) scale(0.95); opacity: 1; }
+      85% { opacity: 1; }
+      100% { transform: translateX(-24px) scale(0.9); opacity: 0; }
+    }
+    @keyframes pulseRing {
+      0% { transform: scale(0.6); opacity: 0; }
+      50% { opacity: 0.6; }
+      100% { transform: scale(1.4); opacity: 0; }
     }
     .swipe-hand-animate {
-      animation: swipeGuidanceAnimation 1.8s infinite ease-in-out;
+      animation: swipeHand 2.2s infinite cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .pulse-ring-animate {
+      animation: pulseRing 2.2s infinite cubic-bezier(0.25, 1, 0.5, 1);
     }
     
     /* Prevent Tamil word fragmentation */
@@ -1117,6 +1126,7 @@ export const Dashboard: React.FC = () => {
                   className="dash-card-hover"
                   style={{
                     flex: isDesktop ? '0 0 280px' : '0 0 100%', scrollSnapAlign:'start',
+                    scrollSnapStop: 'always',
                     borderRadius:'16px', cursor:'pointer', transition:'all 0.25s ease',
                     display:'flex', flexDirection:'column', gap:'0px', position:'relative', overflow:'hidden',
                     height: '180px', border: '1px solid rgba(255,255,255,0.1)',
@@ -1147,16 +1157,32 @@ export const Dashboard: React.FC = () => {
               onClick={handleCarouselScroll}
               style={{
                 position:'absolute', top:0, left:0, right:0, bottom:0,
-                background:'rgba(41, 0, 29, 0.45)', borderRadius:'16px',
+                background:'rgba(26, 0, 19, 0.72)', borderRadius:'16px',
                 display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
-                zIndex:10, pointerEvents:'auto', backdropFilter:'blur(2.5px)', transition:'all 0.3s ease',
-                boxShadow:'inset 0 0 40px rgba(0,0,0,0.5)', border:'1px solid rgba(255,255,255,0.1)'
+                zIndex:10, pointerEvents:'auto', backdropFilter:'blur(4px)', transition:'all 0.3s ease',
+                border:'1px solid rgba(255, 215, 0, 0.2)'
               }}
             >
-              <div className="swipe-hand-animate" style={{ display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(255,255,255,0.2)', width:'50px', height:'50px', borderRadius:'50%', border:'1.5px solid rgba(255,255,255,0.4)', marginBottom:'10px', boxShadow:'0 4px 12px rgba(0,0,0,0.2)' }}>
-                <span style={{ fontSize:'24px' }}>👈</span>
+              <div style={{ position:'relative', width:'80px', height:'80px', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'10px' }}>
+                {/* Golden pulsing ripples */}
+                <div className="pulse-ring-animate" style={{ position:'absolute', width:'50px', height:'50px', borderRadius:'50%', border:'2px solid rgba(255, 215, 0, 0.6)', background:'rgba(255, 215, 0, 0.05)' }} />
+                <div className="pulse-ring-animate" style={{ position:'absolute', width:'75px', height:'75px', borderRadius:'50%', border:'1px solid rgba(255, 215, 0, 0.3)', animationDelay:'0.7s' }} />
+                
+                {/* Sliding premium hand SVG cursor */}
+                <div className="swipe-hand-animate" style={{ zIndex:2, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(255,255,255,0.1)', width:'48px', height:'48px', borderRadius:'50%', border:'1.5px solid rgba(255,255,255,0.5)', boxShadow:'0 8px 32px rgba(0,0,0,0.3)', backdropFilter:'blur(5px)' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5" />
+                    <path d="M14 10V5a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5" />
+                    <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+                    <path d="M20 11.5V9a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2.5" />
+                    <path d="M6 14a7 7 0 0 0 14 0" />
+                  </svg>
+                </div>
               </div>
-              <span style={{ fontFamily:DS.font, fontSize:'12px', fontWeight:'800', color:'white', textShadow:'0 2px 4px rgba(0,0,0,0.6)', letterSpacing:'0.3px', textAlign:'center', padding:'0 16px' }}>
+              <span style={{ fontFamily:DS.font, fontSize:'12px', fontWeight:'800', color:'#FFD700', textShadow:'0 2px 8px rgba(0,0,0,0.8)', letterSpacing:'0.5px', textAlign:'center', padding:'0 24px', display:'block', marginBottom:'3px' }}>
+                {lang === 'ta' ? 'ஸ்வைப் செய்யவும்' : 'SWIPE TO EXPLORE'}
+              </span>
+              <span style={{ fontFamily:DS.font, fontSize:'10px', fontWeight:'600', color:'rgba(255,255,255,0.7)', textShadow:'0 1px 4px rgba(0,0,0,0.6)', textAlign:'center', padding:'0 24px' }}>
                 {lang === 'ta' ? 'அடுத்த திட்டத்தைக் காண இடதுபுறம் ஸ்வைப் செய்யவும்' : 'Swipe left to view other schemes'}
               </span>
             </div>
