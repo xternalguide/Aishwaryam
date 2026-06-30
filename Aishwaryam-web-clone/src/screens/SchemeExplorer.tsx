@@ -56,12 +56,6 @@ export const SchemeExplorer: React.FC = () => {
     }
   }, [availableSchemes, activeSchemes]);
 
-  const formatRupees = (paise: number) => {
-    const rupees = paise / 100;
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(rupees);
-  };
-
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F5F5F5' }}>
       {/* Top Bar */}
@@ -104,73 +98,51 @@ export const SchemeExplorer: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {schemes.map((scheme) => {
               const joined = activeNames.includes(scheme.planName);
-              const keywords: string[] = JSON.parse(scheme.keywordsJson || '[]');
+
+              const isSilver = scheme.planName.toLowerCase().includes('silver');
+              const bannerUrl = (scheme as any).posterImageBase64 || (isSilver ? '/silver_scheme_banner.png' : '/gold_scheme_banner.png');
+              const metalTypeLabel = isSilver ? 'Digi Silver Scheme' : 'Digi Gold Scheme';
 
               return (
                 <div
                   key={scheme.id}
-                  className="glass-card"
                   onClick={() => navigate(`/scheme-detail/${scheme.id}`)}
                   style={{
                     borderRadius: '16px',
-                    padding: '20px',
                     cursor: 'pointer',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '12px',
-                    border: '1px solid rgba(74, 14, 78, 0.08)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
-                    background: 'white',
-                    transition: 'all 0.2s ease'
+                    gap: '0px',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    height: '180px',
+                    border: '1px solid rgba(74,14,78,0.1)',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0, flex: 1 }}>
-                      {autoT(scheme.planName)}
-                    </h3>
-                    {joined && (
-                      <span style={{
-                        fontSize: '9px', fontWeight: 'bold', color: 'var(--success-green)', background: 'var(--success-light)',
-                        padding: '2px 8px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.2)'
-                      }}>
-                        {t('active_badge')}
+                  <img 
+                    src={bannerUrl} 
+                    alt={scheme.planName}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+                  />
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.15) 100%)', zIndex: 2 }} />
+                  <div style={{ position: 'relative', zIndex: 3, height: '100%', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: '4px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize:'10px', fontWeight:'700', color: 'var(--gold-primary)', textTransform:'uppercase', letterSpacing:'1px' }}>
+                        {metalTypeLabel}
                       </span>
-                    )}
-                  </div>
-
-                  <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '18px', margin: 0 }}>
-                    {autoT(scheme.description)}
-                  </p>
-
-                  {/* Highlights */}
-                  {keywords.length > 0 && (
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      {keywords.map((kw, idx) => (
-                        <span key={idx} style={{
-                          fontSize: '10px', fontWeight: '500', color: 'var(--brand-accent)', background: '#FFF0F5',
-                          padding: '2px 8px', borderRadius: '8px'
+                      {joined && (
+                        <span style={{
+                          fontSize: '9px', fontWeight: 'bold', color: 'var(--success-green)', background: 'var(--success-light)',
+                          padding: '2px 8px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.2)'
                         }}>
-                          {autoT(kw)}
+                          {t('active_badge')}
                         </span>
-                      ))}
+                      )}
                     </div>
-                  )}
-
-                  <div style={{ height: '1px', background: '#F3F4F6', margin: '4px 0' }} />
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>{t('min_investment')}</span>
-                      <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text-primary)' }}>
-                        {t('start_from')} {formatRupees(scheme.installmentAmountPaise)}
-                      </span>
-                    </div>
-                    <div>
-                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block', textAlign: 'right' }}>{t('tenure').toUpperCase()}</span>
-                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-primary)', display: 'block', textAlign: 'right' }}>
-                        {scheme.totalInstallments} {scheme.durationUnit ? (scheme.durationUnit.toLowerCase().startsWith('day') ? t('days') : t('months')) : (scheme.frequency === 'Daily' ? t('days') : t('months'))}
-                      </span>
-                    </div>
+                    <span style={{ fontSize:'16px', fontWeight:'800', color:'white', textShadow: '0 2px 4px rgba(0,0,0,0.5)', fontFamily: 'var(--font-poppins)' }}>
+                      {autoT(scheme.planName)}
+                    </span>
                   </div>
                 </div>
               );

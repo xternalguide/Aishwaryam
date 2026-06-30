@@ -659,6 +659,58 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<Aishwaryam.Infrastructure.Data.ApplicationDbContext>();
+        
+        // Remove all old schemes
+        var allSchemes = await db.SchemesMaster.ToListAsync();
+        if (allSchemes.Any(s => s.PlanName != "Swarna Varshini Gold Scheme" && s.PlanName != "Rajatha Varshini Silver Scheme"))
+        {
+            db.SchemesMaster.RemoveRange(allSchemes);
+            await db.SaveChangesAsync();
+            allSchemes = new List<SchemeMaster>();
+        }
+
+        if (!allSchemes.Any())
+        {
+            var goldScheme = new SchemeMaster
+            {
+                Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                PlanName = "Swarna Varshini Gold Scheme",
+                Description = "A monthly gold savings plan to save systematically over 11 months with zero wastage and zero making charges.",
+                InstallmentAmountPaise = 100000,
+                TotalInstallments = 11,
+                Frequency = "Monthly",
+                IsActive = true,
+                DurationUnit = "Months",
+                PosterImageBase64 = "/gold_scheme_banner.png",
+                KeywordsJson = "[\"11 Months Plan\", \"7.5% Bonus Gold\", \"Min. ₹1000/mo\", \"Zero Wastage\"]",
+                BonusConfigJson = "[{\"StartDay\":0,\"EndDay\":330,\"BonusPercentage\":7.5}]",
+                PaymentRulesJson = "{\"minAmountPaise\":100000,\"maxAmountPaise\":5000000,\"multiplePerDay\":false,\"earlyExitAfterDays\":180,\"rating\":4.9}",
+                CustomSectionsJson = "[\r\n  {\r\n    \"title\": \"A to Z Scheme Overview\",\r\n    \"content\": \"• **Maturity & Duration:** This is an 11-month (330 days) systematic gold saving scheme.\\n• **Minimum Investment:** Pay a minimum fixed monthly installment of ₹1,000. Higher installment options are available.\\n• **Gold Accumulation:** Gold weight is credited daily/monthly based on prevailing gold market prices on your payment days.\\n• **Withdrawal Mode:** At maturity, redeem your accumulated gold grams for beautiful physical jewelry with 100% discount on Value Added (V.A.) making charges up to 18%, or collect gold coins.\\n• **Maturity Bonus:** Receive a special loyalty bonus of 7.5% extra gold weight automatically added upon completing all 11 installments.\",\r\n    \"type\": 0\r\n  },\r\n  {\r\n    \"title\": \"Redemption & Wastage Benefits\",\r\n    \"content\": \"• **Zero Wastage:** Get up to 18% making charges and value addition (V.A.) charges completely waived off when purchasing gold jewelry at maturity.\\n• **Flexible Choice:** Purchase jewelry, gold coins, or silver articles at any Aishwaryam Swarna Mahal branch.\\n• **No Cash Refunds:** The accumulated gold weight must be redeemed as physical metal only; no cash refunds are allowed.\",\r\n    \"type\": 1\r\n  }\r\n]"
+            };
+
+            var silverScheme = new SchemeMaster
+            {
+                Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                PlanName = "Rajatha Varshini Silver Scheme",
+                Description = "Systematic silver saving plan to accumulate pure silver articles and coins over 11 months with special loyalty bonus.",
+                InstallmentAmountPaise = 50000,
+                TotalInstallments = 11,
+                Frequency = "Monthly",
+                IsActive = true,
+                DurationUnit = "Months",
+                PosterImageBase64 = "/silver_scheme_banner.png",
+                KeywordsJson = "[\"11 Months Plan\", \"7.5% Bonus Silver\", \"Min. ₹500/mo\", \"Pure Silver Articles\"]",
+                BonusConfigJson = "[{\"StartDay\":0,\"EndDay\":330,\"BonusPercentage\":7.5}]",
+                PaymentRulesJson = "{\"minAmountPaise\":50000,\"maxAmountPaise\":10000000,\"multiplePerDay\":false,\"earlyExitAfterDays\":180,\"rating\":4.8}",
+                CustomSectionsJson = "[\r\n  {\r\n    \"title\": \"A to Z Scheme Overview\",\r\n    \"content\": \"• **Maturity & Duration:** This is an 11-month (330 days) systematic silver saving scheme.\\n• **Minimum Investment:** Pay a minimum fixed monthly installment of ₹500. Higher options are available.\\n• **Silver Accumulation:** Silver weight is credited daily/monthly based on prevailing market rates on payment days.\\n• **Withdrawal Mode:** At maturity, redeem your accumulated silver grams for physical silver articles, utensils, or pure silver coins.\\n• **Maturity Bonus:** Receive a special loyalty bonus of 7.5% extra silver weight automatically added upon completing all 11 installments.\",\r\n    \"type\": 0\r\n  },\r\n  {\r\n    \"title\": \"Redemption Benefits\",\r\n    \"content\": \"• **Special Wastage Discounts:** Avail exclusive making charge discounts on premium silver articles and coins at maturity.\\n• **No Cash Refunds:** The accumulated silver weight must be redeemed as physical silver only; no cash refunds are allowed.\",\r\n    \"type\": 1\r\n  }\r\n]"
+            };
+
+            db.SchemesMaster.Add(goldScheme);
+            db.SchemesMaster.Add(silverScheme);
+            await db.SaveChangesAsync();
+            Console.WriteLine("[SEED] Seeded Swarna Varshini Gold Scheme and Rajatha Varshini Silver Scheme.");
+        }
+
         var masterSchemes = await db.SchemesMaster.ToListAsync();
         bool updatedMaster = false;
         foreach (var m in masterSchemes)

@@ -556,14 +556,14 @@ export const Dashboard: React.FC = () => {
       }
       
       // 3. Dynamically insert a separate companion virtual bonus transaction if the purchase contains a bonus
-      const hasBonus = (tx.transactionType === 'BUY' || tx.transactionType === 'INSTALLMENT' || tx.type === 'BUY' || tx.type === 'INSTALLMENT') && tx.bonusGoldMg > 0;
+      const hasBonus = (tx.transactionType === 'BUY' || tx.transactionType === 'INSTALLMENT' || tx.type === 'BUY' || tx.type === 'INSTALLMENT') && (tx.bonusGoldMg || 0) > 0;
       if (hasBonus) {
         const virtualBonus = {
           ...tx,
           id: `${tx.id}_virtual_bonus`,
           transactionType: 'BONUS',
           type: 'BONUS',
-          goldWeightMg: tx.bonusGoldMg,
+          goldWeightMg: tx.bonusGoldMg || 0,
           amountPaise: 0,
           schemeName: tx.schemeName ? `Loyalty Bonus (${tx.schemeName})` : 'Installment Loyalty Bonus',
           isVirtualBonus: true
@@ -1106,18 +1106,10 @@ export const Dashboard: React.FC = () => {
           >
             <style>{`.no-scrollbar::-webkit-scrollbar{display:none}`}</style>
             {contextAvailableSchemes.map((scheme) => {
-              let keywords: string[] = [];
-              try { keywords = JSON.parse(scheme.keywordsJson || '[]'); } catch (e) {}
-              let maxBonus = '7.5%';
-              try {
-                if (scheme.bonusConfigJson) {
-                  const tiers = JSON.parse(scheme.bonusConfigJson);
-                  if (Array.isArray(tiers) && tiers.length > 0) {
-                    const maxVal = Math.max(...tiers.map((ti: any) => ti.bonusPercentage || 0));
-                    if (maxVal > 0) maxBonus = `${maxVal}%`;
-                  }
-                }
-              } catch (e) {}
+              const isSilver = scheme.planName.toLowerCase().includes('silver');
+              const bannerUrl = scheme.posterImageBase64 || (isSilver ? '/silver_scheme_banner.png' : '/gold_scheme_banner.png');
+              const metalTypeLabel = isSilver ? 'Digi Silver Scheme' : 'Digi Gold Scheme';
+              
               return (
                 <div
                   key={scheme.id}
@@ -1125,45 +1117,25 @@ export const Dashboard: React.FC = () => {
                   className="dash-card-hover"
                   style={{
                     flex: isDesktop ? '0 0 280px' : '0 0 100%', scrollSnapAlign:'start',
-                    ...DS.glass, padding:'20px', cursor:'pointer', transition:'all 0.25s ease',
-                    display:'flex', flexDirection:'column', gap:'12px', position:'relative', overflow:'hidden'
+                    borderRadius:'16px', cursor:'pointer', transition:'all 0.25s ease',
+                    display:'flex', flexDirection:'column', gap:'0px', position:'relative', overflow:'hidden',
+                    height: '180px', border: '1px solid rgba(255,255,255,0.1)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.15)'
                   }}
                 >
-                  <div style={{ position:'absolute', top:'-30px', right:'-30px', width:'90px', height:'90px', borderRadius:'50%', background:'radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 70%)', pointerEvents:'none' }} />
-                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
-                    <span style={{ fontFamily:DS.font, fontSize:'15px', fontWeight:'800', color:DS.textWhite, flex:1, marginRight:'12px' }}>{autoT(scheme.planName)}</span>
-                    <span style={{ fontFamily:DS.font, fontSize:'9px', fontWeight:'700', color:DS.magenta, background:'rgba(194,24,91,0.15)', padding:'3px 8px', borderRadius:'10px', border:'1px solid rgba(194,24,91,0.2)', whiteSpace:'nowrap' }}>
-                      {scheme.frequency === 'Daily' ? 'DAILY' : 'MONTHLY'}
+                  <img 
+                    src={bannerUrl} 
+                    alt={scheme.planName}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+                  />
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.15) 100%)', zIndex: 2 }} />
+                  <div style={{ position: 'relative', zIndex: 3, height: '100%', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: '4px' }}>
+                    <span style={{ fontFamily:DS.font, fontSize:'10px', fontWeight:'700', color: DS.gold, textTransform:'uppercase', letterSpacing:'1px' }}>
+                      {metalTypeLabel}
                     </span>
-                  </div>
-                  <div style={{ display:'flex', gap:'16px' }}>
-                    <div>
-                      <span style={{ fontFamily:DS.font, fontSize:'9px', color:DS.textMuted, textTransform:'uppercase', letterSpacing:'0.5px', display:'block', marginBottom:'2px' }}>Duration</span>
-                      <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'800', color:DS.textWhite }}>
-                        {scheme.totalInstallments} {scheme.durationUnit ? (scheme.durationUnit.toLowerCase().startsWith('day') ? t('days') : t('months')) : (scheme.frequency === 'Daily' ? t('days') : t('months'))}
-                      </span>
-                    </div>
-                    <div>
-                      <span style={{ fontFamily:DS.font, fontSize:'9px', color:DS.textMuted, textTransform:'uppercase', letterSpacing:'0.5px', display:'block', marginBottom:'2px' }}>Min. Investment</span>
-                      <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'800', color:DS.textWhite }}>{formatRupees(scheme.installmentAmountPaise)}</span>
-                    </div>
-                  </div>
-                  <div style={{ background: isDark ? 'rgba(255,215,0,0.1)' : 'rgba(194,24,91,0.06)', borderRadius:'10px', padding:'8px 12px', border: isDark ? '1px solid rgba(255,215,0,0.2)' : '1px solid rgba(194,24,91,0.15)' }}>
-                    <span style={{ fontFamily:DS.font, fontSize:'9px', color: isDark ? 'rgba(255,215,0,0.7)' : DS.magenta, fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.3px', display:'block', marginBottom:'2px' }}>Bonus Offer</span>
-                    <span style={{ fontFamily:DS.font, fontSize:'12px', fontWeight:'800', color: isDark ? DS.gold : DS.purple }}>Get up to {maxBonus} Extra Gold!</span>
-                  </div>
-                  {keywords.length > 0 && (
-                    <div style={{ display:'flex', gap:'6px', flexWrap:'wrap' }}>
-                      {keywords.slice(0,2).map((kw, i) => (
-                        <span key={i} style={{ fontFamily:DS.font, fontSize:'9px', color:DS.magenta, background:'rgba(194,24,91,0.12)', padding:'3px 8px', borderRadius:'6px', border:'1px solid rgba(194,24,91,0.15)', fontWeight:'600' }}>
-                          ✓ {kw}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <div style={{ display:'flex', justifyContent:'flex-end', alignItems:'center', gap:'4px', marginTop:'4px' }}>
-                    <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'700', color:DS.gold }}>View Plan</span>
-                    <ChevronRight size={13} color={DS.gold} />
+                    <span style={{ fontFamily:DS.font, fontSize:'16px', fontWeight:'800', color:'white', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                      {autoT(scheme.planName)}
+                    </span>
                   </div>
                 </div>
               );
