@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { SetupGuide } from './SetupGuide';
 import { DatabaseViewer } from './DatabaseViewer';
 import { LogsViewer } from './LogsViewer';
-import { AdminOffersManager } from './AdminOffersManager';
 import { AuditLogger } from '../../utils/auditLogger';
 import type { AuditLog } from '../../utils/auditLogger';
 import { ApiClient } from '../../utils/ApiClient';
@@ -23,12 +22,11 @@ import {
   Calendar,
   Clock,
   AlertTriangle,
-  Eye,
-  Tag
+  Eye
 } from 'lucide-react';
 
 export const SuperAdminDashboard: React.FC = () => {
-  const [activeView, setActiveView] = useState<'dashboard' | 'logs' | 'database' | 'setup' | 'kyc' | 'offers'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'logs' | 'database' | 'setup' | 'kyc'>('dashboard');
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [liveActivities, setLiveActivities] = useState<AuditLog[]>([]);
 
@@ -226,29 +224,6 @@ export const SuperAdminDashboard: React.FC = () => {
           >
             <ShieldCheck size={18} />
             <span>KYC Verification</span>
-          </button>
-
-          <button
-            onClick={() => setActiveView('offers')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              width: '100%',
-              padding: '12px 16px',
-              borderRadius: '8px',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '13.5px',
-              fontWeight: 'bold',
-              backgroundColor: activeView === 'offers' ? 'rgba(255,255,255,0.1)' : 'transparent',
-              color: activeView === 'offers' ? 'var(--gold-primary)' : 'rgba(255, 255, 255, 0.7)',
-              transition: 'all 0.2s ease',
-              textAlign: 'left'
-            }}
-          >
-            <Tag size={18} />
-            <span>Promotional Offers</span>
           </button>
         </div>
 
@@ -520,7 +495,6 @@ export const SuperAdminDashboard: React.FC = () => {
           {activeView === 'database' && <DatabaseViewer />}
           {activeView === 'setup' && <SetupGuide />}
           {activeView === 'kyc' && <KycVerificationPortal />}
-          {activeView === 'offers' && <AdminOffersManager />}
         </div>
       </div>
     </div>
