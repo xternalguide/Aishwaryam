@@ -656,6 +656,53 @@ app.MapControllers();
 
 try
 {
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<Aishwaryam.Infrastructure.Data.ApplicationDbContext>();
+        var masterSchemes = await db.SchemesMaster.ToListAsync();
+        bool updatedMaster = false;
+        foreach (var m in masterSchemes)
+        {
+            if (!string.IsNullOrEmpty(m.BonusConfigJson))
+            {
+                try
+                {
+                    var tiers = System.Text.Json.JsonSerializer.Deserialize<List<Aishwaryam.Domain.Entities.SchemeBonusTier>>(m.BonusConfigJson);
+                    if (tiers != null)
+                    {
+                        var invalidTiers = tiers.Where(t => t.StartDay <= 0 || t.EndDay <= 0 || t.EndDay < t.StartDay).ToList();
+                        if (invalidTiers.Any())
+                        {
+                            var validTiers = tiers.Where(t => t.StartDay > 0 && t.EndDay >= t.StartDay).ToList();
+                            m.BonusConfigJson = System.Text.Json.JsonSerializer.Serialize(validTiers);
+                            db.SchemesMaster.Update(m);
+                            updatedMaster = true;
+                        }
+                    }
+                }
+                catch {}
+            }
+        }
+        var dbTiers = await db.SchemeBonusTiers.Where(t => t.StartDay <= 0 || t.EndDay <= 0 || t.EndDay < t.StartDay).ToListAsync();
+        if (dbTiers.Any())
+        {
+            db.SchemeBonusTiers.RemoveRange(dbTiers);
+            updatedMaster = true;
+        }
+        if (updatedMaster)
+        {
+            await db.SaveChangesAsync();
+            Console.WriteLine("[SELF-HEAL] Corrected invalid Day 0 scheme bonus tiers in database.");
+        }
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[SELF-HEAL] Failed to self-heal database bonus tiers: {ex.Message}");
+}
+
+try
+{
     Log.Information("Starting Aishwaryam Digital Gold API Host...");
     app.Run();
 }
