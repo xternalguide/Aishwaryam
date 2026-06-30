@@ -331,7 +331,7 @@ export const Mpin: React.FC = () => {
           <h2 style={{
             fontFamily: 'var(--font-playfair)',
             color: 'var(--brand-deep)',
-            fontSize: '24px',
+            fontSize: lang === 'ta' ? '18px' : '22px',
             marginBottom: '8px',
             textAlign: 'center'
           }}>
