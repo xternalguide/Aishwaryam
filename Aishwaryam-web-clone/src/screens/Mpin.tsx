@@ -146,10 +146,16 @@ export const Mpin: React.FC = () => {
     } catch (err: any) {
       const errorText = err.response?.data?.message || 'Incorrect PIN. Please try again.';
       AuditLogger.log('Error', '/mpin/verify', `MPIN verification error: ${errorText}`);
-      const isUserNotFound = err.response?.status === 404 || 
-                             err.response?.status === 401 || 
-                             errorText.toLowerCase().includes('not found') || 
-                             errorText.toLowerCase().includes('unauthorized');
+      
+      const isIncorrectMpin = err.response?.status === 401 && 
+                              (errorText.toLowerCase().includes('incorrect') || errorText.toLowerCase().includes('pin'));
+
+      const isUserNotFound = !isIncorrectMpin && (
+                               err.response?.status === 404 || 
+                               err.response?.status === 401 || 
+                               errorText.toLowerCase().includes('not found') || 
+                               errorText.toLowerCase().includes('unauthorized')
+                             );
                              
       if (isUserNotFound) {
         SessionManager.clearSession();
