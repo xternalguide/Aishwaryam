@@ -172,6 +172,32 @@ export const SchemeMaster: React.FC = () => {
       return;
     }
 
+    // Validate Loyalty Bonus Structure Tiers
+    for (let i = 0; i < bonusTiers.length; i++) {
+      const tier = bonusTiers[i];
+      if (tier.startDay <= 0 || tier.endDay <= 0) {
+        showToast(`Tier ${i + 1}: Day ranges must be greater than 0.`, 'error');
+        return;
+      }
+      if (tier.startDay > tier.endDay) {
+        showToast(`Tier ${i + 1}: Start day (${tier.startDay}) cannot be greater than End day (${tier.endDay}).`, 'error');
+        return;
+      }
+      if (tier.bonusPercentage <= 0) {
+        showToast(`Tier ${i + 1}: Bonus percentage must be greater than 0%.`, 'error');
+        return;
+      }
+
+      // Check for overlap with other tiers
+      for (let j = i + 1; j < bonusTiers.length; j++) {
+        const other = bonusTiers[j];
+        if (tier.startDay <= other.endDay && other.startDay <= tier.endDay) {
+          showToast(`Tier ${i + 1} and Tier ${j + 1} have overlapping day ranges.`, 'error');
+          return;
+        }
+      }
+    }
+
     setIsSaving(true);
 
     // Format keywords
