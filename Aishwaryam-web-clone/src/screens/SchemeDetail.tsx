@@ -22,6 +22,7 @@ interface AvailableScheme {
 
 interface MilestoneItem {
   name: string;
+  startDay?: number;
   targetDay: number;
   bonusPercentage: number;
   isAchieved: boolean;
@@ -219,10 +220,10 @@ export const SchemeDetail: React.FC = () => {
     activeDays: number
   ): MilestoneItem[] => {
     const defaultTiers = [
-      { name: lang === 'ta' ? 'அடுக்கு 1 (7.5%)' : 'Tier 1 (7.5%)', targetDay: 75, bonusPercentage: 7.5, isAchieved: activeDays >= 75 },
-      { name: lang === 'ta' ? 'அடுக்கு 2 (5.5%)' : 'Tier 2 (5.5%)', targetDay: 150, bonusPercentage: 5.5, isAchieved: activeDays >= 150 },
-      { name: lang === 'ta' ? 'அடுக்கு 3 (3.5%)' : 'Tier 3 (3.5%)', targetDay: 225, bonusPercentage: 3.5, isAchieved: activeDays >= 225 },
-      { name: lang === 'ta' ? 'அடுக்கு 4 (1.5%)' : 'Tier 4 (1.5%)', targetDay: 330, bonusPercentage: 1.5, isAchieved: activeDays >= 330 }
+      { name: lang === 'ta' ? 'அடுக்கு 1 (7.5%)' : 'Tier 1 (7.5%)', startDay: 0, targetDay: 75, bonusPercentage: 7.5, isAchieved: activeDays >= 75 },
+      { name: lang === 'ta' ? 'அடுக்கு 2 (5.5%)' : 'Tier 2 (5.5%)', startDay: 76, targetDay: 150, bonusPercentage: 5.5, isAchieved: activeDays >= 150 },
+      { name: lang === 'ta' ? 'அடுக்கு 3 (3.5%)' : 'Tier 3 (3.5%)', startDay: 151, targetDay: 225, bonusPercentage: 3.5, isAchieved: activeDays >= 225 },
+      { name: lang === 'ta' ? 'அடுக்கு 4 (1.5%)' : 'Tier 4 (1.5%)', startDay: 226, targetDay: 330, bonusPercentage: 1.5, isAchieved: activeDays >= 330 }
     ];
 
     if (!bonusConfigJson || bonusConfigJson === '[]') {
@@ -1369,49 +1370,79 @@ export const SchemeDetail: React.FC = () => {
                   {t('milestone_roadmap')}
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '6px', position: 'relative', paddingLeft: '8px' }}>
-                  {milestones.map((ms, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative' }}>
-                      {/* Vertical line connecting nodes */}
-                      {idx < milestones.length - 1 && (
+                  {milestones.map((ms, idx) => {
+                    const isCompleted = elapsedDays >= ms.targetDay;
+                    const isCurrentActive = elapsedDays >= (ms.startDay ?? 0) && elapsedDays < ms.targetDay;
+                    
+                    let statusText = t('pending') || 'Pending';
+                    let statusColor = 'var(--text-muted)';
+                    let dotColor = '#E5E7EB';
+                    let dotBorder = '2px solid white';
+                    let dotShadow = 'none';
+                    let textFontWeight = 'normal';
+                    let textColor = 'var(--text-secondary)';
+                    
+                    if (isCompleted) {
+                      statusText = t('achieved') || 'Achieved';
+                      statusColor = 'var(--success-green)';
+                      dotColor = 'var(--success-green)';
+                      dotBorder = '2px solid #D1FAE5';
+                      dotShadow = '0 0 8px rgba(16, 185, 129, 0.4)';
+                      textColor = 'var(--brand-dark)';
+                    } else if (isCurrentActive) {
+                      statusText = lang === 'ta' ? 'செயலில் உள்ளது' : 'Ongoing';
+                      statusColor = 'var(--brand-mid)';
+                      dotColor = 'var(--brand-mid)';
+                      dotBorder = '2px solid #F5E6C4';
+                      dotShadow = '0 0 8px rgba(158, 42, 43, 0.4)';
+                      textFontWeight = 'bold';
+                      textColor = 'var(--brand-dark)';
+                    }
+
+                    return (
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative' }}>
+                        {/* Vertical line connecting nodes */}
+                        {idx < milestones.length - 1 && (
+                          <div style={{
+                            position: 'absolute',
+                            left: '5px',
+                            top: '16px',
+                            width: '2px',
+                            height: '24px',
+                            background: isCompleted ? 'var(--success-green)' : '#E5E7EB',
+                            zIndex: 1
+                          }} />
+                        )}
+                        {/* Timeline node dot */}
                         <div style={{
-                          position: 'absolute',
-                          left: '5px',
-                          top: '16px',
-                          width: '2px',
-                          height: '24px',
-                          background: ms.isAchieved && milestones[idx + 1].isAchieved ? 'var(--success-green)' : '#E5E7EB',
-                          zIndex: 1
+                          width: '12px',
+                          height: '12px',
+                          borderRadius: '50%',
+                          background: dotColor,
+                          border: dotBorder,
+                          boxShadow: dotShadow,
+                          zIndex: 2
                         }} />
-                      )}
-                      {/* Timeline node dot */}
-                      <div style={{
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: '50%',
-                        background: ms.isAchieved ? 'var(--success-green)' : '#E5E7EB',
-                        border: ms.isAchieved ? '2px solid #D1FAE5' : '2px solid white',
-                        boxShadow: ms.isAchieved ? '0 0 8px rgba(16, 185, 129, 0.4)' : 'none',
-                        zIndex: 2
-                      }} />
-                      
-                      <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{
-                          fontSize: '12.5px',
-                          color: ms.isAchieved ? 'var(--brand-dark)' : 'var(--text-secondary)',
-                          fontWeight: ms.isAchieved ? 'bold' : 'normal'
-                        }}>
-                          {ms.name}
-                        </span>
-                        <span style={{
-                          fontSize: '12px',
-                          fontWeight: 'bold',
-                          color: ms.isAchieved ? 'var(--success-green)' : 'var(--text-muted)'
-                        }}>
-                          {ms.bonusPercentage}% {ms.isAchieved ? t('achieved') : t('pending')}
-                        </span>
+                        
+                        <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{
+                            fontSize: '12.5px',
+                            color: textColor,
+                            fontWeight: textFontWeight
+                          }}>
+                            {ms.name}
+                          </span>
+                          <span style={{
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            color: statusColor
+                          }}>
+                            {ms.bonusPercentage}% {statusText}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
