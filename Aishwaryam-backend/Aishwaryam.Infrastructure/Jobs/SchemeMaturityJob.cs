@@ -12,7 +12,7 @@ namespace Aishwaryam.Infrastructure.Jobs
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<SchemeMaturityJob> _logger;
-        private readonly TimeSpan _checkInterval = TimeSpan.FromHours(1); // Check every hour
+        private readonly TimeSpan _checkInterval = TimeSpan.FromSeconds(30); // Check every 30 seconds for tests
 
         public SchemeMaturityJob(IServiceProvider serviceProvider, ILogger<SchemeMaturityJob> logger)
         {
