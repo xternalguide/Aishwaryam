@@ -1216,9 +1216,31 @@ export const SchemeDetail: React.FC = () => {
   }
   const isJoinAmountValid = parsedJoinVal > 0 && joinAmountRupees >= 100;
 
-  // Installment/Payment progress percentage
-  const totalInstallments = scheme?.totalInstallments || 11;
-  const progressPct = Math.min(100, Math.max(0, (installmentsPaid / totalInstallments) * 100));
+  // Helper to calculate calendar-days-based progress
+  const getDaysProgress = () => {
+    if (!joinedAt || !maturityDate) return { totalDays: 330, elapsedDays: 0, progressPct: 0 };
+    const start = new Date(joinedAt).getTime();
+    const end = new Date(maturityDate).getTime();
+    const now = new Date().getTime();
+    
+    const totalMs = end - start;
+    const elapsedMs = now - start;
+    
+    if (totalMs <= 0) return { totalDays: 330, elapsedDays: 330, progressPct: 100 };
+    
+    const totalDays = Math.ceil(totalMs / (1000 * 60 * 60 * 24));
+    // Start progress at Day 1 so the user sees some progress on day 1
+    const elapsedDays = Math.min(totalDays, Math.max(1, Math.ceil(elapsedMs / (1000 * 60 * 60 * 24))));
+    const progressPct = (elapsedDays / totalDays) * 100;
+    
+    return {
+      totalDays,
+      elapsedDays,
+      progressPct
+    };
+  };
+
+  const { totalDays, elapsedDays, progressPct } = getDaysProgress();
  
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
@@ -1281,7 +1303,7 @@ export const SchemeDetail: React.FC = () => {
             <div className="glass-card" style={{ borderRadius: '16px', padding: '20px', background: 'white', display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
-                  {t('scheme_duration_progress')}: {installmentsPaid} / {totalInstallments}
+                  {t('scheme_duration_progress')}: {lang === 'ta' ? 'நாள்' : 'Day'} {elapsedDays} / {totalDays}
                 </span>
                 <span style={{ fontSize: '14px', fontWeight: '900', color: 'var(--brand-accent)' }}>
                   {remainingDaysForScheme} {remainingDaysForScheme === 1 ? t('days_remaining_singular') : t('days_remaining_plural')}
