@@ -70,11 +70,11 @@ html, body {
   text-size-adjust: 100%;
 }
 
-/* Globally force viewport height to use percentage in mobile WebView to fix bottom spacing/scaling zoom bugs */
+/* Globally force viewport height to use dynamic CSS variable to fix bottom spacing/scaling zoom bugs */
 *[style*="100vh"],
 *[style*="100vh" i] {
-  height: 100vh !important;
-  min-height: 100vh !important;
+  height: var(--vh, 100vh) !important;
+  min-height: var(--vh, 100vh) !important;
 }
 
 /* Base mobile & tablet styling (fluid, full-screen) */
