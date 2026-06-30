@@ -27,6 +27,9 @@ interface KycDetails {
     documentType: string;
     documentNumber: string;
     documentUrl: string;
+    status?: string;
+    submittedAt?: string;
+    rejectedReason?: string;
   }>;
 }
 
@@ -45,6 +48,7 @@ export const KycVerification: React.FC = () => {
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [reviewNotes, setReviewNotes] = useState('');
+  const [activeDocTab, setActiveDocTab] = useState<'pending' | 'rejected' | 'approved'>('pending');
 
   const loadKycList = async () => {
     try {
@@ -87,6 +91,7 @@ export const KycVerification: React.FC = () => {
     setIsDetailLoading(true);
     setDetails(null);
     setReviewNotes('');
+    setActiveDocTab('pending');
 
     try {
       const res = await fetch(`${apiBase}/api/Kyc/status/${uid}`);
@@ -345,69 +350,162 @@ export const KycVerification: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <label className="form-label">Uploaded Document Files</label>
-                  {details.documents.length === 0 ? (
-                    <div style={{ padding: '12px', background: 'var(--surface2)', border: '1px dashed var(--border)', textAlign: 'center', borderRadius: '8px', color: 'var(--text-3)' }}>
-                      No files uploaded by user.
-                    </div>
-                  ) : (
-                    details.documents.map((doc, idx) => {
-                      const isImg =
-                        doc.documentUrl.toLowerCase().includes('.jpg') ||
-                        doc.documentUrl.toLowerCase().includes('.jpeg') ||
-                        doc.documentUrl.toLowerCase().includes('.png') ||
-                        doc.documentUrl.toLowerCase().includes('.webp') ||
-                        doc.documentUrl.startsWith('data:image');
+                {(() => {
+                  const documents = details?.documents || [];
+                  const pendingDocs = documents.filter((d: any) => d.status === 'PENDING' || !d.status || d.status === '—' || d.status === 'UNDER_REVIEW');
+                  const rejectedDocs = documents.filter((d: any) => d.status === 'REJECTED');
+                  const approvedDocs = documents.filter((d: any) => d.status === 'APPROVED' || d.status === 'VERIFIED');
 
-                      return (
-                        <div
-                          key={idx}
+                  const displayDocs = activeDocTab === 'pending'
+                    ? pendingDocs
+                    : activeDocTab === 'rejected'
+                    ? rejectedDocs
+                    : approvedDocs;
+
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <label className="form-label">Uploaded Document Files</label>
+                      
+                      {/* Tabs Navigation */}
+                      <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', gap: '12px', paddingBottom: '4px', marginBottom: '8px' }}>
+                        <button
+                          type="button"
                           style={{
-                            padding: '12px',
-                            background: 'var(--surface2)',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '8px'
+                            padding: '6px 12px',
+                            border: 'none',
+                            background: 'transparent',
+                            color: activeDocTab === 'pending' ? 'var(--blue)' : 'var(--text-3)',
+                            borderBottom: activeDocTab === 'pending' ? '2px solid var(--blue)' : 'none',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            fontSize: '12.5px'
                           }}
+                          onClick={() => setActiveDocTab('pending')}
                         >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontWeight: '700', fontSize: '12px', color: 'var(--blue)' }}>
-                              {doc.documentType || 'Identity File'}
-                            </span>
-                            <a
-                              href={doc.documentUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--text-2)' }}
-                            >
-                              Open <ExternalLink size={10} />
-                            </a>
-                          </div>
-                          {isImg ? (
-                            <img
-                              src={doc.documentUrl}
-                              alt="Document Preview"
-                              style={{
-                                width: '100%',
-                                maxHeight: '180px',
-                                background: '#000',
-                                objectFit: 'contain',
-                                borderRadius: '4px'
-                              }}
-                            />
-                          ) : (
-                            <div style={{ fontSize: '11.5px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <FileText size={14} /> PDF File attached
-                            </div>
-                          )}
+                          Pending ({pendingDocs.length})
+                        </button>
+                        <button
+                          type="button"
+                          style={{
+                            padding: '6px 12px',
+                            border: 'none',
+                            background: 'transparent',
+                            color: activeDocTab === 'rejected' ? 'var(--red)' : 'var(--text-3)',
+                            borderBottom: activeDocTab === 'rejected' ? '2px solid var(--red)' : 'none',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            fontSize: '12.5px'
+                          }}
+                          onClick={() => setActiveDocTab('rejected')}
+                        >
+                          Rejected ({rejectedDocs.length})
+                        </button>
+                        <button
+                          type="button"
+                          style={{
+                            padding: '6px 12px',
+                            border: 'none',
+                            background: 'transparent',
+                            color: activeDocTab === 'approved' ? 'var(--green)' : 'var(--text-3)',
+                            borderBottom: activeDocTab === 'approved' ? '2px solid var(--green)' : 'none',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            fontSize: '12.5px'
+                          }}
+                          onClick={() => setActiveDocTab('approved')}
+                        >
+                          Approved ({approvedDocs.length})
+                        </button>
+                      </div>
+
+                      {displayDocs.length === 0 ? (
+                        <div style={{ padding: '16px', background: 'var(--surface2)', border: '1px dashed var(--border)', textAlign: 'center', borderRadius: '8px', color: 'var(--text-3)', fontSize: '12.5px' }}>
+                          No files found in this section.
                         </div>
-                      );
-                    })
-                  )}
-                </div>
+                      ) : (
+                        displayDocs.map((doc, idx) => {
+                          const isImg =
+                            doc.documentUrl.toLowerCase().includes('.jpg') ||
+                            doc.documentUrl.toLowerCase().includes('.jpeg') ||
+                            doc.documentUrl.toLowerCase().includes('.png') ||
+                            doc.documentUrl.toLowerCase().includes('.webp') ||
+                            doc.documentUrl.startsWith('data:image');
+
+                          // Type label format helper
+                          const docType = doc.documentType?.toUpperCase();
+                          const typeLabel = docType === 'PAN' 
+                            ? 'PAN Card' 
+                            : docType === 'AADHAAR_FRONT' 
+                              ? 'Aadhaar (Front)' 
+                              : docType === 'AADHAAR_BACK' 
+                                ? 'Aadhaar (Back)' 
+                                : doc.documentType || 'Identity File';
+
+                          return (
+                            <div
+                              key={idx}
+                              style={{
+                                padding: '12px',
+                                background: 'var(--surface2)',
+                                borderRadius: '8px',
+                                border: '1px solid var(--border)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '8px'
+                              }}
+                            >
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontWeight: '700', fontSize: '12px', color: activeDocTab === 'rejected' ? 'var(--red)' : activeDocTab === 'approved' ? 'var(--green)' : 'var(--blue)' }}>
+                                  {typeLabel}
+                                </span>
+                                <a
+                                  href={doc.documentUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--text-2)' }}
+                                >
+                                  Open <ExternalLink size={10} />
+                                </a>
+                              </div>
+
+                              {/* Timestamps */}
+                              {(doc as any).submittedAt && (
+                                <div style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>
+                                  Uploaded At: {new Date((doc as any).submittedAt).toLocaleString()}
+                                </div>
+                              )}
+
+                              {isImg ? (
+                                <img
+                                  src={doc.documentUrl}
+                                  alt="Document Preview"
+                                  style={{
+                                    width: '100%',
+                                    maxHeight: '180px',
+                                    background: '#000',
+                                    objectFit: 'contain',
+                                    borderRadius: '4px'
+                                  }}
+                                />
+                              ) : (
+                                <div style={{ fontSize: '11.5px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <FileText size={14} /> PDF File attached
+                                </div>
+                              )}
+
+                              {/* Rejection Details */}
+                              {doc.status === 'REJECTED' && (doc as any).rejectedReason && (
+                                <div style={{ fontSize: '11.5px', color: 'var(--red)', borderTop: '1px dashed rgba(239,68,68,0.15)', paddingTop: '6px', marginTop: '4px' }}>
+                                  <strong>Rejection Reason:</strong> {(doc as any).rejectedReason}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Review Notes Area */}
                 <div className="form-group">

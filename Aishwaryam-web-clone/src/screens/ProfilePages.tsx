@@ -749,44 +749,88 @@ export const ProfileKyc: React.FC = () => {
             {t('kyc_documents_label')}
           </span>
           
-          {kycDocs.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '16px 0' }}>
-              <span style={{ fontSize: '13px', color: 'var(--text-light)', fontStyle: 'italic', display: 'block', marginBottom: '14px' }}>
-                {t('no_kyc_documents')}
-              </span>
-              <button
-                onClick={() => navigate('/onboarding')}
-                style={{
-                  padding: '10px 20px', borderRadius: '10px', background: 'var(--gradient-brand)', color: 'white',
-                  border: 'none', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 10px var(--brand-glow)'
-                }}
-              >
-                Upload KYC Documents
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {kycDocs.map((doc, idx) => (
-                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F9FAFB', padding: '10px 14px', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.02)' }}>
-                  <div>
-                    <span style={{ fontSize: '13px', fontWeight: 'bold', display: 'block', color: 'var(--brand-dark)' }}>
-                      {doc.documentType === 'pan' ? 'PAN Card' : 'Aadhaar Card'}
-                    </span>
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>
-                      No: {doc.documentNumber}
-                    </span>
-                  </div>
-                  <span style={{
-                    fontSize: '11px', fontWeight: 'bold', padding: '3px 8px', borderRadius: '6px',
-                    background: doc.status === 'APPROVED' ? 'var(--success-light)' : doc.status === 'REJECTED' ? 'var(--error-light)' : 'var(--warning-light)',
-                    color: doc.status === 'APPROVED' ? 'var(--success-green)' : doc.status === 'REJECTED' ? 'var(--error-red)' : 'var(--warning-amber)'
-                  }}>
-                    {doc.status === 'APPROVED' ? t('approved_status') : doc.status === 'REJECTED' ? t('rejected_status') : t('review_status')}
+          {(() => {
+            const activeDocs = kycDocs.filter((d: any) => d.status !== 'REPLACED');
+            if (activeDocs.length === 0) {
+              return (
+                <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--text-light)', fontStyle: 'italic', display: 'block', marginBottom: '14px' }}>
+                    {t('no_kyc_documents')}
                   </span>
+                  <button
+                    onClick={() => navigate('/onboarding')}
+                    style={{
+                      padding: '10px 20px', borderRadius: '10px', background: 'var(--gradient-brand)', color: 'white',
+                      border: 'none', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 10px var(--brand-glow)'
+                    }}
+                  >
+                    Upload KYC Documents
+                  </button>
                 </div>
-              ))}
-            </div>
-          )}
+              );
+            }
+
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {activeDocs.map((doc, idx) => (
+                  <div key={idx} style={{ display: 'flex', flexDirection: 'column', background: '#F9FAFB', padding: '12px 14px', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.02)', gap: '6px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <span style={{ fontSize: '13px', fontWeight: 'bold', display: 'block', color: 'var(--brand-dark)' }}>
+                          {doc.documentType.toUpperCase() === 'PAN' 
+                            ? 'PAN Card' 
+                            : doc.documentType.toUpperCase() === 'AADHAAR_FRONT' 
+                              ? 'Aadhaar Card (Front)' 
+                              : doc.documentType.toUpperCase() === 'AADHAAR_BACK' 
+                                ? 'Aadhaar Card (Back)' 
+                                : 'Aadhaar Card'}
+                        </span>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginTop: '2px' }}>
+                          No: {doc.documentNumber}
+                        </span>
+                      </div>
+                      <span style={{
+                        fontSize: '11px', fontWeight: 'bold', padding: '3px 8px', borderRadius: '6px',
+                        background: doc.status === 'APPROVED' ? 'var(--success-light)' : doc.status === 'REJECTED' ? 'var(--error-light)' : 'var(--warning-light)',
+                        color: doc.status === 'APPROVED' ? 'var(--success-green)' : doc.status === 'REJECTED' ? 'var(--error-red)' : 'var(--warning-amber)'
+                      }}>
+                        {doc.status === 'APPROVED' ? t('approved_status') : doc.status === 'REJECTED' ? t('rejected_status') : t('review_status')}
+                      </span>
+                    </div>
+
+                    {doc.status === 'REJECTED' && doc.rejectedReason && (
+                      <div style={{ fontSize: '11px', color: 'var(--error-red)', borderTop: '1px dashed rgba(239,68,68,0.15)', paddingTop: '6px', fontWeight: '500' }}>
+                        <strong>Rejection Reason:</strong> {doc.rejectedReason}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {(kycLevel === 'REJECTED' || activeDocs.some((d: any) => d.status === 'REJECTED')) && (
+                  <div style={{ marginTop: '8px', textAlign: 'center' }}>
+                    <button
+                      onClick={() => navigate('/onboarding')}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '10px',
+                        background: 'var(--gradient-brand)',
+                        color: 'white',
+                        border: 'none',
+                        fontSize: '13px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 10px var(--brand-glow)',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      Resubmit KYC Documents
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
 
       </div>
