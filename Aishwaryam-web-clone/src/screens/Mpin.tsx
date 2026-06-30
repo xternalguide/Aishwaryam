@@ -272,11 +272,7 @@ export const Mpin: React.FC = () => {
   }, [showSuccessDialog, flowState]);
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh',
-      background: 'var(--gradient-brand)',
+    <div className="auth-page-root" style={{
       boxSizing: 'border-box',
       position: 'relative'
     }}>
