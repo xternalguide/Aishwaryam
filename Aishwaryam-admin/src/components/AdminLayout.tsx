@@ -83,21 +83,18 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentTab, setCurrent
 
       {/* Sidebar */}
       <aside className={`sidebar ${isMobileSidebarOpen ? 'open' : ''}`}>
-        <div className="sidebar-logo">
-          <div style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '8px',
-            background: 'var(--accent-gradient)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: '900',
-            color: '#ffffff'
-          }}>
-            A
-          </div>
-          <h1>Aishwaryam</h1>
+        <div className="sidebar-logo" style={{ padding: '0 8px' }}>
+          <img
+            src="/logo.png"
+            alt="Aishwaryam Logo"
+            style={{
+              width: '36px',
+              height: '36px',
+              objectFit: 'contain',
+              borderRadius: '8px'
+            }}
+          />
+          <h1 style={{ display: 'none' }}>Aishwaryam</h1>
           <button
             className="btn btn-ghost btn-xs"
             onClick={() => setIsMobileSidebarOpen(false)}

@@ -244,7 +244,7 @@ export const DashboardOverview: React.FC = () => {
   return (
     <>
       {/* Action Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h2 style={{ fontSize: '24px', fontWeight: '800' }}>Platform Overview</h2>
           <p style={{ color: 'var(--text-2)', fontSize: '13px', marginTop: '4px' }}>
@@ -252,7 +252,7 @@ export const DashboardOverview: React.FC = () => {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <button className="btn btn-outline" onClick={handleDownloadReconciliation}>
             <Download size={16} /> Download Daily Report
           </button>
@@ -268,7 +268,7 @@ export const DashboardOverview: React.FC = () => {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid-cols-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+      <div className="grid-cols-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
         <div className="kpi-card">
           <div className="kpi-icon-wrap" style={{ background: 'var(--blue-dim)', color: 'var(--blue)' }}>
             <Users size={20} />
