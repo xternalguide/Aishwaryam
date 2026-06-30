@@ -562,7 +562,8 @@ export const ProfileKyc: React.FC = () => {
       }
     } catch (err: any) {
       console.error(err);
-      alert('Error connecting to KYC service.');
+      const errMsg = err.response?.data?.message || err.message || 'Error connecting to KYC service.';
+      alert(errMsg);
     }
   };
 
