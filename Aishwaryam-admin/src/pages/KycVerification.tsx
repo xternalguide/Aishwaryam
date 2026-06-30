@@ -383,22 +383,24 @@ export const KycVerification: React.FC = () => {
                       
                       {/* Tabs Navigation */}
                       <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', gap: '12px', paddingBottom: '4px', marginBottom: '8px' }}>
-                        <button
-                          type="button"
-                          style={{
-                            padding: '6px 12px',
-                            border: 'none',
-                            background: 'transparent',
-                            color: activeDocTab === 'pending' ? 'var(--blue)' : 'var(--text-3)',
-                            borderBottom: activeDocTab === 'pending' ? '2px solid var(--blue)' : 'none',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            fontSize: '12.5px'
-                          }}
-                          onClick={() => setActiveDocTab('pending')}
-                        >
-                          Pending ({pendingDocs.length})
-                        </button>
+                        {pendingDocs.length > 0 && (
+                          <button
+                            type="button"
+                            style={{
+                              padding: '6px 12px',
+                              border: 'none',
+                              background: 'transparent',
+                              color: activeDocTab === 'pending' ? 'var(--blue)' : 'var(--text-3)',
+                              borderBottom: activeDocTab === 'pending' ? '2px solid var(--blue)' : 'none',
+                              fontWeight: 'bold',
+                              cursor: 'pointer',
+                              fontSize: '12.5px'
+                            }}
+                            onClick={() => setActiveDocTab('pending')}
+                          >
+                            Pending ({pendingDocs.length})
+                          </button>
+                        )}
                         <button
                           type="button"
                           style={{

@@ -78,28 +78,7 @@ namespace Aishwaryam.Api.Controllers
             try
             {
                 var response = await _kycService.SubmitKycAsync(request);
-
-                // Auto-approve instantly!
-                var docs = await _context.KycDocuments
-                    .Where(d => d.UserId == request.UserId && d.Status == "UNDER_REVIEW")
-                    .ToListAsync();
-
-                foreach (var doc in docs)
-                {
-                    doc.Status = "VERIFIED";
-                }
-
-                var user = await _context.Users.FindAsync(request.UserId);
-                if (user != null)
-                {
-                    user.KycLevel = "VERIFIED";
-                    user.UpdatedAt = DateTime.UtcNow;
-                }
-
-                await _context.SaveChangesAsync();
-                await _notificationService.SendNotificationAsync(request.UserId, "KYC Approved! ✅", "Your KYC has been successfully auto-verified instantly.", "KYC_UPDATE");
-
-                return Ok(new { Success = true, Message = "KYC verified instantly!", Status = "VERIFIED" });
+                return Ok(response);
             }
             catch (Exception ex)
             {
