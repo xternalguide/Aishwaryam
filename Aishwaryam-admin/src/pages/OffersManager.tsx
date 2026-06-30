@@ -31,6 +31,34 @@ export const OffersManager: React.FC = () => {
   const [couponCode, setCouponCode] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [bannerUrl, setBannerUrl] = useState('');
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [minPurchaseGoldMg, setMinPurchaseGoldMg] = useState('');
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setUploadError('Only JPG, JPEG, PNG, and WEBP formats are allowed.');
+      setBannerUrl('');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setUploadError('Image size must be less than 2MB.');
+      setBannerUrl('');
+      return;
+    }
+
+    setUploadError(null);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setBannerUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const loadData = async () => {
     try {
@@ -91,6 +119,9 @@ export const OffersManager: React.FC = () => {
     setDiscountPercentage('');
     setCouponCode('');
     setExpiresAt(new Date(Date.now() + 86400000 * 7).toISOString().split('T')[0]);
+    setBannerUrl('');
+    setUploadError(null);
+    setMinPurchaseGoldMg('');
     setModalOpen(true);
   };
 
@@ -110,7 +141,9 @@ export const OffersManager: React.FC = () => {
       maxDiscountPaise: 50000, // 500 INR default max
       minTransactionAmountPaise: 10000, // 100 INR default min
       couponCode: offerType === 'COUPON' ? couponCode : undefined,
-      expiresAt: new Date(expiresAt).toISOString()
+      expiresAt: new Date(expiresAt).toISOString(),
+      bannerUrl: bannerUrl || undefined,
+      minPurchaseGoldMg: minPurchaseGoldMg ? Math.round(parseFloat(minPurchaseGoldMg) * 1000) : 0
     };
 
     try {
@@ -373,6 +406,35 @@ export const OffersManager: React.FC = () => {
                   />
                 </div>
               )}
+
+              <div className="form-group">
+                <label className="form-label">Min Purchase Grams Threshold (Optional)</label>
+                <input
+                  className="form-control"
+                  type="number"
+                  step="0.001"
+                  min="0"
+                  placeholder="e.g. 1.0 (grams needed to qualify)"
+                  value={minPurchaseGoldMg}
+                  onChange={(e) => setMinPurchaseGoldMg(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Campaign Poster Image (Optional)</label>
+                <input
+                  className="form-control"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+                {uploadError && <p style={{ color: 'var(--red)', fontSize: '11px', margin: '4px 0 0 0' }}>{uploadError}</p>}
+                {bannerUrl && (
+                  <div style={{ marginTop: '8px', border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden', width: '150px', height: '90px' }}>
+                    <img src={bannerUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Poster Preview" />
+                  </div>
+                )}
+              </div>
 
               <div className="form-group">
                 <label className="form-label">Expiration Date</label>
