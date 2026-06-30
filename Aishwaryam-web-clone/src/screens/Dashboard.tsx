@@ -1247,11 +1247,11 @@ export const Dashboard: React.FC = () => {
           <span style={{ fontFamily:DS.font, fontSize:'11px', color:DS.textSub }}>{t('need_help_desc')}</span>
         </div>
       </div>
-      <div style={{ display:'flex', gap:'12px' }}>
-        <button onClick={()=>window.location.href = 'tel:+919443000000'} style={{ flex:1, height:'42px', borderRadius:'12px', background:'linear-gradient(135deg,#29001D,#4A0E4E)', color:'white', border:'1px solid rgba(255,215,0,0.2)', fontFamily:DS.font, fontWeight:'700', fontSize:'12px', display:'flex', alignItems:'center', justifyContent:'center', gap:'6px', cursor:'pointer' }}>
+      <div style={{ display:'flex', flexDirection: isDesktop ? 'row' : 'column', gap:'10px' }}>
+        <button onClick={()=>window.location.href = 'tel:+919443000000'} style={{ width: '100%', height:'42px', borderRadius:'12px', background:'linear-gradient(135deg,#29001D,#4A0E4E)', color:'white', border:'1px solid rgba(255,215,0,0.2)', fontFamily:DS.font, fontWeight:'700', fontSize:'12px', display:'flex', alignItems:'center', justifyContent:'center', gap:'6px', cursor:'pointer' }}>
           <PhoneCall size={14} color={DS.gold} /><span>{t('call_us')}</span>
         </button>
-        <button onClick={()=>window.location.href = 'mailto:support@aishwaryam.com'} style={{ flex:1, height:'42px', borderRadius:'12px', background:'rgba(255,255,255,0.05)', color:DS.textWhite, border:'1px solid rgba(255,255,255,0.1)', fontFamily:DS.font, fontWeight:'700', fontSize:'12px', display:'flex', alignItems:'center', justifyContent:'center', gap:'6px', cursor:'pointer' }}>
+        <button onClick={()=>window.location.href = 'mailto:support@aishwaryam.com'} style={{ width: '100%', height:'42px', borderRadius:'12px', background:'rgba(255,255,255,0.05)', color:DS.textWhite, border:'1px solid rgba(255,255,255,0.1)', fontFamily:DS.font, fontWeight:'700', fontSize:'12px', display:'flex', alignItems:'center', justifyContent:'center', gap:'6px', cursor:'pointer' }}>
           <Mail size={14} color={DS.textSub} /><span>{t('email_us')}</span>
         </button>
       </div>
