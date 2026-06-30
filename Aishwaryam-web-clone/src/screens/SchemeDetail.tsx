@@ -51,6 +51,8 @@ export const SchemeDetail: React.FC = () => {
   const [totalBonusEarnedPaise, setTotalBonusEarnedPaise] = useState(0);
   const [totalBonusGoldMg, setTotalBonusGoldMg] = useState(0);
   const [milestones, setMilestones] = useState<MilestoneItem[]>([]);
+  const [currentBonusPercent, setCurrentBonusPercent] = useState(7.5);
+  const [remainingDaysForCurrentTier, setRemainingDaysForCurrentTier] = useState(75);
 
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [remainingDaysForScheme, setRemainingDaysForScheme] = useState(0);
@@ -317,6 +319,8 @@ export const SchemeDetail: React.FC = () => {
       setMaturityDate(userActiveScheme.maturityDate || userActiveScheme.MaturityDate || '');
       setSchemeStatus(userActiveScheme.status || userActiveScheme.Status || '');
       setIsJoinFormCompleted(userActiveScheme.isJoinFormCompleted || userActiveScheme.IsJoinFormCompleted || false);
+      setCurrentBonusPercent(userActiveScheme.currentBonusTierPercent ?? userActiveScheme.CurrentBonusTierPercent ?? 7.5);
+      setRemainingDaysForCurrentTier(userActiveScheme.remainingDaysForCurrentTier ?? userActiveScheme.RemainingDaysForCurrentTier ?? 0);
 
       // Setup milestones
       setMilestones(parseMilestones(
@@ -1212,24 +1216,9 @@ export const SchemeDetail: React.FC = () => {
   }
   const isJoinAmountValid = parsedJoinVal > 0 && joinAmountRupees >= 100;
 
-  // Helper to calculate days-based progress
-  const getDaysProgress = () => {
-    if (!joinedAt || !maturityDate) return { totalDays: 75, elapsedDays: 0, progressPct: 0 };
-    const start = new Date(joinedAt).getTime();
-    const end = new Date(maturityDate).getTime();
-    const totalMs = end - start;
-    if (totalMs <= 0) return { totalDays: 75, elapsedDays: 75, progressPct: 100 };
-    const totalDays = Math.ceil(totalMs / (1000 * 60 * 60 * 24));
-    const elapsedDays = Math.max(0, totalDays - remainingDaysForScheme);
-    const progressPct = Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100));
-    return {
-      totalDays,
-      elapsedDays,
-      progressPct
-    };
-  };
-
-  const { progressPct } = getDaysProgress();
+  // Installment/Payment progress percentage
+  const totalInstallments = scheme?.totalInstallments || 11;
+  const progressPct = Math.min(100, Math.max(0, (installmentsPaid / totalInstallments) * 100));
  
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
@@ -1292,7 +1281,7 @@ export const SchemeDetail: React.FC = () => {
             <div className="glass-card" style={{ borderRadius: '16px', padding: '20px', background: 'white', display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
-                  {t('scheme_duration_progress')}
+                  {t('scheme_duration_progress')}: {installmentsPaid} / {totalInstallments}
                 </span>
                 <span style={{ fontSize: '14px', fontWeight: '900', color: 'var(--brand-accent)' }}>
                   {remainingDaysForScheme} {remainingDaysForScheme === 1 ? t('days_remaining_singular') : t('days_remaining_plural')}
@@ -1314,6 +1303,38 @@ export const SchemeDetail: React.FC = () => {
                 <span>{t('start_date')}: {joinedAt ? new Date(joinedAt).toLocaleDateString() : '—'}</span>
                 <span>{t('maturity_date')}: {maturityDate ? new Date(maturityDate).toLocaleDateString() : '—'}</span>
               </div>
+            </div>
+
+            {/* Active Bonus Tier Tracker Card */}
+            <div className="glass-card" style={{ borderRadius: '16px', padding: '20px', background: 'white', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
+                  {lang === 'ta' ? 'தற்போதைய போனஸ் நிலை' : 'Current Bonus Tier'}
+                </span>
+                <span style={{ fontSize: '14px', fontWeight: '900', color: 'var(--success-green)' }}>
+                  {currentBonusPercent}% {lang === 'ta' ? 'போனஸ்' : 'Bonus'}
+                </span>
+              </div>
+              
+              {remainingDaysForCurrentTier > 0 ? (
+                <>
+                  <div style={{ width: '100%', height: '6px', background: '#F3F4F6', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{
+                      width: `${Math.min(100, Math.max(0, ((75 - remainingDaysForCurrentTier) / 75) * 100))}%`,
+                      height: '100%',
+                      background: 'var(--success-green)',
+                      borderRadius: '3px',
+                    }} />
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    {remainingDaysForCurrentTier} {lang === 'ta' ? 'நாட்கள் இந்த போனஸ் சதவிகிதத்தில் மீதமுள்ளன' : 'days remaining for this bonus percentage'}
+                  </div>
+                </>
+              ) : (
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  {lang === 'ta' ? 'அடுத்த போனஸ் அடுக்கு தயாராக உள்ளது' : 'Ready for the next bonus tier or matured'}
+                </div>
+              )}
             </div>
 
             {/* Loyalty Milestones Timeline */}
@@ -2107,55 +2128,59 @@ export const SchemeDetail: React.FC = () => {
             </div>
  
             {/* Calculations Breakdown */}
-            {parseFloat(joinAmount) > 0 && (
-              <div style={{ background: '#FFF9F0', border: '1px solid rgba(255, 215, 0, 0.2)', padding: '16px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {joinType === 'RUPEES' ? (
-                  <>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      <span>{t('savings_deposit')}</span>
-                      <span style={{ fontWeight: 'bold' }}>₹{parseFloat(joinAmount).toFixed(2)}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      <span>{t('gst_included')}</span>
-                      <span>₹{(parseFloat(joinAmount) - (parseFloat(joinAmount) / 1.03)).toFixed(2)}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--brand-mid)', fontWeight: 'bold' }}>
-                      <span>{t('loyalty_bonus_structure')} (7.5%)</span>
-                      <span>+ ₹{(parseFloat(joinAmount) / 1.03 * 0.075).toFixed(2)} equivalent</span>
-                    </div>
-                    <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)' }} />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
-                      <span>{t('effective_gold_added')}</span>
-                      <span style={{ color: 'var(--gold-deep)' }}>
-                        {((parseFloat(joinAmount) / 1.03 * 1.075 * 100) / goldPrice22K).toFixed(4)} {t('grams_suffix')}
-                      </span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      <span>{t('base_metal_value_22k')}</span>
-                      <span style={{ fontWeight: 'bold' }}>₹{(parseFloat(joinAmount) * goldPrice22K / 100).toFixed(2)}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      <span>{t('gst_3_percent')}</span>
-                      <span>₹{(parseFloat(joinAmount) * goldPrice22K / 100 * 0.03).toFixed(2)}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--brand-mid)', fontWeight: 'bold' }}>
-                      <span>{t('loyalty_bonus_structure')} (7.5%)</span>
-                      <span>+ {(parseFloat(joinAmount) * 0.075).toFixed(4)} {t('grams_suffix')} equivalent</span>
-                    </div>
-                    <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)' }} />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
-                      <span>{t('total_amount_payable')}</span>
-                      <span style={{ color: 'var(--brand-dark)' }}>
-                        ₹{(parseFloat(joinAmount) * goldPrice22K / 100 * 1.03).toFixed(2)}
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
+            {(() => {
+              const activeBonusPercent = isActive ? (currentBonusPercent || 7.5) : 7.5;
+              const bonusMultiplier = activeBonusPercent / 100;
+              return parseFloat(joinAmount) > 0 && (
+                <div style={{ background: '#FFF9F0', border: '1px solid rgba(255, 215, 0, 0.2)', padding: '16px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {joinType === 'RUPEES' ? (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        <span>{t('savings_deposit')}</span>
+                        <span style={{ fontWeight: 'bold' }}>₹{parseFloat(joinAmount).toFixed(2)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        <span>{t('gst_included')}</span>
+                        <span>₹{(parseFloat(joinAmount) - (parseFloat(joinAmount) / 1.03)).toFixed(2)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--brand-mid)', fontWeight: 'bold' }}>
+                        <span>{t('loyalty_bonus_structure')} ({activeBonusPercent}%)</span>
+                        <span>+ ₹{(parseFloat(joinAmount) / 1.03 * bonusMultiplier).toFixed(2)} equivalent</span>
+                      </div>
+                      <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)' }} />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
+                        <span>{t('effective_gold_added')}</span>
+                        <span style={{ color: 'var(--gold-deep)' }}>
+                          {((parseFloat(joinAmount) / 1.03 * (1 + bonusMultiplier) * 100) / goldPrice22K).toFixed(4)} {t('grams_suffix')}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        <span>{t('base_metal_value_22k')}</span>
+                        <span style={{ fontWeight: 'bold' }}>₹{(parseFloat(joinAmount) * goldPrice22K / 100).toFixed(2)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        <span>{t('gst_3_percent')}</span>
+                        <span>₹{(parseFloat(joinAmount) * goldPrice22K / 100 * 0.03).toFixed(2)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--brand-mid)', fontWeight: 'bold' }}>
+                        <span>{t('loyalty_bonus_structure')} ({activeBonusPercent}%)</span>
+                        <span>+ {(parseFloat(joinAmount) * bonusMultiplier).toFixed(4)} {t('grams_suffix')} equivalent</span>
+                      </div>
+                      <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)' }} />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
+                        <span>{t('total_amount_payable')}</span>
+                        <span style={{ color: 'var(--brand-dark)' }}>
+                          ₹{(parseFloat(joinAmount) * goldPrice22K / 100 * 1.03).toFixed(2)}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
  
             {/* Validation warning */}
             {(validationError || (parsedJoinVal > 0 && !isJoinAmountValid)) && (
