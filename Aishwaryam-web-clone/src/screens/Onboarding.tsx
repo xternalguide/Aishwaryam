@@ -654,21 +654,18 @@ export const Onboarding: React.FC = () => {
 
                 <div>
                   <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>{t('gender_label')} <span style={{ color: 'var(--error-red)' }}>*</span></label>
-                  <div style={{ display: 'flex', gap: '24px', marginTop: '8px' }}>
-                    {['Male', 'Female'].map((g) => (
-                      <label key={g} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
-                        <input
-                          type="radio"
-                          name="gender"
-                          value={g}
-                          checked={gender === g}
-                          onChange={() => setGender(g)}
-                          style={{ accentColor: 'var(--brand-mid)' }}
-                        />
-                        {g === 'Male' ? t('gender_male') : t('gender_female')}
-                      </label>
-                    ))}
-                  </div>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    style={{
+                      width: '100%', height: '40px', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.1)',
+                      padding: '0 12px', fontSize: '14px', outline: 'none', background: 'white', marginTop: '6px'
+                    }}
+                  >
+                    <option value="Male">{t('gender_male')}</option>
+                    <option value="Female">{t('gender_female')}</option>
+                    <option value="Other">{t('gender_other')}</option>
+                  </select>
                 </div>
               </div>
 

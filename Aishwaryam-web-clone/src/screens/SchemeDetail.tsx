@@ -35,7 +35,6 @@ export const SchemeDetail: React.FC = () => {
   const location = useLocation();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [showRelPicker, setShowRelPicker] = useState(false);
   const [scheme, setScheme] = useState<AvailableScheme | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [showJoinSheet, setShowJoinSheet] = useState(false);
@@ -1858,20 +1857,19 @@ export const SchemeDetail: React.FC = () => {
                   {t('relationship')} <span style={{ color: 'red' }}>*</span>
                 </label>
                 
-                {/* Premium Web-App style custom Dropdown Selector */}
-                <div
-                  onClick={() => setShowRelPicker(true)}
+                <select
+                  value={setupNomineeRelationship}
+                  onChange={(e) => setSetupNomineeRelationship(e.target.value)}
                   style={{
                     width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)',
-                    padding: '0 12px', fontSize: '13px', marginTop: '4px', background: 'white',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer'
+                    padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px', background: 'white'
                   }}
                 >
-                  <span style={{ color: setupNomineeRelationship ? 'var(--text-primary)' : 'var(--text-muted)' }}>
-                    {setupNomineeRelationship ? autoT(setupNomineeRelationship) : t('select_relationship')}
-                  </span>
-                  <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>▼</span>
-                </div>
+                  <option value="">{t('select_relationship') || 'Select Relationship'}</option>
+                  {RELATIONSHIPS.map((rel) => (
+                    <option key={rel} value={rel}>{autoT(rel)}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -1918,45 +1916,7 @@ export const SchemeDetail: React.FC = () => {
         </div>
       )}
 
-      {/* Relationship Selection Bottom Sheet Overlay */}
-      {showRelPicker && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)',
-          display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 1200,
-          backdropFilter: 'blur(3px)'
-        }} onClick={() => setShowRelPicker(false)}>
-          <div style={{
-            width: '100%', maxWidth: '440px', background: 'white', borderTopLeftRadius: '24px', borderTopRightRadius: '24px',
-            padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '60%', overflowY: 'auto',
-            boxShadow: '0 -8px 32px rgba(0,0,0,0.15)',
-            boxSizing: 'border-box'
-          }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ECECEC', paddingBottom: '12px' }}>
-              <h4 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>SELECT RELATIONSHIP</h4>
-              <button onClick={() => setShowRelPicker(false)} style={{ background: 'transparent', border: 'none', color: 'var(--brand-mid)', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>Cancel</button>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {RELATIONSHIPS.map((rel) => {
-                const isSel = setupNomineeRelationship === rel;
-                return (
-                  <div
-                    key={rel}
-                    onClick={() => { setSetupNomineeRelationship(rel); setShowRelPicker(false); }}
-                    style={{
-                      padding: '12px 16px', borderRadius: '12px', border: isSel ? '2px solid var(--brand-mid)' : '1px solid #ECECEC',
-                      background: isSel ? '#FFFBF6' : 'white', cursor: 'pointer', display: 'flex', justifyContent: 'space-between',
-                      alignItems: 'center', fontSize: '13px', fontWeight: isSel ? 'bold' : 'normal', color: 'var(--brand-dark)'
-                    }}
-                  >
-                    <span>{autoT(rel)}</span>
-                    {isSel && <span style={{ color: 'var(--brand-mid)', fontWeight: 'bold' }}>✓</span>}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Success Popup Modal */}
       {showSuccessPopup && (

@@ -609,7 +609,7 @@ export const ProfileKyc: React.FC = () => {
           )}
           <div>
             <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--brand-dark)', display: 'block' }}>
-              KYC Level: {kycLevel}
+              KYC Level: {kycLevel === 'FULL' ? 'Completed' : kycLevel}
             </span>
             <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: '16px', display: 'block', marginTop: '2px' }}>
               {kycLevel === 'FULL' 
@@ -755,17 +755,19 @@ export const ProfileKyc: React.FC = () => {
               return (
                 <div style={{ textAlign: 'center', padding: '16px 0' }}>
                   <span style={{ fontSize: '13px', color: 'var(--text-light)', fontStyle: 'italic', display: 'block', marginBottom: '14px' }}>
-                    {t('no_kyc_documents')}
+                    {kycLevel === 'FULL' ? 'All KYC documents have been verified and processed.' : t('no_kyc_documents')}
                   </span>
-                  <button
-                    onClick={() => navigate('/onboarding')}
-                    style={{
-                      padding: '10px 20px', borderRadius: '10px', background: 'var(--gradient-brand)', color: 'white',
-                      border: 'none', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 10px var(--brand-glow)'
-                    }}
-                  >
-                    Upload KYC Documents
-                  </button>
+                  {kycLevel !== 'FULL' && (
+                    <button
+                      onClick={() => navigate('/onboarding')}
+                      style={{
+                        padding: '10px 20px', borderRadius: '10px', background: 'var(--gradient-brand)', color: 'white',
+                        border: 'none', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 10px var(--brand-glow)'
+                      }}
+                    >
+                      Upload KYC Documents
+                    </button>
+                  )}
                 </div>
               );
             }
