@@ -47,7 +47,9 @@ export const SchemeEnrollments: React.FC = () => {
 
       if (enrollRes.ok) {
         const enrollData = await enrollRes.json();
-        const list = Array.isArray(enrollData) ? enrollData : [];
+        const list = Array.isArray(enrollData) 
+          ? enrollData 
+          : (enrollData && Array.isArray(enrollData.enrollments) ? enrollData.enrollments : []);
         const enriched = list.map((e: any) => {
           const u = usersMap[(e.userId || '').toLowerCase()];
           return {
