@@ -1036,14 +1036,14 @@ export const Dashboard: React.FC = () => {
               onClick={() => navigate(`/scheme-detail/${sch.schemeId}`)}
               style={{ ...DS.glass, padding:'18px', cursor:'pointer', transition:'all 0.25s ease' }}
             >
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'12px' }}>
-                <div>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'12px', gap:'12px' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <span style={{ fontFamily:DS.font, fontSize:'9px', color:DS.magenta, fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.8px', display:'block', marginBottom:'3px' }}>
                     {sch.frequency === 'Daily' ? (lang === 'ta' ? 'தினசரி திட்டம்' : 'DAILY SCHEME') : (lang === 'ta' ? 'மாதாந்திர திட்டம்' : 'MONTHLY SCHEME')}
                   </span>
-                  <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'800', color:DS.textWhite }}>{autoT(sch.planName)}</span>
+                  <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'800', color:DS.textWhite, display:'block', wordBreak:'break-word' }}>{autoT(sch.planName)}</span>
                 </div>
-                <span style={{ fontFamily:DS.font, fontSize:'10px', background:'rgba(255,215,0,0.15)', color:DS.gold, padding:'4px 10px', borderRadius:'20px', fontWeight:'700', border:'1px solid rgba(255,215,0,0.2)' }}>
+                <span style={{ fontFamily:DS.font, fontSize:'10px', background:'rgba(255,215,0,0.15)', color:DS.gold, padding:'4px 10px', borderRadius:'20px', fontWeight:'700', border:'1px solid rgba(255,215,0,0.2)', flexShrink: 0, whiteSpace: 'nowrap' }}>
                   {lang === 'ta' ? 'நாள்' : 'Day'} {sch.schemeDayNumber||1}
                 </span>
               </div>
