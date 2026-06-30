@@ -41,8 +41,8 @@
   --text-light: #A0A0AB;
   --text-on-dark: #FFFFFF;
 
-  /* Fonts: Montserrat and Roman combination */
-  --font-playfair: 'Lora', 'Times New Roman', Times, Georgia, serif;
+  /* Fonts: Montserrat globally */
+  --font-playfair: 'Montserrat', sans-serif;
   --font-poppins: 'Montserrat', sans-serif;
   
   box-sizing: border-box;
