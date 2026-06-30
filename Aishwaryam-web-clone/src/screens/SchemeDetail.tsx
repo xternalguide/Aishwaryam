@@ -62,6 +62,7 @@ export const SchemeDetail: React.FC = () => {
   // UI Interactive States
   const [openTabs, setOpenTabs] = useState<Record<number, boolean>>({});
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTermsPopup, setShowTermsPopup] = useState(false);
   const [isPincodeReadOnly, setIsPincodeReadOnly] = useState(true);
   const [isCityReadOnly, setIsCityReadOnly] = useState(true);
   const [isStateReadOnly, setIsStateReadOnly] = useState(true);
@@ -1826,20 +1827,7 @@ export const SchemeDetail: React.FC = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      // Navigate to the separate terms conditions screen, passing filled state so it restores when they hit Back
-                      navigate('/terms-conditions', {
-                        state: {
-                          fromJoinForm: true,
-                          schemeId,
-                          nomineeName: setupNomineeName,
-                          nomineePhone: setupNomineePhone,
-                          nomineeRelationship: setupNomineeRelationship,
-                          pincode: setupPincode,
-                          city: setupCity,
-                          state: setupState,
-                          street: setupStreet
-                        }
-                      });
+                      setShowTermsPopup(true);
                     }}
                     style={{ color: 'var(--brand-mid)', fontWeight: 'bold', textDecoration: 'underline', cursor: 'pointer' }}
                   >
@@ -1957,6 +1945,82 @@ export const SchemeDetail: React.FC = () => {
               >
                 {t('invest_later')}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Scrollable Terms & Conditions Modal Overlay */}
+      {showTermsPopup && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1300,
+          backdropFilter: 'blur(3px)', padding: '20px', boxSizing: 'border-box'
+        }} onClick={() => setShowTermsPopup(false)}>
+          <div style={{
+            width: '100%', maxWidth: '440px', background: 'white', borderRadius: '24px',
+            padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '80%',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.2)', boxSizing: 'border-box'
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ECECEC', paddingBottom: '12px' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>
+                {t('terms_title')}
+              </h3>
+              <button onClick={() => setShowTermsPopup(false)} style={{ background: 'transparent', border: 'none', color: 'var(--brand-mid)', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
+                Close
+              </button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px', paddingRight: '4px' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: '18px', fontStyle: 'italic' }}>
+                {t('terms_subtitle')}
+              </p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ borderLeft: '3px solid var(--brand-accent)', paddingLeft: '10px' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 4px 0' }}>{t('terms_sec1_title')}</h4>
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: 0, lineHeight: '16px' }}>{t('terms_sec1_text')}</p>
+                </div>
+
+                <div style={{ borderLeft: '3px solid var(--brand-accent)', paddingLeft: '10px' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 4px 0' }}>{t('terms_sec2_title')}</h4>
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: '0 0 4px 0', lineHeight: '16px' }}>{t('terms_sec2_text')}</p>
+                  <ul style={{ margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    <li>{t('terms_sec2_bullet1')}</li>
+                    <li>{t('terms_sec2_bullet2')}</li>
+                    <li>{t('terms_sec2_bullet3')}</li>
+                  </ul>
+                </div>
+
+                <div style={{ borderLeft: '3px solid var(--brand-accent)', paddingLeft: '10px' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 4px 0' }}>{t('terms_sec3_title')}</h4>
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: 0, lineHeight: '16px' }}>{t('terms_sec3_text')}</p>
+                </div>
+
+                <div style={{ borderLeft: '3px solid var(--brand-accent)', paddingLeft: '10px' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 4px 0' }}>{t('terms_sec4_title')}</h4>
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: '0 0 4px 0', lineHeight: '16px' }}>{t('terms_sec4_text')}</p>
+                  <ul style={{ margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    <li>{t('terms_sec4_bullet1')}</li>
+                    <li>{t('terms_sec4_bullet2')}</li>
+                    <li>{t('terms_sec4_bullet3')}</li>
+                  </ul>
+                </div>
+
+                <div style={{ borderLeft: '3px solid var(--brand-accent)', paddingLeft: '10px' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 4px 0' }}>{t('terms_sec5_title')}</h4>
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: '0 0 4px 0', lineHeight: '16px' }}>{t('terms_sec5_text')}</p>
+                  <ul style={{ margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    <li>{t('terms_sec5_bullet1')}</li>
+                    <li>{t('terms_sec5_bullet2')}</li>
+                    <li>{t('terms_sec5_bullet3')}</li>
+                  </ul>
+                </div>
+
+                <div style={{ borderLeft: '3px solid var(--brand-accent)', paddingLeft: '10px' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 4px 0' }}>{t('terms_sec6_title')}</h4>
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: 0, lineHeight: '16px' }}>{t('terms_sec6_text')}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
