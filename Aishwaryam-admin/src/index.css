@@ -123,7 +123,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Narrow Sidebar with Cutout curve inspired by screenshot 3 */
 .sidebar {
-  width: 88px;
+  width: 108px;
   background: var(--sidebar-bg);
   display: flex;
   flex-direction: column;
@@ -156,7 +156,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
   padding: 0;
   overflow-y: auto;
@@ -165,40 +165,42 @@ h1, h2, h3, h4, h5, h6 {
 
 .nav-link {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
+  gap: 4px;
+  width: 84px;
+  height: auto;
+  min-height: 56px;
+  padding: 6px 2px;
   color: #64748b;
-  border-radius: 18px;
+  border-radius: 14px;
   cursor: pointer;
   transition: all 0.25s ease;
   position: relative;
   border: 1px solid transparent;
 }
 
-/* Hover tooltips to show page name since text is hidden */
+/* Labels rendered permanently under the icon */
 .nav-link span {
-  position: absolute;
-  left: 74px;
-  background: #0f172a;
-  color: #ffffff;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 11px;
+  font-size: 8px;
   font-weight: 700;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(-10px);
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  z-index: 200;
-}
-
-.nav-link:hover span {
-  opacity: 1;
-  transform: translateX(0);
+  text-align: center;
+  white-space: normal;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  position: static !important;
+  background: transparent !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  padding: 0 2px !important;
+  margin-top: 4px;
+  max-width: 100%;
+  word-wrap: break-word;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
 }
 
 .nav-link:hover {
@@ -211,8 +213,9 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--bg);
   color: var(--text);
   border-radius: 20px 0 0 20px;
-  width: 72px;
-  height: 56px;
+  width: 92px;
+  height: auto;
+  min-height: 56px;
   align-self: flex-end;
   margin-right: -1px;
   box-shadow: none;
@@ -246,7 +249,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .main-content {
-  margin-left: 120px;
+  margin-left: 140px;
   flex: 1;
   display: flex;
   flex-direction: column;
