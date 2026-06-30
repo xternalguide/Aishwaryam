@@ -563,6 +563,10 @@ namespace Aishwaryam.Application.Services
                 existing.IsActive = scheme.IsActive;
                 existing.BonusConfigJson = scheme.BonusConfigJson;
                 existing.CustomSectionsJson = scheme.CustomSectionsJson;
+                existing.PaymentRulesJson = scheme.PaymentRulesJson;
+                existing.KeywordsJson = scheme.KeywordsJson;
+                existing.RazorpayPlanId = scheme.RazorpayPlanId;
+                existing.PosterImageBase64 = scheme.PosterImageBase64;
 
                 var updated = await _schemeRepository.UpdateSchemeMasterAsync(existing);
 
