@@ -292,51 +292,7 @@ export const Onboarding: React.FC = () => {
     return basicInfo && dobValid && marriageValid;
   };
 
-  const startAiVerification = async (docType: 'AADHAAR' | 'PAN') => {
-    const userId = SessionManager.getUserId();
-    if (!userId) return;
 
-    const cardNumber = docType === 'AADHAAR' ? aadhaarNumber : panNumber;
-    const imageBase64 = docType === 'AADHAAR' ? aadhaarFrontImage : panImage;
-
-    if (!cardNumber.trim()) {
-      alert(`Please enter your ${docType === 'AADHAAR' ? 'Aadhaar' : 'PAN'} Card Number first.`);
-      return;
-    }
-    if (!imageBase64) {
-      alert(`Please select or capture your ${docType === 'AADHAAR' ? 'Aadhaar Front' : 'PAN'} image first.`);
-      return;
-    }
-
-    try {
-      setIsSaving(true);
-      setSaveError(null);
-      
-      const res = await ApiClient.post('api/Kyc/ai-verify', {
-        userId: userId,
-        documentType: docType,
-        cardNumber: cardNumber.replace(/\s/g, ''),
-        imageBase64: imageBase64
-      });
-
-      if (res.data && res.data.success) {
-        alert(`${docType} verified successfully by AI!`);
-        await refreshData();
-        if (docType === 'AADHAAR') {
-          SessionManager.saveOnboardingStage(OnboardingStage.FULLY_VERIFIED);
-          navigate('/dashboard');
-        }
-      } else {
-        alert(res.data.message || 'AI verification failed.');
-      }
-    } catch (err: any) {
-      console.error(err);
-      const errMsg = err.response?.data?.message || err.message || 'AI Verification failed.';
-      alert(errMsg);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleNext = async () => {
     const userId = SessionManager.getUserId() || 'user-id-999';
@@ -850,48 +806,7 @@ export const Onboarding: React.FC = () => {
                 <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>{t('step_2_kyc_verification')}</h2>
               </div>
 
-              <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', border: '1.5px solid rgba(255, 215, 0, 0.4)', textAlign: 'center', alignItems: 'center' }}>
-                <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
-                  ⚡ Instant Automatic Verification
-                </span>
-                <span style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                  Skip manual document uploads and approve your KYC instantly.
-                </span>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
-                  <button
-                    onClick={() => startAiVerification('AADHAAR')}
-                    type="button"
-                    style={{
-                      width: '100%', padding: '12px 20px', borderRadius: '12px',
-                      background: 'linear-gradient(135deg, #D4AF37 0%, #AA7C11 100%)', color: 'white',
-                      border: 'none', fontSize: '13.5px', fontWeight: 'bold', cursor: 'pointer',
-                      boxShadow: '0 4px 12px rgba(170, 124, 17, 0.2)'
-                    }}
-                  >
-                    Verify Instantly via Aadhaar
-                  </button>
-                  <button
-                    onClick={() => startAiVerification('PAN')}
-                    type="button"
-                    style={{
-                      width: '100%', padding: '12px 20px', borderRadius: '12px',
-                      background: 'linear-gradient(135deg, #4A5568 0%, #2D3748 100%)', color: 'white',
-                      border: 'none', fontSize: '13.5px', fontWeight: 'bold', cursor: 'pointer',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-                    }}
-                  >
-                    Verify Instantly via PAN
-                  </button>
-                </div>
-              </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '6px 0' }}>
-                <div style={{ height: '1px', flex: 1, background: 'rgba(0,0,0,0.08)' }}></div>
-                <span style={{ margin: '0 12px', fontSize: '11px', fontWeight: 'bold', color: 'var(--text-light)', textTransform: 'uppercase' }}>
-                  Or Continue Manually
-                </span>
-                <div style={{ height: '1px', flex: 1, background: 'rgba(0,0,0,0.08)' }}></div>
-              </div>
 
               {/* PAN Verification */}
               <div className="glass-card" style={{ borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>

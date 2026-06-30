@@ -504,52 +504,7 @@ export const ProfileKyc: React.FC = () => {
 
   const RELATIONSHIPS = ["Father", "Mother", "Wife", "Husband", "Son", "Daughter", "Brother", "Guardian"];
 
-  const startAiVerification = async (docType: 'AADHAAR' | 'PAN') => {
-    const userId = SessionManager.getUserId();
-    if (!userId) return;
 
-    const cardNumber = prompt(`Enter your 12-digit Aadhaar / 10-digit PAN number to verify instantly:`);
-    if (!cardNumber) return;
-
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.onchange = async (e: any) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64 = reader.result as string;
-        try {
-          const res = await ApiClient.post('api/Kyc/ai-verify', {
-            userId: userId,
-            documentType: docType,
-            cardNumber: cardNumber.replace(/\s/g, ''),
-            imageBase64: base64
-          });
-
-          if (res.data && res.data.success) {
-            alert(`${docType} verified successfully by AI!`);
-            refreshData();
-            const statusRes = await ApiClient.get(`api/Kyc/status/${userId}`);
-            if (statusRes.data && statusRes.data.success) {
-              setKycDocs(statusRes.data.documents || []);
-              setKycStatusMsg(statusRes.data.status || 'PENDING');
-            }
-          } else {
-            alert(res.data.message || 'AI verification failed.');
-          }
-        } catch (err: any) {
-          console.error(err);
-          const errMsg = err.response?.data?.message || err.message || 'AI Verification failed.';
-          alert(errMsg);
-        }
-      };
-      reader.readAsDataURL(file);
-    };
-    fileInput.click();
-  };
 
   const handleBack = () => {
     localStorage.setItem('DASHBOARD_ACTIVE_TAB', '2');
@@ -799,39 +754,15 @@ export const ProfileKyc: React.FC = () => {
               <span style={{ fontSize: '13px', color: 'var(--text-light)', fontStyle: 'italic', display: 'block', marginBottom: '14px' }}>
                 {t('no_kyc_documents')}
               </span>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
-                <button
-                  onClick={() => startAiVerification('AADHAAR')}
-                  style={{
-                    width: '100%', maxWidth: '240px', padding: '12px 20px', borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #D4AF37 0%, #AA7C11 100%)', color: 'white',
-                    border: 'none', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(170, 124, 17, 0.2)'
-                  }}
-                >
-                  Verify Instantly via Aadhaar
-                </button>
-                <button
-                  onClick={() => startAiVerification('PAN')}
-                  style={{
-                    width: '100%', maxWidth: '240px', padding: '12px 20px', borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #4A5568 0%, #2D3748 100%)', color: 'white',
-                    border: 'none', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-                  }}
-                >
-                  Verify Instantly via PAN
-                </button>
-                <button
-                  onClick={() => navigate('/onboarding')}
-                  style={{
-                    background: 'transparent', border: 'none', color: 'var(--text-muted)',
-                    fontSize: '12.5px', fontWeight: '600', cursor: 'pointer', textDecoration: 'underline', marginTop: '6px'
-                  }}
-                >
-                  Or Upload Documents Manually
-                </button>
-              </div>
+              <button
+                onClick={() => navigate('/onboarding')}
+                style={{
+                  padding: '10px 20px', borderRadius: '10px', background: 'var(--gradient-brand)', color: 'white',
+                  border: 'none', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 10px var(--brand-glow)'
+                }}
+              >
+                Upload KYC Documents
+              </button>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
