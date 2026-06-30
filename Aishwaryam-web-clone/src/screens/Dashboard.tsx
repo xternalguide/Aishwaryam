@@ -249,7 +249,7 @@ export const Dashboard: React.FC = () => {
     dragStartPosRef.current = { x: 0, y: 0 };
   };
 
-  const [txFilter, setTxFilter] = useState<'ALL' | 'BONUS' | 'PURCHASES' | 'SCHEME'>('ALL');
+  const [txFilter, setTxFilter] = useState<'ALL' | 'BONUS' | 'PURCHASES'>('PURCHASES');
   const [txSort, setTxSort] = useState<'NEWEST' | 'OLDEST'>('NEWEST');
   const [selectedTxDetail, setSelectedTxDetail] = useState<any | null>(null);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
@@ -568,9 +568,6 @@ export const Dashboard: React.FC = () => {
     let list = expandedList;
     if (txFilter === 'PURCHASES') {
       list = list.filter((tx) => tx.transactionType === 'INSTALLMENT' || tx.transactionType === 'BUY' || tx.type === 'INSTALLMENT' || tx.type === 'BUY');
-    } else if (txFilter === 'SCHEME') {
-      // Keep SCHEME_JOIN in the SCHEME-specific tab if they select it explicitly
-      list = list.filter((tx) => tx.transactionType === 'SCHEME_JOIN' || tx.transactionType === 'REDEMPTION_REQUEST' || tx.transactionType === 'REDEMPTION' || tx.transactionType === 'SELL' || tx.type === 'SCHEME_JOIN' || tx.type === 'REDEMPTION_REQUEST' || tx.type === 'REDEMPTION' || tx.type === 'SELL');
     }
 
     if (txSort === 'NEWEST') list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -1289,7 +1286,7 @@ export const Dashboard: React.FC = () => {
 
         {/* filter chips */}
         <div style={{ display:'flex', gap:'8px', overflowX:'auto', paddingBottom:'4px' }}>
-          {['ALL','BONUS','PURCHASES','SCHEME'].map((f) => (
+          {['PURCHASES','BONUS','ALL'].map((f) => (
             <button
               key={f}
               onClick={()=>setTxFilter(f as any)}
@@ -1303,7 +1300,7 @@ export const Dashboard: React.FC = () => {
                 transition:'all 0.2s ease'
               }}
             >
-              {f === 'ALL' ? t('filter_all') : f === 'BONUS' ? t('filter_bonus') : f === 'PURCHASES' ? t('filter_purchases') : t('filter_scheme')}
+              {f === 'PURCHASES' ? t('filter_purchases') : f === 'BONUS' ? t('filter_bonus') : t('filter_all')}
             </button>
           ))}
         </div>
@@ -1312,13 +1309,22 @@ export const Dashboard: React.FC = () => {
         <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
           {list.map((tx) => {
             const details = getTxTypeDetails(tx.transactionType);
-            const isBuy = tx.transactionType === 'INSTALLMENT' || tx.transactionType === 'BONUS' || tx.transactionType === 'EVENT_BONUS' || tx.transactionType === 'BUY' || tx.transactionType === 'SCHEME_JOIN';
+            const isSchemeJoin = tx.transactionType === 'SCHEME_JOIN' || tx.type === 'SCHEME_JOIN';
+            const isPureBonus = tx.transactionType === 'BONUS' || tx.transactionType === 'EVENT_BONUS' || tx.type === 'BONUS' || tx.type === 'EVENT_BONUS';
+            const isBuy = tx.transactionType === 'INSTALLMENT' || tx.transactionType === 'BUY' || tx.type === 'INSTALLMENT' || tx.type === 'BUY';
+            
             return (
               <div
                 key={tx.id}
-                onClick={()=>setSelectedTxDetail(tx)}
+                onClick={() => {
+                  if (isPureBonus || isSchemeJoin) {
+                    // Do nothing for bonuses and scheme activations - no details popup, no receipt download
+                    return;
+                  }
+                  setSelectedTxDetail(tx);
+                }}
                 className="dash-card-hover"
-                style={{ ...DS.glass, padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between', cursor:'pointer', transition:'all 0.2s ease' }}
+                style={{ ...DS.glass, padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between', cursor:(isPureBonus || isSchemeJoin) ? 'default' : 'pointer', transition:'all 0.2s ease' }}
               >
                 <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
                   <div style={{ width:'40px', height:'40px', borderRadius:'12px', background:details.bgColor, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -1326,10 +1332,14 @@ export const Dashboard: React.FC = () => {
                   </div>
                   <div>
                     <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'3px' }}>
-                      <span style={{ fontFamily:DS.font, fontSize:'13px', fontWeight:'700', color:DS.textWhite }}>{autoT(tx.schemeName) || details.label}</span>
-                      <span style={{ fontFamily:DS.font, fontSize:'9px', fontWeight:'700', color:getStatusDetails(tx.status).color, background:getStatusDetails(tx.status).bgColor, padding:'2px 7px', borderRadius:'8px', whiteSpace:'nowrap', flexShrink:0 }}>
-                        {autoT(getStatusDetails(tx.status).text)}
+                      <span style={{ fontFamily:DS.font, fontSize:'13px', fontWeight:'700', color:DS.textWhite }}>
+                        {isSchemeJoin ? (lang === 'ta' ? 'திட்டத்தில் இணைந்துள்ளார்' : 'Joined Scheme') : (autoT(tx.schemeName) || details.label)}
                       </span>
+                      {!isSchemeJoin && (
+                        <span style={{ fontFamily:DS.font, fontSize:'9px', fontWeight:'700', color:getStatusDetails(tx.status).color, background:getStatusDetails(tx.status).bgColor, padding:'2px 7px', borderRadius:'8px', whiteSpace:'nowrap', flexShrink:0 }}>
+                          {autoT(getStatusDetails(tx.status).text)}
+                        </span>
+                      )}
                     </div>
                     <span style={{ fontFamily:DS.font, fontSize:'10px', color:DS.textMuted }}>
                       {tx.schemeName ? `${details.label} • ` : ''}{new Date(tx.createdAt).toLocaleDateString()} {new Date(tx.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
@@ -1337,7 +1347,11 @@ export const Dashboard: React.FC = () => {
                   </div>
                 </div>
                 <div style={{ textAlign:'right', flexShrink:0, marginLeft:'8px' }}>
-                  {(tx.transactionType==='BONUS'||tx.transactionType==='EVENT_BONUS'||tx.type==='BONUS'||tx.type==='EVENT_BONUS') ? (
+                  {isSchemeJoin ? (
+                    <span style={{ fontFamily:DS.font, fontSize:'12px', color:'#10B981', fontWeight:'700' }}>
+                      {lang === 'ta' ? 'வெற்றிகரமாக' : 'Successful'}
+                    </span>
+                  ) : isPureBonus ? (
                     <span style={{ fontFamily:DS.font, fontSize:'13px', fontWeight:'800', color:'#10B981' }}>+{mgToGrams(tx.goldWeightMg)}</span>
                   ) : (
                     <>
