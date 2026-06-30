@@ -29,8 +29,7 @@ namespace Aishwaryam.Infrastructure.Services
             _httpClient = httpClient;
             _logger = logger;
 
-            // Load Digio config. Default to Digio Sandbox if not specified
-            _apiBaseUrl = configuration["Digio:BaseUrl"] ?? "https://ext.digio.in";
+            _apiBaseUrl = configuration["Digio:BaseUrl"] ?? "https://ext.digio.in:444";
             _clientId = configuration["Digio:ClientId"] ?? "AI_DEMO_CLIENT_ID";
             _clientSecret = configuration["Digio:ClientSecret"] ?? "AI_DEMO_CLIENT_SECRET";
 
