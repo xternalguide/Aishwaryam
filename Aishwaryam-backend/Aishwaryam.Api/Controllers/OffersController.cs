@@ -29,8 +29,11 @@ namespace Aishwaryam.Api.Controllers
         [HttpPost("create")]
         public async Task<IActionResult> CreateOffer([FromBody] PromotionalOffer request)
         {
-            if (string.IsNullOrEmpty(request.Title) || request.ExpiresAt <= DateTime.UtcNow)
-                return BadRequest(new { message = "Invalid offer details" });
+            // Normalize expiration date to end of the day (23:59:59) so selecting today doesn't fail UTC check
+            request.ExpiresAt = request.ExpiresAt.Date.AddDays(1).AddSeconds(-1);
+
+            if (string.IsNullOrEmpty(request.Title) || request.ExpiresAt.Date < DateTime.UtcNow.Date)
+                return BadRequest(new { message = "Invalid offer details: title is required and expiration date must not be in the past." });
 
             request.Id = Guid.NewGuid();
             request.CreatedAt = DateTime.UtcNow;
