@@ -138,6 +138,7 @@ builder.Services.AddScoped<IBankingService, BankingService>();
 builder.Services.AddScoped<ISchemeService, SchemeService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IKycComplianceService, KycComplianceService>();
+builder.Services.AddHttpClient<Aishwaryam.Infrastructure.Services.IDigioKycService, Aishwaryam.Infrastructure.Services.DigioKycService>();
 builder.Services.AddScoped<IAdminRepository, Aishwaryam.Infrastructure.Repositories.AdminRepository>();
 builder.Services.AddScoped<IAdminService, Aishwaryam.Application.Services.AdminService>();
 builder.Services.AddScoped<IEmailService, BrevoEmailService>();
