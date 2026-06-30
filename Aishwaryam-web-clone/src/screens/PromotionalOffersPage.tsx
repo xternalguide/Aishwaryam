@@ -227,9 +227,10 @@ export const PromotionalOffersPage: React.FC = () => {
                   <h3 style={{ fontSize: '17px', fontWeight: 'bold', color: '#FFFFFF', margin: '0 0 6px 0' }}>
                     {offer.title}
                   </h3>
-                  <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.7)', margin: '0 0 16px 0', lineHeight: '1.5' }}>
-                    {offer.description}
-                  </p>
+                   <p 
+                     style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.7)', margin: '0 0 16px 0', lineHeight: '1.5' }}
+                     dangerouslySetInnerHTML={{ __html: offer.description }}
+                   />
                   
                   {offer.bannerUrl && (
                     <div style={{ width: '100%', height: '180px', borderRadius: '12px', overflow: 'hidden', marginBottom: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>

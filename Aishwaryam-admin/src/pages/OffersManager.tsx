@@ -35,6 +35,18 @@ export const OffersManager: React.FC = () => {
   const [bannerUrl, setBannerUrl] = useState('');
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [minPurchaseGoldMg, setMinPurchaseGoldMg] = useState('');
+  const editorRef = React.useRef<HTMLDivElement>(null);
+
+  const applyStyle = (command: string, value: string = '') => {
+    document.execCommand(command, false, value);
+    if (editorRef.current) {
+      setDescription(editorRef.current.innerHTML);
+    }
+  };
+
+  const handleEditorInput = (e: React.FormEvent<HTMLDivElement>) => {
+    setDescription(e.currentTarget.innerHTML);
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -124,6 +136,11 @@ export const OffersManager: React.FC = () => {
     setUploadError(null);
     setMinPurchaseGoldMg('');
     setModalOpen(true);
+    setTimeout(() => {
+      if (editorRef.current) {
+        editorRef.current.innerHTML = '';
+      }
+    }, 0);
   };
 
   const handleSaveOffer = async (e: React.FormEvent) => {
@@ -358,12 +375,90 @@ export const OffersManager: React.FC = () => {
 
               <div className="form-group">
                 <label className="form-label">Description / Subtitle</label>
-                <input
+                
+                {/* Rich Text Toolbar */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  borderBottom: 'none',
+                  padding: '8px 12px',
+                  borderTopLeftRadius: '6px',
+                  borderTopRightRadius: '6px',
+                  flexWrap: 'wrap'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => applyStyle('bold')}
+                    style={{ fontWeight: 'bold', padding: '2px 8px', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', background: 'white', fontSize: '11px' }}
+                  >
+                    B
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyStyle('italic')}
+                    style={{ fontStyle: 'italic', padding: '2px 8px', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', background: 'white', fontSize: '11px' }}
+                  >
+                    I
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyStyle('underline')}
+                    style={{ textDecoration: 'underline', padding: '2px 8px', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', background: 'white', fontSize: '11px' }}
+                  >
+                    U
+                  </button>
+                  <span style={{ width: '1px', height: '16px', background: 'var(--border)', margin: '0 4px' }} />
+                  <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                    Color:
+                    <input
+                      type="color"
+                      onChange={(e) => applyStyle('foreColor', e.target.value)}
+                      style={{ border: 'none', width: '20px', height: '20px', padding: 0, cursor: 'pointer' }}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => applyStyle('foreColor', '#D4AF37')}
+                    style={{ fontSize: '10px', color: '#D4AF37', border: '1px solid var(--border)', borderRadius: '4px', padding: '2px 6px', cursor: 'pointer', background: 'white', fontWeight: 'bold' }}
+                  >
+                    Gold
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyStyle('foreColor', '#EF4444')}
+                    style={{ fontSize: '10px', color: '#EF4444', border: '1px solid var(--border)', borderRadius: '4px', padding: '2px 6px', cursor: 'pointer', background: 'white', fontWeight: 'bold' }}
+                  >
+                    Red
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyStyle('foreColor', '#000000')}
+                    style={{ fontSize: '10px', color: '#000000', border: '1px solid var(--border)', borderRadius: '4px', padding: '2px 6px', cursor: 'pointer', background: 'white', fontWeight: 'bold' }}
+                  >
+                    Reset
+                  </button>
+                </div>
+
+                {/* Content Editable Area */}
+                <div
+                  ref={editorRef}
+                  contentEditable={true}
+                  onInput={handleEditorInput}
                   className="form-control"
-                  type="text"
-                  placeholder="Get 5% extra gold weight on all BUY transactions..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  style={{
+                    minHeight: '80px',
+                    maxHeight: '150px',
+                    overflowY: 'auto',
+                    borderTopLeftRadius: 0,
+                    borderTopRightRadius: 0,
+                    borderTop: 'none',
+                    background: 'white',
+                    padding: '10px 12px',
+                    outline: 'none'
+                  }}
                 />
               </div>
 
