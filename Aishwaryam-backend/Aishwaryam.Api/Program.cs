@@ -669,6 +669,16 @@ try
             allSchemes = new List<SchemeMaster>();
         }
 
+        // Also clean up any user scheme subscriptions pointing to non-seeded plan names
+        var userSchemes = await db.UserSchemes.ToListAsync();
+        var invalidUserSchemes = userSchemes.Where(us => us.PlanName != "Swarna Varshini Gold Scheme" && us.PlanName != "Rajatha Varshini Silver Scheme").ToList();
+        if (invalidUserSchemes.Any())
+        {
+            db.UserSchemes.RemoveRange(invalidUserSchemes);
+            await db.SaveChangesAsync();
+            Console.WriteLine("[SEED] Cleaned up invalid user chits (like One Day VIP Savings Plan) from database.");
+        }
+
         if (!allSchemes.Any())
         {
             var goldScheme = new SchemeMaster
