@@ -47,6 +47,29 @@ namespace Aishwaryam.Api.Controllers
             return Ok(new { version = ApplicationDbContext.LastDbChangeTimestamp });
         }
 
+        [HttpPost("mature-silver-schemes")]
+        public async Task<IActionResult> MatureSilverSchemes()
+        {
+            var context = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+            
+            // Find all active UserSchemes where plan name contains 'silver'
+            var silverSchemes = await context.UserSchemes
+                .Where(s => s.Status == "Active" && s.PlanName.ToLower().Contains("silver"))
+                .ToListAsync();
+
+            foreach (var scheme in silverSchemes)
+            {
+                // Make the scheme completed by today (joined 12 months ago)
+                scheme.CreatedAt = DateTime.UtcNow.AddMonths(-12);
+                scheme.MaturityDate = DateTime.UtcNow; 
+                scheme.Status = "Matured";
+                scheme.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await context.SaveChangesAsync();
+            return Ok(new { message = $"Successfully updated and matured {silverSchemes.Count} silver schemes.", schemes = silverSchemes });
+        }
+
         [HttpGet("kpis")]
         public async Task<IActionResult> GetOperationalKpis()
         {

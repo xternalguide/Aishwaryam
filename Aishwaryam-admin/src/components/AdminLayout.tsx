@@ -57,8 +57,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentTab, setCurrent
     { id: 'redemptions', label: 'Redemptions', icon: <Coins size={18} /> },
     { id: 'enrollments', label: 'Scheme Enrollments', icon: <UserCheck size={18} /> },
     { id: 'schemes', label: 'Scheme Master', icon: <ClipboardList size={18} /> },
-    { id: 'offers', label: 'Offers & Promos', icon: <Tag size={18} /> },
-    { id: 'marketing', label: 'Marketing Assets', icon: <Image size={18} /> },
+    // Hidden per request:
+    // { id: 'offers', label: 'Offers & Promos', icon: <Tag size={18} /> },
+    // { id: 'marketing', label: 'Marketing Assets', icon: <Image size={18} /> },
     { id: 'notifications', label: 'Notifications', icon: <Bell size={18} /> },
     { id: 'audit', label: 'Audit Logs', icon: <Terminal size={18} /> },
   ];

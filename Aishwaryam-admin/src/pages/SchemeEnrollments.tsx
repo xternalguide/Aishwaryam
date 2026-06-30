@@ -237,7 +237,11 @@ export const SchemeEnrollments: React.FC = () => {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border2)', paddingBottom: '8px' }}>
                   <span style={{ color: 'var(--text-2)' }}>Milestone Payments</span>
-                  <span style={{ fontWeight: '700' }}>{selectedEnrollment.installmentsPaid} of {selectedEnrollment.totalInstallments} paid</span>
+                  <span style={{ fontWeight: '700' }}>
+                    {selectedEnrollment.frequency?.toLowerCase() === 'daily' || selectedEnrollment.planName?.toLowerCase().includes('silver') || selectedEnrollment.planName?.toLowerCase().includes('gold')
+                      ? 'Daily Weight Accumulation (Flexible)'
+                      : `${selectedEnrollment.installmentsPaid} of ${selectedEnrollment.totalInstallments} paid`}
+                  </span>
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border2)', paddingBottom: '8px' }}>
