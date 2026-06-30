@@ -211,7 +211,7 @@ export const SchemeMaster: React.FC = () => {
       minAmountPaise: Math.round(parseFloat(minAmount) * 100),
       maxAmountPaise: Math.round(parseFloat(maxAmount) * 100),
       multiplePerDay,
-      earlyExitAfterDays: parseInt(earlyExitAfterDays)
+      earlyExitAfterDays: 0
     };
     const paymentRulesJson = JSON.stringify(paymentRules);
 
@@ -574,29 +574,17 @@ export const SchemeMaster: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid-cols-2" style={{ gap: '16px', marginTop: '12px' }}>
-                  <div className="form-group">
-                    <label className="form-label">Early Exit Lock-in Period (Days)</label>
+                <div style={{ marginTop: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <input
-                      className="form-control"
-                      type="number"
-                      value={earlyExitAfterDays}
-                      onChange={(e) => setEarlyExitAfterDays(e.target.value)}
+                      type="checkbox"
+                      id="multiplePerDayCheck"
+                      checked={multiplePerDay}
+                      onChange={(e) => setMultiplePerDay(e.target.checked)}
                     />
-                  </div>
-
-                  <div className="form-group" style={{ display: 'flex', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '20px' }}>
-                      <input
-                        type="checkbox"
-                        id="multiplePerDayCheck"
-                        checked={multiplePerDay}
-                        onChange={(e) => setMultiplePerDay(e.target.checked)}
-                      />
-                      <label htmlFor="multiplePerDayCheck" style={{ fontWeight: '600', cursor: 'pointer', fontSize: '12px' }}>
-                        Allow multiple payments per day
-                      </label>
-                    </div>
+                    <label htmlFor="multiplePerDayCheck" style={{ fontWeight: '600', cursor: 'pointer', fontSize: '12px' }}>
+                      Allow multiple payments per day
+                    </label>
                   </div>
                 </div>
               </div>
