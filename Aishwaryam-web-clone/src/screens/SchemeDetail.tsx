@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { SessionManager } from '../utils/SessionManager';
 import { ApiClient } from '../utils/ApiClient';
 import { useApp } from '../context/AppContext';
@@ -31,8 +31,10 @@ export const SchemeDetail: React.FC = () => {
   const navigate = useNavigate();
   const { schemeId } = useParams<{ schemeId: string }>();
   const { t, lang, autoT } = useTranslation();
+  const location = useLocation();
 
   const [isLoading, setIsLoading] = useState(true);
+  const [showRelPicker, setShowRelPicker] = useState(false);
   const [scheme, setScheme] = useState<AvailableScheme | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [showJoinSheet, setShowJoinSheet] = useState(false);
@@ -59,7 +61,6 @@ export const SchemeDetail: React.FC = () => {
 
   // UI Interactive States
   const [openTabs, setOpenTabs] = useState<Record<number, boolean>>({});
-  const [showTermsCollapse, setShowTermsCollapse] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isPincodeReadOnly, setIsPincodeReadOnly] = useState(true);
   const [isCityReadOnly, setIsCityReadOnly] = useState(true);
@@ -161,6 +162,25 @@ export const SchemeDetail: React.FC = () => {
       };
     }
   }, [showSetupModal]);
+
+  useEffect(() => {
+    if (location.state && (location.state as any).fromJoinForm) {
+      // Re-populate the form inputs if we were in the middle of filling them out
+      const s = location.state as any;
+      if (s.nomineeName) setSetupNomineeName(s.nomineeName);
+      if (s.nomineePhone) setSetupNomineePhone(s.nomineePhone);
+      if (s.nomineeRelationship) setSetupNomineeRelationship(s.nomineeRelationship);
+      if (s.pincode) setSetupPincode(s.pincode);
+      if (s.city) setSetupCity(s.city);
+      if (s.state) setSetupState(s.state);
+      if (s.street) setSetupStreet(s.street);
+      
+      // Open the modal
+      setShowSetupModal(true);
+      // Clean up state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const handleSetupPincodeChange = (value: string) => {
     const numericValue = value.replace(/\D/g, '').slice(0, 6);
@@ -989,8 +1009,8 @@ export const SchemeDetail: React.FC = () => {
       const faqSec = {
         title: lang === 'ta' ? 'அடிக்கடி கேட்கப்படும் கேள்விகள் (FAQs)' : 'Frequently Asked Questions (FAQs)',
         content: lang === 'ta' ?
-          '1. **இந்த தங்கத்தை வாங்க யார் தகுதியானவர்?**\n18 வயது நிரம்பிய இந்திய குடிமக்கள் அனைவரும் இந்த திட்டத்தில் இணைய தகுதியானவர்கள்.\n\n2. **குறைந்தபட்ச சேமிப்பு தொகை எவ்வளவு?**\nவெறும் ₹100 முதல் நீங்கள் இந்த திட்டத்தில் சேமிக்க ஆரம்பிக்கலாம்.\n\n3. **முதிர்வில் என்னால் சிறப்பு ஆபரணங்கள் வாங்க முடியுமா?**\nஆம், உங்கள் எடையை எந்தவித செய்கூலியும் இன்றி அழகான தங்க நகைகளாகவோ அல்லது நாணயங்களாகவோ மாற்றிக் கொள்ளலாம்.\n\n4. **எனது தங்கம் எடையை நான் எப்படி கண்காணிப்பது?**\nஉங்கள் மொபைல் ஆப்பில் உள்ள "Ledger" பக்கத்தில் உங்கள் சேமிப்பு மற்றும் போனஸ் எடையை உடனுக்குடன் தெரிந்துகொள்ளலாம்.' :
-          '1. **Who is eligible to buy this gold?**\nAny Indian citizen above 18 years of age is eligible to enroll in Aishwaryam DigiGold.\n\n2. **What is the minimum amount of enrolling Aishwaryam DigiGold?**\nYou can start saving in this scheme from as low as ₹100.\n\n3. **Can I purchase special items like jewelry under this plan?**\nYes, at maturity you can redeem your accumulated gold grams for beautiful physical jewelry with up to 18% discount on making/wastage charges.\n\n4. **How do I know the weight of accumulated gold?**\nYou can view your real-time accumulated gold and silver balances instantly in your mobile application ledger under the history tab.',
+          '1. **குறைந்தபட்ச சேமிப்பு தொகை எவ்வளவு?**\nவெறும் ₹100 முதல் நீங்கள் இந்த திட்டத்தில் சேமிக்க ஆரம்பிக்கலாம்.\n\n2. **முதிர்வில் என்னால் சிறப்பு ஆபரணங்கள் வாங்க முடியுமா?**\nஆம், உங்கள் எடையை எந்தவித செய்கூலியும் இன்றி அழகான தங்க நகைகளாகவோ அல்லது நாணயங்களாகவோ மாற்றிக் கொள்ளலாம்.\n\n3. **எனது தங்கம் எடையை நான் எப்படி கண்காணிப்பது?**\nஉங்கள் மொபைல் ஆப்பில் உள்ள "Ledger" பக்கத்தில் உங்கள் சேமிப்பு மற்றும் போனஸ் எடையை உடனுக்குடன் தெரிந்துகொள்ளலாம்.' :
+          '1. **What is the minimum amount of enrolling Aishwaryam DigiGold?**\nYou can start saving in this scheme from as low as ₹100.\n\n2. **Can I purchase special items like jewelry under this plan?**\nYes, at maturity you can redeem your accumulated gold grams for beautiful physical jewelry with up to 18% discount on making/wastage charges.\n\n3. **How do I know the weight of accumulated gold?**\nYou can view your real-time accumulated gold and silver balances instantly in your mobile application ledger under the history tab.',
         type: 0
       };
 
@@ -1681,7 +1701,9 @@ export const SchemeDetail: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Pincode {!isPincodeReadOnly && '*'}</label>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>
+                    Pincode {!isPincodeReadOnly && <span style={{ color: 'red' }}>*</span>}
+                  </label>
                   {isPincodeReadOnly ? (
                     <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupPincode || 'N/A'}</span>
                   ) : (
@@ -1698,36 +1720,42 @@ export const SchemeDetail: React.FC = () => {
                   )}
                 </div>
                 <div>
-                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>City {!isCityReadOnly && '*'}</label>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>
+                    City {!isCityReadOnly && <span style={{ color: 'red' }}>*</span>}
+                  </label>
                   {isCityReadOnly ? (
                     <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupCity || 'N/A'}</span>
                   ) : (
                     <input
                       type="text"
-                      placeholder="City"
+                      placeholder="City (filled from PIN)"
                       value={setupCity}
-                      onChange={(e) => setSetupCity(e.target.value)}
-                      style={{ width: '100%', height: '30px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 8px', fontSize: '12px', outline: 'none', marginTop: '2px' }}
+                      readOnly
+                      style={{ width: '100%', height: '30px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 8px', fontSize: '12px', outline: 'none', marginTop: '2px', backgroundColor: '#F3F4F6', color: '#6B7280', cursor: 'not-allowed' }}
                     />
                   )}
                 </div>
                 <div>
-                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>State {!isStateReadOnly && '*'}</label>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>
+                    State {!isStateReadOnly && <span style={{ color: 'red' }}>*</span>}
+                  </label>
                   {isStateReadOnly ? (
                     <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupState || 'N/A'}</span>
                   ) : (
                     <input
                       type="text"
-                      placeholder="State"
+                      placeholder="State (filled from PIN)"
                       value={setupState}
-                      onChange={(e) => setSetupState(e.target.value)}
-                      style={{ width: '100%', height: '30px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 8px', fontSize: '12px', outline: 'none', marginTop: '2px' }}
+                      readOnly
+                      style={{ width: '100%', height: '30px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 8px', fontSize: '12px', outline: 'none', marginTop: '2px', backgroundColor: '#F3F4F6', color: '#6B7280', cursor: 'not-allowed' }}
                     />
                   )}
                 </div>
               </div>
               <div style={{ marginTop: '6px', borderTop: '1px solid #ECECEC', paddingTop: '6px' }}>
-                <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Street Address {!isStreetReadOnly && '*'}</label>
+                <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>
+                  Street Address {!isStreetReadOnly && <span style={{ color: 'red' }}>*</span>}
+                </label>
                 {isStreetReadOnly ? (
                   <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', display: 'block' }}>{setupStreet || 'N/A'}</span>
                 ) : (
@@ -1742,12 +1770,15 @@ export const SchemeDetail: React.FC = () => {
               </div>
             </div>
 
+
             {/* Editable Nominee Details */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>{t('nominee_information')}</span>
               
               <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('nominee_name_label')} *</label>
+                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                  {t('nominee_name_label')} <span style={{ color: 'red' }}>*</span>
+                </label>
                 <input
                   type="text"
                   placeholder={t('enter_nominee_name')}
@@ -1758,21 +1789,28 @@ export const SchemeDetail: React.FC = () => {
               </div>
 
               <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('relationship')} *</label>
-                <select
-                  value={setupNomineeRelationship}
-                  onChange={(e) => setSetupNomineeRelationship(e.target.value)}
-                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px', background: 'white' }}
+                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                  {t('relationship')} <span style={{ color: 'red' }}>*</span>
+                </label>
+                
+                {/* Premium Web-App style custom Dropdown Selector */}
+                <div
+                  onClick={() => setShowRelPicker(true)}
+                  style={{
+                    width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)',
+                    padding: '0 12px', fontSize: '13px', marginTop: '4px', background: 'white',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer'
+                  }}
                 >
-                  <option value="">{t('select_relationship')}</option>
-                  {RELATIONSHIPS.map((rel) => (
-                    <option key={rel} value={rel}>{autoT(rel)}</option>
-                  ))}
-                </select>
+                  <span style={{ color: setupNomineeRelationship ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                    {setupNomineeRelationship ? autoT(setupNomineeRelationship) : t('select_relationship')}
+                  </span>
+                  <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>▼</span>
+                </div>
               </div>
             </div>
 
-            {/* Terms and Conditions expanded section */}
+            {/* Terms and Conditions navigation section */}
             <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '12px', marginTop: '4px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <input
@@ -1788,7 +1826,20 @@ export const SchemeDetail: React.FC = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setShowTermsCollapse(!showTermsCollapse);
+                      // Navigate to the separate terms conditions screen, passing filled state so it restores when they hit Back
+                      navigate('/terms-conditions', {
+                        state: {
+                          fromJoinForm: true,
+                          schemeId,
+                          nomineeName: setupNomineeName,
+                          nomineePhone: setupNomineePhone,
+                          nomineeRelationship: setupNomineeRelationship,
+                          pincode: setupPincode,
+                          city: setupCity,
+                          state: setupState,
+                          street: setupStreet
+                        }
+                      });
                     }}
                     style={{ color: 'var(--brand-mid)', fontWeight: 'bold', textDecoration: 'underline', cursor: 'pointer' }}
                   >
@@ -1796,30 +1847,7 @@ export const SchemeDetail: React.FC = () => {
                   </span>
                 </label>
               </div>
-
-              {/* Expandable Terms Details Container */}
-              {showTermsCollapse && (
-                <div style={{
-                  marginTop: '10px',
-                  background: '#FFFDF9',
-                  border: '1px dashed #FFD700',
-                  borderRadius: '12px',
-                  padding: '12px',
-                  maxHeight: '160px',
-                  overflowY: 'auto',
-                  fontSize: '11px',
-                  color: 'var(--text-secondary)',
-                  lineHeight: '15px'
-                }}>
-                  <strong style={{ display: 'block', marginBottom: '4px', color: 'var(--brand-dark)' }}>Scheme Rules & Terms:</strong>
-                  1. **Duration:** 11 Months plan (300 days systematic accumulation + 30 days lock-in / maturity period).<br />
-                  2. **Micro-Savings:** Save as frequently as you wish, with a minimum payment starting from ₹100.<br />
-                  3. **Loyalty Bonus:** Earn instant cash-equivalent gold value bonuses up to 7.5% depending on when payment is made (0-75 days: 7.5%, 76-150 days: 5.0%, 151-225 days: 3.0%, 226-300 days: 1.0%).<br />
-                  4. **No Cash Refunds:** Accumulation must be redeemed for physical gold jewelry/coins at Aishwaryam Swarna Mahal. Wastage & making charges are waived up to 18%.<br />
-                  5. **Pre-closure:** Pre-closure is allowed but forfeits all accumulated loyalty bonus gold weight.
-                </div>
-              )}
-            </div>
+              </div>
 
             {/* Save & Proceed button */}
             <button
@@ -1834,6 +1862,46 @@ export const SchemeDetail: React.FC = () => {
             >
               {isProcessing ? t('saving') : 'PROCEED'}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Relationship Selection Bottom Sheet Overlay */}
+      {showRelPicker && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 1200,
+          backdropFilter: 'blur(3px)'
+        }} onClick={() => setShowRelPicker(false)}>
+          <div style={{
+            width: '100%', maxWidth: '440px', background: 'white', borderTopLeftRadius: '24px', borderTopRightRadius: '24px',
+            padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '60%', overflowY: 'auto',
+            boxShadow: '0 -8px 32px rgba(0,0,0,0.15)',
+            boxSizing: 'border-box'
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ECECEC', paddingBottom: '12px' }}>
+              <h4 style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>SELECT RELATIONSHIP</h4>
+              <button onClick={() => setShowRelPicker(false)} style={{ background: 'transparent', border: 'none', color: 'var(--brand-mid)', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>Cancel</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {RELATIONSHIPS.map((rel) => {
+                const isSel = setupNomineeRelationship === rel;
+                return (
+                  <div
+                    key={rel}
+                    onClick={() => { setSetupNomineeRelationship(rel); setShowRelPicker(false); }}
+                    style={{
+                      padding: '12px 16px', borderRadius: '12px', border: isSel ? '2px solid var(--brand-mid)' : '1px solid #ECECEC',
+                      background: isSel ? '#FFFBF6' : 'white', cursor: 'pointer', display: 'flex', justifyContent: 'space-between',
+                      alignItems: 'center', fontSize: '13px', fontWeight: isSel ? 'bold' : 'normal', color: 'var(--brand-dark)'
+                    }}
+                  >
+                    <span>{autoT(rel)}</span>
+                    {isSel && <span style={{ color: 'var(--brand-mid)', fontWeight: 'bold' }}>✓</span>}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
