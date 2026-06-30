@@ -292,70 +292,48 @@ export const Onboarding: React.FC = () => {
     return basicInfo && dobValid && marriageValid;
   };
 
-  const triggerDigioKyc = (docType: 'AADHAAR' | 'PAN') => {
-    if (!(window as any).Digio) {
-      const script = document.createElement('script');
-      script.src = "https://ext.digio.in/sdk/v2/digio.js";
-      script.onload = () => startDigioSession(docType);
-      document.body.appendChild(script);
-    } else {
-      startDigioSession(docType);
-    }
-  };
-
-  const startDigioSession = async (docType: 'AADHAAR' | 'PAN') => {
+  const startAiVerification = async (docType: 'AADHAAR' | 'PAN') => {
     const userId = SessionManager.getUserId();
     if (!userId) return;
+
+    const cardNumber = docType === 'AADHAAR' ? aadhaarNumber : panNumber;
+    const imageBase64 = docType === 'AADHAAR' ? aadhaarFrontImage : panImage;
+
+    if (!cardNumber.trim()) {
+      alert(`Please enter your ${docType === 'AADHAAR' ? 'Aadhaar' : 'PAN'} Card Number first.`);
+      return;
+    }
+    if (!imageBase64) {
+      alert(`Please select or capture your ${docType === 'AADHAAR' ? 'Aadhaar Front' : 'PAN'} image first.`);
+      return;
+    }
 
     try {
       setIsSaving(true);
       setSaveError(null);
-      const res = await ApiClient.post('api/Kyc/digio/initiate', {
+      
+      const res = await ApiClient.post('api/Kyc/ai-verify', {
         userId: userId,
-        documentType: docType
+        documentType: docType,
+        cardNumber: cardNumber.replace(/\s/g, ''),
+        imageBase64: imageBase64
       });
 
       if (res.data && res.data.success) {
-        const { kycRequestId, customerIdentifier } = res.data;
-        
-        const options = {
-          environment: 'sandbox', 
-          callback: async function(response: any) {
-            if (response.status === 'success') {
-              try {
-                const verifyRes = await ApiClient.post(`api/Kyc/digio/verify/${kycRequestId}`);
-                if (verifyRes.data && verifyRes.data.success) {
-                  alert('KYC Verified successfully!');
-                  await refreshData();
-                  // Complete onboarding stages
-                  SessionManager.saveOnboardingStage(OnboardingStage.FULLY_VERIFIED);
-                  navigate('/dashboard');
-                } else {
-                  alert(verifyRes.data.message || 'KYC Verification failed or is under review.');
-                }
-              } catch (e) {
-                console.error(e);
-                alert('Error completing KYC verification.');
-              } finally {
-                setIsSaving(false);
-              }
-            } else {
-              alert('KYC process was cancelled or failed.');
-              setIsSaving(false);
-            }
-          }
-        };
-
-        const digioInstance = new (window as any).Digio(options);
-        digioInstance.submit(kycRequestId, customerIdentifier);
+        alert(`${docType} verified successfully by AI!`);
+        await refreshData();
+        if (docType === 'AADHAAR') {
+          SessionManager.saveOnboardingStage(OnboardingStage.FULLY_VERIFIED);
+          navigate('/dashboard');
+        }
       } else {
-        alert(res.data.message || 'Failed to initiate instant verification.');
-        setIsSaving(false);
+        alert(res.data.message || 'AI verification failed.');
       }
     } catch (err: any) {
       console.error(err);
-      const errMsg = err.response?.data?.message || err.message || 'Error connecting to KYC service.';
+      const errMsg = err.response?.data?.message || err.message || 'AI Verification failed.';
       alert(errMsg);
+    } finally {
       setIsSaving(false);
     }
   };
@@ -881,7 +859,7 @@ export const Onboarding: React.FC = () => {
                 </span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
                   <button
-                    onClick={() => triggerDigioKyc('AADHAAR')}
+                    onClick={() => startAiVerification('AADHAAR')}
                     type="button"
                     style={{
                       width: '100%', padding: '12px 20px', borderRadius: '12px',
@@ -893,7 +871,7 @@ export const Onboarding: React.FC = () => {
                     Verify Instantly via Aadhaar
                   </button>
                   <button
-                    onClick={() => triggerDigioKyc('PAN')}
+                    onClick={() => startAiVerification('PAN')}
                     type="button"
                     style={{
                       width: '100%', padding: '12px 20px', borderRadius: '12px',

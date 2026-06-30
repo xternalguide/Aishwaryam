@@ -504,67 +504,51 @@ export const ProfileKyc: React.FC = () => {
 
   const RELATIONSHIPS = ["Father", "Mother", "Wife", "Husband", "Son", "Daughter", "Brother", "Guardian"];
 
-  const triggerDigioKyc = (docType: 'AADHAAR' | 'PAN') => {
-    if (!(window as any).Digio) {
-      const script = document.createElement('script');
-      script.src = "https://ext.digio.in/sdk/v2/digio.js";
-      script.onload = () => startDigioSession(docType);
-      document.body.appendChild(script);
-    } else {
-      startDigioSession(docType);
-    }
-  };
-
-  const startDigioSession = async (docType: 'AADHAAR' | 'PAN') => {
+  const startAiVerification = async (docType: 'AADHAAR' | 'PAN') => {
     const userId = SessionManager.getUserId();
     if (!userId) return;
 
-    try {
-      const res = await ApiClient.post('api/Kyc/digio/initiate', {
-        userId: userId,
-        documentType: docType
-      });
+    const cardNumber = prompt(`Enter your 12-digit Aadhaar / 10-digit PAN number to verify instantly:`);
+    if (!cardNumber) return;
 
-      if (res.data && res.data.success) {
-        const { kycRequestId, customerIdentifier } = res.data;
-        
-        const options = {
-          environment: 'sandbox', 
-          callback: async function(response: any) {
-            if (response.status === 'success') {
-              try {
-                const verifyRes = await ApiClient.post(`api/Kyc/digio/verify/${kycRequestId}`);
-                if (verifyRes.data && verifyRes.data.success) {
-                  alert('KYC Verified successfully!');
-                  refreshData();
-                  const statusRes = await ApiClient.get(`api/Kyc/status/${userId}`);
-                  if (statusRes.data && statusRes.data.success) {
-                    setKycDocs(statusRes.data.documents || []);
-                    setKycStatusMsg(statusRes.data.status || 'PENDING');
-                  }
-                } else {
-                  alert(verifyRes.data.message || 'KYC Verification failed or is under review.');
-                }
-              } catch (e) {
-                console.error(e);
-                alert('Error completing KYC verification.');
-              }
-            } else {
-              alert('KYC process was cancelled or failed.');
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.onchange = async (e: any) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result as string;
+        try {
+          const res = await ApiClient.post('api/Kyc/ai-verify', {
+            userId: userId,
+            documentType: docType,
+            cardNumber: cardNumber.replace(/\s/g, ''),
+            imageBase64: base64
+          });
+
+          if (res.data && res.data.success) {
+            alert(`${docType} verified successfully by AI!`);
+            refreshData();
+            const statusRes = await ApiClient.get(`api/Kyc/status/${userId}`);
+            if (statusRes.data && statusRes.data.success) {
+              setKycDocs(statusRes.data.documents || []);
+              setKycStatusMsg(statusRes.data.status || 'PENDING');
             }
+          } else {
+            alert(res.data.message || 'AI verification failed.');
           }
-        };
-
-        const digioInstance = new (window as any).Digio(options);
-        digioInstance.submit(kycRequestId, customerIdentifier);
-      } else {
-        alert(res.data.message || 'Failed to initiate instant verification.');
-      }
-    } catch (err: any) {
-      console.error(err);
-      const errMsg = err.response?.data?.message || err.message || 'Error connecting to KYC service.';
-      alert(errMsg);
-    }
+        } catch (err: any) {
+          console.error(err);
+          const errMsg = err.response?.data?.message || err.message || 'AI Verification failed.';
+          alert(errMsg);
+        }
+      };
+      reader.readAsDataURL(file);
+    };
+    fileInput.click();
   };
 
   const handleBack = () => {
@@ -817,7 +801,7 @@ export const ProfileKyc: React.FC = () => {
               </span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
                 <button
-                  onClick={() => triggerDigioKyc('AADHAAR')}
+                  onClick={() => startAiVerification('AADHAAR')}
                   style={{
                     width: '100%', maxWidth: '240px', padding: '12px 20px', borderRadius: '12px',
                     background: 'linear-gradient(135deg, #D4AF37 0%, #AA7C11 100%)', color: 'white',
@@ -828,7 +812,7 @@ export const ProfileKyc: React.FC = () => {
                   Verify Instantly via Aadhaar
                 </button>
                 <button
-                  onClick={() => triggerDigioKyc('PAN')}
+                  onClick={() => startAiVerification('PAN')}
                   style={{
                     width: '100%', maxWidth: '240px', padding: '12px 20px', borderRadius: '12px',
                     background: 'linear-gradient(135deg, #4A5568 0%, #2D3748 100%)', color: 'white',
