@@ -165,6 +165,16 @@ export const Dashboard: React.FC = () => {
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .animate-spin { animation: spin 1s linear infinite; }
     
+    @keyframes swipeGuidanceAnimation {
+      0% { transform: translateX(12px); opacity: 0; }
+      20% { opacity: 1; }
+      80% { transform: translateX(-12px); opacity: 1; }
+      100% { transform: translateX(-12px); opacity: 0; }
+    }
+    .swipe-hand-animate {
+      animation: swipeGuidanceAnimation 1.8s infinite ease-in-out;
+    }
+    
     /* Prevent Tamil word fragmentation */
     * {
       word-break: keep-all;
@@ -247,6 +257,14 @@ export const Dashboard: React.FC = () => {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [customAlert, setCustomAlert] = useState<{ message: string; isError?: boolean } | null>(null);
+  const [showSwipeGuidance, setShowSwipeGuidance] = useState(() => !localStorage.getItem('SWIPE_GUIDANCE_SHOWN'));
+  
+  const handleCarouselScroll = () => {
+    if (showSwipeGuidance) {
+      setShowSwipeGuidance(false);
+      localStorage.setItem('SWIPE_GUIDANCE_SHOWN', 'true');
+    }
+  };
 
   // Back button dismiss registers
   useEffect(() => {
@@ -519,10 +537,53 @@ export const Dashboard: React.FC = () => {
   };
 
   const getFilteredTransactions = () => {
-    let list = transactions;
-    if (txFilter === 'BONUS') list = list.filter((tx) => tx.transactionType === 'BONUS' || tx.transactionType === 'EVENT_BONUS' || tx.type === 'BONUS' || tx.type === 'EVENT_BONUS');
-    else if (txFilter === 'PURCHASES') list = list.filter((tx) => tx.transactionType === 'INSTALLMENT' || tx.transactionType === 'BUY' || tx.type === 'INSTALLMENT' || tx.type === 'BUY');
-    else if (txFilter === 'SCHEME') list = list.filter((tx) => tx.transactionType === 'SCHEME_JOIN' || tx.transactionType === 'REDEMPTION_REQUEST' || tx.transactionType === 'REDEMPTION' || tx.transactionType === 'SELL' || tx.type === 'SCHEME_JOIN' || tx.type === 'REDEMPTION_REQUEST' || tx.type === 'REDEMPTION' || tx.type === 'SELL');
+    const expandedList: any[] = [];
+    
+    transactions.forEach((tx) => {
+      const isSchemeJoin = tx.transactionType === 'SCHEME_JOIN' || tx.type === 'SCHEME_JOIN';
+      const isPureBonus = tx.transactionType === 'BONUS' || tx.transactionType === 'EVENT_BONUS' || tx.type === 'BONUS' || tx.type === 'EVENT_BONUS';
+
+      // 1. Exclude SCHEME_JOIN from the ALL activity tab
+      if (txFilter === 'ALL' && isSchemeJoin) {
+        return;
+      }
+      
+      // 2. Add the original transaction (if not filtering only for bonuses, or if it is a pure bonus)
+      if (txFilter !== 'BONUS') {
+        expandedList.push(tx);
+      } else if (isPureBonus) {
+        expandedList.push(tx);
+      }
+      
+      // 3. Dynamically insert a separate companion virtual bonus transaction if the purchase contains a bonus
+      const hasBonus = (tx.transactionType === 'BUY' || tx.transactionType === 'INSTALLMENT' || tx.type === 'BUY' || tx.type === 'INSTALLMENT') && tx.bonusGoldMg > 0;
+      if (hasBonus) {
+        const virtualBonus = {
+          ...tx,
+          id: `${tx.id}_virtual_bonus`,
+          transactionType: 'BONUS',
+          type: 'BONUS',
+          goldWeightMg: tx.bonusGoldMg,
+          amountPaise: 0,
+          schemeName: tx.schemeName ? `Loyalty Bonus (${tx.schemeName})` : 'Installment Loyalty Bonus',
+          isVirtualBonus: true
+        };
+        
+        // Show virtual bonus under ALL and BONUS filters
+        if (txFilter === 'ALL' || txFilter === 'BONUS') {
+          expandedList.push(virtualBonus);
+        }
+      }
+    });
+
+    let list = expandedList;
+    if (txFilter === 'PURCHASES') {
+      list = list.filter((tx) => tx.transactionType === 'INSTALLMENT' || tx.transactionType === 'BUY' || tx.type === 'INSTALLMENT' || tx.type === 'BUY');
+    } else if (txFilter === 'SCHEME') {
+      // Keep SCHEME_JOIN in the SCHEME-specific tab if they select it explicitly
+      list = list.filter((tx) => tx.transactionType === 'SCHEME_JOIN' || tx.transactionType === 'REDEMPTION_REQUEST' || tx.transactionType === 'REDEMPTION' || tx.transactionType === 'SELL' || tx.type === 'SCHEME_JOIN' || tx.type === 'REDEMPTION_REQUEST' || tx.type === 'REDEMPTION' || tx.type === 'SELL');
+    }
+
     if (txSort === 'NEWEST') list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     else list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     return list;
@@ -1036,71 +1097,98 @@ export const Dashboard: React.FC = () => {
     return (
       <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
         <span style={{ fontFamily:DS.font, fontSize:'16px', fontWeight:'800', color:DS.textWhite }}>{t('start_saving')}</span>
-        <div className="no-scrollbar" style={{ display:'flex', gap:'16px', overflowX:'auto', scrollSnapType:'x mandatory', paddingBottom:'4px', WebkitOverflowScrolling:'touch' }}>
-          <style>{`.no-scrollbar::-webkit-scrollbar{display:none}`}</style>
-          {contextAvailableSchemes.map((scheme) => {
-            let keywords: string[] = [];
-            try { keywords = JSON.parse(scheme.keywordsJson || '[]'); } catch (e) {}
-            let maxBonus = '7.5%';
-            try {
-              if (scheme.bonusConfigJson) {
-                const tiers = JSON.parse(scheme.bonusConfigJson);
-                if (Array.isArray(tiers) && tiers.length > 0) {
-                  const maxVal = Math.max(...tiers.map((ti: any) => ti.bonusPercentage || 0));
-                  if (maxVal > 0) maxBonus = `${maxVal}%`;
+        <div style={{ position:'relative' }}>
+          <div 
+            className="no-scrollbar" 
+            onScroll={handleCarouselScroll}
+            onTouchStart={handleCarouselScroll}
+            style={{ display:'flex', gap:'16px', overflowX:'auto', scrollSnapType:'x mandatory', paddingBottom:'4px', WebkitOverflowScrolling:'touch' }}
+          >
+            <style>{`.no-scrollbar::-webkit-scrollbar{display:none}`}</style>
+            {contextAvailableSchemes.map((scheme) => {
+              let keywords: string[] = [];
+              try { keywords = JSON.parse(scheme.keywordsJson || '[]'); } catch (e) {}
+              let maxBonus = '7.5%';
+              try {
+                if (scheme.bonusConfigJson) {
+                  const tiers = JSON.parse(scheme.bonusConfigJson);
+                  if (Array.isArray(tiers) && tiers.length > 0) {
+                    const maxVal = Math.max(...tiers.map((ti: any) => ti.bonusPercentage || 0));
+                    if (maxVal > 0) maxBonus = `${maxVal}%`;
+                  }
                 }
-              }
-            } catch (e) {}
-            return (
-              <div
-                key={scheme.id}
-                onClick={() => navigate(`/scheme-detail/${scheme.id}`)}
-                className="dash-card-hover"
-                style={{
-                  flex: isDesktop ? '0 0 280px' : '0 0 100%', scrollSnapAlign:'start',
-                  ...DS.glass, padding:'20px', cursor:'pointer', transition:'all 0.25s ease',
-                  display:'flex', flexDirection:'column', gap:'12px', position:'relative', overflow:'hidden'
-                }}
-              >
-                <div style={{ position:'absolute', top:'-30px', right:'-30px', width:'90px', height:'90px', borderRadius:'50%', background:'radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 70%)', pointerEvents:'none' }} />
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
-                  <span style={{ fontFamily:DS.font, fontSize:'15px', fontWeight:'800', color:DS.textWhite, flex:1, marginRight:'12px' }}>{autoT(scheme.planName)}</span>
-                  <span style={{ fontFamily:DS.font, fontSize:'9px', fontWeight:'700', color:DS.magenta, background:'rgba(194,24,91,0.15)', padding:'3px 8px', borderRadius:'10px', border:'1px solid rgba(194,24,91,0.2)', whiteSpace:'nowrap' }}>
-                    {scheme.frequency === 'Daily' ? 'DAILY' : 'MONTHLY'}
-                  </span>
-                </div>
-                <div style={{ display:'flex', gap:'16px' }}>
-                  <div>
-                    <span style={{ fontFamily:DS.font, fontSize:'9px', color:DS.textMuted, textTransform:'uppercase', letterSpacing:'0.5px', display:'block', marginBottom:'2px' }}>Duration</span>
-                    <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'800', color:DS.textWhite }}>
-                      {scheme.totalInstallments} {scheme.durationUnit ? (scheme.durationUnit.toLowerCase().startsWith('day') ? t('days') : t('months')) : (scheme.frequency === 'Daily' ? t('days') : t('months'))}
+              } catch (e) {}
+              return (
+                <div
+                  key={scheme.id}
+                  onClick={() => navigate(`/scheme-detail/${scheme.id}`)}
+                  className="dash-card-hover"
+                  style={{
+                    flex: isDesktop ? '0 0 280px' : '0 0 100%', scrollSnapAlign:'start',
+                    ...DS.glass, padding:'20px', cursor:'pointer', transition:'all 0.25s ease',
+                    display:'flex', flexDirection:'column', gap:'12px', position:'relative', overflow:'hidden'
+                  }}
+                >
+                  <div style={{ position:'absolute', top:'-30px', right:'-30px', width:'90px', height:'90px', borderRadius:'50%', background:'radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 70%)', pointerEvents:'none' }} />
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+                    <span style={{ fontFamily:DS.font, fontSize:'15px', fontWeight:'800', color:DS.textWhite, flex:1, marginRight:'12px' }}>{autoT(scheme.planName)}</span>
+                    <span style={{ fontFamily:DS.font, fontSize:'9px', fontWeight:'700', color:DS.magenta, background:'rgba(194,24,91,0.15)', padding:'3px 8px', borderRadius:'10px', border:'1px solid rgba(194,24,91,0.2)', whiteSpace:'nowrap' }}>
+                      {scheme.frequency === 'Daily' ? 'DAILY' : 'MONTHLY'}
                     </span>
                   </div>
-                  <div>
-                    <span style={{ fontFamily:DS.font, fontSize:'9px', color:DS.textMuted, textTransform:'uppercase', letterSpacing:'0.5px', display:'block', marginBottom:'2px' }}>Min. Investment</span>
-                    <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'800', color:DS.textWhite }}>{formatRupees(scheme.installmentAmountPaise)}</span>
-                  </div>
-                </div>
-                <div style={{ background: isDark ? 'rgba(255,215,0,0.1)' : 'rgba(194,24,91,0.06)', borderRadius:'10px', padding:'8px 12px', border: isDark ? '1px solid rgba(255,215,0,0.2)' : '1px solid rgba(194,24,91,0.15)' }}>
-                  <span style={{ fontFamily:DS.font, fontSize:'9px', color: isDark ? 'rgba(255,215,0,0.7)' : DS.magenta, fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.3px', display:'block', marginBottom:'2px' }}>Bonus Offer</span>
-                  <span style={{ fontFamily:DS.font, fontSize:'12px', fontWeight:'800', color: isDark ? DS.gold : DS.purple }}>Get up to {maxBonus} Extra Gold!</span>
-                </div>
-                {keywords.length > 0 && (
-                  <div style={{ display:'flex', gap:'6px', flexWrap:'wrap' }}>
-                    {keywords.slice(0,2).map((kw, i) => (
-                      <span key={i} style={{ fontFamily:DS.font, fontSize:'9px', color:DS.magenta, background:'rgba(194,24,91,0.12)', padding:'3px 8px', borderRadius:'6px', border:'1px solid rgba(194,24,91,0.15)', fontWeight:'600' }}>
-                        ✓ {kw}
+                  <div style={{ display:'flex', gap:'16px' }}>
+                    <div>
+                      <span style={{ fontFamily:DS.font, fontSize:'9px', color:DS.textMuted, textTransform:'uppercase', letterSpacing:'0.5px', display:'block', marginBottom:'2px' }}>Duration</span>
+                      <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'800', color:DS.textWhite }}>
+                        {scheme.totalInstallments} {scheme.durationUnit ? (scheme.durationUnit.toLowerCase().startsWith('day') ? t('days') : t('months')) : (scheme.frequency === 'Daily' ? t('days') : t('months'))}
                       </span>
-                    ))}
+                    </div>
+                    <div>
+                      <span style={{ fontFamily:DS.font, fontSize:'9px', color:DS.textMuted, textTransform:'uppercase', letterSpacing:'0.5px', display:'block', marginBottom:'2px' }}>Min. Investment</span>
+                      <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'800', color:DS.textWhite }}>{formatRupees(scheme.installmentAmountPaise)}</span>
+                    </div>
                   </div>
-                )}
-                <div style={{ display:'flex', justifyContent:'flex-end', alignItems:'center', gap:'4px', marginTop:'4px' }}>
-                  <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'700', color:DS.gold }}>View Plan</span>
-                  <ChevronRight size={13} color={DS.gold} />
+                  <div style={{ background: isDark ? 'rgba(255,215,0,0.1)' : 'rgba(194,24,91,0.06)', borderRadius:'10px', padding:'8px 12px', border: isDark ? '1px solid rgba(255,215,0,0.2)' : '1px solid rgba(194,24,91,0.15)' }}>
+                    <span style={{ fontFamily:DS.font, fontSize:'9px', color: isDark ? 'rgba(255,215,0,0.7)' : DS.magenta, fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.3px', display:'block', marginBottom:'2px' }}>Bonus Offer</span>
+                    <span style={{ fontFamily:DS.font, fontSize:'12px', fontWeight:'800', color: isDark ? DS.gold : DS.purple }}>Get up to {maxBonus} Extra Gold!</span>
+                  </div>
+                  {keywords.length > 0 && (
+                    <div style={{ display:'flex', gap:'6px', flexWrap:'wrap' }}>
+                      {keywords.slice(0,2).map((kw, i) => (
+                        <span key={i} style={{ fontFamily:DS.font, fontSize:'9px', color:DS.magenta, background:'rgba(194,24,91,0.12)', padding:'3px 8px', borderRadius:'6px', border:'1px solid rgba(194,24,91,0.15)', fontWeight:'600' }}>
+                          ✓ {kw}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div style={{ display:'flex', justifyContent:'flex-end', alignItems:'center', gap:'4px', marginTop:'4px' }}>
+                    <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'700', color:DS.gold }}>View Plan</span>
+                    <ChevronRight size={13} color={DS.gold} />
+                  </div>
                 </div>
+              );
+            })}
+          </div>
+
+          {showSwipeGuidance && contextAvailableSchemes.length > 1 && (
+            <div 
+              onClick={handleCarouselScroll}
+              style={{
+                position:'absolute', top:0, left:0, right:0, bottom:0,
+                background:'rgba(41, 0, 29, 0.45)', borderRadius:'16px',
+                display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+                zIndex:10, pointerEvents:'auto', backdropFilter:'blur(2.5px)', transition:'all 0.3s ease',
+                boxShadow:'inset 0 0 40px rgba(0,0,0,0.5)', border:'1px solid rgba(255,255,255,0.1)'
+              }}
+            >
+              <div className="swipe-hand-animate" style={{ display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(255,255,255,0.2)', width:'50px', height:'50px', borderRadius:'50%', border:'1.5px solid rgba(255,255,255,0.4)', marginBottom:'10px', boxShadow:'0 4px 12px rgba(0,0,0,0.2)' }}>
+                <span style={{ fontSize:'24px' }}>👈</span>
               </div>
-            );
-          })}
+              <span style={{ fontFamily:DS.font, fontSize:'12px', fontWeight:'800', color:'white', textShadow:'0 2px 4px rgba(0,0,0,0.6)', letterSpacing:'0.3px', textAlign:'center', padding:'0 16px' }}>
+                {lang === 'ta' ? 'அடுத்த திட்டத்தைக் காண இடதுபுறம் ஸ்வைப் செய்யவும்' : 'Swipe left to view other schemes'}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -1725,59 +1813,61 @@ export const Dashboard: React.FC = () => {
               );
             })()}
 
-            <button
-              disabled={isDownloading}
-              onClick={() => { 
-                if (selectedTxDetail && selectedTxDetail.id) {
-                  setIsDownloading(true);
-                  const url = `${BASE_URL}api/Gold/receipt/download/${selectedTxDetail.id}`;
-                  const isCapacitor = !!(window as any).Capacitor;
-                  if (isCapacitor) {
-                    let iframe = document.getElementById('hidden-download-iframe') as HTMLIFrameElement;
-                    if (!iframe) {
-                      iframe = document.createElement('iframe');
-                      iframe.id = 'hidden-download-iframe';
-                      iframe.style.display = 'none';
-                      document.body.appendChild(iframe);
+            {!selectedTxDetail.isVirtualBonus && (
+              <button
+                disabled={isDownloading}
+                onClick={() => { 
+                  if (selectedTxDetail && selectedTxDetail.id) {
+                    setIsDownloading(true);
+                    const url = `${BASE_URL}api/Gold/receipt/download/${selectedTxDetail.id}`;
+                    const isCapacitor = !!(window as any).Capacitor;
+                    if (isCapacitor) {
+                      let iframe = document.getElementById('hidden-download-iframe') as HTMLIFrameElement;
+                      if (!iframe) {
+                        iframe = document.createElement('iframe');
+                        iframe.id = 'hidden-download-iframe';
+                        iframe.style.display = 'none';
+                        document.body.appendChild(iframe);
+                      }
+                      iframe.src = url;
+                    } else {
+                      window.open(url, '_blank');
                     }
-                    iframe.src = url;
-                  } else {
-                    window.open(url, '_blank');
+                    setTimeout(() => {
+                      setIsDownloading(false);
+                      setSelectedTxDetail(null);
+                    }, 2500);
                   }
-                  setTimeout(() => {
-                    setIsDownloading(false);
-                    setSelectedTxDetail(null);
-                  }, 2500);
-                }
-              }}
-              style={{ 
-                width:'100%', 
-                height:'44px', 
-                borderRadius:'12px', 
-                background: isDownloading ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(74,14,78,0.1)') : 'linear-gradient(135deg,#29001D,#C2185B)', 
-                color: isDownloading ? DS.textSub : 'white', 
-                border: isDownloading ? (isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.15)') : 'none', 
-                fontFamily:DS.font, 
-                fontWeight:'800', 
-                fontSize:'13px', 
-                cursor: isDownloading ? 'not-allowed' : 'pointer', 
-                boxShadow: isDownloading ? 'none' : '0 4px 16px rgba(194,24,91,0.35)',
-                display:'flex',
-                alignItems:'center',
-                justifyContent:'center',
-                gap:'8px',
-                transition:'all 0.3s ease'
-              }}
-            >
-              {isDownloading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  <span>Downloading...</span>
-                </>
-              ) : (
-                'Download Receipt'
-              )}
-            </button>
+                }}
+                style={{ 
+                  width:'100%', 
+                  height:'44px', 
+                  borderRadius:'12px', 
+                  background: isDownloading ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(74,14,78,0.1)') : 'linear-gradient(135deg,#29001D,#C2185B)', 
+                  color: isDownloading ? DS.textSub : 'white', 
+                  border: isDownloading ? (isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.15)') : 'none', 
+                  fontFamily:DS.font, 
+                  fontWeight:'800', 
+                  fontSize:'13px', 
+                  cursor: isDownloading ? 'not-allowed' : 'pointer', 
+                  boxShadow: isDownloading ? 'none' : '0 4px 16px rgba(194,24,91,0.35)',
+                  display:'flex',
+                  alignItems:'center',
+                  justifyContent:'center',
+                  gap:'8px',
+                  transition:'all 0.3s ease'
+                }}
+              >
+                {isDownloading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Downloading...</span>
+                  </>
+                ) : (
+                  'Download Receipt'
+                )}
+              </button>
+            )}
           </div>
         </div>
       )}

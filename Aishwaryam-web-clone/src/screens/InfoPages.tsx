@@ -662,33 +662,37 @@ export const MyBonuses: React.FC = () => {
   const { transactions } = useApp();
 
   const getBonusDisplayDetails = (tx: any) => {
-    if (tx.transactionType === 'EVENT_BONUS') {
+    const isPureBonus = tx.transactionType === 'BONUS' || tx.transactionType === 'EVENT_BONUS' || tx.type === 'BONUS' || tx.type === 'EVENT_BONUS';
+    const weightVal = isPureBonus ? tx.goldWeightMg : tx.bonusGoldMg;
+    const formattedWeight = (weightVal / 1000).toFixed(4) + ' g';
+
+    if (tx.transactionType === 'EVENT_BONUS' || tx.type === 'EVENT_BONUS') {
       return {
         name: tx.rateSource ? `Promotional Reward (${tx.rateSource})` : 'Promotional Bonus Reward',
-        weight: `${tx.goldWeightMg} mg`,
-        amount: 'Promo Reward',
+        weight: formattedWeight,
         percentage: tx.bonusPercentage ? `${tx.bonusPercentage}%` : 'N/A'
       };
     }
-    if (tx.transactionType === 'BONUS') {
+    if (tx.transactionType === 'BONUS' || tx.type === 'BONUS') {
       return {
         name: tx.schemeName ? `Scheme Loyalty Reward (${tx.schemeName})` : 'Scheme Loyalty Bonus',
-        weight: `${tx.goldWeightMg} mg`,
-        amount: 'Loyalty Reward',
+        weight: formattedWeight,
         percentage: tx.bonusPercentage ? `${tx.bonusPercentage}%` : 'N/A'
       };
     }
     return {
       name: tx.schemeName ? `Loyalty Bonus on ${tx.schemeName}` : 'Installment Loyalty Bonus',
-      weight: `${tx.bonusGoldMg} mg`,
-      amount: `Paid ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(tx.amountPaise / 100)}`,
+      weight: formattedWeight,
       percentage: tx.bonusPercentage ? `${tx.bonusPercentage}%` : '7.5%'
     };
   };
 
   const bonusTransactions = transactions.filter(t => 
     ((t.transactionType === 'BUY' || t.transactionType === 'INSTALLMENT') && t.bonusGoldMg > 0) ||
-    t.transactionType === 'EVENT_BONUS'
+    t.transactionType === 'EVENT_BONUS' ||
+    t.transactionType === 'BONUS' ||
+    t.type === 'BONUS' ||
+    t.type === 'EVENT_BONUS'
   );
 
   return (
@@ -707,7 +711,7 @@ export const MyBonuses: React.FC = () => {
                   </span>
                   <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#ccc', flexShrink: 0 }} />
                   <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '500', whiteSpace: 'nowrap' }}>
-                    {details.amount} ({details.percentage})
+                    Bonus ({details.percentage})
                   </span>
                 </div>
               </div>
