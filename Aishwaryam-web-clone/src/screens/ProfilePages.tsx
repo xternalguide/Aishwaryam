@@ -504,6 +504,68 @@ export const ProfileKyc: React.FC = () => {
 
   const RELATIONSHIPS = ["Father", "Mother", "Wife", "Husband", "Son", "Daughter", "Brother", "Guardian"];
 
+  const triggerDigioKyc = (docType: 'AADHAAR' | 'PAN') => {
+    if (!(window as any).Digio) {
+      const script = document.createElement('script');
+      script.src = "https://ext.digio.in/sdk/v2/digio.js";
+      script.onload = () => startDigioSession(docType);
+      document.body.appendChild(script);
+    } else {
+      startDigioSession(docType);
+    }
+  };
+
+  const startDigioSession = async (docType: 'AADHAAR' | 'PAN') => {
+    const userId = SessionManager.getUserId();
+    if (!userId) return;
+
+    try {
+      const res = await ApiClient.post('api/Kyc/digio/initiate', {
+        userId: userId,
+        documentType: docType
+      });
+
+      if (res.data && res.data.success) {
+        const { kycRequestId, customerIdentifier } = res.data;
+        
+        const options = {
+          environment: 'sandbox', 
+          callback: async function(response: any) {
+            if (response.status === 'success') {
+              try {
+                const verifyRes = await ApiClient.post(`api/Kyc/digio/verify/${kycRequestId}`);
+                if (verifyRes.data && verifyRes.data.success) {
+                  alert('KYC Verified successfully!');
+                  refreshData();
+                  const statusRes = await ApiClient.get(`api/Kyc/status/${userId}`);
+                  if (statusRes.data && statusRes.data.success) {
+                    setKycDocs(statusRes.data.documents || []);
+                    setKycStatusMsg(statusRes.data.status || 'PENDING');
+                  }
+                } else {
+                  alert(verifyRes.data.message || 'KYC Verification failed or is under review.');
+                }
+              } catch (e) {
+                console.error(e);
+                alert('Error completing KYC verification.');
+              }
+            } else {
+              alert('KYC process was cancelled or failed.');
+            }
+          }
+        };
+
+        const digioInstance = new (window as any).Digio(options);
+        digioInstance.submit(kycRequestId, customerIdentifier);
+      } else {
+        alert(res.data.message || 'Failed to initiate instant verification.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert('Error connecting to KYC service.');
+    }
+  };
+
   const handleBack = () => {
     localStorage.setItem('DASHBOARD_ACTIVE_TAB', '2');
     navigate('/dashboard');
@@ -752,15 +814,39 @@ export const ProfileKyc: React.FC = () => {
               <span style={{ fontSize: '13px', color: 'var(--text-light)', fontStyle: 'italic', display: 'block', marginBottom: '14px' }}>
                 {t('no_kyc_documents')}
               </span>
-              <button
-                onClick={() => navigate('/onboarding')}
-                style={{
-                  padding: '10px 20px', borderRadius: '10px', background: 'var(--gradient-brand)', color: 'white',
-                  border: 'none', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 10px var(--brand-glow)'
-                }}
-              >
-                Upload KYC Documents
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+                <button
+                  onClick={() => triggerDigioKyc('AADHAAR')}
+                  style={{
+                    width: '100%', maxWidth: '240px', padding: '12px 20px', borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #D4AF37 0%, #AA7C11 100%)', color: 'white',
+                    border: 'none', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(170, 124, 17, 0.2)'
+                  }}
+                >
+                  Verify Instantly via Aadhaar
+                </button>
+                <button
+                  onClick={() => triggerDigioKyc('PAN')}
+                  style={{
+                    width: '100%', maxWidth: '240px', padding: '12px 20px', borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #4A5568 0%, #2D3748 100%)', color: 'white',
+                    border: 'none', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}
+                >
+                  Verify Instantly via PAN
+                </button>
+                <button
+                  onClick={() => navigate('/onboarding')}
+                  style={{
+                    background: 'transparent', border: 'none', color: 'var(--text-muted)',
+                    fontSize: '12.5px', fontWeight: '600', cursor: 'pointer', textDecoration: 'underline', marginTop: '6px'
+                  }}
+                >
+                  Or Upload Documents Manually
+                </button>
+              </div>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
