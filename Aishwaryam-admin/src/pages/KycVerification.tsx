@@ -109,6 +109,21 @@ export const KycVerification: React.FC = () => {
           status: d.status || '—',
           documents: docs
         });
+
+        // Dynamically select the tab to show based on which documents are present
+        const hasPending = docs.some((doc: any) => doc.status === 'PENDING' || !doc.status || doc.status === '—' || doc.status === 'UNDER_REVIEW');
+        const hasApproved = docs.some((doc: any) => doc.status === 'APPROVED' || doc.status === 'VERIFIED');
+        const hasRejected = docs.some((doc: any) => doc.status === 'REJECTED');
+
+        if (hasPending) {
+          setActiveDocTab('pending');
+        } else if (hasApproved) {
+          setActiveDocTab('approved');
+        } else if (hasRejected) {
+          setActiveDocTab('rejected');
+        } else {
+          setActiveDocTab('pending');
+        }
       }
     } catch (e) {
       showToast('Failed to retrieve document details', 'error');
