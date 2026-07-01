@@ -262,6 +262,7 @@ export const Dashboard: React.FC = () => {
   const [editNomineeName, setEditNomineeName] = useState('');
   const [editNomineePhone, setEditNomineePhone] = useState('');
   const [editNomineeRelation, setEditNomineeRelation] = useState('');
+  const [isRelDropdownOpen, setIsRelDropdownOpen] = useState(false);
   const [editImageBase64, setEditImageBase64] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
@@ -1993,14 +1994,51 @@ export const Dashboard: React.FC = () => {
                     style={{ width:'100%', height:'42px', borderRadius:'10px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.15)', padding:'0 14px', fontFamily:DS.font, fontSize:'13px', outline:'none', marginTop:'5px', background: isMinor ? (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)') : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.02)'), color: isMinor ? DS.textMuted : DS.textWhite, boxSizing:'border-box' }}
                   />
                 </div>
-                <div style={{ flex:1 }}>
+                <div style={{ flex:1, position: 'relative' }}>
                   <label style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'700', color:DS.textSub }}>{t('relationship')}</label>
-                  <select value={editNomineeRelation} disabled={isMinor} onChange={(e)=>setEditNomineeRelation(e.target.value)}
-                    style={{ width:'100%', height:'42px', borderRadius:'10px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.15)', padding:'0 14px', fontFamily:DS.font, fontSize:'13px', outline:'none', marginTop:'5px', background: isMinor ? (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)') : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.02)'), color: isMinor ? DS.textMuted : DS.textWhite, boxSizing:'border-box' }}
+                  <div 
+                    onClick={() => !isMinor && setIsRelDropdownOpen(!isRelDropdownOpen)}
+                    style={{ 
+                      width:'100%', height:'42px', borderRadius:'10px', 
+                      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.15)', 
+                      padding:'0 14px', fontFamily:DS.font, fontSize:'13px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      marginTop:'5px', 
+                      background: isMinor ? (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)') : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.02)'), 
+                      color: isMinor ? DS.textMuted : (editNomineeRelation ? DS.textWhite : DS.textMuted), 
+                      boxSizing:'border-box', cursor: isMinor ? 'not-allowed' : 'pointer'
+                    }}
                   >
-                    <option style={{ background: isDark ? '#1A1A2E' : '#FFFFFF', color: DS.textWhite }} value="">{t('select')}</option>
-                    {['Father','Mother','Wife','Husband','Son','Daughter','Brother','Guardian'].map((rel)=>(<option style={{ background: isDark ? '#1A1A2E' : '#FFFFFF', color: DS.textWhite }} key={rel} value={rel}>{autoT(rel)}</option>))}
-                  </select>
+                    <span>{editNomineeRelation ? autoT(editNomineeRelation) : t('select')}</span>
+                    <span style={{ fontSize: '10px', color: DS.textSub }}>▼</span>
+                  </div>
+                  {isRelDropdownOpen && !isMinor && (
+                    <div style={{ 
+                      position: 'absolute', top: '48px', left: 0, right: 0, 
+                      background: isDark ? '#1A1A2E' : '#FFFFFF', 
+                      border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(74,14,78,0.15)', 
+                      borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.25)', zIndex: 100, 
+                      maxHeight: '180px', overflowY: 'auto' 
+                    }}>
+                      {['Father','Mother','Wife','Husband','Son','Daughter','Brother','Guardian'].map((rel) => (
+                        <div 
+                          key={rel}
+                          onClick={() => {
+                            setEditNomineeRelation(rel);
+                            setIsRelDropdownOpen(false);
+                          }}
+                          style={{ 
+                            padding: '10px 14px', fontSize: '13px', cursor: 'pointer',
+                            color: DS.textWhite,
+                            background: editNomineeRelation === rel ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(74,14,78,0.05)') : 'transparent',
+                            borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(74,14,78,0.05)',
+                            textAlign: 'left'
+                          }}
+                        >
+                          {autoT(rel)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

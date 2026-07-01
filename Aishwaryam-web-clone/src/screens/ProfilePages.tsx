@@ -532,6 +532,7 @@ export const ProfileKyc: React.FC = () => {
   const [newNomineeInput, setNewNomineeInput] = useState('');
   const [newNomineePhone, setNewNomineePhone] = useState('');
   const [newNomineeRelationship, setNewNomineeRelationship] = useState('');
+  const [isRelDropdownOpen, setIsRelDropdownOpen] = useState(false);
 
   const [isEditingNominee, setIsEditingNominee] = useState(false);
   const [isSavingNominee, setIsSavingNominee] = useState(false);
@@ -724,18 +725,44 @@ export const ProfileKyc: React.FC = () => {
                 />
               </div>
 
-              <div>
+              <div style={{ position: 'relative' }}>
                 <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Relationship</label>
-                <select
-                  value={newNomineeRelationship}
-                  onChange={(e) => setNewNomineeRelationship(e.target.value)}
-                  style={{ width: '100%', height: '40px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', background: 'white', marginTop: '4px' }}
+                <div 
+                  onClick={() => setIsRelDropdownOpen(!isRelDropdownOpen)}
+                  style={{ 
+                    width: '100%', height: '40px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', 
+                    padding: '0 12px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    background: 'white', marginTop: '4px', cursor: 'pointer', boxSizing: 'border-box'
+                  }}
                 >
-                  <option value="">Select Relationship</option>
-                  {RELATIONSHIPS.map((rel) => (
-                    <option key={rel} value={rel}>{rel}</option>
-                  ))}
-                </select>
+                  <span>{newNomineeRelationship || 'Select Relationship'}</span>
+                  <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>▼</span>
+                </div>
+                {isRelDropdownOpen && (
+                  <div style={{ 
+                    position: 'absolute', top: '44px', left: 0, right: 0, 
+                    background: 'white', border: '1px solid rgba(0,0,0,0.15)', borderRadius: '8px', 
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 100, maxHeight: '180px', overflowY: 'auto' 
+                  }}>
+                    {RELATIONSHIPS.map((rel) => (
+                      <div 
+                        key={rel}
+                        onClick={() => {
+                          setNewNomineeRelationship(rel);
+                          setIsRelDropdownOpen(false);
+                        }}
+                        style={{ 
+                          padding: '10px 12px', fontSize: '13px', cursor: 'pointer',
+                          background: newNomineeRelationship === rel ? 'rgba(74, 14, 78, 0.05)' : 'white',
+                          borderBottom: '1px solid rgba(0,0,0,0.03)',
+                          textAlign: 'left'
+                        }}
+                      >
+                        {rel}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Inline error */}
