@@ -104,6 +104,35 @@ export const Welcome: React.FC = () => {
       color: 'white',
       overflow: 'hidden'
     }}>
+      {/* Full-screen Background Poster Image */}
+      {slide.imageBase64 && (
+        <>
+          <img
+            src={getSlideImage(slide.imageBase64)}
+            alt={slide.title}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              zIndex: 1
+            }}
+          />
+          {/* Dark Overlay for readability */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(to bottom, rgba(41, 0, 29, 0.3) 0%, rgba(41, 0, 29, 0.8) 100%)',
+            zIndex: 2
+          }} />
+        </>
+      )}
+
       <div className="responsive-form-container" style={{
         flex: 1,
         display: 'flex',
@@ -112,7 +141,9 @@ export const Welcome: React.FC = () => {
         padding: '24px',
         justifyContent: 'space-between',
         boxSizing: 'border-box',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'relative',
+        zIndex: 3
       }}>
         {/* Top Header Row with Skip Button */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingTop: '16px', width: '100%' }}>
@@ -147,27 +178,21 @@ export const Welcome: React.FC = () => {
           width: '100%',
           scrollbarWidth: 'none'
         }}>
-          {/* Animated Image/Icon Container */}
-          <div style={{
-            width: '140px',
-            height: '140px',
-            borderRadius: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: `0 10px 30px rgba(0, 0, 0, 0.3)`,
-            marginBottom: '28px',
-            animation: 'pulse 3s infinite alternate',
-            overflow: 'hidden',
-            background: slide.iconBg || 'rgba(255, 255, 255, 0.05)'
-          }}>
-            {slide.imageBase64 ? (
-              <img
-                src={getSlideImage(slide.imageBase64)}
-                alt={slide.title}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            ) : (
+          {/* Fallback Animated Icon Container (only shown if no background poster image exists) */}
+          {!slide.imageBase64 && (
+            <div style={{
+              width: '140px',
+              height: '140px',
+              borderRadius: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: `0 10px 30px rgba(0, 0, 0, 0.3)`,
+              marginBottom: '28px',
+              animation: 'pulse 3s infinite alternate',
+              overflow: 'hidden',
+              background: slide.iconBg || 'rgba(255, 255, 255, 0.05)'
+            }}>
               <div style={{
                 width: '100%',
                 height: '100%',
@@ -178,8 +203,8 @@ export const Welcome: React.FC = () => {
               }}>
                 <Star size={48} color="white" fill="white" />
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Badge */}
           {slide.badge && (
