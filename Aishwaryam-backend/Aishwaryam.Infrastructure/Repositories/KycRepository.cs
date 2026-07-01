@@ -43,5 +43,11 @@ namespace Aishwaryam.Infrastructure.Repositories
             _context.KycDocuments.Update(document);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<string> GetUserKycLevelAsync(Guid userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            return user?.KycLevel ?? "BASIC";
+        }
     }
 }

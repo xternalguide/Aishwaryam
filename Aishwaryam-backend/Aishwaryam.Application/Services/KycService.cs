@@ -40,13 +40,16 @@ namespace Aishwaryam.Application.Services
         public async Task<KycStatusResponse> GetKycStatusAsync(Guid userId)
         {
             var docs = await _kycRepository.GetUserKycDocumentsAsync(userId);
+            var kycLevel = await _kycRepository.GetUserKycLevelAsync(userId);
+
             if (docs == null || !docs.Any())
             {
                 return new KycStatusResponse
                 {
                     Success = true,
                     Message = "No KYC documents found.",
-                    Status = "PENDING"
+                    Status = "PENDING",
+                    KycLevel = kycLevel
                 };
             }
 
@@ -62,6 +65,7 @@ namespace Aishwaryam.Application.Services
                 DocumentNumber = latest.DocumentNumber,
                 DocumentUrl = latest.DocumentUrl,
                 UploadedAt = latest.UploadedAt,
+                KycLevel = kycLevel,
                 Documents = docs.Select(d => new KycDocumentDto
                 {
                     DocumentType = d.DocumentType,

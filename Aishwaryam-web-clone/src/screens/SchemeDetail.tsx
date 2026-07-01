@@ -354,6 +354,9 @@ export const SchemeDetail: React.FC = () => {
           if (res.data && res.data.success) {
             setKycStatusMsg(res.data.status || '');
             setKycDocs(res.data.documents || []);
+            if (res.data.kycLevel) {
+              setKycLevel(res.data.kycLevel);
+            }
           }
         } catch (err) {
           console.error('Failed to load KYC documents in SchemeDetail:', err);

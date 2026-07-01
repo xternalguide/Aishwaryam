@@ -11,5 +11,6 @@ namespace Aishwaryam.Application.Interfaces.Repositories
         Task<KycDocument?> GetKycDocumentAsync(Guid id);
         Task<List<KycDocument>> GetUserKycDocumentsAsync(Guid userId);
         Task UpdateKycDocumentAsync(KycDocument document);
+        Task<string> GetUserKycLevelAsync(Guid userId);
     }
 }

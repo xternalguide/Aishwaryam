@@ -30,6 +30,7 @@ namespace Aishwaryam.Application.DTOs.Kyc
         public string? DocumentNumber { get; set; }
         public string? DocumentUrl { get; set; }
         public DateTimeOffset? UploadedAt { get; set; }
+        public string KycLevel { get; set; } = string.Empty;
         public System.Collections.Generic.List<KycDocumentDto> Documents { get; set; } = new();
     }
 }
