@@ -66,7 +66,7 @@ export const Onboarding: React.FC = () => {
   const [city, setCity] = useState(SessionManager.getPartialCity() || '');
   const [area, setArea] = useState(SessionManager.getPartialArea() || '');
   const [isManualArea] = useState(SessionManager.getPartialIsManualArea() || false);
-  const [termsAccepted, setTermsAccepted] = useState(SessionManager.getPartialTermsAccepted() || false);
+  const [termsAccepted, setTermsAccepted] = useState(true);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [dbTerms, setDbTerms] = useState<string | null>(null);
@@ -368,6 +368,21 @@ export const Onboarding: React.FC = () => {
           nomineeName: nomineeName.trim() || null,
           weddingAnniversaryDate: formattedWeddingDate
         });
+
+        // Save address in DB
+        try {
+          await ApiClient.post('api/Address/add', {
+            userId,
+            state,
+            city,
+            streetAddress: area,
+            pincode,
+            isDefault: true
+          });
+        } catch (addrErr) {
+          console.error("Failed to save address to DB:", addrErr);
+        }
+
         await refreshData();
         setCurrentStep(2);
       } catch (err: any) {
