@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SessionManager, OnboardingStage } from '../utils/SessionManager';
 import { ApiClient } from '../utils/ApiClient';
@@ -91,14 +91,19 @@ export const Onboarding: React.FC = () => {
     SessionManager.saveNomineeName(nomineeName);
   }, [name, email, dob, isMarried, weddingDate, gender, pincode, state, city, area, isManualArea, termsAccepted, nomineeName]);
 
+  const isDirtyRef = useRef(false);
+
+  useEffect(() => {
+    const hasStep1Data = nomineeName || pincode || name || email || dob || (state && state !== 'Tamil Nadu') || (city && city !== 'Chennai') || (area && area !== 'T. Nagar');
+    const hasStep2Data = panImage || aadhaarFrontImage || aadhaarBackImage;
+    isDirtyRef.current = !!(hasStep1Data || hasStep2Data);
+  }, [nomineeName, pincode, name, email, dob, state, city, area, panImage, aadhaarFrontImage, aadhaarBackImage]);
+
   useEffect(() => {
     window.history.pushState(null, '', window.location.href);
 
     const handlePopState = () => {
-      const hasStep1Data = nomineeName || pincode || name || email || dob || (state && state !== 'Tamil Nadu') || (city && city !== 'Chennai') || (area && area !== 'T. Nagar');
-      const hasStep2Data = panImage || aadhaarFrontImage || aadhaarBackImage;
-
-      if (hasStep1Data || hasStep2Data) {
+      if (isDirtyRef.current) {
         if (window.confirm(lang === 'ta' ? 'நீங்கள் வெளியேற விரும்புகிறீர்களா? உள்ளிடப்பட்ட தரவு இழக்கப்படும்.' : 'Are you sure you want to go back? Any entered onboarding data will be lost.')) {
           navigate('/dashboard');
         } else {
@@ -113,7 +118,7 @@ export const Onboarding: React.FC = () => {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [nomineeName, pincode, name, email, dob, state, city, area, panImage, aadhaarFrontImage, aadhaarBackImage, lang, navigate]);
+  }, [lang, navigate]);
 
   useEffect(() => {
     const fetchConfig = async () => {
