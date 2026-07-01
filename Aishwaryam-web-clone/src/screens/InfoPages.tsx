@@ -326,15 +326,15 @@ export const AiAssistant: React.FC = () => {
         justifyContent: 'space-between',
         gap: '12px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--brand-dark)', display: 'flex', alignItems: 'center', cursor: 'pointer', padding: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
+          <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--brand-dark)', display: 'flex', alignItems: 'center', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
             <ArrowLeft size={24} />
           </button>
-          <div>
-            <h4 style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>
+          <div style={{ minWidth: 0 }}>
+            <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {t('ai_assistant_title')}
             </h4>
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {t('ai_assistant_subtitle')}
             </span>
           </div>
@@ -353,7 +353,9 @@ export const AiAssistant: React.FC = () => {
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '4px'
+            gap: '4px',
+            whiteSpace: 'nowrap',
+            flexShrink: 0
           }}
         >
           <Headset size={14} />
