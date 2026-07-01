@@ -321,7 +321,22 @@ namespace Aishwaryam.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Message = ex.Message });
+                var innerMessage = ex.InnerException != null ? ex.InnerException.Message : "";
+                var auditLog = new PlatformAuditLog
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = payment.UserId,
+                    Action = "PAYMENT_RECONCILE_FAILED",
+                    Details = $"Reconciliation failed for Order {orderId}: {ex.Message}. Inner: {innerMessage}. Stack: {ex.StackTrace}",
+                    ErrorMessage = ex.Message,
+                    Status = "Failed",
+                    IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.PlatformAuditLogs.Add(auditLog);
+                await _context.SaveChangesAsync();
+
+                return BadRequest(new { Message = $"{ex.Message} | Inner: {innerMessage}" });
             }
         }
     }
