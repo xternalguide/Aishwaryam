@@ -1,0 +1,614 @@
+{
+	"info": {
+		"_postman_id": "4d16d1ba-34fb-4b53-bdf2-f8c6cf4e58b1",
+		"name": "Aishwaryam Digital Gold API",
+		"description": "Postman Collection for the Aishwaryam Digital Gold Platform backend. Contains all authentication, profile, wallet, gold, KYC, and banking flows.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Send OTP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phoneNumber\": \"9000000010\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Auth/send-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Auth",
+								"send-otp"
+							]
+						},
+						"description": "Sends a verification OTP via Supabase SMS. Use bypass numbers (e.g. 6369344011 or 9000000010) in Development environment."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify OTP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+									"    pm.collectionVariables.set(\"user_id\", jsonData.userId);",
+									"    console.log(\"Saved jwt_token and user_id to collection variables!\");",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phoneNumber\": \"9000000010\",\n    \"otp\": \"123456\",\n    \"deviceFingerprint\": \"postman_client\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Auth/verify-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Auth",
+								"verify-otp"
+							]
+						},
+						"description": "Verifies the OTP and extracts the JWT authorization token."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Firebase Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+									"    pm.collectionVariables.set(\"user_id\", jsonData.userId);",
+									"    console.log(\"Saved jwt_token and user_id to collection variables!\");",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firebaseIdToken\": \"YOUR_FIREBASE_ID_TOKEN\",\n    \"phoneNumber\": \"9000000010\",\n    \"deviceFingerprint\": \"postman_android_client\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Auth/verify-firebase-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Auth",
+								"verify-firebase-token"
+							]
+						},
+						"description": "Verifies Android Client OTP using the Firebase ID Token. Extracts a JWT authorization token."
+					},
+					"response": []
+				},
+				{
+					"name": "Set MPIN",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{user_id}}\",\n    \"mpin\": \"1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Auth/set-mpin",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Auth",
+								"set-mpin"
+							]
+						},
+						"description": "Sets the MPIN for an authenticated user."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify MPIN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{user_id}}\",\n    \"mpin\": \"1234\",\n    \"deviceFingerprint\": \"postman_client\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Auth/verify-mpin",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Auth",
+								"verify-mpin"
+							]
+						},
+						"description": "Authenticates using the user's MPIN and generates a new session token."
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"YOUR_REFRESH_TOKEN_HERE\",\n    \"deviceFingerprint\": \"postman_client\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Auth/refresh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. User Profile",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/User/profile/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"User",
+								"profile",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"Aishwaryam Customer\",\n    \"email\": \"customer@aishwaryam.com\",\n    \"nomineeName\": \"Nominee User\",\n    \"dateOfBirth\": \"1995-05-15T00:00:00Z\",\n    \"biometricEnabled\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/User/profile/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"User",
+								"profile",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Wallet and Gold Operations",
+			"item": [
+				{
+					"name": "Get Live Gold Price",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/Gold/price",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Gold",
+								"price"
+							]
+						},
+						"description": "Get current 24k and 22k gold buy/sell rates."
+					},
+					"response": []
+				},
+				{
+					"name": "Add Wallet Funds",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{user_id}}\",\n    \"amountPaise\": 5000000,\n    \"transactionType\": \"CREDIT\",\n    \"referenceId\": \"postman_dep_001\",\n    \"description\": \"Adding funds via Postman\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Wallet/transaction",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Wallet",
+								"transaction"
+							]
+						},
+						"description": "Credit user wallet funds directly (UAT/Staging test shortcut)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Wallet Balance",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/Wallet/{{user_id}}/balance",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Wallet",
+								"{{user_id}}",
+								"balance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buy Gold",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{user_id}}\",\n    \"totalAmountPaise\": 100000,\n    \"deviceFingerprint\": \"postman_client\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Gold/buy",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Gold",
+								"buy"
+							]
+						},
+						"description": "Debits wallet balance to purchase Gold."
+					},
+					"response": []
+				},
+				{
+					"name": "Sell Gold",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{user_id}}\",\n    \"goldWeightMg\": 10,\n    \"deviceFingerprint\": \"postman_client\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Gold/sell",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Gold",
+								"sell"
+							]
+						},
+						"description": "Sells gold weight in mg and credits to user wallet."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. KYC & Limits",
+			"item": [
+				{
+					"name": "Submit KYC",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{user_id}}\",\n    \"documentType\": \"PAN\",\n    \"documentNumber\": \"ABCDE1234F\",\n    \"documentUrl\": \"https://aishwaryam.com/kyc/pan.jpg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Kyc/submit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Kyc",
+								"submit"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Banking",
+			"item": [
+				{
+					"name": "Add Bank Account",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{user_id}}\",\n    \"accountHolderName\": \"Aishwaryam User\",\n    \"accountNumber\": \"123456789012\",\n    \"ifscCode\": \"SBIN0001234\",\n    \"bankName\": \"State Bank of India\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Banking/add-account",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Banking",
+								"add-account"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Accounts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/Banking/accounts/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Banking",
+								"accounts",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Withdraw Funds",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{user_id}}\",\n    \"amountPaise\": 200000,\n    \"bankAccountId\": \"YOUR_BANK_ACCOUNT_ID_HERE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/Banking/withdraw",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"Banking",
+								"withdraw"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://aishwaryam-production.up.railway.app",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

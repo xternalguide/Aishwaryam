@@ -1,0 +1,115 @@
+Aishwaryam Backend API Endpoints Reference
+========================================
+This document lists all the available REST API endpoints in the Aishwaryam Backend.
+
+----------------------------------------
+1. Auth Endpoints
+Base URL: /api/Auth
+----------------------------------------
+- POST /api/Auth/send-otp
+  Body: { "phoneNumber": "string" }
+  Description: Sends an OTP to the given phone number.
+
+- POST /api/Auth/verify-otp
+  Body: { "phoneNumber": "string", "otp": "string", "deviceFingerprint": "string (optional)" }
+  Description: Verifies the OTP and returns the auth session details.
+
+- POST /api/Auth/set-mpin
+  Body: { "userId": "guid", "mpin": "string" }
+  Description: Sets an MPIN for the user.
+
+- POST /api/Auth/verify-mpin
+  Body: { "userId": "guid", "mpin": "string", "deviceFingerprint": "string (optional)" }
+  Description: Verifies the user's MPIN.
+
+
+----------------------------------------
+2. Banking Endpoints
+Base URL: /api/Banking
+----------------------------------------
+- POST /api/Banking/add-account
+  Body: { "userId": "guid", "accountNumber": "string", ... }
+  Description: Adds a new bank account for the user.
+
+- POST /api/Banking/withdraw
+  Body: { "userId": "guid", "amountPaise": number, ... }
+  Description: Requests a withdrawal to the user's bank account.
+
+- GET /api/Banking/accounts/{userId}
+  Description: Retrieves all bank accounts linked to the given user ID.
+
+
+----------------------------------------
+3. Gold Endpoints
+Base URL: /api/Gold
+----------------------------------------
+- GET /api/Gold/price
+  Description: Retrieves the current live price of gold.
+
+- POST /api/Gold/buy
+  Body: { "userId": "guid", "totalAmountPaise": number, "deviceFingerprint": "string (optional)" }
+  Description: Initiates a gold purchase.
+
+- POST /api/Gold/sell
+  Body: { "userId": "guid", "goldWeightMg": number, "deviceFingerprint": "string (optional)" }
+  Description: Initiates a gold sale.
+
+
+----------------------------------------
+4. KYC Endpoints
+Base URL: /api/Kyc
+----------------------------------------
+- POST /api/Kyc/submit
+  Body: { "userId": "guid", "documentNumber": "string", ... }
+  Description: Submits KYC details for a user.
+
+
+----------------------------------------
+5. User Endpoints
+Base URL: /api/User
+----------------------------------------
+- GET /api/User/profile/{userId}
+  Description: Retrieves user profile information.
+
+- PUT /api/User/profile/{userId}
+  Body: { "fullName": "string", "email": "string", "nomineeName": "string", "dateOfBirth": "datetime", "biometricEnabled": boolean }
+  Description: Updates the user's profile information.
+
+- GET /api/User/config
+  Description: Retrieves the global application configuration.
+
+- GET /api/User/migrate-temp
+  Description: Temporary endpoint to run quick database migrations.
+
+
+----------------------------------------
+6. Wallet Endpoints
+Base URL: /api/Wallet
+----------------------------------------
+- GET /api/Wallet/{userId}/balance
+  Description: Retrieves the user's current wallet and gold balances.
+
+- POST /api/Wallet/transaction
+  Body: { "userId": "guid", "amountPaise": number, "transactionType": "string", "deviceFingerprint": "string (optional)" }
+  Description: Processes a transaction on the user's wallet (credit/debit).
+
+----------------------------------------
+7. Growth Endpoints (Pending Backend Implementation)
+Base URL: /api/Growth
+----------------------------------------
+- POST /api/Growth/apply-referral
+  Body: { "userId": "guid", "referralCode": "string" }
+  Description: Applies a referral code to grant join bonuses or vouchers to users.
+
+----------------------------------------
+8. Extended Gold Features (Pending Backend Implementation)
+----------------------------------------
+- POST /api/Gold/auto-purchase-setup
+  Body: { "userId": "guid", "frequency": "monthly|weekly", "amountPaise": number }
+  Description: Sets up a recurring SIP (Chit fund style) auto gold purchase.
+
+- GET /api/Gold/transactions/{userId}?type=BUY|SELL&sortBy=date&sortOrder=desc
+  Description: Retrieves filtered and sorted gold transactions.
+
+- GET /api/Gold/transactions/{transactionId}/download
+  Description: Downloads a PDF statement/invoice for a specific transaction.

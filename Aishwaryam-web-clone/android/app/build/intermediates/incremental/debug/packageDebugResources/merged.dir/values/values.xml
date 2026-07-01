@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#FFFFFF</color>
+    <string name="app_name">Aishwaryam@yourhome</string>
+    <string name="custom_url_scheme">com.aishwaryam.app</string>
+    <string name="default_web_client_id" translatable="false">596096286505-68m99q8rcp0gjt85vcntn1ao0uturmvs.apps.googleusercontent.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">596096286505</string>
+    <string name="google_api_key" translatable="false">AIzaSyAMBO3ZJWPfao4OfAyU-PSlqCr76qA2jgc</string>
+    <string name="google_app_id" translatable="false">1:596096286505:android:ba7cf7ff2b1bf42b398138</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyAMBO3ZJWPfao4OfAyU-PSlqCr76qA2jgc</string>
+    <string name="google_storage_bucket" translatable="false">aishwaryam-71892.firebasestorage.app</string>
+    <string name="package_name">com.aishwaryam.app</string>
+    <string name="project_id" translatable="false">aishwaryam-71892</string>
+    <string name="title_activity_main">Aishwaryam@yourhome</string>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:background">@null</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:statusBarColor">#4A0E4E</item>
+        <item name="android:fitsSystemWindows">true</item>
+    </style>
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="android:background">@drawable/splash</item>
+    </style>
+</resources>

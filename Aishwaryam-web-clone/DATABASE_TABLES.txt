@@ -1,0 +1,301 @@
+Aishwaryam Database Tables & Columns Reference
+========================================
+This document lists the 30 active database tables in the PostgreSQL schema along with all their column headers.
+
+----------------------------------------
+1. USERS & ADMINS
+----------------------------------------
+Table: users
+- id (UUID, Primary Key)
+- phone_number (VARCHAR, Unique)
+- email (VARCHAR, Unique)
+- full_name (VARCHAR)
+- is_active (BOOLEAN)
+- kyc_level (VARCHAR)
+- mpin_hash (VARCHAR)
+- biometric_enabled (BOOLEAN)
+- referral_code (VARCHAR)
+- date_of_birth (DATE)
+- nominee_name (VARCHAR)
+- created_at (TIMESTAMP)
+- updated_at (TIMESTAMP)
+
+Table: admin_users
+- id (UUID, Primary Key)
+- email (VARCHAR, Unique)
+- password_hash (VARCHAR)
+- role (VARCHAR)
+- created_at (TIMESTAMP)
+
+----------------------------------------
+2. AUTHENTICATION & SESSIONS
+----------------------------------------
+Table: auth_sessions
+- id (UUID, Primary Key)
+- user_id (UUID, Foreign Key)
+- refresh_token (VARCHAR)
+- device_fingerprint (VARCHAR)
+- ip_address (VARCHAR)
+- user_agent (TEXT)
+- expires_at (TIMESTAMP)
+- is_revoked (BOOLEAN)
+- created_at (TIMESTAMP)
+
+Table: otp_logs
+- id (UUID, Primary Key)
+- phone_number (VARCHAR)
+- otp_hash (VARCHAR)
+- ip_address (VARCHAR)
+- expires_at (TIMESTAMP)
+- is_used (BOOLEAN)
+- created_at (TIMESTAMP)
+
+----------------------------------------
+3. KYC (KNOW YOUR CUSTOMER)
+----------------------------------------
+Table: kyc_details
+- user_id (UUID, Primary/Foreign Key)
+- pan_number_encrypted (TEXT)
+- aadhaar_masked (VARCHAR)
+- dob (DATE)
+- verification_status (VARCHAR)
+- verified_by (UUID, Foreign Key)
+- verified_at (TIMESTAMP)
+- updated_at (TIMESTAMP)
+
+Table: kyc_documents
+- id (UUID, Primary Key)
+- user_id (UUID, Foreign Key)
+- document_type (VARCHAR)
+- document_url (TEXT)
+- uploaded_at (TIMESTAMP)
+
+----------------------------------------
+4. WALLET & LEDGER
+----------------------------------------
+Table: wallets
+- user_id (UUID, Primary/Foreign Key)
+- inr_balance_paise (BIGINT)
+- updated_at (TIMESTAMP)
+
+Table: wallet_ledger
+- id (UUID, Primary Key)
+- user_id (UUID, Foreign Key)
+- transaction_type (VARCHAR)
+- amount_paise (BIGINT)
+- reference_id (VARCHAR)
+- description (TEXT)
+- ip_address (VARCHAR)
+- device_fingerprint (VARCHAR)
+- created_at (TIMESTAMP)
+
+----------------------------------------
+5. GOLD HOLDINGS & TRANSACTIONS
+----------------------------------------
+Table: gold_holdings
+- user_id (UUID, Primary/Foreign Key)
+- gold_balance_mg (BIGINT)
+- updated_at (TIMESTAMP)
+
+Table: gold_transactions
+- id (UUID, Primary Key)
+- user_id (UUID, Foreign Key)
+- transaction_type (VARCHAR)
+- gold_weight_mg (BIGINT)
+- price_per_gm_paise (BIGINT)
+- total_amount_paise (BIGINT)
+- ip_address (VARCHAR)
+- device_fingerprint (VARCHAR)
+- created_at (TIMESTAMP)
+
+Table: gold_price_logs
+- id (UUID, Primary Key)
+- buy_price_paise (BIGINT)
+- sell_price_paise (BIGINT)
+- is_admin_override (BOOLEAN)
+- admin_id (UUID, Foreign Key)
+- created_at (TIMESTAMP)
+
+----------------------------------------
+6. PAYMENTS & WITHDRAWALS
+----------------------------------------
+Table: payments
+- id (UUID, Primary Key)
+- user_id (UUID, Foreign Key)
+- provider_order_id (VARCHAR)
+- provider_payment_id (VARCHAR)
+- amount_paise (BIGINT)
+- status (VARCHAR)
+- ip_address (VARCHAR)
+- device_fingerprint (VARCHAR)
+- created_at (TIMESTAMP)
+- updated_at (TIMESTAMP)
+
+Table: bank_accounts
+- id (UUID, Primary Key)
+- user_id (UUID, Foreign Key)
+- account_number_encrypted (TEXT)
+- ifsc_code (VARCHAR)
+- bank_name (VARCHAR)
+- is_verified (BOOLEAN)
+- created_at (TIMESTAMP)
+
+Table: withdrawals (also mapped as withdrawal_requests)
+- id (UUID, Primary Key)
+- user_id (UUID, Foreign Key)
+- bank_account_id (UUID, Foreign Key)
+- amount_paise (BIGINT)
+- status (VARCHAR)
+- utr_number / failure_reason (VARCHAR/TEXT)
+- admin_notes (TEXT)
+- ip_address (VARCHAR)
+- device_fingerprint (VARCHAR)
+- created_at (TIMESTAMP)
+- updated_at (TIMESTAMP)
+
+----------------------------------------
+7. SYSTEM LOGS & AUDIT
+----------------------------------------
+Table: api_error_logs
+- id (UUID, Primary Key)
+- request_id (VARCHAR)
+- endpoint (VARCHAR)
+- error_code (VARCHAR)
+- stack_trace (TEXT)
+- ip_address (VARCHAR)
+- created_at (TIMESTAMP)
+
+Table: login_attempt_logs
+- id (UUID, Primary Key)
+- phone_number (VARCHAR)
+- ip_address (VARCHAR)
+- is_success (BOOLEAN)
+- created_at (TIMESTAMP)
+
+Table: webhook_event_logs
+- id (UUID, Primary Key)
+- provider (VARCHAR)
+- event_type (VARCHAR)
+- payload (JSONB)
+- is_processed (BOOLEAN)
+- created_at (TIMESTAMP)
+
+Table: audit_logs
+- id (BIGSERIAL, Primary Key)
+- admin_id (UUID, Foreign Key)
+- action (VARCHAR)
+- entity_name (VARCHAR)
+- entity_id (VARCHAR)
+- old_values (JSONB)
+- new_values (JSONB)
+- ip_address (VARCHAR)
+- created_at (TIMESTAMP)
+
+----------------------------------------
+8. NOTIFICATIONS
+----------------------------------------
+Table: notification_templates
+- id (UUID, Primary Key)
+- event_name (VARCHAR)
+- title_template (VARCHAR)
+- body_template (TEXT)
+- created_at (TIMESTAMP)
+
+Table: notifications
+- id (UUID, Primary Key)
+- user_id (UUID, Foreign Key)
+- title (VARCHAR)
+- body (TEXT)
+- is_read (BOOLEAN)
+- created_at (TIMESTAMP)
+
+----------------------------------------
+9. GROWTH (REFERRALS & OFFERS)
+----------------------------------------
+Table: referrals
+- id (UUID, Primary Key)
+- referrer_user_id (UUID, Foreign Key)
+- referral_code (VARCHAR, Unique)
+- created_at (TIMESTAMP)
+
+Table: referral_events
+- id (UUID, Primary Key)
+- referrer_user_id (UUID, Foreign Key)
+- referee_user_id (UUID, Foreign Key, Unique)
+- reward_status (VARCHAR)
+- created_at (TIMESTAMP)
+
+Table: offers
+- id (UUID, Primary Key)
+- offer_code (VARCHAR, Unique)
+- description (TEXT)
+- discount_paise (BIGINT)
+- is_active (BOOLEAN)
+- expires_at (TIMESTAMP)
+
+Table: user_offer_redemptions
+- id (UUID, Primary Key)
+- user_id (UUID, Foreign Key)
+- offer_id (UUID, Foreign Key)
+- redeemed_at (TIMESTAMP)
+
+----------------------------------------
+10. CORE ENGINEERING & SETTINGS
+----------------------------------------
+Table: idempotency_keys
+- key (VARCHAR, Primary Key)
+- user_id (UUID, Foreign Key)
+- endpoint (VARCHAR)
+- response_body (JSONB)
+- response_status (INT)
+- created_at (TIMESTAMP)
+
+Table: app_configs
+- id (VARCHAR, Primary Key)
+- support_email (VARCHAR)
+- support_phone (VARCHAR)
+- terms_url (VARCHAR)
+- privacy_url (VARCHAR)
+- faq_json (JSONB)
+- referral_bonus_msg (VARCHAR)
+- primary_color_hex (VARCHAR)
+- secondary_color_hex (VARCHAR)
+- festival_banner_url (VARCHAR)
+- is_referral_enabled (BOOLEAN)
+- is_autosave_enabled (BOOLEAN)
+- updated_at (TIMESTAMP)
+
+----------------------------------------
+11. COMPLIANCE & FRAUD TRACKING
+----------------------------------------
+Table: invoices
+- id (UUID, Primary Key)
+- transaction_id (UUID, Foreign Key)
+- base_amount_paise (BIGINT)
+- gst_amount_paise (BIGINT)
+- total_amount_paise (BIGINT)
+- invoice_pdf_url (TEXT)
+- created_at (TIMESTAMP)
+
+Table: disputes
+- id (UUID, Primary Key)
+- user_id (UUID, Foreign Key)
+- reference_id (VARCHAR)
+- status (VARCHAR)
+- created_at (TIMESTAMP)
+- updated_at (TIMESTAMP)
+
+Table: dispute_messages
+- id (UUID, Primary Key)
+- dispute_id (UUID, Foreign Key)
+- sender_type (VARCHAR)
+- message (TEXT)
+- created_at (TIMESTAMP)
+
+Table: user_activity_logs
+- id (BIGSERIAL, Primary Key)
+- user_id (UUID, Foreign Key)
+- action (VARCHAR)
+- ip_address (VARCHAR)
+- device_fingerprint (VARCHAR)
+- created_at (TIMESTAMP)
