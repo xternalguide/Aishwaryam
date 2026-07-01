@@ -1776,7 +1776,7 @@ export const Dashboard: React.FC = () => {
 
         {/* ── BOTTOM TAB BAR (mobile only) ── */}
         {!isDesktop && (
-          <div style={{ background:DS.bottomBarBg, backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)', borderTop:DS.bottomBarBorder, height:`calc(64px + env(safe-area-inset-bottom, 0px))`, paddingBottom:'env(safe-area-inset-bottom, 0px)', display:'flex', justifyContent:'space-around', alignItems:'center', zIndex:10, boxSizing:'border-box' }}>
+          <div style={{ position:'fixed', bottom:0, left:0, right:0, background:DS.bottomBarBg, backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)', borderTop:DS.bottomBarBorder, height:`calc(64px + env(safe-area-inset-bottom, 0px))`, paddingBottom:'env(safe-area-inset-bottom, 0px)', display:'flex', justifyContent:'space-around', alignItems:'center', zIndex:10, boxSizing:'border-box' }}>
             {[
               { tab:0, icon:Home, label:t('tab_home') },
               { tab:1, icon:History, label:t('tab_history') },
