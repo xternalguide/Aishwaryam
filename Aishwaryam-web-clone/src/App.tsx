@@ -73,7 +73,10 @@ const ScrollToTop: React.FC = () => {
       path.includes('/terms') ||
       path.includes('/faq') ||
       path.includes('/how-it-works') ||
-      path.includes('/my-bonuses')
+      path.includes('/my-bonuses') ||
+      path.includes('/payment') ||
+      path.includes('/ai_assistant') ||
+      path.includes('/notifications')
     ) {
       document.body.style.background = '#F8F9FA';
     } else if (path.includes('/dashboard')) {
