@@ -132,6 +132,20 @@ namespace Aishwaryam.Api.Controllers
             }
             catch (Exception ex)
             {
+                var auditLog = new PlatformAuditLog
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = request.UserId,
+                    Action = "PAYMENT_CREATE_ORDER_FAILED",
+                    Details = $"Payment order creation failed: {ex.Message}. StackTrace: {ex.StackTrace}",
+                    ErrorMessage = ex.Message,
+                    Status = "Failed",
+                    IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.PlatformAuditLogs.Add(auditLog);
+                await _context.SaveChangesAsync();
+
                 return BadRequest(new { Message = ex.Message });
             }
         }
@@ -142,6 +156,25 @@ namespace Aishwaryam.Api.Controllers
             // 1. Verify Razorpay Signature (Strict fintech check - required for all transactions to prevent mock client-side validation bypasses)
             if (!VerifyRazorpaySignature(request.RazorpayOrderId, request.RazorpayPaymentId, request.RazorpaySignature))
             {
+                var message = request.RazorpayOrderId + "|" + request.RazorpayPaymentId;
+                using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_razorpaySecret));
+                var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(message));
+                var expectedSignature = BitConverter.ToString(hash).Replace("-", "").ToLower();
+
+                var auditLog = new PlatformAuditLog
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = request.UserId,
+                    Action = "PAYMENT_SIGNATURE_INVALID",
+                    Details = $"Signature mismatch. OrderId: {request.RazorpayOrderId}, PaymentId: {request.RazorpayPaymentId}, Signature: {request.RazorpaySignature}, Expected: {expectedSignature}",
+                    ErrorMessage = "Invalid payment signature.",
+                    Status = "Failed",
+                    IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.PlatformAuditLogs.Add(auditLog);
+                await _context.SaveChangesAsync();
+
                 return BadRequest(new { Message = "Invalid payment signature." });
             }
 
@@ -159,6 +192,20 @@ namespace Aishwaryam.Api.Controllers
             }
             catch (Exception ex)
             {
+                var auditLog = new PlatformAuditLog
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = request.UserId,
+                    Action = "PAYMENT_VERIFY_FAILED",
+                    Details = $"Payment verification failed: {ex.Message}. StackTrace: {ex.StackTrace}",
+                    ErrorMessage = ex.Message,
+                    Status = "Failed",
+                    IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.PlatformAuditLogs.Add(auditLog);
+                await _context.SaveChangesAsync();
+
                 return BadRequest(new { Message = ex.Message });
             }
         }
