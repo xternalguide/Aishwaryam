@@ -639,7 +639,7 @@ export const ProfileKyc: React.FC = () => {
         {/* Status banner */}
         {(() => {
           const isKycCompleted = kycLevel === 'FULL';
-          const isKycPending = kycLevel === 'PENDING' || kycStatusMsg === 'PENDING';
+          const isKycPending = kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW' || (kycDocs && kycDocs.length > 0);
 
           return (
             <div style={{

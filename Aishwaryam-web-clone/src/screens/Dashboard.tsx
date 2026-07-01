@@ -728,7 +728,7 @@ export const Dashboard: React.FC = () => {
 
   const renderKycBanner = () => {
     if (kycLevel === 'FULL') return null;
-    if (kycLevel === 'PENDING' || kycStatusMsg === 'PENDING') {
+    if (kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW') {
       return renderKycPendingBanner();
     }
     if (kycLevel === 'REJECTED') {
