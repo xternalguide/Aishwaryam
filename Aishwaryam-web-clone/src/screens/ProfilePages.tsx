@@ -637,31 +637,38 @@ export const ProfileKyc: React.FC = () => {
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         
         {/* Status banner */}
-        <div style={{
-          background: kycLevel === 'FULL' ? 'var(--success-light)' : kycLevel === 'PENDING' ? 'var(--warning-light)' : 'var(--error-light)',
-          border: `1.5px solid ${kycLevel === 'FULL' ? 'var(--success-green)' : kycLevel === 'PENDING' ? 'var(--warning-amber)' : 'var(--error-red)'}`,
-          padding: '18px', borderRadius: '16px', display: 'flex', gap: '14px', alignItems: 'flex-start'
-        }}>
-          {kycLevel === 'FULL' ? (
-            <ShieldCheck size={28} color="var(--success-green)" style={{ marginTop: '2px', flexShrink: 0 }} />
-          ) : kycLevel === 'PENDING' ? (
-            <Clock size={28} color="var(--warning-amber)" style={{ marginTop: '2px', flexShrink: 0 }} />
-          ) : (
-            <AlertTriangle size={28} color="var(--error-red)" style={{ marginTop: '2px', flexShrink: 0 }} />
-          )}
-          <div>
-            <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--brand-dark)', display: 'block' }}>
-              KYC Level: {kycLevel === 'FULL' ? 'Completed' : kycLevel}
-            </span>
-            <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: '16px', display: 'block', marginTop: '2px' }}>
-              {kycLevel === 'FULL' 
-                ? 'Your identity is fully verified. You can start physical gold redemptions.' 
-                : kycLevel === 'PENDING'
-                  ? 'Your documents have been submitted and are under review. Please wait for admin approval.'
-                  : 'Please upload PAN and Aadhaar documents to complete verification.'}
-            </span>
-          </div>
-        </div>
+        {(() => {
+          const isKycCompleted = kycLevel === 'FULL';
+          const isKycPending = kycLevel === 'PENDING' || kycStatusMsg === 'PENDING';
+
+          return (
+            <div style={{
+              background: isKycCompleted ? 'var(--success-light)' : isKycPending ? 'var(--warning-light)' : 'var(--error-light)',
+              border: `1.5px solid ${isKycCompleted ? 'var(--success-green)' : isKycPending ? 'var(--warning-amber)' : 'var(--error-red)'}`,
+              padding: '18px', borderRadius: '16px', display: 'flex', gap: '14px', alignItems: 'flex-start'
+            }}>
+              {isKycCompleted ? (
+                <ShieldCheck size={28} color="var(--success-green)" style={{ marginTop: '2px', flexShrink: 0 }} />
+              ) : isKycPending ? (
+                <Clock size={28} color="var(--warning-amber)" style={{ marginTop: '2px', flexShrink: 0 }} />
+              ) : (
+                <AlertTriangle size={28} color="var(--error-red)" style={{ marginTop: '2px', flexShrink: 0 }} />
+              )}
+              <div>
+                <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--brand-dark)', display: 'block' }}>
+                  KYC Level: {isKycCompleted ? 'Completed' : isKycPending ? 'Under Review' : kycLevel}
+                </span>
+                <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: '16px', display: 'block', marginTop: '2px' }}>
+                  {isKycCompleted 
+                    ? 'Your identity is fully verified. You can start physical gold redemptions.' 
+                    : isKycPending
+                      ? 'Your documents have been submitted and are under review. Please wait for admin approval.'
+                      : 'Please upload PAN and Aadhaar documents to complete verification.'}
+                </span>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Details card */}
         <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', borderLeft: '4.5px solid var(--brand-accent)' }}>
