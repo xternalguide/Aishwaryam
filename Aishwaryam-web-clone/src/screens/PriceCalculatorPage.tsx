@@ -26,7 +26,7 @@ export const PriceCalculatorPage: React.FC = () => {
   const parsedVal = parseFloat(calcAmount) || 0;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#F8F9FA' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh', background: '#F8F9FA' }}>
       
       {/* Header */}
       <div className="app-header-bar" style={{

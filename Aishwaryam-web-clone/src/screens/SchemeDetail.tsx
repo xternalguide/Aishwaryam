@@ -1294,7 +1294,7 @@ export const SchemeDetail: React.FC = () => {
   const { totalDays, elapsedDays, progressPct } = getDaysProgress();
  
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh', background: '#F8F9FA' }}>
       {/* Top Bar */}
       <div className="app-header-bar" style={{
         background: 'white',
