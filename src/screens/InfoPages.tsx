@@ -326,15 +326,15 @@ export const AiAssistant: React.FC = () => {
         justifyContent: 'space-between',
         gap: '12px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--brand-dark)', display: 'flex', alignItems: 'center', cursor: 'pointer', padding: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
+          <button onClick={() => navigate(-1)} style={{ background: 'transparent', border: 'none', color: 'var(--brand-dark)', display: 'flex', alignItems: 'center', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
             <ArrowLeft size={24} />
           </button>
-          <div>
-            <h4 style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>
+          <div style={{ minWidth: 0 }}>
+            <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {t('ai_assistant_title')}
             </h4>
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+            <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {t('ai_assistant_subtitle')}
             </span>
           </div>
@@ -353,7 +353,9 @@ export const AiAssistant: React.FC = () => {
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '4px'
+            gap: '4px',
+            whiteSpace: 'nowrap',
+            flexShrink: 0
           }}
         >
           <Headset size={14} />
@@ -580,6 +582,27 @@ export const Referral: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {/* How it works description card */}
+        <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <h4 style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            {lang === 'ta' ? 'பரிந்துரை எவ்வாறு செயல்படுகிறது?' : 'How Referrals & Rewards Work'}
+          </h4>
+          <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '18px' }}>
+            {lang === 'ta' 
+              ? 'உங்கள் நண்பர் உங்கள் பரிந்துரை குறியீட்டைப் பயன்படுத்திப் பதிவு செய்து, தங்களின் முதல் தங்கச் சேமிப்பை அல்லது கொள்முதலைச் செய்யும்போது, உங்களுக்கு ₹500 மதிப்புள்ள தங்கம் உடனடியாகப் பரிசாகக் கணக்கில் சேர்க்கப்படும்.' 
+              : 'When your referred friend signs up and makes their very first purchase or gold scheme installment payment, you will instantly earn gold worth ₹500.'}
+          </p>
+          <div style={{ height: '1px', background: 'rgba(0,0,0,0.06)', margin: '4px 0' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--brand-accent)', fontWeight: 'bold' }}>
+            <span>⚡</span>
+            <span>
+              {lang === 'ta' 
+                ? 'தங்கத்தின் எடை தற்போதைய நேரடி சந்தை விலையின் அடிப்படையில் தானாகவே கணக்கிடப்பட்டு உங்கள் லெட்ஜரில் சேர்க்கப்படும்.' 
+                : 'The gold grams earned are dynamically calculated based on the current live gold price at the time of purchase.'}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -662,33 +685,36 @@ export const MyBonuses: React.FC = () => {
   const { transactions } = useApp();
 
   const getBonusDisplayDetails = (tx: any) => {
-    if (tx.transactionType === 'EVENT_BONUS') {
+    const isPureBonus = tx.transactionType === 'BONUS' || tx.transactionType === 'EVENT_BONUS' || tx.type === 'BONUS' || tx.type === 'EVENT_BONUS';
+    const weightVal = isPureBonus ? tx.goldWeightMg : tx.bonusGoldMg;
+    const formattedWeight = (weightVal / 1000).toFixed(4) + ' g';
+
+    if (tx.transactionType === 'EVENT_BONUS' || tx.type === 'EVENT_BONUS') {
       return {
         name: tx.rateSource ? `Promotional Reward (${tx.rateSource})` : 'Promotional Bonus Reward',
-        weight: `${tx.goldWeightMg} mg`,
-        amount: 'Promo Reward',
+        weight: formattedWeight,
         percentage: tx.bonusPercentage ? `${tx.bonusPercentage}%` : 'N/A'
       };
     }
-    if (tx.transactionType === 'BONUS') {
+    if (tx.transactionType === 'BONUS' || tx.type === 'BONUS') {
       return {
         name: tx.schemeName ? `Scheme Loyalty Reward (${tx.schemeName})` : 'Scheme Loyalty Bonus',
-        weight: `${tx.goldWeightMg} mg`,
-        amount: 'Loyalty Reward',
+        weight: formattedWeight,
         percentage: tx.bonusPercentage ? `${tx.bonusPercentage}%` : 'N/A'
       };
     }
     return {
       name: tx.schemeName ? `Loyalty Bonus on ${tx.schemeName}` : 'Installment Loyalty Bonus',
-      weight: `${tx.bonusGoldMg} mg`,
-      amount: `Paid ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(tx.amountPaise / 100)}`,
+      weight: formattedWeight,
       percentage: tx.bonusPercentage ? `${tx.bonusPercentage}%` : '7.5%'
     };
   };
 
   const bonusTransactions = transactions.filter(t => 
-    ((t.transactionType === 'BUY' || t.transactionType === 'INSTALLMENT') && t.bonusGoldMg > 0) ||
-    t.transactionType === 'EVENT_BONUS'
+    t.transactionType === 'EVENT_BONUS' ||
+    t.transactionType === 'BONUS' ||
+    t.type === 'BONUS' ||
+    t.type === 'EVENT_BONUS'
   );
 
   return (
@@ -707,7 +733,7 @@ export const MyBonuses: React.FC = () => {
                   </span>
                   <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#ccc', flexShrink: 0 }} />
                   <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '500', whiteSpace: 'nowrap' }}>
-                    {details.amount} ({details.percentage})
+                    Bonus ({details.percentage})
                   </span>
                 </div>
               </div>
@@ -732,7 +758,15 @@ export const Notifications: React.FC = () => {
   const [localNotifs, setLocalNotifs] = useState<any[]>([]);
 
   useEffect(() => {
-    refreshData().catch(err => console.error("Error refreshing notifications:", err));
+    const markAllAsReadOnEntry = async () => {
+      try {
+        await ApiClient.put('api/Notification/read-all');
+      } catch (err) {
+        console.error("Error marking all read on entry:", err);
+      }
+      refreshData(true).catch(err => console.error("Error refreshing notifications:", err));
+    };
+    markAllAsReadOnEntry();
   }, []);
 
   useEffect(() => {
@@ -755,6 +789,17 @@ export const Notifications: React.FC = () => {
     }
   };
 
+  const handleMarkAllAsRead = async () => {
+    setLocalNotifs(prev => prev.map(n => ({ ...n, isRead: true })));
+    try {
+      await ApiClient.put('api/Notification/read-all');
+      refreshData(true);
+    } catch (err) {
+      console.error("Error marking all read:", err);
+      refreshData();
+    }
+  };
+
   const handleClearNotification = async (id: string) => {
     // Optimistic UI update
     setLocalNotifs(prev => prev.filter(n => n.id !== id));
@@ -769,12 +814,48 @@ export const Notifications: React.FC = () => {
     }
   };
 
+  const handleClearAllNotifications = async () => {
+    setLocalNotifs([]);
+    try {
+      await ApiClient.delete('api/Notification/clear-all');
+      refreshData(true);
+    } catch (err) {
+      console.error("Error clearing all notifications:", err);
+      refreshData();
+    }
+  };
+
   const displayNotifs = localNotifs;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
       <Header title="Notifications" onBack={() => navigate(-1)} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {localNotifs.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 4px', marginBottom: '4px' }}>
+            <button 
+              onClick={handleMarkAllAsRead}
+              style={{
+                background: 'rgba(74, 14, 78, 0.06)', border: '1px solid rgba(74, 14, 78, 0.12)',
+                borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: 'bold',
+                color: 'var(--brand-dark)', cursor: 'pointer'
+              }}
+            >
+              Read All
+            </button>
+            <button 
+              onClick={handleClearAllNotifications}
+              style={{
+                background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.15)',
+                borderRadius: '8px', padding: '6px 12px', fontSize: '12px', fontWeight: 'bold',
+                color: '#EF4444', cursor: 'pointer'
+              }}
+            >
+              Clear All
+            </button>
+          </div>
+        )}
+
         {displayNotifs.map((n) => (
           <div 
             key={n.id} 

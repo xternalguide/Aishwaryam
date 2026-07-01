@@ -583,7 +583,7 @@ export const translations = {
     security_mpin: "பாதுகாப்பு மற்றும் பின் (MPIN)",
     help_support: "உதவி மற்றும் ஆதரவு",
     logout: "வெளியேறு",
-    escalate_support: "வாடிக்கையாளர் சேவையைத் தொடர்பு கொள்க",
+    escalate_support: "நேரடி தொடர்பு",
     type_message: "உங்கள் செய்தியை உள்ளிடவும்...",
     ai_greeting: "வணக்கம்! 🙏 நான் உங்கள் Aishwaryam @ Your Home தங்க சேமிப்பு உதவியாளர். இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?",
     ai_assistant_title: "Aishwaryam @ Your Home உதவியாளர்",

@@ -28,6 +28,12 @@ export const PaymentSuccess: React.FC = () => {
   const rateSource = receipt.rateSource || 'Live';
   const schemeName = receipt.schemeName || 'Aishwaryam Gold Saver 11 Months';
 
+  const pricePerGmPaise = receipt.pricePerGmPaise || 701000;
+  const bonusGoldMg = receipt.bonusGoldMg || 0;
+  const bonusPercentage = receipt.bonusPercentage || 0;
+  const baseAmountPaise = receipt.baseAmountPaise || Math.round((amountPaise * 100) / 103);
+  const gstAmountPaise = receipt.gstAmountPaise || (amountPaise - baseAmountPaise);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F9FAFB', justifyContent: 'space-between', padding: '24px' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -107,6 +113,33 @@ export const PaymentSuccess: React.FC = () => {
               <span style={{ color: 'var(--text-muted)' }}>Price Source</span>
               <span style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>{rateSource}</span>
             </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+              <span style={{ color: 'var(--text-muted)' }}>Gold Rate (per gram)</span>
+              <span style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>{formatRupees(pricePerGmPaise)} /g</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+              <span style={{ color: 'var(--text-muted)' }}>Base Amount (Excl. GST)</span>
+              <span style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>{formatRupees(baseAmountPaise)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+              <span style={{ color: 'var(--text-muted)' }}>GST (3%)</span>
+              <span style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>{formatRupees(gstAmountPaise)}</span>
+            </div>
+            {bonusGoldMg > 0 && (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                fontSize: '12px',
+                background: '#ECFDF5',
+                padding: '6px 10px',
+                borderRadius: '8px',
+                margin: '4px 0',
+                border: '1px solid #A7F3D0'
+              }}>
+                <span style={{ color: 'var(--success-green)', fontWeight: '600' }}>Loyalty Bonus ({bonusPercentage}%)</span>
+                <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>+{(bonusGoldMg / 1000).toFixed(4)} g</span>
+              </div>
+            )}
 
             <div style={{ height: '1px', background: '#F3F4F6', margin: '8px 0' }} />
 

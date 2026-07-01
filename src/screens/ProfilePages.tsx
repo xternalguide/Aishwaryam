@@ -38,12 +38,12 @@ const CITIES_BY_STATE: Record<string, string[]> = {
 };
 
 const PIN_PREFIXES: Record<string, string[]> = {
-  "Chennai": ["600"],
-  "Coimbatore": ["641"],
-  "Madurai": ["625"],
-  "Salem": ["636"],
-  "Trichy": ["620"],
-  "Tirunelveli": ["627"],
+  "Chennai": ["600", "601", "602", "603", "604"],
+  "Coimbatore": ["641", "642", "638", "639", "640"],
+  "Madurai": ["625", "626", "623", "624"],
+  "Salem": ["636", "637"],
+  "Trichy": ["620", "621", "622"],
+  "Tirunelveli": ["627", "628", "629"],
   "Puducherry": ["605"],
   "Karaikal": ["609"],
   "Kochi": ["682"],
@@ -69,6 +69,8 @@ export const ProfileAddress: React.FC = () => {
   const [formIsDefault, setFormIsDefault] = useState(false);
 
   const [pinError, setPinError] = useState<string | null>(null);
+  const [availableStates, setAvailableStates] = useState<string[]>(STATES);
+  const [citiesByState, setCitiesByState] = useState<Record<string, string[]>>(CITIES_BY_STATE);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -108,10 +110,7 @@ export const ProfileAddress: React.FC = () => {
     setPinError(null);
   };
 
-  const handlePincodeChange = (value: string) => {
-    const numericValue = value.replace(/\D/g, '').slice(0, 6);
-    setFormPincode(numericValue);
-
+  const runLocalFallback = (numericValue: string) => {
     if (numericValue.length >= 3) {
       const prefix = numericValue.substring(0, 3);
       let foundCity = "";
@@ -120,6 +119,17 @@ export const ProfileAddress: React.FC = () => {
         if (prefixes.includes(prefix)) {
           foundCity = city;
           break;
+        }
+      }
+      if (!foundCity) {
+        if (prefix.startsWith('64')) {
+          foundCity = "Coimbatore";
+        } else if (prefix.startsWith('60')) {
+          foundCity = "Chennai";
+        } else if (prefix.startsWith('62')) {
+          foundCity = "Madurai";
+        } else if (prefix.startsWith('63')) {
+          foundCity = "Salem";
         }
       }
       if (foundCity) {
@@ -136,25 +146,56 @@ export const ProfileAddress: React.FC = () => {
         setPinError(null);
       }
     }
+  };
 
-    if (numericValue.length > 0) {
-      if (numericValue.length < 6) {
+  const handlePincodeChange = (value: string) => {
+    const numericValue = value.replace(/\D/g, '').slice(0, 6);
+    setFormPincode(numericValue);
+
+    if (numericValue.length === 6) {
+      fetch(`https://api.postalpincode.in/pincode/${numericValue}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
+            const postOffice = data[0].PostOffice[0];
+            const resolvedState = postOffice.State || '';
+            const resolvedCity = postOffice.District || postOffice.Block || '';
+            
+            if (resolvedState && resolvedCity) {
+              setAvailableStates(prev => {
+                if (!prev.includes(resolvedState)) {
+                  return [...prev, resolvedState];
+                }
+                return prev;
+              });
+              setCitiesByState(prev => {
+                const list = prev[resolvedState] || [];
+                if (!list.includes(resolvedCity)) {
+                  return {
+                    ...prev,
+                    [resolvedState]: [...list, resolvedCity]
+                  };
+                }
+                return prev;
+              });
+
+              setFormState(resolvedState);
+              setFormCity(resolvedCity);
+              setPinError(null);
+            }
+          } else {
+            runLocalFallback(numericValue);
+          }
+        })
+        .catch(() => {
+          runLocalFallback(numericValue);
+        });
+    } else {
+      if (numericValue.length > 0 && numericValue.length < 6) {
         setPinError("PIN Code must be exactly 6 digits.");
       } else {
-        if (formCity) {
-          const prefixes = PIN_PREFIXES[formCity] || [];
-          const isValidPrefix = prefixes.some(prefix => numericValue.startsWith(prefix));
-          if (!isValidPrefix) {
-            setPinError(`PIN Code must start with ${prefixes.join(', ')} for ${formCity}.`);
-          } else {
-            setPinError(null);
-          }
-        } else {
-          setPinError(null);
-        }
+        setPinError(null);
       }
-    } else {
-      setPinError(null);
     }
   };
 
@@ -282,7 +323,7 @@ export const ProfileAddress: React.FC = () => {
                 }}
               >
                 <option value="">Select State</option>
-                {STATES.map((state) => (
+                {availableStates.map((state) => (
                   <option key={state} value={state}>{state}</option>
                 ))}
               </select>
@@ -300,7 +341,7 @@ export const ProfileAddress: React.FC = () => {
                 }}
               >
                 <option value="">Select City</option>
-                {(CITIES_BY_STATE[formState] || []).map((city) => (
+                {(citiesByState[formState] || []).map((city) => (
                   <option key={city} value={city}>{city}</option>
                 ))}
               </select>
@@ -491,6 +532,7 @@ export const ProfileKyc: React.FC = () => {
   const [newNomineeInput, setNewNomineeInput] = useState('');
   const [newNomineePhone, setNewNomineePhone] = useState('');
   const [newNomineeRelationship, setNewNomineeRelationship] = useState('');
+  const [isRelDropdownOpen, setIsRelDropdownOpen] = useState(false);
 
   const [isEditingNominee, setIsEditingNominee] = useState(false);
   const [isSavingNominee, setIsSavingNominee] = useState(false);
@@ -520,9 +562,11 @@ export const ProfileKyc: React.FC = () => {
     setNomineePhone(phone);
     setNomineeRelationship(relationship);
 
-    setNewNomineeInput(name);
-    setNewNomineePhone(phone);
-    setNewNomineeRelationship(relationship);
+    if (!isEditingNominee) {
+      setNewNomineeInput(name);
+      setNewNomineePhone(phone);
+      setNewNomineeRelationship(relationship);
+    }
 
     const fetchKycStatus = async () => {
       const userId = SessionManager.getUserId();
@@ -595,31 +639,38 @@ export const ProfileKyc: React.FC = () => {
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         
         {/* Status banner */}
-        <div style={{
-          background: kycLevel === 'FULL' ? 'var(--success-light)' : kycLevel === 'PENDING' ? 'var(--warning-light)' : 'var(--error-light)',
-          border: `1.5px solid ${kycLevel === 'FULL' ? 'var(--success-green)' : kycLevel === 'PENDING' ? 'var(--warning-amber)' : 'var(--error-red)'}`,
-          padding: '18px', borderRadius: '16px', display: 'flex', gap: '14px', alignItems: 'flex-start'
-        }}>
-          {kycLevel === 'FULL' ? (
-            <ShieldCheck size={28} color="var(--success-green)" style={{ marginTop: '2px', flexShrink: 0 }} />
-          ) : kycLevel === 'PENDING' ? (
-            <Clock size={28} color="var(--warning-amber)" style={{ marginTop: '2px', flexShrink: 0 }} />
-          ) : (
-            <AlertTriangle size={28} color="var(--error-red)" style={{ marginTop: '2px', flexShrink: 0 }} />
-          )}
-          <div>
-            <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--brand-dark)', display: 'block' }}>
-              KYC Level: {kycLevel}
-            </span>
-            <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: '16px', display: 'block', marginTop: '2px' }}>
-              {kycLevel === 'FULL' 
-                ? 'Your identity is fully verified. You can start physical gold redemptions.' 
-                : kycLevel === 'PENDING'
-                  ? 'Your documents have been submitted and are under review. Please wait for admin approval.'
-                  : 'Please upload PAN and Aadhaar documents to complete verification.'}
-            </span>
-          </div>
-        </div>
+        {(() => {
+          const isKycCompleted = kycLevel === 'FULL';
+          const isKycPending = kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW' || (kycDocs && kycDocs.length > 0);
+
+          return (
+            <div style={{
+              background: isKycCompleted ? 'var(--success-light)' : isKycPending ? 'var(--warning-light)' : 'var(--error-light)',
+              border: `1.5px solid ${isKycCompleted ? 'var(--success-green)' : isKycPending ? 'var(--warning-amber)' : 'var(--error-red)'}`,
+              padding: '18px', borderRadius: '16px', display: 'flex', gap: '14px', alignItems: 'flex-start'
+            }}>
+              {isKycCompleted ? (
+                <ShieldCheck size={28} color="var(--success-green)" style={{ marginTop: '2px', flexShrink: 0 }} />
+              ) : isKycPending ? (
+                <Clock size={28} color="var(--warning-amber)" style={{ marginTop: '2px', flexShrink: 0 }} />
+              ) : (
+                <AlertTriangle size={28} color="var(--error-red)" style={{ marginTop: '2px', flexShrink: 0 }} />
+              )}
+              <div>
+                <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--brand-dark)', display: 'block' }}>
+                  KYC Level: {isKycCompleted ? 'Completed' : isKycPending ? 'Under Review' : kycLevel}
+                </span>
+                <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: '16px', display: 'block', marginTop: '2px' }}>
+                  {isKycCompleted 
+                    ? 'Your identity is fully verified. You can start physical gold redemptions.' 
+                    : isKycPending
+                      ? 'Your documents have been submitted and are under review. Please wait for admin approval.'
+                      : 'Please upload PAN and Aadhaar documents to complete verification.'}
+                </span>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Details card */}
         <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '14px', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', borderLeft: '4.5px solid var(--brand-accent)' }}>
@@ -674,27 +725,53 @@ export const ProfileKyc: React.FC = () => {
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Nominee Mobile</label>
                 <input
-                  type="tel"
-                  inputMode="numeric"
+                  type="text"
+                  maxLength={10}
                   placeholder="10-digit mobile number"
                   value={newNomineePhone}
-                  onChange={(e) => setNewNomineePhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  onChange={(e) => setNewNomineePhone(e.target.value.replace(/\D/g, ''))}
                   style={{ width: '100%', height: '40px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', background: 'white', marginTop: '4px' }}
                 />
               </div>
 
-              <div>
+              <div style={{ position: 'relative' }}>
                 <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Relationship</label>
-                <select
-                  value={newNomineeRelationship}
-                  onChange={(e) => setNewNomineeRelationship(e.target.value)}
-                  style={{ width: '100%', height: '40px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', background: 'white', marginTop: '4px' }}
+                <div 
+                  onClick={() => setIsRelDropdownOpen(!isRelDropdownOpen)}
+                  style={{ 
+                    width: '100%', height: '40px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', 
+                    padding: '0 12px', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    background: 'white', marginTop: '4px', cursor: 'pointer', boxSizing: 'border-box'
+                  }}
                 >
-                  <option value="">Select Relationship</option>
-                  {RELATIONSHIPS.map((rel) => (
-                    <option key={rel} value={rel}>{rel}</option>
-                  ))}
-                </select>
+                  <span>{newNomineeRelationship || 'Select Relationship'}</span>
+                  <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>▼</span>
+                </div>
+                {isRelDropdownOpen && (
+                  <div style={{ 
+                    position: 'absolute', top: '44px', left: 0, right: 0, 
+                    background: 'white', border: '1px solid rgba(0,0,0,0.15)', borderRadius: '8px', 
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 100, maxHeight: '180px', overflowY: 'auto' 
+                  }}>
+                    {RELATIONSHIPS.map((rel) => (
+                      <div 
+                        key={rel}
+                        onClick={() => {
+                          setNewNomineeRelationship(rel);
+                          setIsRelDropdownOpen(false);
+                        }}
+                        style={{ 
+                          padding: '10px 12px', fontSize: '13px', cursor: 'pointer',
+                          background: newNomineeRelationship === rel ? 'rgba(74, 14, 78, 0.05)' : 'white',
+                          borderBottom: '1px solid rgba(0,0,0,0.03)',
+                          textAlign: 'left'
+                        }}
+                      >
+                        {rel}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Inline error */}
@@ -755,17 +832,19 @@ export const ProfileKyc: React.FC = () => {
               return (
                 <div style={{ textAlign: 'center', padding: '16px 0' }}>
                   <span style={{ fontSize: '13px', color: 'var(--text-light)', fontStyle: 'italic', display: 'block', marginBottom: '14px' }}>
-                    {t('no_kyc_documents')}
+                    {kycLevel === 'FULL' ? 'All KYC documents have been verified and processed.' : t('no_kyc_documents')}
                   </span>
-                  <button
-                    onClick={() => navigate('/onboarding')}
-                    style={{
-                      padding: '10px 20px', borderRadius: '10px', background: 'var(--gradient-brand)', color: 'white',
-                      border: 'none', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 10px var(--brand-glow)'
-                    }}
-                  >
-                    Upload KYC Documents
-                  </button>
+                  {kycLevel !== 'FULL' && (
+                    <button
+                      onClick={() => navigate('/onboarding')}
+                      style={{
+                        padding: '10px 20px', borderRadius: '10px', background: 'var(--gradient-brand)', color: 'white',
+                        border: 'none', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 10px var(--brand-glow)'
+                      }}
+                    >
+                      Upload KYC Documents
+                    </button>
+                  )}
                 </div>
               );
             }
@@ -791,10 +870,10 @@ export const ProfileKyc: React.FC = () => {
                       </div>
                       <span style={{
                         fontSize: '11px', fontWeight: 'bold', padding: '3px 8px', borderRadius: '6px',
-                        background: doc.status === 'APPROVED' ? 'var(--success-light)' : doc.status === 'REJECTED' ? 'var(--error-light)' : 'var(--warning-light)',
-                        color: doc.status === 'APPROVED' ? 'var(--success-green)' : doc.status === 'REJECTED' ? 'var(--error-red)' : 'var(--warning-amber)'
+                        background: (doc.status === 'APPROVED' || doc.status === 'VERIFIED') ? 'var(--success-light)' : doc.status === 'REJECTED' ? 'var(--error-light)' : 'var(--warning-light)',
+                        color: (doc.status === 'APPROVED' || doc.status === 'VERIFIED') ? 'var(--success-green)' : doc.status === 'REJECTED' ? 'var(--error-red)' : 'var(--warning-amber)'
                       }}>
-                        {doc.status === 'APPROVED' ? t('approved_status') : doc.status === 'REJECTED' ? t('rejected_status') : t('review_status')}
+                        {(doc.status === 'APPROVED' || doc.status === 'VERIFIED') ? t('approved_status') : doc.status === 'REJECTED' ? t('rejected_status') : t('review_status')}
                       </span>
                     </div>
 

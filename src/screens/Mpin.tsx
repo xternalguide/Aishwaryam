@@ -146,10 +146,16 @@ export const Mpin: React.FC = () => {
     } catch (err: any) {
       const errorText = err.response?.data?.message || 'Incorrect PIN. Please try again.';
       AuditLogger.log('Error', '/mpin/verify', `MPIN verification error: ${errorText}`);
-      const isUserNotFound = err.response?.status === 404 || 
-                             err.response?.status === 401 || 
-                             errorText.toLowerCase().includes('not found') || 
-                             errorText.toLowerCase().includes('unauthorized');
+      
+      const isIncorrectMpin = err.response?.status === 401 && 
+                              (errorText.toLowerCase().includes('incorrect') || errorText.toLowerCase().includes('pin'));
+
+      const isUserNotFound = !isIncorrectMpin && (
+                               err.response?.status === 404 || 
+                               err.response?.status === 401 || 
+                               errorText.toLowerCase().includes('not found') || 
+                               errorText.toLowerCase().includes('unauthorized')
+                             );
                              
       if (isUserNotFound) {
         SessionManager.clearSession();
@@ -266,11 +272,7 @@ export const Mpin: React.FC = () => {
   }, [showSuccessDialog, flowState]);
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-      background: 'var(--gradient-brand)',
+    <div className="auth-page-root auth-page-bg" style={{
       boxSizing: 'border-box',
       position: 'relative'
     }}>
@@ -325,7 +327,7 @@ export const Mpin: React.FC = () => {
           <h2 style={{
             fontFamily: 'var(--font-playfair)',
             color: 'var(--brand-deep)',
-            fontSize: '24px',
+            fontSize: lang === 'ta' ? '18px' : '22px',
             marginBottom: '8px',
             textAlign: 'center'
           }}>

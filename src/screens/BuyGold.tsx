@@ -135,7 +135,12 @@ export const BuyGold: React.FC = () => {
             transactionId: order.orderId,
             type: 'BUY',
             amountPaise: totalToPayPaise,
-            goldWeightMg: Math.round(parseFloat(weightInput) * 1000),
+            goldWeightMg: verifyRes.data.goldWeightMg || Math.round(parseFloat(weightInput) * 1000),
+            pricePerGmPaise: verifyRes.data.pricePerGmPaise,
+            bonusGoldMg: verifyRes.data.bonusGoldMg,
+            bonusPercentage: verifyRes.data.bonusPercentage,
+            baseAmountPaise: verifyRes.data.baseAmountPaise,
+            gstAmountPaise: verifyRes.data.gstAmountPaise,
             createdAt: new Date().toISOString(),
             rateSource: 'Live',
             schemeName: 'Digital Gold Savings'

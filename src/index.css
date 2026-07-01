@@ -54,6 +54,10 @@
   padding: 0;
 }
 
+button, input, select, textarea {
+  font-family: inherit;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -70,11 +74,10 @@ html, body {
   text-size-adjust: 100%;
 }
 
-/* Globally force viewport height to use percentage to fix WebView layout zoom scaling bugs */
-*[style*="100vh"],
-*[style*="100vh" i] {
-  height: 100% !important;
-  min-height: 100% !important;
+/* Force viewport height on background screens to fix WebView layout zoom scaling bugs */
+.auth-page-bg {
+  min-height: 112vh !important;
+  height: auto !important;
 }
 
 /* Base mobile & tablet styling (fluid, full-screen) */
@@ -259,6 +262,20 @@ button, input, select {
   body {
     zoom: 0.86 !important;
   }
+}
+
+.auth-page-root {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  width: 100% !important;
+}
+
+.auth-page-bg {
+  background: var(--gradient-brand) !important;
 }
 
 

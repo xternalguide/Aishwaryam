@@ -33,7 +33,6 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle2,
-  Settings,
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────
@@ -148,6 +147,8 @@ export const Dashboard: React.FC = () => {
 
   const [userName, setUserName] = useState('');
   const [kycLevel, setKycLevel] = useState('BASIC');
+  const [kycStatusMsg, setKycStatusMsg] = useState('');
+  const [kycDocs, setKycDocs] = useState<any[]>([]);
 
   // ── THEME TOGGLE (Always Light) ───────────────────────────────────────────
   const isDark = false;
@@ -165,6 +166,25 @@ export const Dashboard: React.FC = () => {
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .animate-spin { animation: spin 1s linear infinite; }
     
+    @keyframes swipeHand {
+      0% { transform: translateX(24px) scale(1); opacity: 0; }
+      15% { opacity: 1; }
+      50% { transform: translateX(-24px) scale(0.95); opacity: 1; }
+      85% { opacity: 1; }
+      100% { transform: translateX(-24px) scale(0.9); opacity: 0; }
+    }
+    @keyframes pulseRing {
+      0% { transform: scale(0.6); opacity: 0; }
+      50% { opacity: 0.6; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+    .swipe-hand-animate {
+      animation: swipeHand 2.2s infinite cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .pulse-ring-animate {
+      animation: pulseRing 2.2s infinite cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    
     /* Prevent Tamil word fragmentation */
     * {
       word-break: keep-all;
@@ -181,6 +201,7 @@ export const Dashboard: React.FC = () => {
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [offerTitle, setOfferTitle] = useState<string | null>(null);
   const [offerDesc, setOfferDesc] = useState<string | null>(null);
+  const [offerBanner, setOfferBanner] = useState<string | null>(null);
   const [activeBannerIdx, setActiveBannerIdx] = useState(0);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [isDownloading, setIsDownloading] = useState(false);
@@ -231,7 +252,7 @@ export const Dashboard: React.FC = () => {
     dragStartPosRef.current = { x: 0, y: 0 };
   };
 
-  const [txFilter, setTxFilter] = useState<'ALL' | 'BONUS' | 'PURCHASES' | 'SCHEME'>('ALL');
+  const [txFilter, setTxFilter] = useState<'ALL' | 'BONUS' | 'PURCHASES'>('PURCHASES');
   const [txSort, setTxSort] = useState<'NEWEST' | 'OLDEST'>('NEWEST');
   const [selectedTxDetail, setSelectedTxDetail] = useState<any | null>(null);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
@@ -243,10 +264,19 @@ export const Dashboard: React.FC = () => {
   const [editNomineeName, setEditNomineeName] = useState('');
   const [editNomineePhone, setEditNomineePhone] = useState('');
   const [editNomineeRelation, setEditNomineeRelation] = useState('');
+  const [isRelDropdownOpen, setIsRelDropdownOpen] = useState(false);
   const [editImageBase64, setEditImageBase64] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [customAlert, setCustomAlert] = useState<{ message: string; isError?: boolean } | null>(null);
+  const [showSwipeGuidance, setShowSwipeGuidance] = useState(() => !localStorage.getItem('SWIPE_GUIDANCE_SHOWN'));
+  
+  const handleCarouselScroll = () => {
+    if (showSwipeGuidance) {
+      setShowSwipeGuidance(false);
+      localStorage.setItem('SWIPE_GUIDANCE_SHOWN', 'true');
+    }
+  };
 
   // Back button dismiss registers
   useEffect(() => {
@@ -409,11 +439,34 @@ export const Dashboard: React.FC = () => {
     if (profile) {
       setUserName(profile.fullName || 'User');
       setKycLevel(profile.kycLevel || 'BASIC');
+
+      const fetchKycStatus = async () => {
+        const userId = SessionManager.getUserId();
+        if (!userId) return;
+        try {
+          const res = await ApiClient.get(`api/Kyc/status/${userId}`);
+          if (res.data && res.data.success) {
+            setKycStatusMsg(res.data.status || '');
+            setKycDocs(res.data.documents || []);
+          }
+        } catch (err) {
+          console.error('Failed to load KYC documents in dashboard:', err);
+        }
+      };
+      fetchKycStatus();
     }
     if (contextActiveSchemes) setActiveSchemes(contextActiveSchemes);
     if (contextTransactions) setTransactions(contextTransactions);
     if (contextUnreadNotifCount !== undefined) setUnreadNotifCount(contextUnreadNotifCount);
-    if (offers && offers.length > 0) { setOfferTitle(offers[0].title); setOfferDesc(offers[0].description); }
+    if (offers && offers.length > 0) {
+      setOfferTitle(offers[0].title);
+      setOfferDesc(offers[0].description);
+      setOfferBanner(offers[0].bannerUrl || null);
+    } else {
+      setOfferTitle(null);
+      setOfferDesc(null);
+      setOfferBanner(null);
+    }
   }, [profile, livePrice, contextActiveSchemes, contextAvailableSchemes, contextTransactions, contextUnreadNotifCount, offers]);
 
   useEffect(() => {
@@ -519,10 +572,31 @@ export const Dashboard: React.FC = () => {
   };
 
   const getFilteredTransactions = () => {
-    let list = transactions;
-    if (txFilter === 'BONUS') list = list.filter((tx) => tx.transactionType === 'BONUS' || tx.transactionType === 'EVENT_BONUS' || tx.type === 'BONUS' || tx.type === 'EVENT_BONUS');
-    else if (txFilter === 'PURCHASES') list = list.filter((tx) => tx.transactionType === 'INSTALLMENT' || tx.transactionType === 'BUY' || tx.type === 'INSTALLMENT' || tx.type === 'BUY');
-    else if (txFilter === 'SCHEME') list = list.filter((tx) => tx.transactionType === 'SCHEME_JOIN' || tx.transactionType === 'REDEMPTION_REQUEST' || tx.transactionType === 'REDEMPTION' || tx.transactionType === 'SELL' || tx.type === 'SCHEME_JOIN' || tx.type === 'REDEMPTION_REQUEST' || tx.type === 'REDEMPTION' || tx.type === 'SELL');
+    const expandedList: any[] = [];
+    
+    transactions.forEach((tx) => {
+      const isSchemeJoin = tx.transactionType === 'SCHEME_JOIN' || tx.type === 'SCHEME_JOIN';
+      const isPureBonus = tx.transactionType === 'BONUS' || tx.transactionType === 'EVENT_BONUS' || tx.type === 'BONUS' || tx.type === 'EVENT_BONUS';
+
+      // 1. Exclude SCHEME_JOIN from the ALL activity tab
+      if (txFilter === 'ALL' && isSchemeJoin) {
+        return;
+      }
+      
+      // 2. Add the original transaction (if not filtering only for bonuses, or if it is a pure bonus)
+      if (txFilter !== 'BONUS') {
+        expandedList.push(tx);
+      } else if (isPureBonus) {
+        expandedList.push(tx);
+      }
+      
+    });
+
+    let list = expandedList;
+    if (txFilter === 'PURCHASES') {
+      list = list.filter((tx) => tx.transactionType === 'INSTALLMENT' || tx.transactionType === 'BUY' || tx.type === 'INSTALLMENT' || tx.type === 'BUY');
+    }
+
     if (txSort === 'NEWEST') list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     else list.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     return list;
@@ -535,13 +609,16 @@ export const Dashboard: React.FC = () => {
   // ═══════════════════════════════════════════
   
   const handleActionClick = (onClick: () => void) => {
+    const activeDocs = kycDocs.filter((d: any) => d.status !== 'REPLACED');
+    const hasDocs = activeDocs.length > 0;
+
+    if (kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW' || hasDocs) {
+      alert(t('kyc_pending_block'));
+      return;
+    }
     if (kycLevel === 'BASIC') {
       alert(t('kyc_basic_block'));
       navigate('/onboarding');
-      return;
-    }
-    if (kycLevel === 'PENDING') {
-      alert(t('kyc_pending_block'));
       return;
     }
     if (kycLevel === 'REJECTED') {
@@ -654,6 +731,20 @@ export const Dashboard: React.FC = () => {
     </div>
   );
 
+  const renderKycBanner = () => {
+    if (kycLevel === 'FULL') return null;
+    const activeDocs = kycDocs.filter((d: any) => d.status !== 'REPLACED');
+    const hasDocs = activeDocs.length > 0;
+
+    if (kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW' || hasDocs) {
+      return renderKycPendingBanner();
+    }
+    if (kycLevel === 'REJECTED') {
+      return renderKycRejectedBanner();
+    }
+    return renderKycWarningBanner();
+  };
+
 
   const renderMobileIntegratedHeader = () => {
     const totalBonusGoldMg = portfolio?.totalBonusGoldMg || 0;
@@ -694,26 +785,35 @@ export const Dashboard: React.FC = () => {
           </button>
         </div>
 
-        {kycLevel === 'BASIC' ? (
-          renderKycWarningBanner()
-        ) : kycLevel === 'PENDING' ? (
-          renderKycPendingBanner()
-        ) : kycLevel === 'REJECTED' ? (
-          renderKycRejectedBanner()
-        ) : (
+        {renderKycBanner() || (
           <>
             {/* Balance Display */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '8px 0' }}>
-              <span style={{ fontFamily: DS.font, fontSize: '11px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                {t('total_gold_saved')}
-              </span>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginTop: '4px' }}>
-                <span style={{ fontFamily: DS.font, fontSize: '36px', fontWeight: '900', color: 'white', lineHeight: 1 }}>
-                  {((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', margin: '8px 0', width: '100%' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <span style={{ fontFamily: DS.font, fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: '700', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                  {t('total_gold_saved')}
                 </span>
-                <span style={{ fontFamily: DS.font, fontSize: '13px', fontWeight: '700', color: DS.gold, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                  {t('grams_label')}
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginTop: '4px' }}>
+                  <span style={{ fontFamily: DS.font, fontSize: '26px', fontWeight: '900', color: 'white', lineHeight: 1 }}>
+                    {((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)}
+                  </span>
+                  <span style={{ fontFamily: DS.font, fontSize: '11px', fontWeight: '700', color: DS.gold, textTransform: 'uppercase' }}>
+                    {t('grams_label')}
+                  </span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', borderLeft: '1px solid rgba(255, 255, 255, 0.1)', width: '100%' }}>
+                <span style={{ fontFamily: DS.font, fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', fontWeight: '700', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                  {lang === 'ta' ? 'மொத்த வெள்ளி' : 'Total Silver'}
                 </span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginTop: '4px' }}>
+                  <span style={{ fontFamily: DS.font, fontSize: '26px', fontWeight: '900', color: '#E0E0E0', lineHeight: 1 }}>
+                    {((portfolio?.silverBalanceMg || 0) / 1000).toFixed(4)}
+                  </span>
+                  <span style={{ fontFamily: DS.font, fontSize: '11px', fontWeight: '700', color: '#C0C0C0', textTransform: 'uppercase' }}>
+                    {t('grams_label')}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -870,22 +970,27 @@ export const Dashboard: React.FC = () => {
         <div style={{ width:'32px', height:'22px', borderRadius:'6px', background:'linear-gradient(135deg,#FFE082 0%,#FFB300 100%)', border:'1px solid #FFD54F', opacity:0.85 }} />
       </div>
 
-      {kycLevel === 'BASIC' ? (
-        renderKycWarningBanner()
-      ) : kycLevel === 'PENDING' ? (
-        renderKycPendingBanner()
-      ) : kycLevel === 'REJECTED' ? (
-        renderKycRejectedBanner()
-      ) : (
+      {renderKycBanner() || (
         <>
           {/* balance */}
-          <div style={{ marginBottom:'8px' }}>
-            <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'600', color:'rgba(255,255,255,0.5)', letterSpacing:'0.5px', textTransform:'uppercase' }}>{t('total_gold_saved')}</span>
-            <div style={{ display:'flex', alignItems:'baseline', gap:'10px', marginTop:'6px' }}>
-              <span style={{ fontFamily:DS.font, fontSize:'40px', fontWeight:'900', color:'#FFFFFF', lineHeight:1 }}>
-                {((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)}
-              </span>
-              <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'700', color:DS.gold, letterSpacing:'1px', textTransform:'uppercase' }}>{t('grams_label')}</span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom:'8px' }}>
+            <div>
+              <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'600', color:'rgba(255,255,255,0.5)', letterSpacing:'0.5px', textTransform:'uppercase' }}>{t('total_gold_saved')}</span>
+              <div style={{ display:'flex', alignItems:'baseline', gap:'6px', marginTop:'6px' }}>
+                <span style={{ fontFamily:DS.font, fontSize:'28px', fontWeight:'900', color:'#FFFFFF', lineHeight:1 }}>
+                  {((portfolio?.goldBalanceMg || 0) / 1000).toFixed(4)}
+                </span>
+                <span style={{ fontFamily:DS.font, fontSize:'12px', fontWeight:'700', color:DS.gold, letterSpacing:'0.5px', textTransform:'uppercase' }}>{t('grams_label')}</span>
+              </div>
+            </div>
+            <div style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '16px' }}>
+              <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'600', color:'rgba(255,255,255,0.5)', letterSpacing:'0.5px', textTransform:'uppercase' }}>{lang === 'ta' ? 'மொத்த சேமிப்பு வெள்ளி' : 'Total Silver Saved'}</span>
+              <div style={{ display:'flex', alignItems:'baseline', gap:'6px', marginTop:'6px' }}>
+                <span style={{ fontFamily:DS.font, fontSize:'28px', fontWeight:'900', color:'#E0E0E0', lineHeight:1 }}>
+                  {((portfolio?.silverBalanceMg || 0) / 1000).toFixed(4)}
+                </span>
+                <span style={{ fontFamily:DS.font, fontSize:'12px', fontWeight:'700', color:'#C0C0C0', letterSpacing:'0.5px', textTransform:'uppercase' }}>{t('grams_label')}</span>
+              </div>
             </div>
           </div>
 
@@ -989,14 +1094,14 @@ export const Dashboard: React.FC = () => {
               onClick={() => navigate(`/scheme-detail/${sch.schemeId}`)}
               style={{ ...DS.glass, padding:'18px', cursor:'pointer', transition:'all 0.25s ease' }}
             >
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'12px' }}>
-                <div>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'12px', gap:'12px' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <span style={{ fontFamily:DS.font, fontSize:'9px', color:DS.magenta, fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.8px', display:'block', marginBottom:'3px' }}>
                     {sch.frequency === 'Daily' ? (lang === 'ta' ? 'தினசரி திட்டம்' : 'DAILY SCHEME') : (lang === 'ta' ? 'மாதாந்திர திட்டம்' : 'MONTHLY SCHEME')}
                   </span>
-                  <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'800', color:DS.textWhite }}>{autoT(sch.planName)}</span>
+                  <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'800', color:DS.textWhite, display:'block', wordBreak:'break-word' }}>{autoT(sch.planName)}</span>
                 </div>
-                <span style={{ fontFamily:DS.font, fontSize:'10px', background:'rgba(255,215,0,0.15)', color:DS.gold, padding:'4px 10px', borderRadius:'20px', fontWeight:'700', border:'1px solid rgba(255,215,0,0.2)' }}>
+                <span style={{ fontFamily:DS.font, fontSize:'10px', background:'rgba(255,215,0,0.15)', color:DS.gold, padding:'4px 10px', borderRadius:'20px', fontWeight:'700', border:'1px solid rgba(255,215,0,0.2)', flexShrink: 0, whiteSpace: 'nowrap' }}>
                   {lang === 'ta' ? 'நாள்' : 'Day'} {sch.schemeDayNumber||1}
                 </span>
               </div>
@@ -1036,71 +1141,87 @@ export const Dashboard: React.FC = () => {
     return (
       <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
         <span style={{ fontFamily:DS.font, fontSize:'16px', fontWeight:'800', color:DS.textWhite }}>{t('start_saving')}</span>
-        <div className="no-scrollbar" style={{ display:'flex', gap:'16px', overflowX:'auto', scrollSnapType:'x mandatory', paddingBottom:'4px', WebkitOverflowScrolling:'touch' }}>
-          <style>{`.no-scrollbar::-webkit-scrollbar{display:none}`}</style>
-          {contextAvailableSchemes.map((scheme) => {
-            let keywords: string[] = [];
-            try { keywords = JSON.parse(scheme.keywordsJson || '[]'); } catch (e) {}
-            let maxBonus = '7.5%';
-            try {
-              if (scheme.bonusConfigJson) {
-                const tiers = JSON.parse(scheme.bonusConfigJson);
-                if (Array.isArray(tiers) && tiers.length > 0) {
-                  const maxVal = Math.max(...tiers.map((ti: any) => ti.bonusPercentage || 0));
-                  if (maxVal > 0) maxBonus = `${maxVal}%`;
-                }
-              }
-            } catch (e) {}
-            return (
-              <div
-                key={scheme.id}
-                onClick={() => navigate(`/scheme-detail/${scheme.id}`)}
-                className="dash-card-hover"
-                style={{
-                  flex: isDesktop ? '0 0 280px' : '0 0 100%', scrollSnapAlign:'start',
-                  ...DS.glass, padding:'20px', cursor:'pointer', transition:'all 0.25s ease',
-                  display:'flex', flexDirection:'column', gap:'12px', position:'relative', overflow:'hidden'
-                }}
-              >
-                <div style={{ position:'absolute', top:'-30px', right:'-30px', width:'90px', height:'90px', borderRadius:'50%', background:'radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 70%)', pointerEvents:'none' }} />
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
-                  <span style={{ fontFamily:DS.font, fontSize:'15px', fontWeight:'800', color:DS.textWhite, flex:1, marginRight:'12px' }}>{autoT(scheme.planName)}</span>
-                  <span style={{ fontFamily:DS.font, fontSize:'9px', fontWeight:'700', color:DS.magenta, background:'rgba(194,24,91,0.15)', padding:'3px 8px', borderRadius:'10px', border:'1px solid rgba(194,24,91,0.2)', whiteSpace:'nowrap' }}>
-                    {scheme.frequency === 'Daily' ? 'DAILY' : 'MONTHLY'}
-                  </span>
-                </div>
-                <div style={{ display:'flex', gap:'16px' }}>
-                  <div>
-                    <span style={{ fontFamily:DS.font, fontSize:'9px', color:DS.textMuted, textTransform:'uppercase', letterSpacing:'0.5px', display:'block', marginBottom:'2px' }}>Duration</span>
-                    <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'800', color:DS.textWhite }}>
-                      {scheme.totalInstallments} {scheme.durationUnit ? (scheme.durationUnit.toLowerCase().startsWith('day') ? t('days') : t('months')) : (scheme.frequency === 'Daily' ? t('days') : t('months'))}
+        <div style={{ position:'relative' }}>
+          <div 
+            className="no-scrollbar" 
+            onScroll={handleCarouselScroll}
+            onTouchStart={handleCarouselScroll}
+            style={{ display:'flex', gap:'16px', overflowX:'auto', scrollSnapType:'x mandatory', paddingBottom:'4px', WebkitOverflowScrolling:'touch' }}
+          >
+            <style>{`.no-scrollbar::-webkit-scrollbar{display:none}`}</style>
+            {contextAvailableSchemes.map((scheme) => {
+              const isSilver = scheme.planName.toLowerCase().includes('silver');
+              const bannerUrl = scheme.posterImageBase64 || (isSilver ? '/silver_scheme_banner.png' : '/gold_scheme_banner.png');
+              const metalTypeLabel = isSilver ? 'Digi Silver Scheme' : 'Digi Gold Scheme';
+              
+              return (
+                <div
+                  key={scheme.id}
+                  onClick={() => navigate(`/scheme-detail/${scheme.id}`)}
+                  className="dash-card-hover"
+                  style={{
+                    flex: isDesktop ? '0 0 280px' : '0 0 100%', scrollSnapAlign:'start',
+                    scrollSnapStop: 'always',
+                    borderRadius:'16px', cursor:'pointer', transition:'all 0.25s ease',
+                    display:'flex', flexDirection:'column', gap:'0px', position:'relative', overflow:'hidden',
+                    height: '180px', border: '1px solid rgba(255,255,255,0.1)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.15)'
+                  }}
+                >
+                  <img 
+                    src={bannerUrl} 
+                    alt={scheme.planName}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+                  />
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.15) 100%)', zIndex: 2 }} />
+                  <div style={{ position: 'relative', zIndex: 3, height: '100%', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: '4px' }}>
+                    <span style={{ fontFamily:DS.font, fontSize:'10px', fontWeight:'700', color: DS.gold, textTransform:'uppercase', letterSpacing:'1px' }}>
+                      {metalTypeLabel}
+                    </span>
+                    <span style={{ fontFamily:DS.font, fontSize:'16px', fontWeight:'800', color:'white', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                      {autoT(scheme.planName)}
                     </span>
                   </div>
-                  <div>
-                    <span style={{ fontFamily:DS.font, fontSize:'9px', color:DS.textMuted, textTransform:'uppercase', letterSpacing:'0.5px', display:'block', marginBottom:'2px' }}>Min. Investment</span>
-                    <span style={{ fontFamily:DS.font, fontSize:'14px', fontWeight:'800', color:DS.textWhite }}>{formatRupees(scheme.installmentAmountPaise)}</span>
-                  </div>
                 </div>
-                <div style={{ background: isDark ? 'rgba(255,215,0,0.1)' : 'rgba(194,24,91,0.06)', borderRadius:'10px', padding:'8px 12px', border: isDark ? '1px solid rgba(255,215,0,0.2)' : '1px solid rgba(194,24,91,0.15)' }}>
-                  <span style={{ fontFamily:DS.font, fontSize:'9px', color: isDark ? 'rgba(255,215,0,0.7)' : DS.magenta, fontWeight:'700', textTransform:'uppercase', letterSpacing:'0.3px', display:'block', marginBottom:'2px' }}>Bonus Offer</span>
-                  <span style={{ fontFamily:DS.font, fontSize:'12px', fontWeight:'800', color: isDark ? DS.gold : DS.purple }}>Get up to {maxBonus} Extra Gold!</span>
-                </div>
-                {keywords.length > 0 && (
-                  <div style={{ display:'flex', gap:'6px', flexWrap:'wrap' }}>
-                    {keywords.slice(0,2).map((kw, i) => (
-                      <span key={i} style={{ fontFamily:DS.font, fontSize:'9px', color:DS.magenta, background:'rgba(194,24,91,0.12)', padding:'3px 8px', borderRadius:'6px', border:'1px solid rgba(194,24,91,0.15)', fontWeight:'600' }}>
-                        ✓ {kw}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <div style={{ display:'flex', justifyContent:'flex-end', alignItems:'center', gap:'4px', marginTop:'4px' }}>
-                  <span style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'700', color:DS.gold }}>View Plan</span>
-                  <ChevronRight size={13} color={DS.gold} />
+              );
+            })}
+          </div>
+
+          {showSwipeGuidance && contextAvailableSchemes.length > 1 && (
+            <div 
+              onClick={handleCarouselScroll}
+              style={{
+                position:'absolute', top:0, left:0, right:0, bottom:0,
+                background:'rgba(26, 0, 19, 0.72)', borderRadius:'16px',
+                display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+                zIndex:10, pointerEvents:'auto', backdropFilter:'blur(4px)', transition:'all 0.3s ease',
+                border:'1px solid rgba(255, 215, 0, 0.2)'
+              }}
+            >
+              <div style={{ position:'relative', width:'80px', height:'80px', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'10px' }}>
+                {/* Golden pulsing ripples */}
+                <div className="pulse-ring-animate" style={{ position:'absolute', width:'50px', height:'50px', borderRadius:'50%', border:'2px solid rgba(255, 215, 0, 0.6)', background:'rgba(255, 215, 0, 0.05)' }} />
+                <div className="pulse-ring-animate" style={{ position:'absolute', width:'75px', height:'75px', borderRadius:'50%', border:'1px solid rgba(255, 215, 0, 0.3)', animationDelay:'0.7s' }} />
+                
+                {/* Sliding premium hand SVG cursor */}
+                <div className="swipe-hand-animate" style={{ zIndex:2, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(255,255,255,0.1)', width:'48px', height:'48px', borderRadius:'50%', border:'1.5px solid rgba(255,255,255,0.5)', boxShadow:'0 8px 32px rgba(0,0,0,0.3)', backdropFilter:'blur(5px)' }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFD700" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5" />
+                    <path d="M14 10V5a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5" />
+                    <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+                    <path d="M20 11.5V9a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2.5" />
+                    <path d="M6 14a7 7 0 0 0 14 0" />
+                  </svg>
                 </div>
               </div>
-            );
-          })}
+              <span style={{ fontFamily:DS.font, fontSize:'12px', fontWeight:'800', color:'#FFD700', textShadow:'0 2px 8px rgba(0,0,0,0.8)', letterSpacing:'0.5px', textAlign:'center', padding:'0 24px', display:'block', marginBottom:'3px' }}>
+                {lang === 'ta' ? 'ஸ்வைப் செய்யவும்' : 'SWIPE TO EXPLORE'}
+              </span>
+              <span style={{ fontFamily:DS.font, fontSize:'10px', fontWeight:'600', color:'rgba(255,255,255,0.7)', textShadow:'0 1px 4px rgba(0,0,0,0.6)', textAlign:'center', padding:'0 24px' }}>
+                {lang === 'ta' ? 'அடுத்த திட்டத்தைக் காண இடதுபுறம் ஸ்வைப் செய்யவும்' : 'Swipe left to view other schemes'}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -1110,18 +1231,30 @@ export const Dashboard: React.FC = () => {
   const renderPromosAndBanners = () => (
     <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
       {offerTitle && (
-        <div style={{ ...DS.glass, padding:'16px', display:'flex', justifyContent:'space-between', alignItems:'center', borderColor:'rgba(255,215,0,0.2)' }}>
-          <div>
-            <span style={{ fontFamily:DS.font, fontSize:'13px', fontWeight:'800', color:DS.textWhite, display:'block' }}>{offerTitle}</span>
-            <span style={{ fontFamily:DS.font, fontSize:'11px', color:DS.textSub }}>{offerDesc}</span>
-          </div>
-          <button
-            onClick={() => navigate('/buy-gold')}
-            style={{ background:'linear-gradient(135deg,#C2185B,#4A0E4E)', color:'white', border:'none', padding:'8px 16px', borderRadius:'10px', fontFamily:DS.font, fontSize:'11px', fontWeight:'700', cursor:'pointer' }}
+        offerBanner ? (
+          <div 
+            onClick={() => navigate('/offers')}
+            style={{ width: '100%', height: '150px', borderRadius: '16px', overflow: 'hidden', cursor: 'pointer', border: '1px solid rgba(255,215,0,0.2)', position: 'relative' }}
           >
-            {t('claim')}
-          </button>
-        </div>
+            <img src={offerBanner} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Active Campaign" />
+            <div style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'linear-gradient(135deg,#C2185B,#4A0E4E)', color: 'white', padding: '6px 12px', borderRadius: '8px', fontSize: '10px', fontWeight: 'bold' }}>
+              View Details
+            </div>
+          </div>
+        ) : (
+          <div style={{ ...DS.glass, padding:'16px', display:'flex', justifyContent:'space-between', alignItems:'center', borderColor:'rgba(255,215,0,0.2)' }}>
+            <div>
+              <span style={{ fontFamily:DS.font, fontSize:'13px', fontWeight:'800', color:DS.textWhite, display:'block' }}>{offerTitle}</span>
+              <span style={{ fontFamily:DS.font, fontSize:'11px', color:DS.textSub }} dangerouslySetInnerHTML={{ __html: offerDesc || '' }} />
+            </div>
+            <button
+              onClick={() => navigate('/offers')}
+              style={{ background:'linear-gradient(135deg,#C2185B,#4A0E4E)', color:'white', border:'none', padding:'8px 16px', borderRadius:'10px', fontFamily:DS.font, fontSize:'11px', fontWeight:'700', cursor:'pointer' }}
+            >
+              {t('claim')}
+            </button>
+          </div>
+        )
       )}
       {banners.length > 0 && (
         <>
@@ -1181,11 +1314,11 @@ export const Dashboard: React.FC = () => {
           <span style={{ fontFamily:DS.font, fontSize:'11px', color:DS.textSub }}>{t('need_help_desc')}</span>
         </div>
       </div>
-      <div style={{ display:'flex', gap:'12px' }}>
-        <button onClick={()=>window.location.href = 'tel:+919443000000'} style={{ flex:1, height:'42px', borderRadius:'12px', background:'linear-gradient(135deg,#29001D,#4A0E4E)', color:'white', border:'1px solid rgba(255,215,0,0.2)', fontFamily:DS.font, fontWeight:'700', fontSize:'12px', display:'flex', alignItems:'center', justifyContent:'center', gap:'6px', cursor:'pointer' }}>
+      <div style={{ display:'flex', flexDirection: isDesktop ? 'row' : 'column', gap:'10px' }}>
+        <button onClick={()=>window.location.href = 'tel:+919443000000'} style={{ width: '100%', height:'42px', borderRadius:'12px', background:'linear-gradient(135deg,#29001D,#4A0E4E)', color:'white', border:'1px solid rgba(255,215,0,0.2)', fontFamily:DS.font, fontWeight:'700', fontSize:'12px', display:'flex', alignItems:'center', justifyContent:'center', gap:'6px', cursor:'pointer' }}>
           <PhoneCall size={14} color={DS.gold} /><span>{t('call_us')}</span>
         </button>
-        <button onClick={()=>window.location.href = 'mailto:support@aishwaryam.com'} style={{ flex:1, height:'42px', borderRadius:'12px', background:'rgba(255,255,255,0.05)', color:DS.textWhite, border:'1px solid rgba(255,255,255,0.1)', fontFamily:DS.font, fontWeight:'700', fontSize:'12px', display:'flex', alignItems:'center', justifyContent:'center', gap:'6px', cursor:'pointer' }}>
+        <button onClick={()=>window.location.href = 'mailto:support@aishwaryam.com'} style={{ width: '100%', height:'42px', borderRadius:'12px', background:'rgba(255,255,255,0.05)', color:DS.textWhite, border:'1px solid rgba(255,255,255,0.1)', fontFamily:DS.font, fontWeight:'700', fontSize:'12px', display:'flex', alignItems:'center', justifyContent:'center', gap:'6px', cursor:'pointer' }}>
           <Mail size={14} color={DS.textSub} /><span>{t('email_us')}</span>
         </button>
       </div>
@@ -1223,7 +1356,7 @@ export const Dashboard: React.FC = () => {
 
         {/* filter chips */}
         <div style={{ display:'flex', gap:'8px', overflowX:'auto', paddingBottom:'4px' }}>
-          {['ALL','BONUS','PURCHASES','SCHEME'].map((f) => (
+          {['PURCHASES','BONUS','ALL'].map((f) => (
             <button
               key={f}
               onClick={()=>setTxFilter(f as any)}
@@ -1237,7 +1370,7 @@ export const Dashboard: React.FC = () => {
                 transition:'all 0.2s ease'
               }}
             >
-              {f === 'ALL' ? t('filter_all') : f === 'BONUS' ? t('filter_bonus') : f === 'PURCHASES' ? t('filter_purchases') : t('filter_scheme')}
+              {f === 'PURCHASES' ? t('filter_purchases') : f === 'BONUS' ? t('filter_bonus') : t('filter_all')}
             </button>
           ))}
         </div>
@@ -1246,13 +1379,22 @@ export const Dashboard: React.FC = () => {
         <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
           {list.map((tx) => {
             const details = getTxTypeDetails(tx.transactionType);
-            const isBuy = tx.transactionType === 'INSTALLMENT' || tx.transactionType === 'BONUS' || tx.transactionType === 'EVENT_BONUS' || tx.transactionType === 'BUY' || tx.transactionType === 'SCHEME_JOIN';
+            const isSchemeJoin = tx.transactionType === 'SCHEME_JOIN' || tx.type === 'SCHEME_JOIN';
+            const isPureBonus = tx.transactionType === 'BONUS' || tx.transactionType === 'EVENT_BONUS' || tx.type === 'BONUS' || tx.type === 'EVENT_BONUS';
+            const isBuy = tx.transactionType === 'INSTALLMENT' || tx.transactionType === 'BUY' || tx.type === 'INSTALLMENT' || tx.type === 'BUY';
+            
             return (
               <div
                 key={tx.id}
-                onClick={()=>setSelectedTxDetail(tx)}
+                onClick={() => {
+                  if (isPureBonus || isSchemeJoin) {
+                    // Do nothing for bonuses and scheme activations - no details popup, no receipt download
+                    return;
+                  }
+                  setSelectedTxDetail(tx);
+                }}
                 className="dash-card-hover"
-                style={{ ...DS.glass, padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between', cursor:'pointer', transition:'all 0.2s ease' }}
+                style={{ ...DS.glass, padding:'14px 16px', display:'flex', alignItems:'center', justifyContent:'space-between', cursor:(isPureBonus || isSchemeJoin) ? 'default' : 'pointer', transition:'all 0.2s ease' }}
               >
                 <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
                   <div style={{ width:'40px', height:'40px', borderRadius:'12px', background:details.bgColor, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -1260,10 +1402,14 @@ export const Dashboard: React.FC = () => {
                   </div>
                   <div>
                     <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'3px' }}>
-                      <span style={{ fontFamily:DS.font, fontSize:'13px', fontWeight:'700', color:DS.textWhite }}>{autoT(tx.schemeName) || details.label}</span>
-                      <span style={{ fontFamily:DS.font, fontSize:'9px', fontWeight:'700', color:getStatusDetails(tx.status).color, background:getStatusDetails(tx.status).bgColor, padding:'2px 7px', borderRadius:'8px', whiteSpace:'nowrap', flexShrink:0 }}>
-                        {autoT(getStatusDetails(tx.status).text)}
+                      <span style={{ fontFamily:DS.font, fontSize:'13px', fontWeight:'700', color:DS.textWhite }}>
+                        {isSchemeJoin ? (lang === 'ta' ? 'திட்டத்தில் இணைந்துள்ளார்' : 'Joined Scheme') : (autoT(tx.schemeName) || details.label)}
                       </span>
+                      {!isSchemeJoin && (
+                        <span style={{ fontFamily:DS.font, fontSize:'9px', fontWeight:'700', color:getStatusDetails(tx.status).color, background:getStatusDetails(tx.status).bgColor, padding:'2px 7px', borderRadius:'8px', whiteSpace:'nowrap', flexShrink:0 }}>
+                          {autoT(getStatusDetails(tx.status).text)}
+                        </span>
+                      )}
                     </div>
                     <span style={{ fontFamily:DS.font, fontSize:'10px', color:DS.textMuted }}>
                       {tx.schemeName ? `${details.label} • ` : ''}{new Date(tx.createdAt).toLocaleDateString()} {new Date(tx.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
@@ -1271,7 +1417,11 @@ export const Dashboard: React.FC = () => {
                   </div>
                 </div>
                 <div style={{ textAlign:'right', flexShrink:0, marginLeft:'8px' }}>
-                  {(tx.transactionType==='BONUS'||tx.transactionType==='EVENT_BONUS'||tx.type==='BONUS'||tx.type==='EVENT_BONUS') ? (
+                  {isSchemeJoin ? (
+                    <span style={{ fontFamily:DS.font, fontSize:'12px', color:'#10B981', fontWeight:'700' }}>
+                      {lang === 'ta' ? 'வெற்றிகரமாக' : 'Successful'}
+                    </span>
+                  ) : isPureBonus ? (
                     <span style={{ fontFamily:DS.font, fontSize:'13px', fontWeight:'800', color:'#10B981' }}>+{mgToGrams(tx.goldWeightMg)}</span>
                   ) : (
                     <>
@@ -1575,7 +1725,6 @@ export const Dashboard: React.FC = () => {
                       { label:t('address_label'), icon:<MapPin size={20} />, iconBg:'rgba(156,39,176,0.15)', iconColor:'#9C27B0', onClick:()=>navigate('/profile/address') },
                       { label:t('kyc_details'), icon:<ShieldCheck size={20} />, iconBg:'rgba(2,136,209,0.15)', iconColor:'#0288D1', onClick:()=>navigate('/profile/kyc') },
                       { label:t('change_mpin'), icon:<Lock size={20} />, iconBg:'rgba(230,81,0,0.15)', iconColor:'#E65100', onClick:()=>navigate('/mpin/change') },
-                      { label: 'Super Admin Portal', icon:<Settings size={20} />, iconBg:'rgba(255,215,0,0.15)', iconColor:'#B8860B', onClick:()=>navigate('/super-admin') },
                     ].map(({ label, icon, iconBg, iconColor, onClick }) => (
                       <div key={label} onClick={onClick} className="dash-card-hover" style={{ ...DS.glass, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 18px', cursor:'pointer', transition:'all 0.2s ease' }}>
                         <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>
@@ -1725,59 +1874,61 @@ export const Dashboard: React.FC = () => {
               );
             })()}
 
-            <button
-              disabled={isDownloading}
-              onClick={() => { 
-                if (selectedTxDetail && selectedTxDetail.id) {
-                  setIsDownloading(true);
-                  const url = `${BASE_URL}api/Gold/receipt/download/${selectedTxDetail.id}`;
-                  const isCapacitor = !!(window as any).Capacitor;
-                  if (isCapacitor) {
-                    let iframe = document.getElementById('hidden-download-iframe') as HTMLIFrameElement;
-                    if (!iframe) {
-                      iframe = document.createElement('iframe');
-                      iframe.id = 'hidden-download-iframe';
-                      iframe.style.display = 'none';
-                      document.body.appendChild(iframe);
+            {!selectedTxDetail.isVirtualBonus && (
+              <button
+                disabled={isDownloading}
+                onClick={() => { 
+                  if (selectedTxDetail && selectedTxDetail.id) {
+                    setIsDownloading(true);
+                    const url = `${BASE_URL}api/Gold/receipt/download/${selectedTxDetail.id}`;
+                    const isCapacitor = !!(window as any).Capacitor;
+                    if (isCapacitor) {
+                      let iframe = document.getElementById('hidden-download-iframe') as HTMLIFrameElement;
+                      if (!iframe) {
+                        iframe = document.createElement('iframe');
+                        iframe.id = 'hidden-download-iframe';
+                        iframe.style.display = 'none';
+                        document.body.appendChild(iframe);
+                      }
+                      iframe.src = url;
+                    } else {
+                      window.open(url, '_blank');
                     }
-                    iframe.src = url;
-                  } else {
-                    window.open(url, '_blank');
+                    setTimeout(() => {
+                      setIsDownloading(false);
+                      setSelectedTxDetail(null);
+                    }, 2500);
                   }
-                  setTimeout(() => {
-                    setIsDownloading(false);
-                    setSelectedTxDetail(null);
-                  }, 2500);
-                }
-              }}
-              style={{ 
-                width:'100%', 
-                height:'44px', 
-                borderRadius:'12px', 
-                background: isDownloading ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(74,14,78,0.1)') : 'linear-gradient(135deg,#29001D,#C2185B)', 
-                color: isDownloading ? DS.textSub : 'white', 
-                border: isDownloading ? (isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.15)') : 'none', 
-                fontFamily:DS.font, 
-                fontWeight:'800', 
-                fontSize:'13px', 
-                cursor: isDownloading ? 'not-allowed' : 'pointer', 
-                boxShadow: isDownloading ? 'none' : '0 4px 16px rgba(194,24,91,0.35)',
-                display:'flex',
-                alignItems:'center',
-                justifyContent:'center',
-                gap:'8px',
-                transition:'all 0.3s ease'
-              }}
-            >
-              {isDownloading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  <span>Downloading...</span>
-                </>
-              ) : (
-                'Download Receipt'
-              )}
-            </button>
+                }}
+                style={{ 
+                  width:'100%', 
+                  height:'44px', 
+                  borderRadius:'12px', 
+                  background: isDownloading ? (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(74,14,78,0.1)') : 'linear-gradient(135deg,#29001D,#C2185B)', 
+                  color: isDownloading ? DS.textSub : 'white', 
+                  border: isDownloading ? (isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.15)') : 'none', 
+                  fontFamily:DS.font, 
+                  fontWeight:'800', 
+                  fontSize:'13px', 
+                  cursor: isDownloading ? 'not-allowed' : 'pointer', 
+                  boxShadow: isDownloading ? 'none' : '0 4px 16px rgba(194,24,91,0.35)',
+                  display:'flex',
+                  alignItems:'center',
+                  justifyContent:'center',
+                  gap:'8px',
+                  transition:'all 0.3s ease'
+                }}
+              >
+                {isDownloading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Downloading...</span>
+                  </>
+                ) : (
+                  'Download Receipt'
+                )}
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -1861,18 +2012,55 @@ export const Dashboard: React.FC = () => {
               <div style={{ display:'flex', gap:'12px' }}>
                 <div style={{ flex:1 }}>
                   <label style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'700', color:DS.textSub }}>{t('nominee_mobile')}</label>
-                  <input type="tel" inputMode="numeric" value={editNomineePhone} disabled={isMinor} onChange={(e)=>setEditNomineePhone(e.target.value.replace(/\D/g,'').slice(0,10))}
+                  <input type="text" maxLength={10} value={editNomineePhone} disabled={isMinor} onChange={(e)=>setEditNomineePhone(e.target.value.replace(/\D/g,''))}
                     style={{ width:'100%', height:'42px', borderRadius:'10px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.15)', padding:'0 14px', fontFamily:DS.font, fontSize:'13px', outline:'none', marginTop:'5px', background: isMinor ? (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)') : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.02)'), color: isMinor ? DS.textMuted : DS.textWhite, boxSizing:'border-box' }}
                   />
                 </div>
-                <div style={{ flex:1 }}>
+                <div style={{ flex:1, position: 'relative' }}>
                   <label style={{ fontFamily:DS.font, fontSize:'11px', fontWeight:'700', color:DS.textSub }}>{t('relationship')}</label>
-                  <select value={editNomineeRelation} disabled={isMinor} onChange={(e)=>setEditNomineeRelation(e.target.value)}
-                    style={{ width:'100%', height:'42px', borderRadius:'10px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.15)', padding:'0 14px', fontFamily:DS.font, fontSize:'13px', outline:'none', marginTop:'5px', background: isMinor ? (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)') : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.02)'), color: isMinor ? DS.textMuted : DS.textWhite, boxSizing:'border-box' }}
+                  <div 
+                    onClick={() => !isMinor && setIsRelDropdownOpen(!isRelDropdownOpen)}
+                    style={{ 
+                      width:'100%', height:'42px', borderRadius:'10px', 
+                      border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(74,14,78,0.15)', 
+                      padding:'0 14px', fontFamily:DS.font, fontSize:'13px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      marginTop:'5px', 
+                      background: isMinor ? (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)') : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.02)'), 
+                      color: isMinor ? DS.textMuted : (editNomineeRelation ? DS.textWhite : DS.textMuted), 
+                      boxSizing:'border-box', cursor: isMinor ? 'not-allowed' : 'pointer'
+                    }}
                   >
-                    <option style={{ background: isDark ? '#1A1A2E' : '#FFFFFF', color: DS.textWhite }} value="">{t('select')}</option>
-                    {['Father','Mother','Wife','Husband','Son','Daughter','Brother','Guardian'].map((rel)=>(<option style={{ background: isDark ? '#1A1A2E' : '#FFFFFF', color: DS.textWhite }} key={rel} value={rel}>{autoT(rel)}</option>))}
-                  </select>
+                    <span>{editNomineeRelation ? autoT(editNomineeRelation) : t('select')}</span>
+                    <span style={{ fontSize: '10px', color: DS.textSub }}>▼</span>
+                  </div>
+                  {isRelDropdownOpen && !isMinor && (
+                    <div style={{ 
+                      position: 'absolute', top: '48px', left: 0, right: 0, 
+                      background: isDark ? '#1A1A2E' : '#FFFFFF', 
+                      border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(74,14,78,0.15)', 
+                      borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.25)', zIndex: 100, 
+                      maxHeight: '180px', overflowY: 'auto' 
+                    }}>
+                      {['Father','Mother','Wife','Husband','Son','Daughter','Brother','Guardian'].map((rel) => (
+                        <div 
+                          key={rel}
+                          onClick={() => {
+                            setEditNomineeRelation(rel);
+                            setIsRelDropdownOpen(false);
+                          }}
+                          style={{ 
+                            padding: '10px 14px', fontSize: '13px', cursor: 'pointer',
+                            color: DS.textWhite,
+                            background: editNomineeRelation === rel ? (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(74,14,78,0.05)') : 'transparent',
+                            borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(74,14,78,0.05)',
+                            textAlign: 'left'
+                          }}
+                        >
+                          {autoT(rel)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SessionManager, OnboardingStage } from '../utils/SessionManager';
 import { ApiClient } from '../utils/ApiClient';
@@ -16,7 +16,7 @@ export const Onboarding: React.FC = () => {
   useEffect(() => {
     if (profile?.kycLevel === 'PENDING' || profile?.kycLevel === 'FULL') {
       navigate('/dashboard');
-    } else if (profile?.kycLevel === 'REJECTED' || (profile?.fullName && profile?.fullName.trim() !== '')) {
+    } else if (profile?.kycLevel === 'REJECTED' || (profile?.nomineeName && profile?.nomineeName.trim() !== '')) {
       setCurrentStep(2);
     }
   }, [profile, navigate]);
@@ -66,7 +66,7 @@ export const Onboarding: React.FC = () => {
   const [city, setCity] = useState(SessionManager.getPartialCity() || '');
   const [area, setArea] = useState(SessionManager.getPartialArea() || '');
   const [isManualArea] = useState(SessionManager.getPartialIsManualArea() || false);
-  const [termsAccepted, setTermsAccepted] = useState(SessionManager.getPartialTermsAccepted() || false);
+  const [termsAccepted, setTermsAccepted] = useState(true);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [dbTerms, setDbTerms] = useState<string | null>(null);
@@ -90,6 +90,35 @@ export const Onboarding: React.FC = () => {
     });
     SessionManager.saveNomineeName(nomineeName);
   }, [name, email, dob, isMarried, weddingDate, gender, pincode, state, city, area, isManualArea, termsAccepted, nomineeName]);
+
+  const isDirtyRef = useRef(false);
+
+  useEffect(() => {
+    const hasStep1Data = nomineeName || pincode || name || email || dob || (state && state !== 'Tamil Nadu') || (city && city !== 'Chennai') || (area && area !== 'T. Nagar');
+    const hasStep2Data = panImage || aadhaarFrontImage || aadhaarBackImage;
+    isDirtyRef.current = !!(hasStep1Data || hasStep2Data);
+  }, [nomineeName, pincode, name, email, dob, state, city, area, panImage, aadhaarFrontImage, aadhaarBackImage]);
+
+  useEffect(() => {
+    window.history.pushState(null, '', window.location.href);
+
+    const handlePopState = () => {
+      if (isDirtyRef.current) {
+        if (window.confirm(lang === 'ta' ? 'நீங்கள் வெளியேற விரும்புகிறீர்களா? உள்ளிடப்பட்ட தரவு இழக்கப்படும்.' : 'Are you sure you want to go back? Any entered onboarding data will be lost.')) {
+          navigate('/dashboard');
+        } else {
+          window.history.pushState(null, '', window.location.href);
+        }
+      } else {
+        navigate('/dashboard');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [lang, navigate]);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -254,15 +283,39 @@ export const Onboarding: React.FC = () => {
     const clean = val.replace(/\D/g, '').slice(0, 6);
     setPincode(clean);
     if (clean.length === 6) {
-      if (clean.startsWith('641')) {
-        setState('Tamil Nadu');
-        setCity('Coimbatore');
-        setArea('Gandhipuram');
-      } else {
-        setState('Tamil Nadu');
-        setCity('Chennai');
-        setArea('T. Nagar');
-      }
+      fetch(`https://api.postalpincode.in/pincode/${clean}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
+            const postOffice = data[0].PostOffice[0];
+            setState(postOffice.State || 'Tamil Nadu');
+            setCity(postOffice.District || 'Coimbatore');
+            setArea(postOffice.Name || 'Gandhipuram');
+          } else {
+            // Local fallback
+            if (clean.startsWith('641') || clean.startsWith('642')) {
+              setState('Tamil Nadu');
+              setCity('Coimbatore');
+              setArea('Gandhipuram');
+            } else {
+              setState('Tamil Nadu');
+              setCity('Chennai');
+              setArea('T. Nagar');
+            }
+          }
+        })
+        .catch(() => {
+          // Local fallback
+          if (clean.startsWith('641') || clean.startsWith('642')) {
+            setState('Tamil Nadu');
+            setCity('Coimbatore');
+            setArea('Gandhipuram');
+          } else {
+            setState('Tamil Nadu');
+            setCity('Chennai');
+            setArea('T. Nagar');
+          }
+        });
     }
   };
 
@@ -315,6 +368,21 @@ export const Onboarding: React.FC = () => {
           nomineeName: nomineeName.trim() || null,
           weddingAnniversaryDate: formattedWeddingDate
         });
+
+        // Save address in DB
+        try {
+          await ApiClient.post('api/Address/add', {
+            userId,
+            state,
+            city,
+            streetAddress: area,
+            pincode,
+            isDefault: true
+          });
+        } catch (addrErr) {
+          console.error("Failed to save address to DB:", addrErr);
+        }
+
         await refreshData();
         setCurrentStep(2);
       } catch (err: any) {
@@ -392,8 +460,21 @@ export const Onboarding: React.FC = () => {
     }
   };
 
+  const handleBackAction = () => {
+    const hasStep1Data = nomineeName || pincode || name || email || dob || (state && state !== 'Tamil Nadu') || (city && city !== 'Chennai') || (area && area !== 'T. Nagar');
+    const hasStep2Data = panImage || aadhaarFrontImage || aadhaarBackImage;
+    
+    if (hasStep1Data || hasStep2Data) {
+      if (window.confirm(lang === 'ta' ? 'நீங்கள் வெளியேற விரும்புகிறீர்களா? உள்ளிடப்பட்ட தரவு இழக்கப்படும்.' : 'Are you sure you want to go back? Any entered onboarding data will be lost.')) {
+        navigate('/dashboard');
+      }
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--surface-light)' }}>
+    <div className="auth-page-root" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--surface-light)' }}>
       {/* Header */}
       <div className="app-header-bar" style={{
         background: 'var(--brand-dark)',
@@ -405,7 +486,7 @@ export const Onboarding: React.FC = () => {
         boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
       }}>
         <button
-          onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : navigate(-1)}
+          onClick={handleBackAction}
           style={{ background: 'transparent', border: 'none', color: 'white', display: 'flex', alignItems: 'center', cursor: 'pointer' }}
         >
           <ArrowLeft size={24} />
@@ -417,7 +498,7 @@ export const Onboarding: React.FC = () => {
         </div>
       </div>
 
-      <div className="onboarding-form-container" style={{ flex: 1, overflowY: 'auto', padding: '5px 20px 20px 20px', display: 'flex', flexDirection: 'column' }}>
+      <div className="onboarding-form-container" style={{ flex: 1, overflowY: 'auto', padding: '5px 20px 120px 20px', display: 'flex', flexDirection: 'column' }}>
         {/* Progress Stepper */}
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0px 0 16px 0' }}>
           {[1, 2].map((num) => (
@@ -435,7 +516,7 @@ export const Onboarding: React.FC = () => {
                 fontSize: '14px',
                 transition: 'all 0.3s ease'
               }}>
-                {num}
+                {num < currentStep ? '✓' : num}
               </div>
               {num < totalSteps && (
                 <div style={{
@@ -654,21 +735,18 @@ export const Onboarding: React.FC = () => {
 
                 <div>
                   <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>{t('gender_label')} <span style={{ color: 'var(--error-red)' }}>*</span></label>
-                  <div style={{ display: 'flex', gap: '24px', marginTop: '8px' }}>
-                    {['Male', 'Female'].map((g) => (
-                      <label key={g} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
-                        <input
-                          type="radio"
-                          name="gender"
-                          value={g}
-                          checked={gender === g}
-                          onChange={() => setGender(g)}
-                          style={{ accentColor: 'var(--brand-mid)' }}
-                        />
-                        {g === 'Male' ? t('gender_male') : t('gender_female')}
-                      </label>
-                    ))}
-                  </div>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    style={{
+                      width: '100%', height: '40px', borderRadius: '10px', border: '1px solid rgba(0,0,0,0.1)',
+                      padding: '0 12px', fontSize: '14px', outline: 'none', background: 'white', marginTop: '6px'
+                    }}
+                  >
+                    <option value="Male">{t('gender_male')}</option>
+                    <option value="Female">{t('gender_female')}</option>
+                    <option value="Other">{t('gender_other')}</option>
+                  </select>
                 </div>
               </div>
 
@@ -701,18 +779,18 @@ export const Onboarding: React.FC = () => {
                     <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>{t('state_label')}</label>
                     <input
                       type="text"
-                      disabled
                       value={state}
-                      placeholder={t('auto_populated')}
+                      onChange={(e) => setState(e.target.value)}
+                      placeholder={t('state_label')}
                       style={{
                         width: '100%',
                         height: '48px',
                         borderRadius: '8px',
-                        border: '1px solid rgba(0,0,0,0.08)',
+                        border: '1px solid rgba(0,0,0,0.1)',
                         padding: '0 12px',
                         fontSize: '14px',
-                        background: '#F3F4F6',
-                        color: 'var(--text-secondary)',
+                        background: '#FFFFFF',
+                        color: 'var(--text-primary)',
                         marginTop: '4px'
                       }}
                     />
@@ -722,18 +800,18 @@ export const Onboarding: React.FC = () => {
                     <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>{t('city_label')}</label>
                     <input
                       type="text"
-                      disabled
                       value={city}
-                      placeholder={t('auto_populated')}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder={t('city_label')}
                       style={{
                         width: '100%',
                         height: '48px',
                         borderRadius: '8px',
-                        border: '1px solid rgba(0,0,0,0.08)',
+                        border: '1px solid rgba(0,0,0,0.1)',
                         padding: '0 12px',
                         fontSize: '14px',
-                        background: '#F3F4F6',
-                        color: 'var(--text-secondary)',
+                        background: '#FFFFFF',
+                        color: 'var(--text-primary)',
                         marginTop: '4px'
                       }}
                     />

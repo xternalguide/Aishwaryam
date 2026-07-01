@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { SessionManager } from '../utils/SessionManager';
 import { ApiClient } from '../utils/ApiClient';
 import { useApp } from '../context/AppContext';
@@ -22,6 +22,7 @@ interface AvailableScheme {
 
 interface MilestoneItem {
   name: string;
+  startDay?: number;
   targetDay: number;
   bonusPercentage: number;
   isAchieved: boolean;
@@ -31,6 +32,7 @@ export const SchemeDetail: React.FC = () => {
   const navigate = useNavigate();
   const { schemeId } = useParams<{ schemeId: string }>();
   const { t, lang, autoT } = useTranslation();
+  const location = useLocation();
 
   const [isLoading, setIsLoading] = useState(true);
   const [scheme, setScheme] = useState<AvailableScheme | null>(null);
@@ -49,7 +51,9 @@ export const SchemeDetail: React.FC = () => {
   const [totalBonusEarnedPaise, setTotalBonusEarnedPaise] = useState(0);
   const [totalBonusGoldMg, setTotalBonusGoldMg] = useState(0);
   const [milestones, setMilestones] = useState<MilestoneItem[]>([]);
-  const [autoPayEnabled, setAutoPayEnabled] = useState(false);
+  const [currentBonusPercent, setCurrentBonusPercent] = useState(7.5);
+  const [remainingDaysForCurrentTier, setRemainingDaysForCurrentTier] = useState(75);
+
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [remainingDaysForScheme, setRemainingDaysForScheme] = useState(0);
   const [ledger, setLedger] = useState<any[]>([]);
@@ -59,6 +63,13 @@ export const SchemeDetail: React.FC = () => {
 
   // UI Interactive States
   const [openTabs, setOpenTabs] = useState<Record<number, boolean>>({});
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTermsPopup, setShowTermsPopup] = useState(false);
+  const [isPincodeReadOnly, setIsPincodeReadOnly] = useState(true);
+  const [isCityReadOnly, setIsCityReadOnly] = useState(true);
+  const [isStateReadOnly, setIsStateReadOnly] = useState(true);
+  const [isStreetReadOnly, setIsStreetReadOnly] = useState(true);
+  const [setupPinError, setSetupPinError] = useState<string | null>(null);
 
   useEffect(() => {
     if (userSchemeId) {
@@ -75,6 +86,8 @@ export const SchemeDetail: React.FC = () => {
   }, [userSchemeId]);
 
   const [kycLevel, setKycLevel] = useState('BASIC');
+  const [kycStatusMsg, setKycStatusMsg] = useState('');
+  const [kycDocs, setKycDocs] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingTitle, setProcessingTitle] = useState('Verifying Transaction...');
   const [processingMsg, setProcessingMsg] = useState('Confirming your purchase. Please do not close the application or go back.');
@@ -102,29 +115,13 @@ export const SchemeDetail: React.FC = () => {
   const [setupCity, setSetupCity] = useState('');
   const [setupStreet, setSetupStreet] = useState('');
   const [setupPincode, setSetupPincode] = useState('');
-  const [setupPinError, setSetupPinError] = useState<string | null>(null);
 
   const RELATIONSHIPS = ["Father", "Mother", "Wife", "Husband", "Son", "Daughter", "Brother", "Guardian"];
-  const CITIES_BY_STATE: Record<string, string[]> = {
-    "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Salem", "Trichy", "Tirunelveli"],
-    "Puducherry": ["Puducherry", "Karaikal"],
-    "Kerala": ["Kochi", "Thiruvananthapuram"],
-    "Karnataka": ["Bengaluru", "Mysuru"]
-  };
-  const PIN_PREFIXES: Record<string, string[]> = {
-    "Chennai": ["600"],
-    "Coimbatore": ["641"],
-    "Madurai": ["625"],
-    "Salem": ["636"],
-    "Trichy": ["620"],
-    "Tirunelveli": ["627"],
-    "Puducherry": ["605"],
-    "Karaikal": ["609"],
-    "Kochi": ["682"],
-    "Thiruvananthapuram": ["695"],
-    "Bengaluru": ["560"],
-    "Mysuru": ["570"]
-  };
+
+  const activeDocs = kycDocs.filter((d: any) => d.status !== 'REPLACED');
+  const hasDocs = activeDocs.length > 0;
+  const isKycPending = kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW' || hasDocs;
+  const isKycRejected = kycLevel === 'REJECTED';
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -176,6 +173,25 @@ export const SchemeDetail: React.FC = () => {
     }
   }, [showSetupModal]);
 
+  useEffect(() => {
+    if (location.state && (location.state as any).fromJoinForm) {
+      // Re-populate the form inputs if we were in the middle of filling them out
+      const s = location.state as any;
+      if (s.nomineeName) setSetupNomineeName(s.nomineeName);
+      if (s.nomineePhone) setSetupNomineePhone(s.nomineePhone);
+      if (s.nomineeRelationship) setSetupNomineeRelationship(s.nomineeRelationship);
+      if (s.pincode) setSetupPincode(s.pincode);
+      if (s.city) setSetupCity(s.city);
+      if (s.state) setSetupState(s.state);
+      if (s.street) setSetupStreet(s.street);
+      
+      // Open the modal
+      setShowSetupModal(true);
+      // Clean up state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+
   const handleSetupPincodeChange = (value: string) => {
     const numericValue = value.replace(/\D/g, '').slice(0, 6);
     setSetupPincode(numericValue);
@@ -190,59 +206,11 @@ export const SchemeDetail: React.FC = () => {
             setSetupCity(postOffice.District || postOffice.Block || '');
             setSetupPinError(null);
           } else {
-            // Static prefix fallback
-            const prefix = numericValue.substring(0, 3);
-            let foundCity = '';
-            let foundState = '';
-            for (const [city, prefixes] of Object.entries(PIN_PREFIXES)) {
-              if (prefixes.includes(prefix)) {
-                foundCity = city;
-                break;
-              }
-            }
-            if (foundCity) {
-              for (const [state, cities] of Object.entries(CITIES_BY_STATE)) {
-                if (cities.includes(foundCity)) {
-                  foundState = state;
-                  break;
-                }
-              }
-            }
-            if (foundCity && foundState) {
-              setSetupCity(foundCity);
-              setSetupState(foundState);
-              setSetupPinError(null);
-            } else {
-              setSetupPinError("Invalid PIN Code.");
-            }
+            setSetupPinError("Invalid PIN Code.");
           }
         })
         .catch(() => {
-          // Static prefix fallback
-          const prefix = numericValue.substring(0, 3);
-          let foundCity = '';
-          let foundState = '';
-          for (const [city, prefixes] of Object.entries(PIN_PREFIXES)) {
-            if (prefixes.includes(prefix)) {
-              foundCity = city;
-              break;
-            }
-          }
-          if (foundCity) {
-            for (const [state, cities] of Object.entries(CITIES_BY_STATE)) {
-              if (cities.includes(foundCity)) {
-                foundState = state;
-                break;
-              }
-            }
-          }
-          if (foundCity && foundState) {
-            setSetupCity(foundCity);
-            setSetupState(foundState);
-            setSetupPinError(null);
-          } else {
-            setSetupPinError("Invalid PIN Code.");
-          }
+          setSetupPinError("Invalid PIN Code.");
         });
     } else {
       if (numericValue.length > 0 && numericValue.length < 6) {
@@ -257,19 +225,22 @@ export const SchemeDetail: React.FC = () => {
     bonusConfigJson: string | null,
     activeDays: number
   ): MilestoneItem[] => {
-    if (!bonusConfigJson) {
-      return [
-        { name: 'Join Bonus', targetDay: 1, bonusPercentage: 7.5, isAchieved: activeDays >= 1 },
-        { name: 'Month 3 Milestone', targetDay: 90, bonusPercentage: 5.5, isAchieved: activeDays >= 90 },
-        { name: 'Month 6 Milestone', targetDay: 180, bonusPercentage: 3.5, isAchieved: activeDays >= 180 },
-        { name: 'Maturity Bonus', targetDay: 330, bonusPercentage: 1.5, isAchieved: activeDays >= 330 }
-      ];
+    const defaultTiers = [
+      { name: lang === 'ta' ? 'அடுக்கு 1 (7.5%)' : 'Tier 1 (7.5%)', startDay: 0, targetDay: 75, bonusPercentage: 7.5, isAchieved: activeDays >= 75 },
+      { name: lang === 'ta' ? 'அடுக்கு 2 (5.5%)' : 'Tier 2 (5.5%)', startDay: 76, targetDay: 150, bonusPercentage: 5.5, isAchieved: activeDays >= 150 },
+      { name: lang === 'ta' ? 'அடுக்கு 3 (3.5%)' : 'Tier 3 (3.5%)', startDay: 151, targetDay: 225, bonusPercentage: 3.5, isAchieved: activeDays >= 225 },
+      { name: lang === 'ta' ? 'அடுக்கு 4 (1.5%)' : 'Tier 4 (1.5%)', startDay: 226, targetDay: 330, bonusPercentage: 1.5, isAchieved: activeDays >= 330 }
+    ];
+
+    if (!bonusConfigJson || bonusConfigJson === '[]') {
+      return defaultTiers;
     }
 
     try {
       const config = JSON.parse(bonusConfigJson);
       
       if (Array.isArray(config)) {
+        if (config.length === 0) return defaultTiers;
         return config.map((tier: any) => {
           const start = tier.startDay ?? tier.StartDay ?? 0;
           const end = tier.endDay ?? tier.EndDay ?? 0;
@@ -352,12 +323,14 @@ export const SchemeDetail: React.FC = () => {
       setTotalSavingsAddedPaise(userActiveScheme.totalSavingsAddedPaise || 0);
       setTotalBonusEarnedPaise(userActiveScheme.totalBonusEarnedPaise || 0);
       setTotalBonusGoldMg(userActiveScheme.totalBonusGoldMg || 0);
-      setAutoPayEnabled(userActiveScheme.autoPayEnabled || false);
+
       setRemainingDaysForScheme(userActiveScheme.remainingDaysForScheme || 0);
       setJoinedAt(userActiveScheme.joinedAt || userActiveScheme.JoinedAt || '');
       setMaturityDate(userActiveScheme.maturityDate || userActiveScheme.MaturityDate || '');
       setSchemeStatus(userActiveScheme.status || userActiveScheme.Status || '');
       setIsJoinFormCompleted(userActiveScheme.isJoinFormCompleted || userActiveScheme.IsJoinFormCompleted || false);
+      setCurrentBonusPercent(userActiveScheme.currentBonusTierPercent ?? userActiveScheme.CurrentBonusTierPercent ?? 7.5);
+      setRemainingDaysForCurrentTier(userActiveScheme.remainingDaysForCurrentTier ?? userActiveScheme.RemainingDaysForCurrentTier ?? 0);
 
       // Setup milestones
       setMilestones(parseMilestones(
@@ -373,6 +346,20 @@ export const SchemeDetail: React.FC = () => {
     // 4. Fetch profile for KYC verification checks
     if (profile) {
       setKycLevel(profile.kycLevel || 'BASIC');
+      const fetchKycStatus = async () => {
+        const userId = SessionManager.getUserId();
+        if (!userId) return;
+        try {
+          const res = await ApiClient.get(`api/Kyc/status/${userId}`);
+          if (res.data && res.data.success) {
+            setKycStatusMsg(res.data.status || '');
+            setKycDocs(res.data.documents || []);
+          }
+        } catch (err) {
+          console.error('Failed to load KYC documents in SchemeDetail:', err);
+        }
+      };
+      fetchKycStatus();
     }
     
     setIsLoading(false);
@@ -458,6 +445,11 @@ export const SchemeDetail: React.FC = () => {
                 type: 'BUY',
                 amountPaise,
                 goldWeightMg: verifyRes.data.goldWeightMg || Math.round(goldWeightGrams * 1000),
+                pricePerGmPaise: verifyRes.data.pricePerGmPaise,
+                bonusGoldMg: verifyRes.data.bonusGoldMg,
+                bonusPercentage: verifyRes.data.bonusPercentage,
+                baseAmountPaise: verifyRes.data.baseAmountPaise,
+                gstAmountPaise: verifyRes.data.gstAmountPaise,
                 createdAt: new Date().toISOString(),
                 rateSource: 'Live',
                 schemeName: scheme.planName
@@ -521,6 +513,11 @@ export const SchemeDetail: React.FC = () => {
                     type: 'BUY',
                     amountPaise,
                     goldWeightMg: verifyRes.data.goldWeightMg || Math.round(goldWeightGrams * 1000),
+                    pricePerGmPaise: verifyRes.data.pricePerGmPaise,
+                    bonusGoldMg: verifyRes.data.bonusGoldMg,
+                    bonusPercentage: verifyRes.data.bonusPercentage,
+                    baseAmountPaise: verifyRes.data.baseAmountPaise,
+                    gstAmountPaise: verifyRes.data.gstAmountPaise,
                     createdAt: new Date().toISOString(),
                     rateSource: 'Live',
                     schemeName: scheme.planName
@@ -608,11 +605,19 @@ export const SchemeDetail: React.FC = () => {
         setSetupCity(defaultAddr.city || '');
         setSetupStreet(defaultAddr.streetAddress || defaultAddr.street || '');
         setSetupPincode(defaultAddr.pincode || '');
+        setIsPincodeReadOnly(!!defaultAddr.pincode);
+        setIsCityReadOnly(!!defaultAddr.city);
+        setIsStateReadOnly(!!defaultAddr.state);
+        setIsStreetReadOnly(!!(defaultAddr.streetAddress || defaultAddr.street));
       } else {
         setSetupState('');
         setSetupCity('');
         setSetupStreet('');
         setSetupPincode('');
+        setIsPincodeReadOnly(false);
+        setIsCityReadOnly(false);
+        setIsStateReadOnly(false);
+        setIsStreetReadOnly(false);
       }
  
       setPendingAction('PAY');
@@ -625,17 +630,17 @@ export const SchemeDetail: React.FC = () => {
 
   const handleJoinScheme = async () => {
     if (!scheme) return;
-    if (kycLevel === 'BASIC') {
-      alert(t('kyc_basic_block'));
-      navigate('/onboarding');
-      return;
-    }
-    if (kycLevel === 'PENDING') {
+    if (isKycPending) {
       alert(t('kyc_pending_block'));
       return;
     }
-    if (kycLevel === 'REJECTED') {
+    if (isKycRejected) {
       alert(t('kyc_rejected_block'));
+      return;
+    }
+    if (kycLevel === 'BASIC') {
+      alert(t('kyc_basic_block'));
+      navigate('/onboarding');
       return;
     }
 
@@ -650,11 +655,19 @@ export const SchemeDetail: React.FC = () => {
         setSetupCity(defaultAddr.city || '');
         setSetupStreet(defaultAddr.streetAddress || defaultAddr.street || '');
         setSetupPincode(defaultAddr.pincode || '');
+        setIsPincodeReadOnly(!!defaultAddr.pincode);
+        setIsCityReadOnly(!!defaultAddr.city);
+        setIsStateReadOnly(!!defaultAddr.state);
+        setIsStreetReadOnly(!!(defaultAddr.streetAddress || defaultAddr.street));
       } else {
         setSetupState('');
         setSetupCity('');
         setSetupStreet('');
         setSetupPincode('');
+        setIsPincodeReadOnly(false);
+        setIsCityReadOnly(false);
+        setIsStateReadOnly(false);
+        setIsStreetReadOnly(false);
       }
 
       setPendingAction('JOIN');
@@ -687,6 +700,36 @@ export const SchemeDetail: React.FC = () => {
   };
 
   const handleSaveSetup = async () => {
+    // 0. Perform validation checks
+    if (!setupNomineeName.trim()) {
+      alert("Nominee Name is required. Please fill it.");
+      return;
+    }
+    if (!setupNomineeRelationship) {
+      alert("Nominee Relationship is required. Please select it.");
+      return;
+    }
+    if (!isPincodeReadOnly && (!setupPincode || setupPincode.length !== 6)) {
+      alert("A valid 6-digit Pincode is required.");
+      return;
+    }
+    if (!isCityReadOnly && !setupCity.trim()) {
+      alert("City is required.");
+      return;
+    }
+    if (!isStateReadOnly && !setupState.trim()) {
+      alert("State is required.");
+      return;
+    }
+    if (!isStreetReadOnly && !setupStreet.trim()) {
+      alert("Street Address is required.");
+      return;
+    }
+    if (!agreedToTerms) {
+      alert("You must agree to the Terms & Conditions to proceed.");
+      return;
+    }
+
     const userId = SessionManager.getUserId();
     if (!userId) return;
     
@@ -748,7 +791,7 @@ export const SchemeDetail: React.FC = () => {
           setUserSchemeId(newSchemeId);
           await refreshData();
           setShowSetupModal(false);
-          setShowSuccessPopup(true);
+          setShowJoinSheet(true); // Proceed to payment page/sheet directly!
         } else {
           alert(joinRes.data?.message || 'Failed to join scheme.');
         }
@@ -787,17 +830,17 @@ export const SchemeDetail: React.FC = () => {
 
   const handlePayJoinPlan = async () => {
     if (!scheme) return;
-    if (kycLevel === 'BASIC') {
-      alert(t('kyc_basic_block'));
-      navigate('/onboarding');
-      return;
-    }
-    if (kycLevel === 'PENDING') {
+    if (isKycPending) {
       alert(t('kyc_pending_block'));
       return;
     }
-    if (kycLevel === 'REJECTED') {
+    if (isKycRejected) {
       alert(t('kyc_rejected_block'));
+      return;
+    }
+    if (kycLevel === 'BASIC') {
+      alert(t('kyc_basic_block'));
+      navigate('/onboarding');
       return;
     }
     const parsedVal = parseFloat(joinAmount) || 0;
@@ -867,11 +910,70 @@ export const SchemeDetail: React.FC = () => {
 
   const renderContentWithTable = (text: string) => {
     if (!text) return null;
+
+    const renderFormattedText = (rawText: string) => {
+      const lines = rawText.split('\n');
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {lines.map((line, li) => {
+            const trimmed = line.trim();
+            if (!trimmed) return <div key={li} style={{ height: '4px' }} />;
+
+            // Detect bullets
+            const isBullet = trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*');
+            // Detect numbered list (e.g. "1. ", "2. ")
+            const matchNum = trimmed.match(/^(\d+)\.\s(.*)/);
+
+            const formatBold = (str: string) => {
+              const parts = str.split('**');
+              return parts.map((part, index) => {
+                if (index % 2 === 1) {
+                  return <strong key={index} style={{ color: 'var(--brand-dark)', fontWeight: '700' }}>{part}</strong>;
+                }
+                return part;
+              });
+            };
+
+            if (isBullet) {
+              const cleanLine = trimmed.replace(/^[•\-\*]\s*/, '');
+              return (
+                <div key={li} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', margin: '2px 0' }}>
+                  <span style={{ color: 'var(--brand-accent)', fontSize: '14px', lineHeight: '1.2' }}>•</span>
+                  <span style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '18px', textAlign: 'left' }}>
+                    {formatBold(cleanLine)}
+                  </span>
+                </div>
+              );
+            }
+
+            if (matchNum) {
+              const num = matchNum[1];
+              const cleanLine = matchNum[2];
+              return (
+                <div key={li} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', margin: '4px 0' }}>
+                  <span style={{ color: 'var(--brand-dark)', fontWeight: '700', fontSize: '12.5px' }}>{num}.</span>
+                  <span style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '18px', textAlign: 'left' }}>
+                    {formatBold(cleanLine)}
+                  </span>
+                </div>
+              );
+            }
+
+            return (
+              <p key={li} style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '18px', margin: 0, textAlign: 'left' }}>
+                {formatBold(trimmed)}
+              </p>
+            );
+          })}
+        </div>
+      );
+    };
+
     const startIdx = text.indexOf('[TABLE]');
     const endIdx = text.indexOf('[/TABLE]');
 
     if (startIdx === -1 || endIdx === -1) {
-      return <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '20px', margin: 0, whiteSpace: 'pre-line' }}>{text}</p>;
+      return renderFormattedText(text);
     }
 
     const cleanText = text.substring(0, startIdx).trim();
@@ -882,7 +984,7 @@ export const SchemeDetail: React.FC = () => {
     
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {cleanText && <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '20px', margin: 0, whiteSpace: 'pre-line' }}>{cleanText}</p>}
+        {cleanText && renderFormattedText(cleanText)}
         
         {lines.length > 0 && (
           <div style={{ overflowX: 'auto', border: '1px solid #ECECEC', borderRadius: '8px', marginTop: '6px' }}>
@@ -911,20 +1013,52 @@ export const SchemeDetail: React.FC = () => {
           </div>
         )}
         
-        {restText && <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '20px', margin: 0, whiteSpace: 'pre-line' }}>{restText}</p>}
+        {restText && renderFormattedText(restText)}
       </div>
     );
   };
 
   const renderCustomSections = () => {
-    if (!scheme || !scheme.customSectionsJson) return null;
+    if (!scheme) return null;
     try {
-      const sections = JSON.parse(scheme.customSectionsJson);
-      if (!Array.isArray(sections) || sections.length === 0) return null;
+      let dbSections: any[] = [];
+      if (scheme.customSectionsJson) {
+        try {
+          dbSections = JSON.parse(scheme.customSectionsJson);
+        } catch (e) {}
+      }
+      if (!Array.isArray(dbSections)) dbSections = [];
+
+      const whySaveGoldSec = {
+        title: lang === 'ta' ? 'ஏன் தங்கம் சேமிக்க வேண்டும்? (Why Save Gold?)' : 'Why Save Gold? Benefits of Aishwaryam DigiGold',
+        content: lang === 'ta' ? 
+          '• **விலையேற்றம் பாதுகாப்பு:** தங்கம் எப்போதும் பணவீக்கத்திலிருந்து பாதுகாப்பை வழங்கும் சிறந்த முதலீடு ஆகும்.\n• **0% வேஸ்டேஜ் & சேதாரம்:** இந்த திட்டத்தின் மூலம் முதிர்வில் தங்கம் வாங்கும்போது 18% வரை சேதாரம் மற்றும் செய்கூலி சேமிக்கலாம்.\n• **சிறிய அளவில் முதலீடு:** தினமும் அல்லது மாதந்தோறும் வெறும் ₹100 முதல் சேமிக்கலாம்.\n• **நெகிழ்வான விநியோகம்:** சேமித்த தங்கத்தை நாணயங்களாகவோ அல்லது நகைகளாகவோ மாற்றிக்கொள்ளலாம்.' :
+          '• **Inflation Protection:** Gold is a timeless asset that hedges against inflation and market volatility.\n• **Zero Wastage Benefit:** Save up to 18% on making charges and Value Addition (V.A.) charges at maturity.\n• **Micro-Savings:** Start accumulating physical gold weight from just ₹100.\n• **Flexible Redemption:** Redeem your accumulated weight for premium jewelry or raw gold coins.',
+        type: 0
+      };
+
+      const howItWorksSec = {
+        title: lang === 'ta' ? 'திட்டம் எப்படி செயல்படுகிறது & போனஸ் விவரம்' : 'How the Scheme Works & Loyalty Bonus Details',
+        content: lang === 'ta' ?
+          '• **திட்ட காலம்:** 11 மாதங்கள் (300 நாட்கள் சேமிப்பு காலம் + 30 நாட்கள் முதிர்வு காலம்).\n• **போனஸ் கணக்கீடு:** போனஸ் என்பது தங்கம் எடையின் மூலமாக வராது, உங்கள் சேமிப்பு தொகைக்கு தகுந்த போனஸ் தொகையாக கணக்கிடப்படும். பின்னர் அந்த போனஸ் தொகைக்கு நிகரான தங்க எடை உங்கள் கணக்கில் சேர்க்கப்படும்.\n• **போனஸ் சலுகை (0-75 நாட்கள்):** முதல் 75 நாட்களுக்குள் செலுத்தப்படும் அனைத்து தொகைகளுக்கும் 7.5% போனஸ் வழங்கப்படும். உதாரணமாக ₹10,000 செலுத்தினால் ₹750 போனஸ் மதிப்புள்ள தங்க எடை கணக்கில் சேர்க்கப்படும்.\n• **போனஸ் சலுகை (76-150 நாட்கள்):** 5.0% போனஸ்.\n• **போனஸ் சலுகை (151-225 நாட்கள்):** 3.0% போனஸ்.\n• **போனஸ் சலுகை (226-300 நாட்கள்):** 1.0% போனஸ்.' :
+          '• **Plan Duration:** 11 Months (300 days accumulation period + 30 days lock-in/maturity period).\n• **Bonus Calculation:** Bonus is credited as an additional cash value equivalent, which is instantly converted to gold weight at prevailing market rates.\n• **0 to 75 Days Payment:** Get a high 7.5% bonus on all payments made within the first 75 days. (e.g. ₹10,000 paid yields a bonus value of ₹750, adding equivalent gold weight to your account).\n• **76 to 150 Days Payment:** 5.0% bonus added to your payments.\n• **151 to 225 Days Payment:** 3.0% bonus added to your payments.\n• **226 to 300 Days Payment:** 1.0% bonus added to your payments.',
+        type: 0
+      };
+
+      const faqSec = {
+        title: lang === 'ta' ? 'அடிக்கடி கேட்கப்படும் கேள்விகள் (FAQs)' : 'Frequently Asked Questions (FAQs)',
+        content: lang === 'ta' ?
+          '1. **குறைந்தபட்ச சேமிப்பு தொகை எவ்வளவு?**\nவெறும் ₹100 முதல் நீங்கள் இந்த திட்டத்தில் சேமிக்க ஆரம்பிக்கலாம்.\n\n2. **முதிர்வில் என்னால் சிறப்பு ஆபரணங்கள் வாங்க முடியுமா?**\nஆம், உங்கள் எடையை எந்தவித செய்கூலியும் இன்றி அழகான தங்க நகைகளாகவோ அல்லது நாணயங்களாகவோ மாற்றிக் கொள்ளலாம்.\n\n3. **எனது தங்கம் எடையை நான் எப்படி கண்காணிப்பது?**\nஉங்கள் மொபைல் ஆப்பில் உள்ள "Ledger" பக்கத்தில் உங்கள் சேமிப்பு மற்றும் போனஸ் எடையை உடனுக்குடன் தெரிந்துகொள்ளலாம்.' :
+          '1. **What is the minimum amount of enrolling Aishwaryam DigiGold?**\nYou can start saving in this scheme from as low as ₹100.\n\n2. **Can I purchase special items like jewelry under this plan?**\nYes, at maturity you can redeem your accumulated gold grams for beautiful physical jewelry with up to 18% discount on making/wastage charges.\n\n3. **How do I know the weight of accumulated gold?**\nYou can view your real-time accumulated gold and silver balances instantly in your mobile application ledger under the history tab.',
+        type: 0
+      };
+
+      // Order tabs correctly: Why Save Gold first, How It Works second, then database configs, and FAQ last
+      const allSections = [whySaveGoldSec, howItWorksSec, ...dbSections, faqSec];
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {sections.map((sec: any, idx: number) => {
+          {allSections.map((sec: any, idx: number) => {
             const type = sec.type !== undefined ? sec.type : 0;
             
             if (type === 0) {
@@ -1014,92 +1148,66 @@ export const SchemeDetail: React.FC = () => {
 
   const renderLoyaltyBonusStructure = () => {
     if (!scheme) return null;
-    if (!scheme.bonusConfigJson) {
+
+    let config: any[] = [];
+    let hasConfig = false;
+    if (scheme.bonusConfigJson) {
+      try {
+        const parsed = JSON.parse(scheme.bonusConfigJson);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          config = parsed;
+          hasConfig = true;
+        }
+      } catch (e) {}
+    }
+
+    if (!hasConfig) {
+      // Fallback tabular column of the default 4 tiers:
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold' }}>
-            <span>{t('payment_day')}</span>
-            <span>{t('bonus_credited')}</span>
-          </div>
-          <div style={{ height: '1px', background: '#F3F4F6' }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-            <span>Day 1 to 75</span>
-            <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>7.5% Bonus weight</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '8px', background: '#FFFDF9', padding: '16px', borderRadius: '12px', border: '1px solid #F5E6C4' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 'bold', color: 'var(--brand-dark)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '6px' }}>
+            <span>PAYMENT INTERVAL</span>
+            <span>BONUS ACCUMULATED</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-            <span>Day 76 to 150</span>
-            <span style={{ color: 'var(--warning-amber)', fontWeight: 'bold' }}>5.5% Bonus weight</span>
+            <span>Day 1 to 75 (First 75 Days)</span>
+            <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>7.5% Instant Bonus</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-            <span>Day 151 to 330</span>
-            <span style={{ color: 'var(--brand-accent)', fontWeight: 'bold' }}>3.5% Bonus weight</span>
+            <span>Day 76 to 150 (Second 75 Days)</span>
+            <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>5.0% Instant Bonus</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+            <span>Day 151 to 225 (Third 75 Days)</span>
+            <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>3.0% Instant Bonus</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+            <span>Day 226 to 300 (Last 75 Days)</span>
+            <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>1.0% Instant Bonus</span>
           </div>
         </div>
       );
     }
 
-    try {
-      const config = JSON.parse(scheme.bonusConfigJson);
-      if (Array.isArray(config)) {
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold' }}>
-              <span>{t('payment_interval')}</span>
-              <span>{t('bonus_credited')}</span>
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '8px', background: '#FFFDF9', padding: '16px', borderRadius: '12px', border: '1px solid #F5E6C4' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontWeight: 'bold', color: 'var(--brand-dark)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '6px' }}>
+          <span>PAYMENT INTERVAL</span>
+          <span>BONUS ACCUMULATED</span>
+        </div>
+        {config.map((tier: any, idx: number) => {
+          const start = tier.startDay ?? tier.StartDay ?? 0;
+          const end = tier.endDay ?? tier.EndDay ?? 0;
+          const pct = tier.bonusPercentage ?? tier.BonusPercentage ?? 0;
+          return (
+            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+              <span>Day {start} to {end}</span>
+              <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>{pct}% Instant Bonus</span>
             </div>
-            <div style={{ height: '1px', background: '#F3F4F6' }} />
-            {config.map((tier: any, idx: number) => {
-              const start = tier.startDay ?? tier.StartDay ?? 0;
-              const end = tier.endDay ?? tier.EndDay ?? 0;
-              const pct = tier.bonusPercentage ?? tier.BonusPercentage ?? 0;
-              return (
-                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  <span>Day {start} to {end}</span>
-                  <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>{pct}% Bonus weight</span>
-                </div>
-              );
-            })}
-          </div>
-        );
-      }
-      
-      if (typeof config === 'object') {
-        const startPct = config.startingBonusPercent ?? 7.5;
-        const milestones = config.milestones || [];
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 'bold' }}>
-              <span>{t('milestone_target')}</span>
-              <span>{t('bonus_value')}</span>
-            </div>
-            <div style={{ height: '1px', background: '#F3F4F6' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-              <span>Starting Loyalty Bonus</span>
-              <span style={{ color: 'var(--success-green)', fontWeight: 'bold' }}>{startPct}% Bonus weight</span>
-            </div>
-            {milestones.map((ms: any, idx: number) => {
-              let label = '';
-              let val = '';
-              if (ms.days !== undefined) {
-                label = `Day ${ms.days} Completed`;
-                val = `+${ms.bonusPercent}% Bonus`;
-              } else if (ms.installment !== undefined) {
-                label = `Installment ${ms.installment} Reached`;
-                val = ms.flatGoldBonusMg ? `+${ms.flatGoldBonusMg} mg Gold` : `+${ms.bonusPercent || ms.freeMonthBonusPercent}%`;
-              }
-              return (
-                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  <span>{label}</span>
-                  <span style={{ color: 'var(--brand-accent)', fontWeight: 'bold' }}>{val}</span>
-                </div>
-              );
-            })}
-          </div>
-        );
-      }
-    } catch (e) {
-      return <span style={{ color: 'red', fontSize: '11px' }}>Failed to parse bonus methodology</span>;
-    }
+          );
+        })}
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -1132,16 +1240,23 @@ export const SchemeDetail: React.FC = () => {
   }
   const isJoinAmountValid = parsedJoinVal > 0 && joinAmountRupees >= 100;
 
-  // Helper to calculate days-based progress
+  // Helper to calculate calendar-days-based progress
   const getDaysProgress = () => {
-    if (!joinedAt || !maturityDate) return { totalDays: 75, elapsedDays: 0, progressPct: 0 };
+    if (!joinedAt || !maturityDate) return { totalDays: 330, elapsedDays: 0, progressPct: 0 };
     const start = new Date(joinedAt).getTime();
     const end = new Date(maturityDate).getTime();
+    const now = new Date().getTime();
+    
     const totalMs = end - start;
-    if (totalMs <= 0) return { totalDays: 75, elapsedDays: 75, progressPct: 100 };
+    const elapsedMs = now - start;
+    
+    if (totalMs <= 0) return { totalDays: 330, elapsedDays: 330, progressPct: 100 };
+    
     const totalDays = Math.ceil(totalMs / (1000 * 60 * 60 * 24));
-    const elapsedDays = Math.max(0, totalDays - remainingDaysForScheme);
-    const progressPct = Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100));
+    // Start progress at Day 1 so the user sees some progress on day 1
+    const elapsedDays = Math.min(totalDays, Math.max(1, Math.ceil(elapsedMs / (1000 * 60 * 60 * 24))));
+    const progressPct = (elapsedDays / totalDays) * 100;
+    
     return {
       totalDays,
       elapsedDays,
@@ -1149,7 +1264,7 @@ export const SchemeDetail: React.FC = () => {
     };
   };
 
-  const { progressPct } = getDaysProgress();
+  const { totalDays, elapsedDays, progressPct } = getDaysProgress();
  
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
@@ -1181,20 +1296,26 @@ export const SchemeDetail: React.FC = () => {
             {autoT(scheme.description)}
           </p>
  
-          <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
-            <div>
-              <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('tenure').toUpperCase()}</span>
-              <div style={{ fontSize: '13px', fontWeight: 'bold' }}>{scheme.totalInstallments} {scheme.durationUnit ? (scheme.durationUnit.toLowerCase().startsWith('day') ? t('days') : t('months')) : (scheme.frequency === 'Daily' ? t('days') : t('months'))}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px', background: '#F8F9FA', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.03)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('tenure')}</span>
+              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
+                {scheme.totalInstallments} {scheme.durationUnit ? (scheme.durationUnit.toLowerCase().startsWith('day') ? t('days') : t('months')) : (scheme.frequency === 'Daily' ? t('days') : t('months'))}
+              </span>
             </div>
-            <div style={{ width: '1px', height: '20px', background: 'rgba(0,0,0,0.1)' }} />
-            <div>
-              <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('min_investment')}</span>
-              <div style={{ fontSize: '13px', fontWeight: 'bold' }}>{t('start_from')} {formatRupees(scheme.installmentAmountPaise)}</div>
+            <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('min_investment')}</span>
+              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
+                {t('start_from')} {formatRupees(scheme.installmentAmountPaise)}
+              </span>
             </div>
-            <div style={{ width: '1px', height: '20px', background: 'rgba(0,0,0,0.1)' }} />
-            <div>
-              <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('frequency').toUpperCase()}</span>
-              <div style={{ fontSize: '13px', fontWeight: 'bold', textTransform: 'capitalize' }}>{autoT(scheme.frequency)}</div>
+            <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-muted)' }}>{t('frequency')}</span>
+              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', textTransform: 'capitalize' }}>
+                {autoT(scheme.frequency)}
+              </span>
             </div>
           </div>
         </div>
@@ -1206,7 +1327,7 @@ export const SchemeDetail: React.FC = () => {
             <div className="glass-card" style={{ borderRadius: '16px', padding: '20px', background: 'white', display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
-                  {t('scheme_duration_progress')}
+                  {t('scheme_duration_progress')}: {lang === 'ta' ? 'நாள்' : 'Day'} {elapsedDays} / {totalDays}
                 </span>
                 <span style={{ fontSize: '14px', fontWeight: '900', color: 'var(--brand-accent)' }}>
                   {remainingDaysForScheme} {remainingDaysForScheme === 1 ? t('days_remaining_singular') : t('days_remaining_plural')}
@@ -1230,6 +1351,38 @@ export const SchemeDetail: React.FC = () => {
               </div>
             </div>
 
+            {/* Active Bonus Tier Tracker Card */}
+            <div className="glass-card" style={{ borderRadius: '16px', padding: '20px', background: 'white', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
+                  {lang === 'ta' ? 'தற்போதைய போனஸ் நிலை' : 'Current Bonus Tier'}
+                </span>
+                <span style={{ fontSize: '14px', fontWeight: '900', color: 'var(--success-green)' }}>
+                  {currentBonusPercent}% {lang === 'ta' ? 'போனஸ்' : 'Bonus'}
+                </span>
+              </div>
+              
+              {remainingDaysForCurrentTier > 0 ? (
+                <>
+                  <div style={{ width: '100%', height: '6px', background: '#F3F4F6', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{
+                      width: `${Math.min(100, Math.max(0, ((75 - remainingDaysForCurrentTier) / 75) * 100))}%`,
+                      height: '100%',
+                      background: 'var(--success-green)',
+                      borderRadius: '3px',
+                    }} />
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    {remainingDaysForCurrentTier} {lang === 'ta' ? 'நாட்கள் இந்த போனஸ் சதவிகிதத்தில் மீதமுள்ளன' : 'days remaining for this bonus percentage'}
+                  </div>
+                </>
+              ) : (
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  {lang === 'ta' ? 'அடுத்த போனஸ் அடுக்கு தயாராக உள்ளது' : 'Ready for the next bonus tier or matured'}
+                </div>
+              )}
+            </div>
+
             {/* Loyalty Milestones Timeline */}
             {milestones.length > 0 && (
               <div className="glass-card" style={{ borderRadius: '16px', padding: '20px', background: 'white', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -1237,49 +1390,79 @@ export const SchemeDetail: React.FC = () => {
                   {t('milestone_roadmap')}
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '6px', position: 'relative', paddingLeft: '8px' }}>
-                  {milestones.map((ms, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative' }}>
-                      {/* Vertical line connecting nodes */}
-                      {idx < milestones.length - 1 && (
+                  {milestones.map((ms, idx) => {
+                    const isCompleted = elapsedDays >= ms.targetDay;
+                    const isCurrentActive = elapsedDays >= (ms.startDay ?? 0) && elapsedDays < ms.targetDay;
+                    
+                    let statusText = t('pending') || 'Pending';
+                    let statusColor = 'var(--text-muted)';
+                    let dotColor = '#E5E7EB';
+                    let dotBorder = '2px solid white';
+                    let dotShadow = 'none';
+                    let textFontWeight = 'normal';
+                    let textColor = 'var(--text-secondary)';
+                    
+                    if (isCompleted) {
+                      statusText = t('achieved') || 'Achieved';
+                      statusColor = 'var(--success-green)';
+                      dotColor = 'var(--success-green)';
+                      dotBorder = '2px solid #D1FAE5';
+                      dotShadow = '0 0 8px rgba(16, 185, 129, 0.4)';
+                      textColor = 'var(--brand-dark)';
+                    } else if (isCurrentActive) {
+                      statusText = lang === 'ta' ? 'செயலில் உள்ளது' : 'Ongoing';
+                      statusColor = 'var(--brand-mid)';
+                      dotColor = 'var(--brand-mid)';
+                      dotBorder = '2px solid #F5E6C4';
+                      dotShadow = '0 0 8px rgba(158, 42, 43, 0.4)';
+                      textFontWeight = 'bold';
+                      textColor = 'var(--brand-dark)';
+                    }
+
+                    return (
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative' }}>
+                        {/* Vertical line connecting nodes */}
+                        {idx < milestones.length - 1 && (
+                          <div style={{
+                            position: 'absolute',
+                            left: '5px',
+                            top: '16px',
+                            width: '2px',
+                            height: '24px',
+                            background: isCompleted ? 'var(--success-green)' : '#E5E7EB',
+                            zIndex: 1
+                          }} />
+                        )}
+                        {/* Timeline node dot */}
                         <div style={{
-                          position: 'absolute',
-                          left: '5px',
-                          top: '16px',
-                          width: '2px',
-                          height: '24px',
-                          background: ms.isAchieved && milestones[idx + 1].isAchieved ? 'var(--success-green)' : '#E5E7EB',
-                          zIndex: 1
+                          width: '12px',
+                          height: '12px',
+                          borderRadius: '50%',
+                          background: dotColor,
+                          border: dotBorder,
+                          boxShadow: dotShadow,
+                          zIndex: 2
                         }} />
-                      )}
-                      {/* Timeline node dot */}
-                      <div style={{
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: '50%',
-                        background: ms.isAchieved ? 'var(--success-green)' : '#E5E7EB',
-                        border: ms.isAchieved ? '2px solid #D1FAE5' : '2px solid white',
-                        boxShadow: ms.isAchieved ? '0 0 8px rgba(16, 185, 129, 0.4)' : 'none',
-                        zIndex: 2
-                      }} />
-                      
-                      <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{
-                          fontSize: '12.5px',
-                          color: ms.isAchieved ? 'var(--brand-dark)' : 'var(--text-secondary)',
-                          fontWeight: ms.isAchieved ? 'bold' : 'normal'
-                        }}>
-                          {ms.name}
-                        </span>
-                        <span style={{
-                          fontSize: '12px',
-                          fontWeight: 'bold',
-                          color: ms.isAchieved ? 'var(--success-green)' : 'var(--text-muted)'
-                        }}>
-                          {ms.bonusPercentage}% {ms.isAchieved ? t('achieved') : t('pending')}
-                        </span>
+                        
+                        <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{
+                            fontSize: '12.5px',
+                            color: textColor,
+                            fontWeight: textFontWeight
+                          }}>
+                            {ms.name}
+                          </span>
+                          <span style={{
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            color: statusColor
+                          }}>
+                            {ms.bonusPercentage}% {statusText}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -1371,13 +1554,13 @@ export const SchemeDetail: React.FC = () => {
                 </span>
               </div>
               <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', textAlign: 'left', minWidth: '340px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', textAlign: 'left', minWidth: '500px' }}>
                   <thead>
                     <tr style={{ borderBottom: '1.5px solid #ECECEC', background: '#F3F4F6' }}>
-                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold' }}>{t('date_and_time')}</th>
-                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>{t('amount')}</th>
-                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>{t('gold_purchased')}</th>
-                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right' }}>{t('bonus_gold')}</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{t('date_and_time')}</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right', whiteSpace: 'nowrap' }}>{t('amount')}</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right', whiteSpace: 'nowrap' }}>{t('gold_purchased')}</th>
+                      <th style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontWeight: 'bold', textAlign: 'right', whiteSpace: 'nowrap' }}>{t('bonus_gold')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1401,13 +1584,13 @@ export const SchemeDetail: React.FC = () => {
                           return (
                             <tr key={item.id || index} style={{ borderBottom: '1px solid #ECECEC' }}>
                               <td style={{ padding: '10px 12px', color: 'var(--brand-dark)', whiteSpace: 'nowrap' }}>{formattedDate}</td>
-                              <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+                              <td style={{ padding: '10px 12px', textAlign: 'right', fontWeight: 'bold', color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
                                 {formatRupeesFull(amt)}
                               </td>
-                              <td style={{ padding: '10px 12px', textAlign: 'right', color: '#FFB300', fontWeight: 'bold' }}>
+                              <td style={{ padding: '10px 12px', textAlign: 'right', color: '#FFB300', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                                 {mgToGrams(goldMg)}
                               </td>
-                              <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--brand-accent)', fontWeight: 'bold' }}>
+                              <td style={{ padding: '10px 12px', textAlign: 'right', color: 'var(--brand-accent)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                                 {mgToGrams(bonusMg)}
                               </td>
                             </tr>
@@ -1415,7 +1598,7 @@ export const SchemeDetail: React.FC = () => {
                         })
                     ) : (
                       <tr>
-                        <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                        <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                           {t('no_transactions_found')}
                         </td>
                       </tr>
@@ -1423,35 +1606,6 @@ export const SchemeDetail: React.FC = () => {
                   </tbody>
                 </table>
               </div>
-            </div>
-  
-            {/* Autopay Subscription config */}
-            <div className="glass-card" style={{
-              borderRadius: '16px', padding: '16px', background: 'white',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-            }}>
-              <div>
-                <span style={{ fontSize: '13px', fontWeight: 'bold', display: 'block' }}>{t('autopay_subscription')}</span>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('autopay_desc')}</span>
-              </div>
-              <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '40px', height: '22px' }}>
-                <input
-                  type="checkbox"
-                  checked={autoPayEnabled}
-                  onChange={(e) => setAutoPayEnabled(e.target.checked)}
-                  style={{ opacity: 0, width: 0, height: 0 }}
-                />
-                <span className="slider-switch" style={{
-                  position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundColor: autoPayEnabled ? 'var(--brand-mid)' : '#ccc', borderRadius: '34px',
-                  transition: '0.4s'
-                }}>
-                  <span style={{
-                    position: 'absolute', content: '""', height: '16px', width: '16px', left: autoPayEnabled ? '20px' : '4px', bottom: '3px',
-                    backgroundColor: 'white', borderRadius: '50%', transition: '0.4s'
-                  }} />
-                </span>
-              </label>
             </div>
           </div>
         ) : (
@@ -1474,7 +1628,7 @@ export const SchemeDetail: React.FC = () => {
             </div>
  
             {/* KYC warnings if basic */}
-            {kycLevel === 'BASIC' && (
+            {kycLevel === 'BASIC' && !isKycPending && (
               <div className="glass-card" style={{
                 borderRadius: '16px', padding: '16px', background: 'var(--warning-light)',
                 border: '1px solid rgba(245, 158, 11, 0.2)', display: 'flex', gap: '12px', alignItems: 'flex-start'
@@ -1569,13 +1723,13 @@ export const SchemeDetail: React.FC = () => {
             {isProcessing ? (
               <div className="spinner" style={{ width: '20px', height: '20px', border: '2px solid white', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
             ) : (
-              kycLevel === 'BASIC' ? t('complete_kyc_join') : t('join_scheme_plan')
+              (kycLevel === 'BASIC' && !isKycPending) ? t('complete_kyc_join') : t('join_scheme_plan')
             )}
           </button>
         )}
       </div>
 
-      {/* Nominee & Address Setup Modal */}
+      {/* Nominee & Address Setup Modal (Aishwaryam Join Form) */}
       {showSetupModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)',
@@ -1583,12 +1737,12 @@ export const SchemeDetail: React.FC = () => {
           backdropFilter: 'blur(4px)', overflowY: 'auto', padding: '20px 0'
         }}>
           <div className="glass-card" style={{
-            width: '90%', maxWidth: '400px', background: 'white', borderRadius: '24px', padding: '24px',
+            width: '95%', maxWidth: '440px', background: 'white', borderRadius: '24px', padding: '24px',
             display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
             margin: 'auto'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 {t('scheme_join_form')}
               </h3>
               <button onClick={() => setShowSetupModal(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
@@ -1596,15 +1750,120 @@ export const SchemeDetail: React.FC = () => {
               </button>
             </div>
 
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '16px' }}>
-              {t('scheme_join_form_desc')}
-            </span>
+            <div style={{ borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '8px' }}>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: '16px' }}>
+                Please review your profile details and provide nominee information to enroll.
+              </span>
+            </div>
 
-            {/* Nominee details */}
+            {/* Read-Only Profile & Address Details Section */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#F9FAFB', borderRadius: '16px', padding: '16px', border: '1px solid #F3F4F6' }}>
+              <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--brand-dark)', textTransform: 'uppercase', letterSpacing: '0.2px', display: 'block', marginBottom: '4px' }}>
+                {lang === 'ta' ? 'சுயவிவர விவரங்கள்' : 'Profile Details'}
+              </span>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px' }}>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Scheme Plan</label>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{scheme?.planName || 'N/A'}</span>
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Full Name</label>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{profile?.fullName || 'N/A'}</span>
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Mobile Number</label>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{profile?.phoneNumber || 'N/A'}</span>
+                </div>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Email ID</label>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', overflowWrap: 'break-word', wordBreak: 'break-word', display: 'block' }}>{profile?.email || 'N/A'}</span>
+                </div>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>Date of Birth</label>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                    {profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString(lang === 'ta' ? 'ta-IN' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
+                  </span>
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>
+                    Pincode {!isPincodeReadOnly && <span style={{ color: 'red' }}>*</span>}
+                  </label>
+                  {isPincodeReadOnly ? (
+                    <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupPincode || 'N/A'}</span>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="6-digit PIN"
+                      value={setupPincode}
+                      onChange={(e) => handleSetupPincodeChange(e.target.value)}
+                      style={{ width: '100%', height: '30px', borderRadius: '6px', border: setupPinError ? '1px solid var(--error-red)' : '1px solid rgba(0,0,0,0.1)', padding: '0 8px', fontSize: '12px', outline: 'none', marginTop: '2px' }}
+                    />
+                  )}
+                  {setupPinError && !isPincodeReadOnly && (
+                    <span style={{ fontSize: '9px', color: 'var(--error-red)', display: 'block', marginTop: '2px' }}>{setupPinError}</span>
+                  )}
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>
+                    City {!isCityReadOnly && <span style={{ color: 'red' }}>*</span>}
+                  </label>
+                  {isCityReadOnly ? (
+                    <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupCity || 'N/A'}</span>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="City (filled from PIN)"
+                      value={setupCity}
+                      readOnly
+                      style={{ width: '100%', height: '30px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 8px', fontSize: '12px', outline: 'none', marginTop: '2px', backgroundColor: '#F3F4F6', color: '#6B7280', cursor: 'not-allowed' }}
+                    />
+                  )}
+                </div>
+                <div>
+                  <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>
+                    State {!isStateReadOnly && <span style={{ color: 'red' }}>*</span>}
+                  </label>
+                  {isStateReadOnly ? (
+                    <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>{setupState || 'N/A'}</span>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="State (filled from PIN)"
+                      value={setupState}
+                      readOnly
+                      style={{ width: '100%', height: '30px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 8px', fontSize: '12px', outline: 'none', marginTop: '2px', backgroundColor: '#F3F4F6', color: '#6B7280', cursor: 'not-allowed' }}
+                    />
+                  )}
+                </div>
+              </div>
+              <div style={{ marginTop: '6px', borderTop: '1px solid #ECECEC', paddingTop: '6px' }}>
+                <label style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block' }}>
+                  Street Address {!isStreetReadOnly && <span style={{ color: 'red' }}>*</span>}
+                </label>
+                {isStreetReadOnly ? (
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', display: 'block' }}>{setupStreet || 'N/A'}</span>
+                ) : (
+                  <input
+                    type="text"
+                    placeholder="Flat, building, street, area details"
+                    value={setupStreet}
+                    onChange={(e) => setSetupStreet(e.target.value)}
+                    style={{ width: '100%', height: '32px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 8px', fontSize: '12px', outline: 'none', marginTop: '4px' }}
+                  />
+                )}
+              </div>
+            </div>
+
+
+            {/* Editable Nominee Details */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>{t('nominee_information')}</span>
+              
               <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('nominee_name_label')}</label>
+                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                  {t('nominee_name_label')} <span style={{ color: 'red' }}>*</span>
+                </label>
                 <input
                   type="text"
                   placeholder={t('enter_nominee_name')}
@@ -1615,24 +1874,19 @@ export const SchemeDetail: React.FC = () => {
               </div>
 
               <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('nominee_mobile')}</label>
-                <input
-                  type="text"
-                  placeholder={t('ten_digit_mobile')}
-                  value={setupNomineePhone}
-                  onChange={(e) => setSetupNomineePhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('relationship')}</label>
+                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                  {t('relationship')} <span style={{ color: 'red' }}>*</span>
+                </label>
+                
                 <select
                   value={setupNomineeRelationship}
                   onChange={(e) => setSetupNomineeRelationship(e.target.value)}
-                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px', background: 'white' }}
+                  style={{
+                    width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)',
+                    padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px', background: 'white'
+                  }}
                 >
-                  <option value="">{t('select_relationship')}</option>
+                  <option value="">{t('select_relationship') || 'Select Relationship'}</option>
                   {RELATIONSHIPS.map((rel) => (
                     <option key={rel} value={rel}>{autoT(rel)}</option>
                   ))}
@@ -1640,96 +1894,50 @@ export const SchemeDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Address details */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '8px', borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '12px' }}>
-              <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>{t('primary_address')}</span>
-              
-              <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('pincode_label')}</label>
+            {/* Terms and Conditions navigation section */}
+            <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: '12px', marginTop: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <input
-                  type="text"
-                  placeholder={t('enter_pincode')}
-                  value={setupPincode}
-                  onChange={(e) => handleSetupPincodeChange(e.target.value)}
-                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: setupPinError ? '1px solid var(--error-red)' : '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px' }}
+                  type="checkbox"
+                  id="agree-checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                 />
-                {setupPinError && (
-                  <span style={{ fontSize: '11px', color: 'var(--error-red)', marginTop: '4px', display: 'block' }}>
-                    {setupPinError}
+                <label htmlFor="agree-checkbox" style={{ fontSize: '12px', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                  By continuing, you agree to the{' '}
+                  <span
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowTermsPopup(true);
+                    }}
+                    style={{ color: 'var(--brand-mid)', fontWeight: 'bold', textDecoration: 'underline', cursor: 'pointer' }}
+                  >
+                    Terms & Conditions
                   </span>
-                )}
+                </label>
               </div>
-
-              <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('state_label')}</label>
-                <input
-                  type="text"
-                  readOnly
-                  placeholder="Auto-populated on Pincode entry..."
-                  value={setupState}
-                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px', background: '#F3F4F6', color: '#1F2937' }}
-                />
               </div>
-
-              <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('city_label')}</label>
-                <input
-                  type="text"
-                  readOnly
-                  placeholder="Auto-populated on Pincode entry..."
-                  value={setupCity}
-                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px', background: '#F3F4F6', color: '#1F2937' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{t('street_address')}</label>
-                <input
-                  type="text"
-                  placeholder={t('street_address_placeholder')}
-                  value={setupStreet}
-                  onChange={(e) => setSetupStreet(e.target.value)}
-                  style={{ width: '100%', height: '38px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', marginTop: '4px' }}
-                />
-              </div>
-            </div>
 
             {/* Save & Proceed button */}
             <button
               onClick={handleSaveSetup}
-              disabled={
-                isProcessing ||
-                !setupNomineeName.trim() ||
-                setupNomineePhone.length !== 10 ||
-                !setupNomineeRelationship ||
-                !setupState || 
-                !setupCity || 
-                !setupStreet.trim() || 
-                setupPincode.length !== 6 || 
-                setupPinError !== null
-              }
+              disabled={isProcessing}
               style={{
-                width: '100%', height: '46px', borderRadius: '12px', background: 'var(--gradient-brand)',
+                width: '100%', height: '46px', borderRadius: '12px', background: 'var(--brand-dark)',
                 color: 'white', border: 'none', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer',
-                marginTop: '10px', boxShadow: '0 4px 10px var(--brand-glow)',
-                opacity: (
-                  isProcessing ||
-                  !setupNomineeName.trim() ||
-                  setupNomineePhone.length !== 10 ||
-                  !setupNomineeRelationship ||
-                  !setupState || 
-                  !setupCity || 
-                  !setupStreet.trim() || 
-                  setupPincode.length !== 6 || 
-                  setupPinError !== null
-                ) ? 0.5 : 1
+                marginTop: '6px', boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                opacity: isProcessing ? 0.5 : 1
               }}
             >
-              {isProcessing ? t('saving') : t('save_proceed')}
+              {isProcessing ? t('saving') : 'PROCEED'}
             </button>
           </div>
         </div>
       )}
+
+
 
       {/* Success Popup Modal */}
       {showSuccessPopup && (
@@ -1782,6 +1990,82 @@ export const SchemeDetail: React.FC = () => {
               >
                 {t('invest_later')}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Scrollable Terms & Conditions Modal Overlay */}
+      {showTermsPopup && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1300,
+          backdropFilter: 'blur(3px)', padding: '20px', boxSizing: 'border-box'
+        }} onClick={() => setShowTermsPopup(false)}>
+          <div style={{
+            width: '100%', maxWidth: '440px', background: 'white', borderRadius: '24px',
+            padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '80%',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.2)', boxSizing: 'border-box'
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ECECEC', paddingBottom: '12px' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: 0 }}>
+                {t('terms_title')}
+              </h3>
+              <button onClick={() => setShowTermsPopup(false)} style={{ background: 'transparent', border: 'none', color: 'var(--brand-mid)', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}>
+                Close
+              </button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px', paddingRight: '4px' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0, lineHeight: '18px', fontStyle: 'italic' }}>
+                {t('terms_subtitle')}
+              </p>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div style={{ borderLeft: '3px solid var(--brand-accent)', paddingLeft: '10px' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 4px 0' }}>{t('terms_sec1_title')}</h4>
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: 0, lineHeight: '16px' }}>{t('terms_sec1_text')}</p>
+                </div>
+
+                <div style={{ borderLeft: '3px solid var(--brand-accent)', paddingLeft: '10px' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 4px 0' }}>{t('terms_sec2_title')}</h4>
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: '0 0 4px 0', lineHeight: '16px' }}>{t('terms_sec2_text')}</p>
+                  <ul style={{ margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    <li>{t('terms_sec2_bullet1')}</li>
+                    <li>{t('terms_sec2_bullet2')}</li>
+                    <li>{t('terms_sec2_bullet3')}</li>
+                  </ul>
+                </div>
+
+                <div style={{ borderLeft: '3px solid var(--brand-accent)', paddingLeft: '10px' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 4px 0' }}>{t('terms_sec3_title')}</h4>
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: 0, lineHeight: '16px' }}>{t('terms_sec3_text')}</p>
+                </div>
+
+                <div style={{ borderLeft: '3px solid var(--brand-accent)', paddingLeft: '10px' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 4px 0' }}>{t('terms_sec4_title')}</h4>
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: '0 0 4px 0', lineHeight: '16px' }}>{t('terms_sec4_text')}</p>
+                  <ul style={{ margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    <li>{t('terms_sec4_bullet1')}</li>
+                    <li>{t('terms_sec4_bullet2')}</li>
+                    <li>{t('terms_sec4_bullet3')}</li>
+                  </ul>
+                </div>
+
+                <div style={{ borderLeft: '3px solid var(--brand-accent)', paddingLeft: '10px' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 4px 0' }}>{t('terms_sec5_title')}</h4>
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: '0 0 4px 0', lineHeight: '16px' }}>{t('terms_sec5_text')}</p>
+                  <ul style={{ margin: 0, paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    <li>{t('terms_sec5_bullet1')}</li>
+                    <li>{t('terms_sec5_bullet2')}</li>
+                    <li>{t('terms_sec5_bullet3')}</li>
+                  </ul>
+                </div>
+
+                <div style={{ borderLeft: '3px solid var(--brand-accent)', paddingLeft: '10px' }}>
+                  <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)', margin: '0 0 4px 0' }}>{t('terms_sec6_title')}</h4>
+                  <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', margin: 0, lineHeight: '16px' }}>{t('terms_sec6_text')}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1881,55 +2165,59 @@ export const SchemeDetail: React.FC = () => {
             </div>
  
             {/* Calculations Breakdown */}
-            {parseFloat(joinAmount) > 0 && (
-              <div style={{ background: '#FFF9F0', border: '1px solid rgba(255, 215, 0, 0.2)', padding: '16px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {joinType === 'RUPEES' ? (
-                  <>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      <span>{t('savings_deposit')}</span>
-                      <span style={{ fontWeight: 'bold' }}>₹{parseFloat(joinAmount).toFixed(2)}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      <span>{t('gst_included')}</span>
-                      <span>₹{(parseFloat(joinAmount) - (parseFloat(joinAmount) / 1.03)).toFixed(2)}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--brand-mid)', fontWeight: 'bold' }}>
-                      <span>{t('loyalty_bonus_structure')} (7.5%)</span>
-                      <span>+ ₹{(parseFloat(joinAmount) / 1.03 * 0.075).toFixed(2)} equivalent</span>
-                    </div>
-                    <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)' }} />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
-                      <span>{t('effective_gold_added')}</span>
-                      <span style={{ color: 'var(--gold-deep)' }}>
-                        {((parseFloat(joinAmount) / 1.03 * 1.075 * 100) / goldPrice22K).toFixed(4)} {t('grams_suffix')}
-                      </span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      <span>{t('base_metal_value_22k')}</span>
-                      <span style={{ fontWeight: 'bold' }}>₹{(parseFloat(joinAmount) * goldPrice22K / 100).toFixed(2)}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                      <span>{t('gst_3_percent')}</span>
-                      <span>₹{(parseFloat(joinAmount) * goldPrice22K / 100 * 0.03).toFixed(2)}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--brand-mid)', fontWeight: 'bold' }}>
-                      <span>{t('loyalty_bonus_structure')} (7.5%)</span>
-                      <span>+ {(parseFloat(joinAmount) * 0.075).toFixed(4)} {t('grams_suffix')} equivalent</span>
-                    </div>
-                    <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)' }} />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
-                      <span>{t('total_amount_payable')}</span>
-                      <span style={{ color: 'var(--brand-dark)' }}>
-                        ₹{(parseFloat(joinAmount) * goldPrice22K / 100 * 1.03).toFixed(2)}
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
+            {(() => {
+              const activeBonusPercent = isActive ? (currentBonusPercent || 7.5) : 7.5;
+              const bonusMultiplier = activeBonusPercent / 100;
+              return parseFloat(joinAmount) > 0 && (
+                <div style={{ background: '#FFF9F0', border: '1px solid rgba(255, 215, 0, 0.2)', padding: '16px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {joinType === 'RUPEES' ? (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        <span>{t('savings_deposit')}</span>
+                        <span style={{ fontWeight: 'bold' }}>₹{parseFloat(joinAmount).toFixed(2)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        <span>{t('gst_included')}</span>
+                        <span>₹{(parseFloat(joinAmount) - (parseFloat(joinAmount) / 1.03)).toFixed(2)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--brand-mid)', fontWeight: 'bold' }}>
+                        <span>{t('loyalty_bonus_structure')} ({activeBonusPercent}%)</span>
+                        <span>+ ₹{(parseFloat(joinAmount) / 1.03 * bonusMultiplier).toFixed(2)} equivalent</span>
+                      </div>
+                      <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)' }} />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
+                        <span>{t('effective_gold_added')}</span>
+                        <span style={{ color: 'var(--gold-deep)' }}>
+                          {((parseFloat(joinAmount) / 1.03 * (1 + bonusMultiplier) * 100) / goldPrice22K).toFixed(4)} {t('grams_suffix')}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        <span>{t('base_metal_value_22k')}</span>
+                        <span style={{ fontWeight: 'bold' }}>₹{(parseFloat(joinAmount) * goldPrice22K / 100).toFixed(2)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        <span>{t('gst_3_percent')}</span>
+                        <span>₹{(parseFloat(joinAmount) * goldPrice22K / 100 * 0.03).toFixed(2)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--brand-mid)', fontWeight: 'bold' }}>
+                        <span>{t('loyalty_bonus_structure')} ({activeBonusPercent}%)</span>
+                        <span>+ {(parseFloat(joinAmount) * bonusMultiplier).toFixed(4)} {t('grams_suffix')} equivalent</span>
+                      </div>
+                      <div style={{ height: '1px', background: 'rgba(0,0,0,0.05)' }} />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 'bold', color: 'var(--brand-dark)' }}>
+                        <span>{t('total_amount_payable')}</span>
+                        <span style={{ color: 'var(--brand-dark)' }}>
+                          ₹{(parseFloat(joinAmount) * goldPrice22K / 100 * 1.03).toFixed(2)}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
  
             {/* Validation warning */}
             {(validationError || (parsedJoinVal > 0 && !isJoinAmountValid)) && (

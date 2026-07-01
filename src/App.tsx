@@ -99,6 +99,7 @@ import { AppProvider } from './context/AppContext';
 import { PushNotificationHandler } from './components/PushNotificationHandler';
 import { BackButtonHandler } from './components/BackButtonHandler';
 import { SuperAdminDashboard } from './screens/super-admin/SuperAdminDashboard';
+import { PromotionalOffersPage } from './screens/PromotionalOffersPage';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
 import './App.css';
@@ -316,6 +317,7 @@ const App: React.FC = () => {
             <Route path="/my-bonuses" element={<MyBonuses />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/super-admin" element={<SuperAdminDashboard />} />
+            <Route path="/offers" element={<PromotionalOffersPage />} />
 
             {/* Fallback route */}
             <Route path="*" element={<Navigate to="/" replace />} />

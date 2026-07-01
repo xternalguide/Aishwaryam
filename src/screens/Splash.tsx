@@ -55,13 +55,9 @@ export const Splash: React.FC = () => {
   }, [minTimeElapsed, maxTimeReached, isLoading, navigate]);
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
+    <div className="auth-page-root auth-page-bg" style={{
       alignItems: 'center',
       justifyContent: 'center',
-      height: '100vh',
-      background: 'var(--gradient-brand)',
       color: 'white',
       textAlign: 'center'
     }}>
