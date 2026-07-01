@@ -16,7 +16,7 @@ export const Onboarding: React.FC = () => {
   useEffect(() => {
     if (profile?.kycLevel === 'PENDING' || profile?.kycLevel === 'FULL') {
       navigate('/dashboard');
-    } else if (profile?.kycLevel === 'REJECTED' || (profile?.fullName && profile?.fullName.trim() !== '')) {
+    } else if (profile?.kycLevel === 'REJECTED' || (profile?.nomineeName && profile?.nomineeName.trim() !== '')) {
       setCurrentStep(2);
     }
   }, [profile, navigate]);
