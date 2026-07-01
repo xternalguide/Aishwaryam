@@ -147,6 +147,7 @@ export const Dashboard: React.FC = () => {
 
   const [userName, setUserName] = useState('');
   const [kycLevel, setKycLevel] = useState('BASIC');
+  const [kycStatusMsg, setKycStatusMsg] = useState('');
 
   // ── THEME TOGGLE (Always Light) ───────────────────────────────────────────
   const isDark = false;
@@ -437,6 +438,20 @@ export const Dashboard: React.FC = () => {
     if (profile) {
       setUserName(profile.fullName || 'User');
       setKycLevel(profile.kycLevel || 'BASIC');
+
+      const fetchKycStatus = async () => {
+        const userId = SessionManager.getUserId();
+        if (!userId) return;
+        try {
+          const res = await ApiClient.get(`api/Kyc/status/${userId}`);
+          if (res.data && res.data.success) {
+            setKycStatusMsg(res.data.status || '');
+          }
+        } catch (err) {
+          console.error('Failed to load KYC documents in dashboard:', err);
+        }
+      };
+      fetchKycStatus();
     }
     if (contextActiveSchemes) setActiveSchemes(contextActiveSchemes);
     if (contextTransactions) setTransactions(contextTransactions);
@@ -711,6 +726,17 @@ export const Dashboard: React.FC = () => {
     </div>
   );
 
+  const renderKycBanner = () => {
+    if (kycLevel === 'FULL') return null;
+    if (kycLevel === 'PENDING' || kycStatusMsg === 'PENDING') {
+      return renderKycPendingBanner();
+    }
+    if (kycLevel === 'REJECTED') {
+      return renderKycRejectedBanner();
+    }
+    return renderKycWarningBanner();
+  };
+
 
   const renderMobileIntegratedHeader = () => {
     const totalBonusGoldMg = portfolio?.totalBonusGoldMg || 0;
@@ -751,13 +777,7 @@ export const Dashboard: React.FC = () => {
           </button>
         </div>
 
-        {kycLevel === 'BASIC' ? (
-          renderKycWarningBanner()
-        ) : kycLevel === 'PENDING' ? (
-          renderKycPendingBanner()
-        ) : kycLevel === 'REJECTED' ? (
-          renderKycRejectedBanner()
-        ) : (
+        {renderKycBanner() || (
           <>
             {/* Balance Display */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', margin: '8px 0', width: '100%' }}>
@@ -942,13 +962,7 @@ export const Dashboard: React.FC = () => {
         <div style={{ width:'32px', height:'22px', borderRadius:'6px', background:'linear-gradient(135deg,#FFE082 0%,#FFB300 100%)', border:'1px solid #FFD54F', opacity:0.85 }} />
       </div>
 
-      {kycLevel === 'BASIC' ? (
-        renderKycWarningBanner()
-      ) : kycLevel === 'PENDING' ? (
-        renderKycPendingBanner()
-      ) : kycLevel === 'REJECTED' ? (
-        renderKycRejectedBanner()
-      ) : (
+      {renderKycBanner() || (
         <>
           {/* balance */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom:'8px' }}>
