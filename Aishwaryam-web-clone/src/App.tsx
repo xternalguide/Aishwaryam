@@ -60,28 +60,41 @@ const ScrollToTop: React.FC = () => {
 
     // Dynamically sync body background color to match active screen theme
     const path = pathname.toLowerCase();
-    if (path.includes('/welcome')) {
-      document.body.style.background = 'var(--gradient-brand)';
-    } else if (path.includes('/login') || path.includes('/mpin') || path.includes('/profilesetup') || path.includes('/onboarding')) {
-      document.body.style.background = 'var(--surface-light)';
-    } else if (
+    
+    // Group 1: Screens with dark purple buttons/backgrounds at the bottom
+    if (
+      path.includes('/welcome') || 
+      path.includes('/login') || 
+      path.includes('/mpin') || 
+      path.includes('/profile-setup') || 
+      path.includes('/onboarding') ||
+      path.includes('/privacy') ||
+      path.includes('/terms')
+    ) {
+      document.body.style.background = 'var(--brand-deep)';
+    } 
+    // Group 2: Screens with light grey/off-white backgrounds
+    else if (
       path.includes('/price-calculator') || 
       path.includes('/scheme') || 
       path.includes('/completed-schemes') ||
       path.includes('/portfolio') ||
-      path.includes('/privacy') ||
-      path.includes('/terms') ||
       path.includes('/faq') ||
-      path.includes('/how-it-works') ||
+      path.includes('/how') || // matches /how-it-works /how_it_works
       path.includes('/my-bonuses') ||
       path.includes('/payment') ||
       path.includes('/ai_assistant') ||
-      path.includes('/notifications')
+      path.includes('/notifications') ||
+      path.includes('/offers')
     ) {
       document.body.style.background = '#F8F9FA';
-    } else if (path.includes('/dashboard')) {
-      document.body.style.background = '#F0EDE8'; // Matches the home/dashboard tab page background
-    } else {
+    } 
+    // Group 3: Main dashboard tabs
+    else if (path.includes('/dashboard')) {
+      document.body.style.background = '#F0EDE8';
+    } 
+    // Fallback
+    else {
       document.body.style.background = '#ffffff';
     }
   }, [pathname]);
