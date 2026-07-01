@@ -779,18 +779,18 @@ export const Onboarding: React.FC = () => {
                     <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>{t('state_label')}</label>
                     <input
                       type="text"
-                      disabled
                       value={state}
-                      placeholder={t('auto_populated')}
+                      onChange={(e) => setState(e.target.value)}
+                      placeholder={t('state_label')}
                       style={{
                         width: '100%',
                         height: '48px',
                         borderRadius: '8px',
-                        border: '1px solid rgba(0,0,0,0.08)',
+                        border: '1px solid rgba(0,0,0,0.1)',
                         padding: '0 12px',
                         fontSize: '14px',
-                        background: '#F3F4F6',
-                        color: 'var(--text-secondary)',
+                        background: '#FFFFFF',
+                        color: 'var(--text-primary)',
                         marginTop: '4px'
                       }}
                     />
@@ -800,18 +800,18 @@ export const Onboarding: React.FC = () => {
                     <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>{t('city_label')}</label>
                     <input
                       type="text"
-                      disabled
                       value={city}
-                      placeholder={t('auto_populated')}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder={t('city_label')}
                       style={{
                         width: '100%',
                         height: '48px',
                         borderRadius: '8px',
-                        border: '1px solid rgba(0,0,0,0.08)',
+                        border: '1px solid rgba(0,0,0,0.1)',
                         padding: '0 12px',
                         fontSize: '14px',
-                        background: '#F3F4F6',
-                        color: 'var(--text-secondary)',
+                        background: '#FFFFFF',
+                        color: 'var(--text-primary)',
                         marginTop: '4px'
                       }}
                     />
