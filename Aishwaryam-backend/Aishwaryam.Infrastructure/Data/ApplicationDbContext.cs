@@ -294,7 +294,11 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
                 entity.Property(e => e.UserId).HasColumnName("user_id");
                 entity.Property(e => e.DocumentType).HasColumnName("document_type").IsRequired().HasMaxLength(50);
+                entity.Property(e => e.DocumentNumber).HasColumnName("document_number");
                 entity.Property(e => e.DocumentUrl).HasColumnName("document_url").IsRequired();
+                entity.Property(e => e.Status).HasColumnName("status").HasDefaultValue("UNDER_REVIEW");
+                entity.Property(e => e.RejectionReason).HasColumnName("rejection_reason");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.UploadedAt).HasColumnName("uploaded_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                 entity.HasOne(d => d.User)

@@ -69,7 +69,11 @@ CREATE TABLE kyc_documents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     document_type VARCHAR(50) NOT NULL, -- PAN, AADHAAR_FRONT, AADHAAR_BACK
+    document_number VARCHAR(100),
     document_url TEXT NOT NULL,
+    status VARCHAR(50) DEFAULT 'UNDER_REVIEW',
+    rejection_reason TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
