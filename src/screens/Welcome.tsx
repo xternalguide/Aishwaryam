@@ -24,21 +24,6 @@ export const Welcome: React.FC = () => {
   const [current, setCurrent] = useState(0);
   const [slides, setSlides] = useState<Slide[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [viewportHeight, setViewportHeight] = useState('100vh');
-
-  useEffect(() => {
-    const handleResize = () => {
-      // If the display/font scale is zoomed, the browser viewport height decreases.
-      if (window.innerHeight < 740) {
-        setViewportHeight('120vh');
-      } else {
-        setViewportHeight('100vh');
-      }
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     const fetchWelcomeSlides = async () => {
@@ -112,7 +97,7 @@ export const Welcome: React.FC = () => {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      minHeight: viewportHeight,
+      minHeight: '120vh',
       background: 'var(--gradient-brand)',
       boxSizing: 'border-box',
       position: 'relative',
