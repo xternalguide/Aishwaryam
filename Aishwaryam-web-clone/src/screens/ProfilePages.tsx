@@ -562,9 +562,11 @@ export const ProfileKyc: React.FC = () => {
     setNomineePhone(phone);
     setNomineeRelationship(relationship);
 
-    setNewNomineeInput(name);
-    setNewNomineePhone(phone);
-    setNewNomineeRelationship(relationship);
+    if (!isEditingNominee) {
+      setNewNomineeInput(name);
+      setNewNomineePhone(phone);
+      setNewNomineeRelationship(relationship);
+    }
 
     const fetchKycStatus = async () => {
       const userId = SessionManager.getUserId();
