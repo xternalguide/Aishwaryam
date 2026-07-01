@@ -133,8 +133,13 @@ window.alert = function(message: string) {
   document.body.appendChild(backdrop);
 };
 
+import { Provider } from 'react-redux'
+import { store } from './store/index'
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </StrictMode>,
 )
