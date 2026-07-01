@@ -72,14 +72,18 @@ builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-    // Auth Rate Limit: 120 requests per 1 minute per IP (increased for testing and release flexibility)
-    options.AddFixedWindowLimiter("auth_policy", opt =>
-    {
-        opt.Window = TimeSpan.FromMinutes(1);
-        opt.PermitLimit = 120;
-        opt.QueueLimit = 0;
-        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-    });
+    // Auth Rate Limit: 120 requests per 1 minute per IP (partitioned by IP to prevent global scaling bottlenecks)
+    options.AddPolicy("auth_policy", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "global_auth",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                Window = TimeSpan.FromMinutes(1),
+                PermitLimit = 120,
+                QueueLimit = 0,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                AutoReplenishment = true
+            }));
 
     // General API Rate Limit: 100 requests per minute per IP
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
