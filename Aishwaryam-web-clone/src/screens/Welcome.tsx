@@ -88,7 +88,7 @@ export const Welcome: React.FC = () => {
 
   const getSlideImage = (base64?: string) => {
     if (!base64) return '';
-    if (base64.startsWith('data:')) return base64;
+    if (base64.startsWith('data:') || base64.startsWith('http') || base64.startsWith('/') || base64.startsWith('blob:')) return base64;
     return `data:image/png;base64,${base64}`;
   };
 
@@ -96,7 +96,8 @@ export const Welcome: React.FC = () => {
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      height: '100vh',
+      height: '100%',
+      minHeight: '100vh',
       background: 'var(--gradient-brand)',
       boxSizing: 'border-box',
       position: 'relative',
