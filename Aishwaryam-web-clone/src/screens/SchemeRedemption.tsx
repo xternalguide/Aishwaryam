@@ -68,7 +68,7 @@ export const SchemeRedemption: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#F8F9FA' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: '#F8F9FA' }}>
         <div className="spinner" style={{ width: '36px', height: '36px', border: '3px solid var(--brand-mid)', borderTop: '3px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       </div>
     );
@@ -78,7 +78,7 @@ export const SchemeRedemption: React.FC = () => {
                     (redemptionType !== 'DELIVERY' || deliveryAddress.trim().length > 0);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8F9FA' }}>
       {/* Top Bar */}
       <div className="app-header-bar" style={{
         background: 'white',

@@ -173,7 +173,7 @@ export const BuyGold: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F9FAFB' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F9FAFB' }}>
       {/* Top Bar */}
       <div className="app-header-bar" style={{
         background: 'white',

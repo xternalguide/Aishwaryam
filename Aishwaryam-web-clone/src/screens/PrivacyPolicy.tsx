@@ -74,7 +74,7 @@ export const PrivacyPolicy: React.FC = () => {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'white' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'white' }}>
       
       {/* Header */}
       <div className="app-header-bar" style={{

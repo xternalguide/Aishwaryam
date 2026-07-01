@@ -54,7 +54,7 @@ export const Welcome: React.FC = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '100vh',
+        height: '100%',
         background: 'var(--gradient-brand)',
         color: 'white'
       }}>

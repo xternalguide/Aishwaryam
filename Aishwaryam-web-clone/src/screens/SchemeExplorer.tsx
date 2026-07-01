@@ -57,7 +57,7 @@ export const SchemeExplorer: React.FC = () => {
   }, [availableSchemes, activeSchemes]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh', background: '#F8F9FA' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100%', background: '#F8F9FA' }}>
       {/* Top Bar */}
       <div className="app-header-bar" style={{
         background: 'var(--gradient-brand)',

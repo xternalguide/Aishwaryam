@@ -35,7 +35,7 @@ export const PaymentSuccess: React.FC = () => {
   const gstAmountPaise = receipt.gstAmountPaise || (amountPaise - baseAmountPaise);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F9FAFB', justifyContent: 'space-between', padding: '24px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F9FAFB', justifyContent: 'space-between', padding: '24px' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         {/* Animated Checkmark Circle */}
         <div style={{

@@ -28,7 +28,7 @@ export const CompletedSchemesPage: React.FC = () => {
   const mgToGrams = (mg: number) => `${(mg / 1000).toFixed(4)} g`;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8F9FA' }}>
       
       {/* Header */}
       <div className="app-header-bar" style={{

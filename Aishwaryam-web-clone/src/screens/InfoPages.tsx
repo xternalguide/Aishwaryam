@@ -31,7 +31,7 @@ const Header: React.FC<{ title: string; onBack: () => void }> = ({ title, onBack
 export const HowItWorks: React.FC = () => {
   const navigate = useNavigate();
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F9FAFB' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F9FAFB' }}>
       <Header title="How It Works" onBack={() => navigate(-1)} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {[
@@ -70,7 +70,7 @@ export const Faq: React.FC = () => {
     { q: t('faq_4_q'), a: t('faq_4_a') }
   ];
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F9FAFB' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F9FAFB' }}>
       <Header title={t('faqs')} onBack={() => navigate(-1)} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {faqs.map((faq, idx) => (
@@ -98,7 +98,7 @@ export const Faq: React.FC = () => {
 export const SafetyTrust: React.FC = () => {
   const navigate = useNavigate();
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F9FAFB' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F9FAFB' }}>
       <Header title="Safety & Trust" onBack={() => navigate(-1)} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div style={{ textAlign: 'center', padding: '20px 0' }}>
@@ -124,7 +124,7 @@ export const SafetyTrust: React.FC = () => {
 export const About: React.FC = () => {
   const navigate = useNavigate();
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F9FAFB' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F9FAFB' }}>
       <Header title="About Us" onBack={() => navigate(-1)} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div style={{ textAlign: 'center', padding: '20px 0' }}>
@@ -145,7 +145,7 @@ export const About: React.FC = () => {
 export const RedemptionGuide: React.FC = () => {
   const navigate = useNavigate();
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F9FAFB' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F9FAFB' }}>
       <Header title="Redemption Guide" onBack={() => navigate(-1)} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {[
@@ -167,7 +167,7 @@ export const RedemptionGuide: React.FC = () => {
 export const WhyGold: React.FC = () => {
   const navigate = useNavigate();
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F9FAFB' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F9FAFB' }}>
       <Header title="Why Invest in Gold?" onBack={() => navigate(-1)} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {[
@@ -189,7 +189,7 @@ export const WhyGold: React.FC = () => {
 export const DigiGoldInfo: React.FC = () => {
   const navigate = useNavigate();
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F9FAFB' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F9FAFB' }}>
       <Header title="Digital Metal chits" onBack={() => navigate(-1)} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -314,7 +314,7 @@ export const AiAssistant: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F5F5F5', position: 'relative' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F5F5F5', position: 'relative' }}>
       
       {/* Custom localized header with Talk to a Human button */}
       <div className="app-header-bar" style={{
@@ -548,7 +548,7 @@ export const Referral: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8F9FA' }}>
       <Header title={t('referrals_rewards')} onBack={() => navigate(-1)} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{ textAlign: 'center', padding: '10px 0' }}>
@@ -613,7 +613,7 @@ export const LegalHub: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F9FAFB' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F9FAFB' }}>
       <Header title={t('legal_compliance')} onBack={() => navigate(-1)} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {[
@@ -643,7 +643,7 @@ export const GoldRateAlerts: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8F9FA' }}>
       <Header title="Gold Rate Alerts" onBack={() => navigate(-1)} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div className="glass-card" style={{ padding: '20px', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -718,7 +718,7 @@ export const MyBonuses: React.FC = () => {
   );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8F9FA' }}>
       <Header title="My Bonuses" onBack={() => navigate(-1)} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {bonusTransactions.map((tx, idx) => {
@@ -828,7 +828,7 @@ export const Notifications: React.FC = () => {
   const displayNotifs = localNotifs;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8F9FA' }}>
       <Header title="Notifications" onBack={() => navigate(-1)} />
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {localNotifs.length > 0 && (

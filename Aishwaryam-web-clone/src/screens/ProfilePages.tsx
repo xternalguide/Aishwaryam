@@ -278,7 +278,7 @@ export const ProfileAddress: React.FC = () => {
   const isFormValid = formState && formCity && formStreet.trim() && formPincode.length === 6 && !pinError;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8F9FA' }}>
       <ProfileHeader title={t('address_label')} onBack={handleBack} />
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -633,7 +633,7 @@ export const ProfileKyc: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8F9FA' }}>
       <ProfileHeader title={t('kyc_details')} onBack={handleBack} />
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>

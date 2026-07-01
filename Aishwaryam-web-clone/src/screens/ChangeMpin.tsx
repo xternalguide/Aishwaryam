@@ -109,7 +109,7 @@ export const ChangeMpin: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8F9FA' }}>
       {/* Header */}
       <div className="app-header-bar" style={{
         background: 'var(--gradient-brand)',
