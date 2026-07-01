@@ -97,7 +97,7 @@ export const Welcome: React.FC = () => {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      minHeight: '120vh',
+      minHeight: '100%',
       background: 'var(--gradient-brand)',
       boxSizing: 'border-box',
       position: 'relative',
@@ -111,7 +111,8 @@ export const Welcome: React.FC = () => {
         height: '100%',
         padding: '24px',
         justifyContent: 'space-between',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        overflow: 'hidden'
       }}>
         {/* Top Header Row with Skip Button */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingTop: '16px', width: '100%' }}>
@@ -141,7 +142,10 @@ export const Welcome: React.FC = () => {
           textAlign: 'center',
           flex: 1,
           justifyContent: 'center',
-          paddingTop: isLast ? '40px' : '0'
+          paddingTop: isLast ? '40px' : '0',
+          overflowY: 'auto',
+          width: '100%',
+          scrollbarWidth: 'none'
         }}>
           {/* Animated Image/Icon Container */}
           <div style={{
@@ -271,7 +275,9 @@ export const Welcome: React.FC = () => {
           flexDirection: 'column',
           alignItems: 'center',
           gap: '24px',
-          paddingBottom: '32px'
+          paddingBottom: '32px',
+          flexShrink: 0,
+          width: '100%'
         }}>
           {/* Indicators */}
           <div style={{ display: 'flex', gap: '8px' }}>
