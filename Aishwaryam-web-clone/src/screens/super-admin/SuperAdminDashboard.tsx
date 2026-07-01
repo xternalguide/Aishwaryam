@@ -568,7 +568,7 @@ const KycVerificationPortal: React.FC = () => {
   };
 
   const documents = selectedUser?.documents || [];
-  const pendingDocs = documents.filter((d: any) => d.status === 'PENDING' || d.status === 'UNDER_REVIEW');
+  const pendingDocs = documents.filter((d: any) => d.status === 'PENDING');
   const rejectedDocs = documents.filter((d: any) => d.status === 'REJECTED');
   const approvedDocs = documents.filter((d: any) => d.status === 'APPROVED');
 
