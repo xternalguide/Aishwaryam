@@ -262,6 +262,24 @@ namespace Aishwaryam.Api.Controllers
             }
         }
 
+        [HttpGet("recent")]
+        public async Task<IActionResult> GetRecentPayments()
+        {
+            var payments = await _context.Payments
+                .OrderByDescending(p => p.CreatedAt)
+                .Take(10)
+                .Select(p => new {
+                    p.Id,
+                    p.UserId,
+                    p.ProviderOrderId,
+                    p.AmountPaise,
+                    p.Status,
+                    p.CreatedAt
+                })
+                .ToListAsync();
+            return Ok(payments);
+        }
+
         [HttpGet("reconcile/{orderId}")]
         public async Task<IActionResult> ReconcilePayment(string orderId)
         {
