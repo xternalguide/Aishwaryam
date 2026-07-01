@@ -608,26 +608,6 @@ export const Dashboard: React.FC = () => {
   // RENDER HELPERS (MOBILE INTEGRATED DESIGN)
   // ═══════════════════════════════════════════
   
-  const handleActionClick = (onClick: () => void) => {
-    const activeDocs = kycDocs.filter((d: any) => d.status !== 'REPLACED');
-    const hasDocs = activeDocs.length > 0;
-
-    if (kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW' || hasDocs) {
-      alert(t('kyc_pending_block'));
-      return;
-    }
-    if (kycLevel === 'BASIC') {
-      alert(t('kyc_basic_block'));
-      navigate('/onboarding');
-      return;
-    }
-    if (kycLevel === 'REJECTED') {
-      alert(lang === 'ta' ? 'Resubmit the KYC. உங்கள் KYC நிராகரிக்கப்பட்டுள்ளது.' : 'KYC Rejected. Please resubmit your KYC.');
-      navigate('/onboarding');
-      return;
-    }
-    onClick();
-  };
 
   const renderKycWarningBanner = () => (
     <div 
@@ -851,10 +831,10 @@ export const Dashboard: React.FC = () => {
 
   const renderMobileQuickActions = () => {
     const actions = [
-      { label: t('action_schemes'), icon: <TrendingUp size={20} color="#C2185B" />, bg: 'rgba(194, 24, 91, 0.12)', onClick: () => handleActionClick(() => navigate('/scheme-explorer')) },
-      { label: t('my_bonuses'), icon: <Award size={20} color="#FFB300" />, bg: 'rgba(255, 179, 0, 0.12)', onClick: () => handleActionClick(() => navigate('/my-bonuses')) },
-      { label: t('action_referral'), icon: <Gift size={20} color="#10B981" />, bg: 'rgba(16, 185, 129, 0.12)', onClick: () => handleActionClick(() => navigate('/referral')) },
-      { label: t('action_calculator'), icon: <Calculator size={20} color="#0288D1" />, bg: 'rgba(2, 136, 209, 0.12)', onClick: () => handleActionClick(() => navigate('/profile/price-calculator')) },
+      { label: t('action_schemes'), icon: <TrendingUp size={20} color="#C2185B" />, bg: 'rgba(194, 24, 91, 0.12)', onClick: () => navigate('/scheme-explorer') },
+      { label: t('my_bonuses'), icon: <Award size={20} color="#FFB300" />, bg: 'rgba(255, 179, 0, 0.12)', onClick: () => navigate('/my-bonuses') },
+      { label: t('action_referral'), icon: <Gift size={20} color="#10B981" />, bg: 'rgba(16, 185, 129, 0.12)', onClick: () => navigate('/referral') },
+      { label: t('action_calculator'), icon: <Calculator size={20} color="#0288D1" />, bg: 'rgba(2, 136, 209, 0.12)', onClick: () => navigate('/profile/price-calculator') },
     ];
 
     return (
@@ -1044,9 +1024,9 @@ export const Dashboard: React.FC = () => {
   /** Quick actions 3×1 grid */
   const renderQuickActionsGrid = () => {
     const actions = [
-      { label:'Explore Schemes', icon:<TrendingUp size={22} color={isDark ? '#FFD700' : '#B8860B'} />, bg: isDark ? 'rgba(255,215,0,0.15)' : 'rgba(184,134,11,0.12)', onClick:()=>handleActionClick(()=>navigate('/scheme-explorer')) },
-      { label:'My Bonuses',      icon:<Award size={22} color="#C2185B" />,      bg:'rgba(194,24,91,0.15)',  onClick:()=>handleActionClick(()=>navigate('/my-bonuses')) },
-      { label:'Refer & Earn',   icon:<Gift size={22} color="#10B981" />,        bg:'rgba(16,185,129,0.15)', onClick:()=>handleActionClick(()=>navigate('/referral')) },
+      { label:'Explore Schemes', icon:<TrendingUp size={22} color={isDark ? '#FFD700' : '#B8860B'} />, bg: isDark ? 'rgba(255,215,0,0.15)' : 'rgba(184,134,11,0.12)', onClick:()=>navigate('/scheme-explorer') },
+      { label:'My Bonuses',      icon:<Award size={22} color="#C2185B" />,      bg:'rgba(194,24,91,0.15)',  onClick:()=>navigate('/my-bonuses') },
+      { label:'Refer & Earn',   icon:<Gift size={22} color="#10B981" />,        bg:'rgba(16,185,129,0.15)', onClick:()=>navigate('/referral') },
     ];
     return (
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'12px' }}>
