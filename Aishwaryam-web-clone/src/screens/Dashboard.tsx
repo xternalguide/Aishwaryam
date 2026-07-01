@@ -2113,7 +2113,7 @@ export const Dashboard: React.FC = () => {
           onClick={() => navigate('/ai_assistant')}
           style={{
             position: 'fixed',
-            bottom: `calc(80px + env(safe-area-inset-bottom, 0px))`,
+            bottom: `calc(100px + env(safe-area-inset-bottom, 0px))`,
             right: '20px',
             width: '54px',
             height: '54px',
