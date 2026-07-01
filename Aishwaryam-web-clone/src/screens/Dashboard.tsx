@@ -1431,7 +1431,7 @@ export const Dashboard: React.FC = () => {
   // MAIN RENDER
   // ═══════════════════════════════════════════
   return (
-    <div style={{ display:'flex', flexDirection:isDesktop?'row':'column', height:'100%', width:'100%', overflow:'hidden', background:DS.bgPage, fontFamily:DS.font, position:'relative' }}>
+    <div style={{ display:'flex', flexDirection:isDesktop?'row':'column', height:'100vh', width:'100%', overflow:'hidden', background:DS.bgPage, fontFamily:DS.font, position:'relative' }}>
       <style>{globalStyles}</style>
 
       {/* ── DESKTOP SIDEBAR ── */}
@@ -1499,7 +1499,7 @@ export const Dashboard: React.FC = () => {
       )}
 
       {/* ── MAIN CONTENT ── */}
-      <div style={{ flex:1, display:'flex', flexDirection:'column', height:'100%', overflowY:'auto', overflowX:'hidden' }}>
+      <div style={{ flex:1, display:'flex', flexDirection:'column', height:'100%', overflowY:'hidden', overflowX:'hidden' }}>
 
         {/* TOP NAVBAR */}
         {isDesktop && selectedTab !== 2 && (
