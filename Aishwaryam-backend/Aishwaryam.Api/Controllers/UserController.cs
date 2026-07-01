@@ -287,7 +287,15 @@ namespace Aishwaryam.Api.Controllers
                     "ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS offer_type varchar(30) DEFAULT 'FLASH_SALE' NOT NULL; " +
                     "ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS bonus_percent decimal(5,2) DEFAULT 0 NOT NULL; " +
                     "ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS min_purchase_amount_paise bigint DEFAULT 0 NOT NULL; " +
-                    "ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS duration_hours int DEFAULT 24 NOT NULL;"
+                    "ALTER TABLE promotional_offers ADD COLUMN IF NOT EXISTS duration_hours int DEFAULT 24 NOT NULL; " +
+                    "ALTER TABLE kyc_documents ADD COLUMN IF NOT EXISTS \"DocumentNumber\" text; " +
+                    "ALTER TABLE kyc_documents ADD COLUMN IF NOT EXISTS \"Status\" text DEFAULT 'UNDER_REVIEW'; " +
+                    "ALTER TABLE kyc_documents ADD COLUMN IF NOT EXISTS \"RejectionReason\" text; " +
+                    "ALTER TABLE kyc_documents ADD COLUMN IF NOT EXISTS \"CreatedAt\" timestamp with time zone DEFAULT CURRENT_TIMESTAMP; " +
+                    "ALTER TABLE kyc_documents ADD COLUMN IF NOT EXISTS document_number text; " +
+                    "ALTER TABLE kyc_documents ADD COLUMN IF NOT EXISTS status text DEFAULT 'UNDER_REVIEW'; " +
+                    "ALTER TABLE kyc_documents ADD COLUMN IF NOT EXISTS rejection_reason text; " +
+                    "ALTER TABLE kyc_documents ADD COLUMN IF NOT EXISTS created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP;"
                 );
                 return Ok("Migrated successfully");
             } catch (Exception e) {
