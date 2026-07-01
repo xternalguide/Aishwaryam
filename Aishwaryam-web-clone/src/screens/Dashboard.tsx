@@ -131,7 +131,7 @@ interface TransactionItem {
 // ─────────────────────────────────────────────
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const isAndroidApp = !!(window as any).Capacitor && /android/i.test(navigator.userAgent);
+
   const { t, autoT, lang, changeLanguage } = useTranslation();
   const [selectedTab, setSelectedTab] = useState(() => {
     const saved = localStorage.getItem('DASHBOARD_ACTIVE_TAB');
@@ -1541,7 +1541,7 @@ export const Dashboard: React.FC = () => {
           onTouchStart={handlePullTouchStart}
           onTouchMove={handlePullTouchMove}
           onTouchEnd={handlePullTouchEnd}
-          style={{ flex:1, overflowY:'auto', overflowX:'hidden', paddingBottom:isDesktop?'32px':(isAndroidApp?'96px':'32px'), position:'relative' }}
+          style={{ flex:1, overflowY:'auto', overflowX:'hidden', paddingBottom:isDesktop?'32px':'100px', position:'relative' }}
         >
           {/* Pull to refresh indicator */}
           {(pullDistance > 0 || isRefreshing) && (
