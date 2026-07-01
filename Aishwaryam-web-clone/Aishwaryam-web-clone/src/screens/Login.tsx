@@ -152,7 +152,8 @@ export const Login: React.FC = () => {
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      height: '100vh',
+      height: '100%',
+      minHeight: '100vh',
       background: 'var(--surface-light)',
       boxSizing: 'border-box',
       position: 'relative'
