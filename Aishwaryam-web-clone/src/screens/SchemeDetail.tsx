@@ -86,6 +86,8 @@ export const SchemeDetail: React.FC = () => {
   }, [userSchemeId]);
 
   const [kycLevel, setKycLevel] = useState('BASIC');
+  const [kycStatusMsg, setKycStatusMsg] = useState('');
+  const [kycDocs, setKycDocs] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingTitle, setProcessingTitle] = useState('Verifying Transaction...');
   const [processingMsg, setProcessingMsg] = useState('Confirming your purchase. Please do not close the application or go back.');
@@ -115,6 +117,11 @@ export const SchemeDetail: React.FC = () => {
   const [setupPincode, setSetupPincode] = useState('');
 
   const RELATIONSHIPS = ["Father", "Mother", "Wife", "Husband", "Son", "Daughter", "Brother", "Guardian"];
+
+  const activeDocs = kycDocs.filter((d: any) => d.status !== 'REPLACED');
+  const hasDocs = activeDocs.length > 0;
+  const isKycPending = kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW' || hasDocs;
+  const isKycRejected = kycLevel === 'REJECTED';
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -339,6 +346,20 @@ export const SchemeDetail: React.FC = () => {
     // 4. Fetch profile for KYC verification checks
     if (profile) {
       setKycLevel(profile.kycLevel || 'BASIC');
+      const fetchKycStatus = async () => {
+        const userId = SessionManager.getUserId();
+        if (!userId) return;
+        try {
+          const res = await ApiClient.get(`api/Kyc/status/${userId}`);
+          if (res.data && res.data.success) {
+            setKycStatusMsg(res.data.status || '');
+            setKycDocs(res.data.documents || []);
+          }
+        } catch (err) {
+          console.error('Failed to load KYC documents in SchemeDetail:', err);
+        }
+      };
+      fetchKycStatus();
     }
     
     setIsLoading(false);
@@ -609,17 +630,17 @@ export const SchemeDetail: React.FC = () => {
 
   const handleJoinScheme = async () => {
     if (!scheme) return;
-    if (kycLevel === 'BASIC') {
-      alert(t('kyc_basic_block'));
-      navigate('/onboarding');
-      return;
-    }
-    if (kycLevel === 'PENDING') {
+    if (isKycPending) {
       alert(t('kyc_pending_block'));
       return;
     }
-    if (kycLevel === 'REJECTED') {
+    if (isKycRejected) {
       alert(t('kyc_rejected_block'));
+      return;
+    }
+    if (kycLevel === 'BASIC') {
+      alert(t('kyc_basic_block'));
+      navigate('/onboarding');
       return;
     }
 
@@ -809,17 +830,17 @@ export const SchemeDetail: React.FC = () => {
 
   const handlePayJoinPlan = async () => {
     if (!scheme) return;
-    if (kycLevel === 'BASIC') {
-      alert(t('kyc_basic_block'));
-      navigate('/onboarding');
-      return;
-    }
-    if (kycLevel === 'PENDING') {
+    if (isKycPending) {
       alert(t('kyc_pending_block'));
       return;
     }
-    if (kycLevel === 'REJECTED') {
+    if (isKycRejected) {
       alert(t('kyc_rejected_block'));
+      return;
+    }
+    if (kycLevel === 'BASIC') {
+      alert(t('kyc_basic_block'));
+      navigate('/onboarding');
       return;
     }
     const parsedVal = parseFloat(joinAmount) || 0;
@@ -1607,7 +1628,7 @@ export const SchemeDetail: React.FC = () => {
             </div>
  
             {/* KYC warnings if basic */}
-            {kycLevel === 'BASIC' && (
+            {kycLevel === 'BASIC' && !isKycPending && (
               <div className="glass-card" style={{
                 borderRadius: '16px', padding: '16px', background: 'var(--warning-light)',
                 border: '1px solid rgba(245, 158, 11, 0.2)', display: 'flex', gap: '12px', alignItems: 'flex-start'
@@ -1702,7 +1723,7 @@ export const SchemeDetail: React.FC = () => {
             {isProcessing ? (
               <div className="spinner" style={{ width: '20px', height: '20px', border: '2px solid white', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
             ) : (
-              kycLevel === 'BASIC' ? t('complete_kyc_join') : t('join_scheme_plan')
+              (kycLevel === 'BASIC' && !isKycPending) ? t('complete_kyc_join') : t('join_scheme_plan')
             )}
           </button>
         )}

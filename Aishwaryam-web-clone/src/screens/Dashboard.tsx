@@ -148,6 +148,7 @@ export const Dashboard: React.FC = () => {
   const [userName, setUserName] = useState('');
   const [kycLevel, setKycLevel] = useState('BASIC');
   const [kycStatusMsg, setKycStatusMsg] = useState('');
+  const [kycDocs, setKycDocs] = useState<any[]>([]);
 
   // ── THEME TOGGLE (Always Light) ───────────────────────────────────────────
   const isDark = false;
@@ -446,6 +447,7 @@ export const Dashboard: React.FC = () => {
           const res = await ApiClient.get(`api/Kyc/status/${userId}`);
           if (res.data && res.data.success) {
             setKycStatusMsg(res.data.status || '');
+            setKycDocs(res.data.documents || []);
           }
         } catch (err) {
           console.error('Failed to load KYC documents in dashboard:', err);
@@ -607,13 +609,16 @@ export const Dashboard: React.FC = () => {
   // ═══════════════════════════════════════════
   
   const handleActionClick = (onClick: () => void) => {
+    const activeDocs = kycDocs.filter((d: any) => d.status !== 'REPLACED');
+    const hasDocs = activeDocs.length > 0;
+
+    if (kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW' || hasDocs) {
+      alert(t('kyc_pending_block'));
+      return;
+    }
     if (kycLevel === 'BASIC') {
       alert(t('kyc_basic_block'));
       navigate('/onboarding');
-      return;
-    }
-    if (kycLevel === 'PENDING') {
-      alert(t('kyc_pending_block'));
       return;
     }
     if (kycLevel === 'REJECTED') {
@@ -728,7 +733,10 @@ export const Dashboard: React.FC = () => {
 
   const renderKycBanner = () => {
     if (kycLevel === 'FULL') return null;
-    if (kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW') {
+    const activeDocs = kycDocs.filter((d: any) => d.status !== 'REPLACED');
+    const hasDocs = activeDocs.length > 0;
+
+    if (kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW' || hasDocs) {
       return renderKycPendingBanner();
     }
     if (kycLevel === 'REJECTED') {
