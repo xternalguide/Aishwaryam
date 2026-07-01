@@ -67,9 +67,7 @@ const ScrollToTop: React.FC = () => {
       path.includes('/login') || 
       path.includes('/mpin') || 
       path.includes('/profile-setup') || 
-      path.includes('/onboarding') ||
-      path.includes('/privacy') ||
-      path.includes('/terms')
+      path.includes('/onboarding')
     ) {
       document.body.style.background = 'var(--brand-deep)';
     } 

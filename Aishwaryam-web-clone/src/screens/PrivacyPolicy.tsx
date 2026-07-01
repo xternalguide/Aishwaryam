@@ -133,7 +133,10 @@ export const PrivacyPolicy: React.FC = () => {
       {!isAccepted && (
         <div style={{
           background: 'white',
-          padding: '16px 20px',
+          paddingTop: '16px',
+          paddingLeft: '20px',
+          paddingRight: '20px',
+          paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))',
           borderTop: '1px solid #ECECEC',
           boxShadow: '0 -4px 12px rgba(0,0,0,0.03)',
           position: 'sticky',
