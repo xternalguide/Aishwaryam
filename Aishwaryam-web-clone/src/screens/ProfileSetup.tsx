@@ -52,14 +52,15 @@ export const ProfileSetup: React.FC = () => {
     <div className="auth-page-root" style={{
       display: 'flex',
       flexDirection: 'column',
-      minHeight: '112vh',
-      height: 'auto',
+      height: '100vh',
+      overflow: 'hidden',
       background: '#F5F7F5',
       boxSizing: 'border-box'
     }}>
       <div className="responsive-form-container" style={{
         flex: 1,
-        padding: '24px',
+        overflowY: 'auto',
+        padding: '24px 24px 120px 24px',
         display: 'flex',
         flexDirection: 'column',
         boxSizing: 'border-box'

@@ -268,7 +268,8 @@ button, input, select {
 .auth-page-root {
   display: flex !important;
   flex-direction: column !important;
-  min-height: 112vh !important;
+  height: 100vh !important;
+  overflow: hidden !important;
   box-sizing: border-box !important;
   position: relative !important;
   width: 100% !important;

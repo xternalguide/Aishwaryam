@@ -454,7 +454,7 @@ export const Onboarding: React.FC = () => {
   };
 
   return (
-    <div className="auth-page-root" style={{ display: 'flex', flexDirection: 'column', minHeight: '112vh', height: 'auto', background: 'var(--surface-light)' }}>
+    <div className="auth-page-root" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--surface-light)' }}>
       {/* Header */}
       <div className="app-header-bar" style={{
         background: 'var(--brand-dark)',
@@ -478,7 +478,7 @@ export const Onboarding: React.FC = () => {
         </div>
       </div>
 
-      <div className="onboarding-form-container" style={{ flex: 1, padding: '5px 20px 20px 20px', display: 'flex', flexDirection: 'column' }}>
+      <div className="onboarding-form-container" style={{ flex: 1, overflowY: 'auto', padding: '5px 20px 120px 20px', display: 'flex', flexDirection: 'column' }}>
         {/* Progress Stepper */}
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0px 0 16px 0' }}>
           {[1, 2].map((num) => (
