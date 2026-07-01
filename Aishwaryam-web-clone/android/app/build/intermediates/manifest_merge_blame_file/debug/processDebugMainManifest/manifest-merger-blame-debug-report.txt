@@ -11,11 +11,11 @@
 11    <!-- Permissions -->
 12
 13    <uses-permission android:name="android.permission.INTERNET" />
-13-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:41:5-67
-13-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:41:22-64
+13-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:41:5-67
+13-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:41:22-64
 14    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-14-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:42:5-77
-14-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:42:22-74
+14-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:42:5-77
+14-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:42:22-74
 15    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 15-->[com.google.firebase:firebase-messaging:25.0.1] C:\Users\srive\.gradle\caches\8.14.3\transforms\fee7827030cf30b9c64fc7d59fae02bb\transformed\firebase-messaging-25.0.1\AndroidManifest.xml:22:5-79
 15-->[com.google.firebase:firebase-messaging:25.0.1] C:\Users\srive\.gradle\caches\8.14.3\transforms\fee7827030cf30b9c64fc7d59fae02bb\transformed\firebase-messaging-25.0.1\AndroidManifest.xml:22:22-76
@@ -72,8 +72,8 @@
 42        <intent>
 42-->[com.razorpay:standard-core:1.7.15] C:\Users\srive\.gradle\caches\8.14.3\transforms\c70bffb82c833c8c7c78e3f374882410\transformed\standard-core-1.7.15\AndroidManifest.xml:33:9-35:18
 43            <action android:name="android.intent.action.MAIN" />
-43-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:17-69
-43-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:25-66
+43-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:17-69
+43-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:25-66
 44        </intent>
 45        <intent>
 45-->[com.razorpay:standard-core:1.7.15] C:\Users\srive\.gradle\caches\8.14.3\transforms\c70bffb82c833c8c7c78e3f374882410\transformed\standard-core-1.7.15\AndroidManifest.xml:36:9-40:18
@@ -115,68 +115,68 @@
 64-->[com.razorpay:core:1.0.16] C:\Users\srive\.gradle\caches\8.14.3\transforms\b95e92518864fdd4b20b2c0008bc90da\transformed\core-1.0.16\AndroidManifest.xml:10:22-78
 65
 66    <application
-66-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:4:5-37:19
+66-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:4:5-37:19
 67        android:allowBackup="true"
-67-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:5:9-35
+67-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:5:9-35
 68        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
 68-->[androidx.core:core:1.17.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:28:18-86
 69        android:debuggable="true"
 70        android:extractNativeLibs="false"
 71        android:icon="@mipmap/ic_launcher"
-71-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:6:9-43
+71-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:6:9-43
 72        android:label="@string/app_name"
-72-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:7:9-41
+72-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:7:9-41
 73        android:roundIcon="@mipmap/ic_launcher_round"
-73-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:8:9-54
+73-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:8:9-54
 74        android:supportsRtl="true"
-74-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:9:9-35
+74-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:9:9-35
 75        android:theme="@style/AppTheme"
-75-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:10:9-40
+75-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:10:9-40
 76        android:usesCleartextTraffic="true" >
-76-->[:capacitor-cordova-android-plugins] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:18-53
+76-->[:capacitor-cordova-android-plugins] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:18-53
 77        <activity
-77-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:12:9-26:20
+77-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:12:9-26:20
 78            android:name="com.aishwaryam.app.MainActivity"
-78-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:14:13-41
+78-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:14:13-41
 79            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
-79-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:13:13-148
+79-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:13:13-148
 80            android:exported="true"
-80-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:19:13-36
+80-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:19:13-36
 81            android:label="@string/title_activity_main"
-81-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:15:13-56
+81-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:15:13-56
 82            android:launchMode="singleTask"
-82-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:17:13-44
+82-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:17:13-44
 83            android:screenOrientation="portrait"
-83-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:18:13-49
+83-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:18:13-49
 84            android:theme="@style/AppTheme.NoActionBarLaunch" >
-84-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:16:13-62
+84-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:16:13-62
 85            <intent-filter>
-85-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:21:13-24:29
+85-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:21:13-24:29
 86                <action android:name="android.intent.action.MAIN" />
-86-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:17-69
-86-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:25-66
+86-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:17-69
+86-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:25-66
 87
 88                <category android:name="android.intent.category.LAUNCHER" />
-88-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:23:17-77
-88-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:23:27-74
+88-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:23:17-77
+88-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:23:27-74
 89            </intent-filter>
 90        </activity>
 91
 92        <provider
 93            android:name="androidx.core.content.FileProvider"
-93-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:29:13-62
+93-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:29:13-62
 94            android:authorities="com.aishwaryam.app.fileprovider"
-94-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:30:13-64
+94-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:30:13-64
 95            android:exported="false"
-95-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:31:13-37
+95-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:31:13-37
 96            android:grantUriPermissions="true" >
-96-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:32:13-47
+96-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:32:13-47
 97            <meta-data
-97-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:33:13-35:64
+97-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:33:13-35:64
 98                android:name="android.support.FILE_PROVIDER_PATHS"
-98-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:34:17-67
+98-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:34:17-67
 99                android:resource="@xml/file_paths" />
-99-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:35:17-51
+99-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:35:17-51
 100        </provider>
 101
 102        <service
@@ -306,8 +306,8 @@
 170            <intent-filter>
 170-->[com.razorpay:standard-core:1.7.15] C:\Users\srive\.gradle\caches\8.14.3\transforms\c70bffb82c833c8c7c78e3f374882410\transformed\standard-core-1.7.15\AndroidManifest.xml:52:13-54:29
 171                <action android:name="android.intent.action.MAIN" />
-171-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:17-69
-171-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:25-66
+171-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:17-69
+171-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:25-66
 172            </intent-filter>
 173        </activity>
 174
