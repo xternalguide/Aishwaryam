@@ -55,7 +55,7 @@ export const Splash: React.FC = () => {
   }, [minTimeElapsed, maxTimeReached, isLoading, navigate]);
 
   return (
-    <div className="auth-page-root" style={{
+    <div className="auth-page-root auth-page-bg" style={{
       alignItems: 'center',
       justifyContent: 'center',
       color: 'white',

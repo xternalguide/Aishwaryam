@@ -272,7 +272,7 @@ export const Mpin: React.FC = () => {
   }, [showSuccessDialog, flowState]);
 
   return (
-    <div className="auth-page-root" style={{
+    <div className="auth-page-root auth-page-bg" style={{
       boxSizing: 'border-box',
       position: 'relative'
     }}>

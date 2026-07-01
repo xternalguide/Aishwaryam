@@ -59,7 +59,6 @@ export const ProfileSetup: React.FC = () => {
     }}>
       <div className="responsive-form-container" style={{
         flex: 1,
-        overflowY: 'auto',
         padding: '24px',
         display: 'flex',
         flexDirection: 'column',

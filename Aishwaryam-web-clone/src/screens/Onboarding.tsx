@@ -416,6 +416,19 @@ export const Onboarding: React.FC = () => {
     }
   };
 
+  const handleBackAction = () => {
+    const hasStep1Data = nomineeName || pincode || name || email || dob || (state && state !== 'Tamil Nadu') || (city && city !== 'Chennai') || (area && area !== 'T. Nagar');
+    const hasStep2Data = panImage || aadhaarFrontImage || aadhaarBackImage;
+    
+    if (hasStep1Data || hasStep2Data) {
+      if (window.confirm(lang === 'ta' ? 'நீங்கள் வெளியேற விரும்புகிறீர்களா? உள்ளிடப்பட்ட தரவு இழக்கப்படும்.' : 'Are you sure you want to go back? Any entered onboarding data will be lost.')) {
+        navigate('/dashboard');
+      }
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
   return (
     <div className="auth-page-root" style={{ display: 'flex', flexDirection: 'column', minHeight: '112vh', height: 'auto', background: 'var(--surface-light)' }}>
       {/* Header */}
@@ -429,7 +442,7 @@ export const Onboarding: React.FC = () => {
         boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
       }}>
         <button
-          onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : navigate(-1)}
+          onClick={handleBackAction}
           style={{ background: 'transparent', border: 'none', color: 'white', display: 'flex', alignItems: 'center', cursor: 'pointer' }}
         >
           <ArrowLeft size={24} />
@@ -441,7 +454,7 @@ export const Onboarding: React.FC = () => {
         </div>
       </div>
 
-      <div className="onboarding-form-container" style={{ flex: 1, overflowY: 'auto', padding: '5px 20px 20px 20px', display: 'flex', flexDirection: 'column' }}>
+      <div className="onboarding-form-container" style={{ flex: 1, padding: '5px 20px 20px 20px', display: 'flex', flexDirection: 'column' }}>
         {/* Progress Stepper */}
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0px 0 16px 0' }}>
           {[1, 2].map((num) => (
@@ -459,7 +472,7 @@ export const Onboarding: React.FC = () => {
                 fontSize: '14px',
                 transition: 'all 0.3s ease'
               }}>
-                {num}
+                {num < currentStep ? '✓' : num}
               </div>
               {num < totalSteps && (
                 <div style={{

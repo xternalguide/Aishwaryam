@@ -265,15 +265,17 @@ button, input, select {
   }
 }
 
-/* Auth screen extended background to resolve bottom navigation/safe-area spacing on scaled screens */
 .auth-page-root {
   display: flex !important;
   flex-direction: column !important;
   min-height: 112vh !important;
-  background: var(--gradient-brand) !important;
   box-sizing: border-box !important;
   position: relative !important;
   width: 100% !important;
+}
+
+.auth-page-bg {
+  background: var(--gradient-brand) !important;
 }
 
 
