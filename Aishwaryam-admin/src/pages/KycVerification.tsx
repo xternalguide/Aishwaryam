@@ -97,35 +97,61 @@ export const KycVerification: React.FC = () => {
       const res = await fetch(`${apiBase}/api/Kyc/status/${uid}`);
       if (res.ok) {
         const d = await res.json();
-        const docs = d.documents && d.documents.length
-          ? d.documents
-          : d.documentUrl
-          ? [{ documentType: d.documentType, documentNumber: d.documentNumber, documentUrl: d.documentUrl }]
+        const rawDocs = d.documents || d.Documents || [];
+        const docUrl = d.documentUrl || d.DocumentUrl || '';
+        const docType = d.documentType || d.DocumentType || '';
+        const docNum = d.documentNumber || d.DocumentNumber || '';
+        const statusVal = d.status || d.Status || '';
+
+        const docs = rawDocs && rawDocs.length
+          ? rawDocs
+          : docUrl
+          ? [{ documentType: docType, documentNumber: docNum, documentUrl: docUrl, status: statusVal }]
           : [];
         
         const selUser = users.find((u) => u.id === uid);
         const isUserPending = selUser?.kycLevel === 'PENDING';
         
         const mappedDocs = docs.map((doc: any) => {
-          if (isUserPending && (doc.status === 'VERIFIED' || doc.status === 'APPROVED')) {
-            return { ...doc, status: 'PENDING' };
+          const docStatus = (doc.status || doc.Status || '').toUpperCase();
+          const docTypeStr = doc.documentType || doc.DocumentType || '';
+          const docNumStr = doc.documentNumber || doc.DocumentNumber || '';
+          const docUrlStr = doc.documentUrl || doc.DocumentUrl || '';
+          const submittedAtVal = doc.submittedAt || doc.SubmittedAt || doc.uploadedAt || doc.UploadedAt || '';
+
+          let finalStatus = docStatus;
+          if (isUserPending && (docStatus === 'VERIFIED' || docStatus === 'APPROVED')) {
+            finalStatus = 'PENDING';
           }
-          return doc;
+
+          return {
+            documentType: docTypeStr,
+            documentNumber: docNumStr,
+            documentUrl: docUrlStr,
+            status: finalStatus,
+            submittedAt: submittedAtVal
+          };
         });
         
-        const displayStatus = isUserPending ? 'PENDING' : (d.status || '—');
+        const displayStatus = isUserPending ? 'PENDING' : (statusVal || '—');
 
         setDetails({
-          documentType: d.documentType || '—',
-          documentNumber: d.documentNumber || '—',
+          documentType: docType || '—',
+          documentNumber: docNum || '—',
           status: displayStatus,
           documents: mappedDocs
         });
 
         // Dynamically select the tab to show based on which documents are present
-        const hasPending = mappedDocs.some((doc: any) => doc.status === 'PENDING' || !doc.status || doc.status === '—' || doc.status === 'UNDER_REVIEW');
-        const hasApproved = mappedDocs.some((doc: any) => doc.status === 'APPROVED' || doc.status === 'VERIFIED');
-        const hasRejected = mappedDocs.some((doc: any) => doc.status === 'REJECTED');
+        const hasPending = mappedDocs.some((doc: any) => {
+          const s = (doc.status || '').toUpperCase();
+          return s === 'PENDING' || !s || s === '—' || s === 'UNDER_REVIEW';
+        });
+        const hasApproved = mappedDocs.some((doc: any) => {
+          const s = (doc.status || '').toUpperCase();
+          return s === 'APPROVED' || s === 'VERIFIED';
+        });
+        const hasRejected = mappedDocs.some((doc: any) => (doc.status || '').toUpperCase() === 'REJECTED');
 
         if (hasPending) {
           setActiveDocTab('pending');
