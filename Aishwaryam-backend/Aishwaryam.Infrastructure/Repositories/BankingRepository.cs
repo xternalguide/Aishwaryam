@@ -46,7 +46,11 @@ namespace Aishwaryam.Infrastructure.Repositories
 
         public async Task UpdatePaymentAsync(Payment payment)
         {
-            _context.Payments.Update(payment);
+            var entry = _context.Entry(payment);
+            if (entry.State == Microsoft.EntityFrameworkCore.EntityState.Detached)
+            {
+                _context.Payments.Update(payment);
+            }
             await _context.SaveChangesAsync();
         }
 
