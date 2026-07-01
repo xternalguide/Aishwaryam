@@ -120,7 +120,7 @@ export const SchemeDetail: React.FC = () => {
 
   const activeDocs = kycDocs.filter((d: any) => d.status !== 'REPLACED');
   const hasDocs = activeDocs.length > 0;
-  const isKycPending = kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW' || hasDocs;
+  const isKycPending = kycLevel !== 'FULL' && (kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW' || hasDocs);
   const isKycRejected = kycLevel === 'REJECTED';
 
   useEffect(() => {
