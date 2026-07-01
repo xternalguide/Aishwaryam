@@ -254,15 +254,39 @@ export const Onboarding: React.FC = () => {
     const clean = val.replace(/\D/g, '').slice(0, 6);
     setPincode(clean);
     if (clean.length === 6) {
-      if (clean.startsWith('641')) {
-        setState('Tamil Nadu');
-        setCity('Coimbatore');
-        setArea('Gandhipuram');
-      } else {
-        setState('Tamil Nadu');
-        setCity('Chennai');
-        setArea('T. Nagar');
-      }
+      fetch(`https://api.postalpincode.in/pincode/${clean}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
+            const postOffice = data[0].PostOffice[0];
+            setState(postOffice.State || 'Tamil Nadu');
+            setCity(postOffice.District || 'Coimbatore');
+            setArea(postOffice.Name || 'Gandhipuram');
+          } else {
+            // Local fallback
+            if (clean.startsWith('641') || clean.startsWith('642')) {
+              setState('Tamil Nadu');
+              setCity('Coimbatore');
+              setArea('Gandhipuram');
+            } else {
+              setState('Tamil Nadu');
+              setCity('Chennai');
+              setArea('T. Nagar');
+            }
+          }
+        })
+        .catch(() => {
+          // Local fallback
+          if (clean.startsWith('641') || clean.startsWith('642')) {
+            setState('Tamil Nadu');
+            setCity('Coimbatore');
+            setArea('Gandhipuram');
+          } else {
+            setState('Tamil Nadu');
+            setCity('Chennai');
+            setArea('T. Nagar');
+          }
+        });
     }
   };
 

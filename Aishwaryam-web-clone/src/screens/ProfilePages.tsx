@@ -38,12 +38,12 @@ const CITIES_BY_STATE: Record<string, string[]> = {
 };
 
 const PIN_PREFIXES: Record<string, string[]> = {
-  "Chennai": ["600"],
-  "Coimbatore": ["641"],
-  "Madurai": ["625"],
-  "Salem": ["636"],
-  "Trichy": ["620"],
-  "Tirunelveli": ["627"],
+  "Chennai": ["600", "601", "602", "603", "604"],
+  "Coimbatore": ["641", "642", "638", "639", "640"],
+  "Madurai": ["625", "626", "623", "624"],
+  "Salem": ["636", "637"],
+  "Trichy": ["620", "621", "622"],
+  "Tirunelveli": ["627", "628", "629"],
   "Puducherry": ["605"],
   "Karaikal": ["609"],
   "Kochi": ["682"],
@@ -120,6 +120,17 @@ export const ProfileAddress: React.FC = () => {
         if (prefixes.includes(prefix)) {
           foundCity = city;
           break;
+        }
+      }
+      if (!foundCity) {
+        if (prefix.startsWith('64')) {
+          foundCity = "Coimbatore";
+        } else if (prefix.startsWith('60')) {
+          foundCity = "Chennai";
+        } else if (prefix.startsWith('62')) {
+          foundCity = "Madurai";
+        } else if (prefix.startsWith('63')) {
+          foundCity = "Salem";
         }
       }
       if (foundCity) {
