@@ -49,10 +49,11 @@ export const ProfileSetup: React.FC = () => {
   const isFormValid = fullName.trim().length > 0 && email.trim().length > 0 && email.includes('@');
 
   return (
-    <div style={{
+    <div className="auth-page-root" style={{
       display: 'flex',
       flexDirection: 'column',
-      height: '100vh',
+      minHeight: '112vh',
+      height: 'auto',
       background: '#F5F7F5',
       boxSizing: 'border-box'
     }}>

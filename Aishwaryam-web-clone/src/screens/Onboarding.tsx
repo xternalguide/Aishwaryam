@@ -417,7 +417,7 @@ export const Onboarding: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--surface-light)' }}>
+    <div className="auth-page-root" style={{ display: 'flex', flexDirection: 'column', minHeight: '112vh', height: 'auto', background: 'var(--surface-light)' }}>
       {/* Header */}
       <div className="app-header-bar" style={{
         background: 'var(--brand-dark)',
