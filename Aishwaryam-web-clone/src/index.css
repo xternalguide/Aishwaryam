@@ -74,9 +74,8 @@ html, body {
   text-size-adjust: 100%;
 }
 
-/* Globally force viewport height to use percentage to fix WebView layout zoom scaling bugs */
-*[style*="100vh"],
-*[style*="100vh" i] {
+/* Force viewport height on background screens to fix WebView layout zoom scaling bugs */
+.auth-page-bg {
   min-height: 112vh !important;
   height: auto !important;
 }
