@@ -57,6 +57,29 @@ const ScrollToTop: React.FC = () => {
     // Also reset the #root element which is the main scroll container
     const root = document.getElementById('root');
     if (root) root.scrollTop = 0;
+
+    // Dynamically sync body background color to match active screen theme
+    const path = pathname.toLowerCase();
+    if (path.includes('/welcome')) {
+      document.body.style.background = 'var(--gradient-brand)';
+    } else if (path.includes('/login') || path.includes('/mpin') || path.includes('/profilesetup') || path.includes('/onboarding')) {
+      document.body.style.background = 'var(--surface-light)';
+    } else if (
+      path.includes('/price-calculator') || 
+      path.includes('/scheme') || 
+      path.includes('/completed-schemes') ||
+      path.includes('/portfolio') ||
+      path.includes('/privacy') ||
+      path.includes('/terms') ||
+      path.includes('/faq') ||
+      path.includes('/how-it-works')
+    ) {
+      document.body.style.background = '#F8F9FA';
+    } else if (path.includes('/dashboard')) {
+      document.body.style.background = '#F0EDE8'; // Matches the home/dashboard tab page background
+    } else {
+      document.body.style.background = '#ffffff';
+    }
   }, [pathname]);
   return null;
 };
