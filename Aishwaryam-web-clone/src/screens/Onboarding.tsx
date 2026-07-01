@@ -92,6 +92,30 @@ export const Onboarding: React.FC = () => {
   }, [name, email, dob, isMarried, weddingDate, gender, pincode, state, city, area, isManualArea, termsAccepted, nomineeName]);
 
   useEffect(() => {
+    window.history.pushState(null, '', window.location.href);
+
+    const handlePopState = () => {
+      const hasStep1Data = nomineeName || pincode || name || email || dob || (state && state !== 'Tamil Nadu') || (city && city !== 'Chennai') || (area && area !== 'T. Nagar');
+      const hasStep2Data = panImage || aadhaarFrontImage || aadhaarBackImage;
+
+      if (hasStep1Data || hasStep2Data) {
+        if (window.confirm(lang === 'ta' ? 'நீங்கள் வெளியேற விரும்புகிறீர்களா? உள்ளிடப்பட்ட தரவு இழக்கப்படும்.' : 'Are you sure you want to go back? Any entered onboarding data will be lost.')) {
+          navigate('/dashboard');
+        } else {
+          window.history.pushState(null, '', window.location.href);
+        }
+      } else {
+        navigate('/dashboard');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [nomineeName, pincode, name, email, dob, state, city, area, panImage, aadhaarFrontImage, aadhaarBackImage, lang, navigate]);
+
+  useEffect(() => {
     const fetchConfig = async () => {
       try {
         const res = await ApiClient.get('api/User/config');
