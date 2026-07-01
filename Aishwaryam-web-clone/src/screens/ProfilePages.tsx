@@ -715,11 +715,11 @@ export const ProfileKyc: React.FC = () => {
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>Nominee Mobile</label>
                 <input
-                  type="tel"
-                  inputMode="numeric"
+                  type="text"
+                  maxLength={10}
                   placeholder="10-digit mobile number"
                   value={newNomineePhone}
-                  onChange={(e) => setNewNomineePhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  onChange={(e) => setNewNomineePhone(e.target.value.replace(/\D/g, ''))}
                   style={{ width: '100%', height: '40px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)', padding: '0 12px', fontSize: '13px', outline: 'none', background: 'white', marginTop: '4px' }}
                 />
               </div>
