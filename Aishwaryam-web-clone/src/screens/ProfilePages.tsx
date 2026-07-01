@@ -69,6 +69,8 @@ export const ProfileAddress: React.FC = () => {
   const [formIsDefault, setFormIsDefault] = useState(false);
 
   const [pinError, setPinError] = useState<string | null>(null);
+  const [availableStates, setAvailableStates] = useState<string[]>(STATES);
+  const [citiesByState, setCitiesByState] = useState<Record<string, string[]>>(CITIES_BY_STATE);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -108,10 +110,7 @@ export const ProfileAddress: React.FC = () => {
     setPinError(null);
   };
 
-  const handlePincodeChange = (value: string) => {
-    const numericValue = value.replace(/\D/g, '').slice(0, 6);
-    setFormPincode(numericValue);
-
+  const runLocalFallback = (numericValue: string) => {
     if (numericValue.length >= 3) {
       const prefix = numericValue.substring(0, 3);
       let foundCity = "";
@@ -147,25 +146,56 @@ export const ProfileAddress: React.FC = () => {
         setPinError(null);
       }
     }
+  };
 
-    if (numericValue.length > 0) {
-      if (numericValue.length < 6) {
+  const handlePincodeChange = (value: string) => {
+    const numericValue = value.replace(/\D/g, '').slice(0, 6);
+    setFormPincode(numericValue);
+
+    if (numericValue.length === 6) {
+      fetch(`https://api.postalpincode.in/pincode/${numericValue}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
+            const postOffice = data[0].PostOffice[0];
+            const resolvedState = postOffice.State || '';
+            const resolvedCity = postOffice.District || postOffice.Block || '';
+            
+            if (resolvedState && resolvedCity) {
+              setAvailableStates(prev => {
+                if (!prev.includes(resolvedState)) {
+                  return [...prev, resolvedState];
+                }
+                return prev;
+              });
+              setCitiesByState(prev => {
+                const list = prev[resolvedState] || [];
+                if (!list.includes(resolvedCity)) {
+                  return {
+                    ...prev,
+                    [resolvedState]: [...list, resolvedCity]
+                  };
+                }
+                return prev;
+              });
+
+              setFormState(resolvedState);
+              setFormCity(resolvedCity);
+              setPinError(null);
+            }
+          } else {
+            runLocalFallback(numericValue);
+          }
+        })
+        .catch(() => {
+          runLocalFallback(numericValue);
+        });
+    } else {
+      if (numericValue.length > 0 && numericValue.length < 6) {
         setPinError("PIN Code must be exactly 6 digits.");
       } else {
-        if (formCity) {
-          const prefixes = PIN_PREFIXES[formCity] || [];
-          const isValidPrefix = prefixes.some(prefix => numericValue.startsWith(prefix));
-          if (!isValidPrefix) {
-            setPinError(`PIN Code must start with ${prefixes.join(', ')} for ${formCity}.`);
-          } else {
-            setPinError(null);
-          }
-        } else {
-          setPinError(null);
-        }
+        setPinError(null);
       }
-    } else {
-      setPinError(null);
     }
   };
 
@@ -293,7 +323,7 @@ export const ProfileAddress: React.FC = () => {
                 }}
               >
                 <option value="">Select State</option>
-                {STATES.map((state) => (
+                {availableStates.map((state) => (
                   <option key={state} value={state}>{state}</option>
                 ))}
               </select>
@@ -311,7 +341,7 @@ export const ProfileAddress: React.FC = () => {
                 }}
               >
                 <option value="">Select City</option>
-                {(CITIES_BY_STATE[formState] || []).map((city) => (
+                {(citiesByState[formState] || []).map((city) => (
                   <option key={city} value={city}>{city}</option>
                 ))}
               </select>
