@@ -120,7 +120,7 @@ export const SchemeDetail: React.FC = () => {
 
   const activeDocs = kycDocs.filter((d: any) => d.status !== 'REPLACED');
   const hasDocs = activeDocs.length > 0;
-  const isKycPending = kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW' || hasDocs;
+  const isKycPending = kycLevel !== 'FULL' && (kycLevel === 'PENDING' || kycStatusMsg === 'PENDING' || kycStatusMsg === 'UNDER_REVIEW' || hasDocs);
   const isKycRejected = kycLevel === 'REJECTED';
 
   useEffect(() => {
@@ -354,6 +354,9 @@ export const SchemeDetail: React.FC = () => {
           if (res.data && res.data.success) {
             setKycStatusMsg(res.data.status || '');
             setKycDocs(res.data.documents || []);
+            if (res.data.kycLevel) {
+              setKycLevel(res.data.kycLevel);
+            }
           }
         } catch (err) {
           console.error('Failed to load KYC documents in SchemeDetail:', err);
@@ -430,14 +433,38 @@ export const SchemeDetail: React.FC = () => {
               ? JSON.parse(result.response)
               : result.response;
 
-            // 2. Verify payment order on backend (with extended 60-second timeout)
+            // 2. Verify payment order on backend (with 1.5s delay and 3 retries to handle WebView sleep cycles)
             setIsProcessing(true);
-            const verifyRes = await ApiClient.post('api/Payment/verify', {
-              userId,
-              razorpayOrderId: orderData.orderId,
-              razorpayPaymentId: rzpResponse.razorpay_payment_id,
-              razorpaySignature: rzpResponse.razorpay_signature
-            }, { timeout: 60000 });
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            let verifyRes: any = null;
+            let retries = 3;
+            let attempt = 0;
+            let success = false;
+            let lastError = null;
+
+            while (attempt < retries && !success) {
+              try {
+                attempt++;
+                verifyRes = await ApiClient.post('api/Payment/verify', {
+                  userId,
+                  razorpayOrderId: orderData.orderId,
+                  razorpayPaymentId: rzpResponse.razorpay_payment_id,
+                  razorpaySignature: rzpResponse.razorpay_signature
+                }, { timeout: 60000 });
+                success = true;
+              } catch (err: any) {
+                lastError = err;
+                console.warn(`Verify attempt ${attempt} failed:`, err);
+                if (attempt < retries) {
+                  await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+              }
+            }
+
+            if (!success && lastError) {
+              throw lastError;
+            }
 
             if (verifyRes.data && verifyRes.data.success) {
               const receiptJson = JSON.stringify({
@@ -1267,7 +1294,7 @@ export const SchemeDetail: React.FC = () => {
   const { totalDays, elapsedDays, progressPct } = getDaysProgress();
  
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#F8F9FA' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh', background: '#F8F9FA' }}>
       {/* Top Bar */}
       <div className="app-header-bar" style={{
         background: 'white',

@@ -24,6 +24,21 @@ export const Welcome: React.FC = () => {
   const [current, setCurrent] = useState(0);
   const [slides, setSlides] = useState<Slide[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [viewportHeight, setViewportHeight] = useState('100vh');
+
+  useEffect(() => {
+    const handleResize = () => {
+      // If the display/font scale is zoomed, the browser viewport height decreases.
+      if (window.innerHeight < 740) {
+        setViewportHeight('120vh');
+      } else {
+        setViewportHeight('100vh');
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchWelcomeSlides = async () => {
@@ -88,7 +103,7 @@ export const Welcome: React.FC = () => {
 
   const getSlideImage = (base64?: string) => {
     if (!base64) return '';
-    if (base64.startsWith('data:')) return base64;
+    if (base64.startsWith('data:') || base64.startsWith('http') || base64.startsWith('/') || base64.startsWith('blob:')) return base64;
     return `data:image/png;base64,${base64}`;
   };
 
@@ -96,7 +111,8 @@ export const Welcome: React.FC = () => {
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      height: '100vh',
+      height: '100%',
+      minHeight: viewportHeight,
       background: 'var(--gradient-brand)',
       boxSizing: 'border-box',
       position: 'relative',
