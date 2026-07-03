@@ -304,8 +304,8 @@ export const KycVerification: React.FC = () => {
       </div>
 
       {/* KYC Table Grid */}
-      <div className="grid-cols-3" style={{ alignItems: 'start' }}>
-        <div className={selectedUid ? 'card kyc-table-span' : 'card kyc-table-full'}>
+      <div>
+        <div className="card">
           <div className="card-head">
             <span className="card-title">KYC Submissions List</span>
             <span className="badge badge-amber">{filteredUsers.length} shown</span>
@@ -377,243 +377,255 @@ export const KycVerification: React.FC = () => {
             </div>
           )}
         </div>
+      </div>
 
-        {/* Selected KYC Detail Side Panel */}
-        {selectedUid && (
-          <div className="card kyc-detail-span fade-in">
-            <div className="card-head">
-              <span className="card-title" style={{ fontSize: '15px' }}>KYC: {selectedName}</span>
+      {/* Selected KYC Detail Popup Modal */}
+      {selectedUid && (
+        <div className="modal-backdrop" onClick={() => setSelectedUid(null)}>
+          <div className="modal-content fade-in" style={{ maxWidth: '640px', width: '90%' }} onClick={(e) => e.stopPropagation()}>
+            <div className="card-head" style={{ borderBottom: '1px solid var(--border)', padding: '20px 24px', margin: 0 }}>
+              <span className="card-title" style={{ fontSize: '18px' }}>Review KYC: {selectedName}</span>
               <button
                 className="btn btn-ghost btn-xs"
                 onClick={() => setSelectedUid(null)}
                 style={{ padding: '4px', borderRadius: '50%' }}
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
 
-            {isDetailLoading ? (
-              <div style={{ color: 'var(--text-2)', textAlign: 'center', padding: '30px' }}>Loading attachments...</div>
-            ) : details ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div className="form-group">
-                  <label className="form-label">Document Details</label>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px' }}>
-                    <div><strong>Type:</strong> {details.documentType}</div>
-                    <div><strong>Number:</strong> {details.documentNumber}</div>
-                    <div><strong>Status:</strong> {details.status === 'PENDING' || details.status === 'UNDER_REVIEW' ? 'Waiting for Approval' : details.status}</div>
+            <div className="modal-body">
+              {isDetailLoading ? (
+                <div style={{ color: 'var(--text-2)', textAlign: 'center', padding: '30px' }}>Loading attachments...</div>
+              ) : details ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div className="form-group">
+                    <label className="form-label">Document Details</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px' }}>
+                      <div><strong>Type:</strong> {details.documentType}</div>
+                      <div><strong>Number:</strong> {details.documentNumber}</div>
+                      <div><strong>Status:</strong> {details.status === 'PENDING' || details.status === 'UNDER_REVIEW' ? 'Waiting for Approval' : details.status}</div>
+                    </div>
                   </div>
-                </div>
 
-                {(() => {
-                  const documents = details?.documents || [];
-                  const pendingDocs = documents.filter((d: any) => d.status === 'PENDING' || !d.status || d.status === '—' || d.status === 'UNDER_REVIEW');
-                  const rejectedDocs = documents.filter((d: any) => d.status === 'REJECTED');
-                  const approvedDocs = documents.filter((d: any) => d.status === 'APPROVED' || d.status === 'VERIFIED');
+                  {(() => {
+                    const documents = details?.documents || [];
+                    const pendingDocs = documents.filter((d: any) => d.status === 'PENDING' || !d.status || d.status === '—' || d.status === 'UNDER_REVIEW');
+                    const rejectedDocs = documents.filter((d: any) => d.status === 'REJECTED');
+                    const approvedDocs = documents.filter((d: any) => d.status === 'APPROVED' || d.status === 'VERIFIED');
 
-                  const displayDocs = activeDocTab === 'pending'
-                    ? pendingDocs
-                    : activeDocTab === 'rejected'
-                    ? rejectedDocs
-                    : approvedDocs;
+                    const displayDocs = activeDocTab === 'pending'
+                      ? pendingDocs
+                      : activeDocTab === 'rejected'
+                      ? rejectedDocs
+                      : approvedDocs;
 
-                  return (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      <label className="form-label">Uploaded Document Files</label>
-                                     {/* Tabs Navigation */}
-                      <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', gap: '12px', paddingBottom: '4px', marginBottom: '8px' }}>
-                        <button
-                          type="button"
-                          style={{
-                            padding: '6px 12px',
-                            border: 'none',
-                            background: 'transparent',
-                            color: activeDocTab === 'pending' ? 'var(--blue)' : 'var(--text-3)',
-                            borderBottom: activeDocTab === 'pending' ? '2px solid var(--blue)' : 'none',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            fontSize: '12.5px'
-                          }}
-                          onClick={() => setActiveDocTab('pending')}
-                        >
-                          Pending ({pendingDocs.length})
-                        </button>
-                        <button
-                          type="button"
-                          style={{
-                            padding: '6px 12px',
-                            border: 'none',
-                            background: 'transparent',
-                            color: activeDocTab === 'rejected' ? 'var(--red)' : 'var(--text-3)',
-                            borderBottom: activeDocTab === 'rejected' ? '2px solid var(--red)' : 'none',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            fontSize: '12.5px'
-                          }}
-                          onClick={() => setActiveDocTab('rejected')}
-                        >
-                          Rejected ({rejectedDocs.length})
-                        </button>
-                        <button
-                          type="button"
-                          style={{
-                            padding: '6px 12px',
-                            border: 'none',
-                            background: 'transparent',
-                            color: activeDocTab === 'approved' ? 'var(--green)' : 'var(--text-3)',
-                            borderBottom: activeDocTab === 'approved' ? '2px solid var(--green)' : 'none',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            fontSize: '12.5px'
-                          }}
-                          onClick={() => setActiveDocTab('approved')}
-                        >
-                          Approved ({approvedDocs.length})
-                        </button>
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <label className="form-label">Uploaded Document Files</label>
+                        {/* Tabs Navigation */}
+                        <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', gap: '12px', paddingBottom: '4px', marginBottom: '8px' }}>
+                          <button
+                            type="button"
+                            style={{
+                              padding: '6px 12px',
+                              border: 'none',
+                              background: 'transparent',
+                              color: activeDocTab === 'pending' ? 'var(--blue)' : 'var(--text-3)',
+                              borderBottom: activeDocTab === 'pending' ? '2px solid var(--blue)' : 'none',
+                              fontWeight: 'bold',
+                              cursor: 'pointer',
+                              fontSize: '12.5px'
+                            }}
+                            onClick={() => setActiveDocTab('pending')}
+                          >
+                            Pending ({pendingDocs.length})
+                          </button>
+                          <button
+                            type="button"
+                            style={{
+                              padding: '6px 12px',
+                              border: 'none',
+                              background: 'transparent',
+                              color: activeDocTab === 'rejected' ? 'var(--red)' : 'var(--text-3)',
+                              borderBottom: activeDocTab === 'rejected' ? '2px solid var(--red)' : 'none',
+                              fontWeight: 'bold',
+                              cursor: 'pointer',
+                              fontSize: '12.5px'
+                            }}
+                            onClick={() => setActiveDocTab('rejected')}
+                          >
+                            Rejected ({rejectedDocs.length})
+                          </button>
+                          <button
+                            type="button"
+                            style={{
+                              padding: '6px 12px',
+                              border: 'none',
+                              background: 'transparent',
+                              color: activeDocTab === 'approved' ? 'var(--green)' : 'var(--text-3)',
+                              borderBottom: activeDocTab === 'approved' ? '2px solid var(--green)' : 'none',
+                              fontWeight: 'bold',
+                              cursor: 'pointer',
+                              fontSize: '12.5px'
+                            }}
+                            onClick={() => setActiveDocTab('approved')}
+                          >
+                            Approved ({approvedDocs.length})
+                          </button>
+                        </div>
+
+                        {displayDocs.length === 0 ? (
+                          <div style={{ padding: '16px', background: 'var(--surface2)', border: '1px dashed var(--border)', textAlign: 'center', borderRadius: '8px', color: 'var(--text-3)', fontSize: '12.5px' }}>
+                            No files found in this section.
+                          </div>
+                        ) : (
+                          displayDocs.map((doc, idx) => {
+                            const isImg =
+                              doc.documentUrl.toLowerCase().includes('.jpg') ||
+                              doc.documentUrl.toLowerCase().includes('.jpeg') ||
+                              doc.documentUrl.toLowerCase().includes('.png') ||
+                              doc.documentUrl.toLowerCase().includes('.webp') ||
+                              doc.documentUrl.startsWith('data:image');
+
+                            // Type label format helper
+                            const docType = doc.documentType?.toUpperCase();
+                            const typeLabel = docType === 'PAN' 
+                              ? 'PAN Card' 
+                              : docType === 'AADHAAR_FRONT' 
+                                ? 'Aadhaar (Front)' 
+                                : docType === 'AADHAAR_BACK' 
+                                  ? 'Aadhaar (Back)' 
+                                  : doc.documentType || 'Identity File';
+
+                            return (
+                              <div
+                                key={idx}
+                                style={{
+                                  padding: '12px',
+                                  background: 'var(--surface2)',
+                                  borderRadius: '8px',
+                                  border: '1px solid var(--border)',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  gap: '8px'
+                                }}
+                              >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <span style={{ fontWeight: '700', fontSize: '12px', color: activeDocTab === 'rejected' ? 'var(--red)' : activeDocTab === 'approved' ? 'var(--green)' : 'var(--blue)' }}>
+                                    {typeLabel}
+                                  </span>
+                                  <a
+                                    href={doc.documentUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--text-2)' }}
+                                  >
+                                    Open <ExternalLink size={10} />
+                                  </a>
+                                </div>
+
+                                {/* Timestamps */}
+                                {(doc as any).submittedAt && (
+                                  <div style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>
+                                    Uploaded At: {new Date((doc as any).submittedAt).toLocaleString()}
+                                  </div>
+                                )}
+
+                                {isImg ? (
+                                  <img
+                                    src={doc.documentUrl}
+                                    alt="Document Preview"
+                                    style={{
+                                      width: '100%',
+                                      maxHeight: '180px',
+                                      background: '#000',
+                                      objectFit: 'contain',
+                                      borderRadius: '4px'
+                                    }}
+                                  />
+                                ) : (
+                                  <div style={{ fontSize: '11.5px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <FileText size={14} /> PDF File attached
+                                  </div>
+                                )}
+
+                                {/* Rejection Details */}
+                                {doc.status === 'REJECTED' && (doc as any).rejectedReason && (
+                                  <div style={{ fontSize: '11.5px', color: 'var(--red)', borderTop: '1px dashed rgba(239,68,68,0.15)', paddingTop: '6px', marginTop: '4px' }}>
+                                    <strong>Rejection Reason:</strong> {(doc as any).rejectedReason}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {activeDocTab === 'pending' && selectedUser?.kycLevel !== 'FULL' && selectedUser?.kycLevel !== 'VERIFIED' && (
+                    <>
+                      {/* Review Notes Area */}
+                      <div className="form-group">
+                        <label className="form-label">Review Notes / Rejection Reason</label>
+                        <textarea
+                          className="form-control"
+                          placeholder="Type details if documents are blurry or wrong to notify the user..."
+                          rows={3}
+                          style={{ resize: 'vertical' }}
+                          value={reviewNotes}
+                          onChange={(e) => setReviewNotes(e.target.value)}
+                        />
                       </div>
 
-                      {displayDocs.length === 0 ? (
-                        <div style={{ padding: '16px', background: 'var(--surface2)', border: '1px dashed var(--border)', textAlign: 'center', borderRadius: '8px', color: 'var(--text-3)', fontSize: '12.5px' }}>
-                          No files found in this section.
+                      {/* Actions Panel */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            className="btn btn-success"
+                            style={{ flex: 1 }}
+                            onClick={() => handleKycAction(true)}
+                            disabled={!details.documents.length || isProcessing}
+                          >
+                            <Check size={14} /> Approve
+                          </button>
+                          <button
+                            className="btn btn-danger"
+                            style={{ flex: 1 }}
+                            onClick={() => handleKycAction(false)}
+                            disabled={isProcessing}
+                          >
+                            <X size={14} /> Reject
+                          </button>
                         </div>
-                      ) : (
-                        displayDocs.map((doc, idx) => {
-                          const isImg =
-                            doc.documentUrl.toLowerCase().includes('.jpg') ||
-                            doc.documentUrl.toLowerCase().includes('.jpeg') ||
-                            doc.documentUrl.toLowerCase().includes('.png') ||
-                            doc.documentUrl.toLowerCase().includes('.webp') ||
-                            doc.documentUrl.startsWith('data:image');
-
-                          // Type label format helper
-                          const docType = doc.documentType?.toUpperCase();
-                          const typeLabel = docType === 'PAN' 
-                            ? 'PAN Card' 
-                            : docType === 'AADHAAR_FRONT' 
-                              ? 'Aadhaar (Front)' 
-                              : docType === 'AADHAAR_BACK' 
-                                ? 'Aadhaar (Back)' 
-                                : doc.documentType || 'Identity File';
-
-                          return (
-                            <div
-                              key={idx}
-                              style={{
-                                padding: '12px',
-                                background: 'var(--surface2)',
-                                borderRadius: '8px',
-                                border: '1px solid var(--border)',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '8px'
-                              }}
-                            >
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontWeight: '700', fontSize: '12px', color: activeDocTab === 'rejected' ? 'var(--red)' : activeDocTab === 'approved' ? 'var(--green)' : 'var(--blue)' }}>
-                                  {typeLabel}
-                                </span>
-                                <a
-                                  href={doc.documentUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--text-2)' }}
-                                >
-                                  Open <ExternalLink size={10} />
-                                </a>
-                              </div>
-
-                              {/* Timestamps */}
-                              {(doc as any).submittedAt && (
-                                <div style={{ fontSize: '10.5px', color: 'var(--text-3)' }}>
-                                  Uploaded At: {new Date((doc as any).submittedAt).toLocaleString()}
-                                </div>
-                              )}
-
-                              {isImg ? (
-                                <img
-                                  src={doc.documentUrl}
-                                  alt="Document Preview"
-                                  style={{
-                                    width: '100%',
-                                    maxHeight: '180px',
-                                    background: '#000',
-                                    objectFit: 'contain',
-                                    borderRadius: '4px'
-                                  }}
-                                />
-                              ) : (
-                                <div style={{ fontSize: '11.5px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                  <FileText size={14} /> PDF File attached
-                                </div>
-                              )}
-
-                              {/* Rejection Details */}
-                              {doc.status === 'REJECTED' && (doc as any).rejectedReason && (
-                                <div style={{ fontSize: '11.5px', color: 'var(--red)', borderTop: '1px dashed rgba(239,68,68,0.15)', paddingTop: '6px', marginTop: '4px' }}>
-                                  <strong>Rejection Reason:</strong> {(doc as any).rejectedReason}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  );
-                })()}
-
-                {activeDocTab === 'pending' && selectedUser?.kycLevel !== 'FULL' && selectedUser?.kycLevel !== 'VERIFIED' && (
-                  <>
-                    {/* Review Notes Area */}
-                    <div className="form-group">
-                      <label className="form-label">Review Notes / Rejection Reason</label>
-                      <textarea
-                        className="form-control"
-                        placeholder="Type details if documents are blurry or wrong to notify the user..."
-                        rows={3}
-                        style={{ resize: 'vertical' }}
-                        value={reviewNotes}
-                        onChange={(e) => setReviewNotes(e.target.value)}
-                      />
-                    </div>
-
-                    {/* Actions Panel */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ display: 'flex', gap: '8px' }}>
                         <button
-                          className="btn btn-success"
-                          style={{ flex: 1 }}
-                          onClick={() => handleKycAction(true)}
-                          disabled={!details.documents.length || isProcessing}
-                        >
-                          {isProcessing ? 'Processing...' : <><Check size={14} /> Approve</>}
-                        </button>
-                        <button
-                          className="btn btn-danger"
-                          style={{ flex: 1 }}
-                          onClick={() => handleKycAction(false)}
+                          className="btn btn-primary"
+                          style={{ width: '100%' }}
+                          onClick={() => handleSendNudge(selectedUid, selectedName, true)}
                           disabled={isProcessing}
                         >
-                          {isProcessing ? 'Processing...' : <><X size={14} /> Reject</>}
+                          <Bell size={14} /> Send Custom Nudge
                         </button>
                       </div>
-                      <button
-                        className="btn btn-primary"
-                        style={{ width: '100%' }}
-                        onClick={() => handleSendNudge(selectedUid, selectedName, true)}
-                        disabled={isProcessing}
-                      >
-                        <Bell size={14} /> Send Custom Nudge
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', color: 'var(--text-3)' }}>Failed to load parameters.</div>
-            )}
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', color: 'var(--text-3)' }}>Failed to load parameters.</div>
+              )}
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* On-screen Loading Overlay Spinner */}
+      {isProcessing && (
+        <div className="fullscreen-loader">
+          <div className="spinner" />
+          <span style={{ color: '#fff', fontWeight: 'bold', fontSize: '15px' }}>Processing, please wait...</span>
+        </div>
+      )}
     </>
   );
 };
