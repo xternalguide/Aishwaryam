@@ -160,7 +160,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentTab, setCurrent
             `}</style>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: 'var(--text-3)' }}>Admin</span>
+              <span style={{ color: 'var(--text-3)' }}>Super Admin</span>
               <span style={{ color: 'var(--border)' }}>/</span>
               <span style={{ fontWeight: '600' }}>
                 {navItems.find((n) => n.id === currentTab)?.label || 'Overview'}
@@ -200,11 +200,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentTab, setCurrent
                 fontWeight: '700',
                 fontSize: '14px'
               }}>
-                A
+                S
               </div>
               <div style={{ display: 'flex', flexDirection: 'column' }} className="admin-profile-details">
-                <span style={{ fontWeight: '700', fontSize: '13px' }}>Admin</span>
-                <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>blazewingwebs@gmail.com</span>
+                <span style={{ fontWeight: '700', fontSize: '13px' }}>Super Admin</span>
+                <span style={{ fontSize: '11px', color: 'var(--text-3)' }}>superadmin@aishwaryam.com</span>
               </div>
             </div>
             <style>{`

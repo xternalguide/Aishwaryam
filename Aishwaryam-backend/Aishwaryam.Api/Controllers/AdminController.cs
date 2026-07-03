@@ -10,6 +10,7 @@ using Aishwaryam.Application.Interfaces.Services;
 using Microsoft.EntityFrameworkCore;
 using Aishwaryam.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
+using Aishwaryam.Domain.Entities;
 
 namespace Aishwaryam.Api.Controllers
 {
@@ -395,5 +396,330 @@ namespace Aishwaryam.Api.Controllers
                 return StatusCode(500, new { message = "Error resetting user data", error = ex.Message });
             }
         }
+
+        // ==========================================
+        // SUPER ADMIN CRUD FOR USERS
+        // ==========================================
+
+        [HttpPost("users")]
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request, [FromServices] ApplicationDbContext dbContext)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request.PhoneNumber))
+                    return BadRequest(new { message = "Phone number is required." });
+
+                var exists = await dbContext.Users.AnyAsync(u => u.PhoneNumber == request.PhoneNumber);
+                if (exists)
+                    return BadRequest(new { message = "User with this phone number already exists." });
+
+                var userId = Guid.NewGuid();
+                var random = new Random();
+                string code;
+                bool isUnique = false;
+                do
+                {
+                    code = "AISH" + random.Next(100000, 999999).ToString();
+                    isUnique = !await dbContext.Users.AnyAsync(u => u.ReferralCode == code);
+                } while (!isUnique);
+
+                var user = new User
+                {
+                    Id = userId,
+                    FullName = request.FullName,
+                    PhoneNumber = request.PhoneNumber,
+                    Email = request.Email,
+                    KycLevel = request.KycLevel ?? "BASIC",
+                    IsActive = request.IsActive,
+                    ReferralCode = code,
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    UpdatedAt = DateTimeOffset.UtcNow
+                };
+
+                dbContext.Users.Add(user);
+
+                var wallet = new Wallet { UserId = userId, InrBalancePaise = 0, UpdatedAt = DateTimeOffset.UtcNow };
+                dbContext.Wallets.Add(wallet);
+
+                var goldHolding = new GoldHolding { UserId = userId, GoldBalanceMg = 0, BonusGoldBalanceMg = 0, UpdatedAt = DateTimeOffset.UtcNow };
+                dbContext.GoldHoldings.Add(goldHolding);
+
+                ApplicationDbContext.LastDbChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                await dbContext.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "User created successfully.", user });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error creating user", error = ex.Message });
+            }
+        }
+
+        [HttpPut("users/{userId}")]
+        public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] AdminUpdateUserRequest request, [FromServices] ApplicationDbContext dbContext)
+        {
+            try
+            {
+                var user = await dbContext.Users.FindAsync(userId);
+                if (user == null) return NotFound(new { message = "User not found" });
+
+                if (!string.IsNullOrEmpty(request.PhoneNumber))
+                {
+                    var phoneTaken = await dbContext.Users.AnyAsync(u => u.PhoneNumber == request.PhoneNumber && u.Id != userId);
+                    if (phoneTaken) return BadRequest(new { message = "Phone number is already in use by another user." });
+                    user.PhoneNumber = request.PhoneNumber;
+                }
+
+                if (!string.IsNullOrEmpty(request.Email))
+                {
+                    var emailTaken = await dbContext.Users.AnyAsync(u => u.Email == request.Email && u.Id != userId);
+                    if (emailTaken) return BadRequest(new { message = "Email is already in use by another user." });
+                    user.Email = request.Email;
+                }
+
+                user.FullName = request.FullName ?? user.FullName;
+                user.KycLevel = request.KycLevel ?? user.KycLevel;
+                user.IsActive = request.IsActive;
+                user.UpdatedAt = DateTimeOffset.UtcNow;
+
+                dbContext.Users.Update(user);
+
+                ApplicationDbContext.LastDbChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                await dbContext.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "User details updated successfully.", user });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error updating user details", error = ex.Message });
+            }
+        }
+
+        [HttpDelete("users/{userId}")]
+        public async Task<IActionResult> HardDeleteUser(Guid userId, [FromServices] ApplicationDbContext dbContext)
+        {
+            try
+            {
+                var user = await dbContext.Users.FindAsync(userId);
+                if (user == null) return NotFound(new { message = "User not found" });
+
+                // Delete linked entities cascade
+                var schemes = await dbContext.UserSchemes.Where(s => s.UserId == userId).ToListAsync();
+                dbContext.UserSchemes.RemoveRange(schemes);
+
+                var goldTxs = await dbContext.GoldTransactions.Where(t => t.UserId == userId).ToListAsync();
+                dbContext.GoldTransactions.RemoveRange(goldTxs);
+
+                var payments = await dbContext.Payments.Where(p => p.UserId == userId).ToListAsync();
+                dbContext.Payments.RemoveRange(payments);
+
+                var ledger = await dbContext.WalletLedgers.Where(w => w.UserId == userId).ToListAsync();
+                dbContext.WalletLedgers.RemoveRange(ledger);
+
+                var withdrawals = await dbContext.WithdrawalRequests.Where(w => w.UserId == userId).ToListAsync();
+                dbContext.WithdrawalRequests.RemoveRange(withdrawals);
+
+                var investments = await dbContext.SchemeInvestments.Where(i => i.UserId == userId).ToListAsync();
+                dbContext.SchemeInvestments.RemoveRange(investments);
+
+                var redemptions = await dbContext.SchemeRedemptions.Where(r => r.UserId == userId).ToListAsync();
+                dbContext.SchemeRedemptions.RemoveRange(redemptions);
+
+                var notifications = await dbContext.UserNotifications.Where(n => n.UserId == userId).ToListAsync();
+                dbContext.UserNotifications.RemoveRange(notifications);
+
+                var deviceLogs = await dbContext.UserDevices.Where(d => d.UserId == userId).ToListAsync();
+                dbContext.UserDevices.RemoveRange(deviceLogs);
+
+                var bankAccounts = await dbContext.BankAccounts.Where(b => b.UserId == userId).ToListAsync();
+                dbContext.BankAccounts.RemoveRange(bankAccounts);
+
+                var goldHolding = await dbContext.GoldHoldings.FirstOrDefaultAsync(h => h.UserId == userId);
+                if (goldHolding != null) dbContext.GoldHoldings.Remove(goldHolding);
+
+                var wallet = await dbContext.Wallets.FirstOrDefaultAsync(w => w.UserId == userId);
+                if (wallet != null) dbContext.Wallets.Remove(wallet);
+
+                dbContext.Users.Remove(user);
+
+                ApplicationDbContext.LastDbChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                await dbContext.SaveChangesAsync();
+
+                return Ok(new { success = true, message = $"User {user.FullName} and all associated data records hard-deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error during user hard delete", error = ex.Message });
+            }
+        }
+
+        // ==========================================
+        // SUPER ADMIN CRUD FOR TRANSACTIONS
+        // ==========================================
+
+        [HttpPost("transactions")]
+        public async Task<IActionResult> CreateTransaction([FromBody] CreateTransactionRequest request, [FromServices] ApplicationDbContext dbContext)
+        {
+            try
+            {
+                var userExists = await dbContext.Users.AnyAsync(u => u.Id == request.UserId);
+                if (!userExists) return BadRequest(new { message = "Target user not found." });
+
+                var transactionId = Guid.NewGuid();
+                var tx = new GoldTransaction
+                {
+                    Id = transactionId,
+                    UserId = request.UserId,
+                    TransactionType = request.TransactionType ?? "BUY",
+                    GoldWeightMg = request.GoldWeightMg,
+                    TotalAmountPaise = request.TotalAmountPaise,
+                    PricePerGmPaise = request.PricePerGmPaise,
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    RateSource = "MANUAL_SUPERADMIN",
+                    RateTimestamp = DateTimeOffset.UtcNow
+                };
+
+                dbContext.GoldTransactions.Add(tx);
+
+                // Update Gold Holdings
+                var goldHolding = await dbContext.GoldHoldings.FirstOrDefaultAsync(h => h.UserId == request.UserId);
+                if (goldHolding != null)
+                {
+                    if (tx.TransactionType == "BUY" || tx.TransactionType == "BONUS")
+                        goldHolding.GoldBalanceMg += request.GoldWeightMg;
+                    else if (tx.TransactionType == "SELL")
+                        goldHolding.GoldBalanceMg = Math.Max(0, goldHolding.GoldBalanceMg - request.GoldWeightMg);
+
+                    goldHolding.UpdatedAt = DateTimeOffset.UtcNow;
+                    dbContext.GoldHoldings.Update(goldHolding);
+                }
+
+                ApplicationDbContext.LastDbChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                await dbContext.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Transaction logged successfully.", transaction = tx });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error logging transaction", error = ex.Message });
+            }
+        }
+
+        [HttpPut("transactions/{transactionId}")]
+        public async Task<IActionResult> UpdateTransaction(Guid transactionId, [FromBody] UpdateTransactionRequest request, [FromServices] ApplicationDbContext dbContext)
+        {
+            try
+            {
+                var tx = await dbContext.GoldTransactions.FindAsync(transactionId);
+                if (tx == null) return NotFound(new { message = "Transaction not found." });
+
+                var goldHolding = await dbContext.GoldHoldings.FirstOrDefaultAsync(h => h.UserId == tx.UserId);
+                if (goldHolding != null)
+                {
+                    // Revert old transaction weight
+                    if (tx.TransactionType == "BUY" || tx.TransactionType == "BONUS")
+                        goldHolding.GoldBalanceMg = Math.Max(0, goldHolding.GoldBalanceMg - tx.GoldWeightMg);
+                    else if (tx.TransactionType == "SELL")
+                        goldHolding.GoldBalanceMg += tx.GoldWeightMg;
+
+                    // Apply new transaction type and details
+                    tx.TransactionType = request.TransactionType ?? tx.TransactionType;
+                    tx.GoldWeightMg = request.GoldWeightMg;
+                    tx.TotalAmountPaise = request.TotalAmountPaise;
+                    tx.PricePerGmPaise = request.PricePerGmPaise;
+                    tx.RateTimestamp = DateTimeOffset.UtcNow;
+
+                    // Re-apply weight
+                    if (tx.TransactionType == "BUY" || tx.TransactionType == "BONUS")
+                        goldHolding.GoldBalanceMg += request.GoldWeightMg;
+                    else if (tx.TransactionType == "SELL")
+                        goldHolding.GoldBalanceMg = Math.Max(0, goldHolding.GoldBalanceMg - request.GoldWeightMg);
+
+                    goldHolding.UpdatedAt = DateTimeOffset.UtcNow;
+                    dbContext.GoldHoldings.Update(goldHolding);
+                }
+
+                dbContext.GoldTransactions.Update(tx);
+
+                ApplicationDbContext.LastDbChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                await dbContext.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Transaction updated successfully.", transaction = tx });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error updating transaction details", error = ex.Message });
+            }
+        }
+
+        [HttpDelete("transactions/{transactionId}")]
+        public async Task<IActionResult> DeleteTransaction(Guid transactionId, [FromServices] ApplicationDbContext dbContext)
+        {
+            try
+            {
+                var tx = await dbContext.GoldTransactions.FindAsync(transactionId);
+                if (tx == null) return NotFound(new { message = "Transaction not found." });
+
+                var goldHolding = await dbContext.GoldHoldings.FirstOrDefaultAsync(h => h.UserId == tx.UserId);
+                if (goldHolding != null)
+                {
+                    // Revert transaction weight
+                    if (tx.TransactionType == "BUY" || tx.TransactionType == "BONUS")
+                        goldHolding.GoldBalanceMg = Math.Max(0, goldHolding.GoldBalanceMg - tx.GoldWeightMg);
+                    else if (tx.TransactionType == "SELL")
+                        goldHolding.GoldBalanceMg += tx.GoldWeightMg;
+
+                    goldHolding.UpdatedAt = DateTimeOffset.UtcNow;
+                    dbContext.GoldHoldings.Update(goldHolding);
+                }
+
+                dbContext.GoldTransactions.Remove(tx);
+
+                ApplicationDbContext.LastDbChangeTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                await dbContext.SaveChangesAsync();
+
+                return Ok(new { success = true, message = "Transaction reversed and deleted successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error deleting transaction", error = ex.Message });
+            }
+        }
+    }
+
+    public class CreateUserRequest
+    {
+        public string PhoneNumber { get; set; }
+        public string Email { get; set; }
+        public string FullName { get; set; }
+        public string KycLevel { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class AdminUpdateUserRequest
+    {
+        public string PhoneNumber { get; set; }
+        public string Email { get; set; }
+        public string FullName { get; set; }
+        public string KycLevel { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class CreateTransactionRequest
+    {
+        public Guid UserId { get; set; }
+        public string TransactionType { get; set; }
+        public long GoldWeightMg { get; set; }
+        public long TotalAmountPaise { get; set; }
+        public long PricePerGmPaise { get; set; }
+    }
+
+    public class UpdateTransactionRequest
+    {
+        public string TransactionType { get; set; }
+        public long GoldWeightMg { get; set; }
+        public long TotalAmountPaise { get; set; }
+        public long PricePerGmPaise { get; set; }
     }
 }
+

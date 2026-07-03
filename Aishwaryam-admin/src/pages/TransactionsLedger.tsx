@@ -114,14 +114,14 @@ export const TransactionsLedger: React.FC = () => {
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="page-header">
         <div>
           <h2 style={{ fontSize: '24px', fontWeight: '800' }}>Transactions Ledger</h2>
           <p style={{ color: 'var(--text-2)', fontSize: '13px', marginTop: '4px' }}>
             Platform gold purchases, sell-backs, bonus disbursements, and invoice generation.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button className="btn btn-outline" onClick={handleExportCSV}>
             <Download size={16} /> Export CSV
           </button>

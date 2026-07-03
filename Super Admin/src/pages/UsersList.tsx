@@ -4,13 +4,15 @@ import {
   Search,
   Download,
   Eye,
-  ToggleLeft,
-  ToggleRight,
+  Edit,
+  Trash2,
+  Plus,
   X,
   CreditCard,
   Briefcase,
   Layers,
-  Activity
+  Activity,
+  UserPlus
 } from 'lucide-react';
 
 interface User {
@@ -38,11 +40,34 @@ export const UsersList: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Selected User for details modal
+  // Modal control states
   const [selectedUid, setSelectedUid] = useState<string | null>(null);
   const [selectedName, setSelectedName] = useState('');
   const [userDetail, setUserDetail] = useState<UserDetail | null>(null);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
+
+  // User Create Modal State
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    fullName: '',
+    phoneNumber: '',
+    email: '',
+    kycLevel: 'BASIC',
+    isActive: true
+  });
+
+  // User Edit Modal State
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    id: '',
+    fullName: '',
+    phoneNumber: '',
+    email: '',
+    kycLevel: 'BASIC',
+    isActive: true
+  });
+
+  const [isSaving, setIsSaving] = useState(false);
 
   const loadUsers = async () => {
     try {
@@ -111,47 +136,91 @@ export const UsersList: React.FC = () => {
     showToast('Exported successfully', 'success');
   };
 
-  const handleToggleStatus = async (uid: string, currentStatus: boolean) => {
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
     try {
-      const res = await fetch(`${apiBase}/api/Admin/users/${uid}/toggle-active`, { method: 'POST' });
+      const res = await fetch(`${apiBase}/api/Admin/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createForm)
+      });
       if (res.ok) {
-        showToast(`User status toggled successfully`, 'success');
-        // Force update local cache & trigger version reload
-        const vRes = await fetch(`${apiBase}/api/Admin/db-version`);
-        if (vRes.ok) {
-          const vData = await vRes.json();
-          sessionStorage.setItem('admin-db-version', String(vData.version));
-        }
+        showToast('Subscriber profile created successfully', 'success');
+        setIsCreateOpen(false);
+        setCreateForm({ fullName: '', phoneNumber: '', email: '', kycLevel: 'BASIC', isActive: true });
         loadUsers();
       } else {
-        showToast('Failed to toggle user status', 'error');
+        const err = await res.json().catch(() => ({}));
+        showToast(err.message || 'Failed to create user', 'error');
       }
-    } catch (e) {
-      showToast('Network error while toggling status', 'error');
+    } catch (err: any) {
+      showToast('Network error: ' + err.message, 'error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleResetUserData = async (uid: string) => {
+  const handleEditOpen = (user: User) => {
+    setEditForm({
+      id: user.id,
+      fullName: user.fullName || '',
+      phoneNumber: user.phoneNumber || '',
+      email: user.email || '',
+      kycLevel: user.kycLevel || 'BASIC',
+      isActive: user.isActive
+    });
+    setIsEditOpen(true);
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    try {
+      const res = await fetch(`${apiBase}/api/Admin/users/${editForm.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm)
+      });
+      if (res.ok) {
+        showToast('Subscriber profile updated successfully', 'success');
+        setIsEditOpen(false);
+        loadUsers();
+        if (selectedUid === editForm.id) {
+          viewUser(editForm.id, editForm.fullName);
+        }
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast(err.message || 'Failed to update profile details', 'error');
+      }
+    } catch (err: any) {
+      showToast('Network error: ' + err.message, 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteUser = async (uid: string, name: string) => {
     const confirm = window.confirm(
-      `Are you sure you want to reset all transaction history, gold balances, and schemes for ${selectedName} to zero? This will NOT delete their profile details, nominee info, addresses, or KYC documents. This action cannot be undone.`
+      `CRITICAL WARNING: Are you absolutely sure you want to HARD DELETE the user "${name}"? This will permanently delete their profile, active schemes, wallets, gold holdings, bank account details, and all transaction histories from the database. This action cannot be undone.`
     );
     if (!confirm) return;
 
     try {
-      setIsDetailLoading(true);
-      const res = await fetch(`${apiBase}/api/Admin/users/${uid}/reset-data`, { method: 'POST' });
+      setIsSaving(true);
+      const res = await fetch(`${apiBase}/api/Admin/users/${uid}`, { method: 'DELETE' });
       if (res.ok) {
-        showToast('User transactional activity data reset successfully', 'success');
-        // Refresh the detail panel
-        viewUser(uid, selectedName);
+        showToast(`User ${name} and all data deleted successfully`, 'success');
+        setSelectedUid(null);
+        loadUsers();
       } else {
-        const err = await res.json();
-        showToast(err.message || 'Failed to reset user data', 'error');
-        setIsDetailLoading(false);
+        const err = await res.json().catch(() => ({}));
+        showToast(err.message || 'Failed to delete user profile', 'error');
       }
-    } catch (e) {
-      showToast('Network error while resetting user data', 'error');
-      setIsDetailLoading(false);
+    } catch (err: any) {
+      showToast('Network error during delete: ' + err.message, 'error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -196,14 +265,19 @@ export const UsersList: React.FC = () => {
     <>
       <div className="page-header">
         <div>
-          <h2 style={{ fontSize: '24px', fontWeight: '800' }}>Users Directory</h2>
+          <h2 style={{ fontSize: '24px', fontWeight: '800' }}>Super Admin: Users Directory</h2>
           <p style={{ color: 'var(--text-2)', fontSize: '13px', marginTop: '4px' }}>
-            Manage registered clients, wallets, security parameters, and plan configurations.
+            Full CRUD operations on registered accounts, wallets, profiles, and transaction settings.
           </p>
         </div>
-        <button className="btn btn-outline" onClick={handleExportCSV}>
-          <Download size={16} /> Export CSV
-        </button>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button className="btn btn-primary" onClick={() => setIsCreateOpen(true)}>
+            <Plus size={16} /> Create User
+          </button>
+          <button className="btn btn-outline" onClick={handleExportCSV}>
+            <Download size={16} /> Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Filters bar */}
@@ -295,11 +369,18 @@ export const UsersList: React.FC = () => {
                           </button>
                           <button
                             className="btn btn-ghost btn-xs"
-                            onClick={() => handleToggleStatus(u.id, u.isActive)}
-                            style={{ color: u.isActive ? 'var(--red)' : 'var(--green)' }}
-                            title={u.isActive ? 'Suspend User account' : 'Restore User account'}
+                            onClick={() => handleEditOpen(u)}
+                            title="Edit User Details"
                           >
-                            {u.isActive ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
+                            <Edit size={14} /> Edit
+                          </button>
+                          <button
+                            className="btn btn-ghost btn-xs"
+                            onClick={() => handleDeleteUser(u.id, u.fullName)}
+                            style={{ color: 'var(--red)' }}
+                            title="Delete User"
+                          >
+                            <Trash2 size={14} /> Delete
                           </button>
                         </div>
                       </td>
@@ -319,28 +400,6 @@ export const UsersList: React.FC = () => {
             <div className="card-head" style={{ borderBottom: '1px solid var(--border)', padding: '20px 24px', margin: 0 }}>
               <span className="card-title" style={{ fontSize: '18px' }}>Manage Profile: {selectedName}</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <button
-                  className="btn"
-                  onClick={() => handleResetUserData(selectedUid!)}
-                  disabled={isDetailLoading}
-                  style={{
-                    backgroundColor: '#C5A880',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '6px 14px',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                    opacity: isDetailLoading ? 0.6 : 1
-                  }}
-                >
-                  Reset User Activity
-                </button>
                 <button
                   className="btn btn-ghost btn-xs"
                   onClick={() => setSelectedUid(null)}
@@ -370,15 +429,6 @@ export const UsersList: React.FC = () => {
                         <label className="form-label">Referral Code</label>
                         <input className="form-control" type="text" value={userDetail.profile?.referralCode || '—'} readOnly />
                       </div>
-                    </div>
-                    <div className="form-group" style={{ marginTop: '8px' }}>
-                      <label className="form-label">Address Line</label>
-                      <textarea
-                        className="form-control"
-                        rows={2}
-                        value={`${userDetail.profile?.address?.addressLine1 || ''} ${userDetail.profile?.address?.addressLine2 || ''}`.trim() || 'No address specified'}
-                        readOnly
-                      />
                     </div>
                   </div>
 
@@ -478,10 +528,172 @@ export const UsersList: React.FC = () => {
                   </div>
                 </>
               ) : (
-                <div style={{ textAlign: 'center', color: 'var(--text-3)' }}>Failed to render user profile detail.</div>
+                <div style={{ color: 'var(--red)', textAlign: 'center', padding: '40px' }}>No client profile details available.</div>
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* User Create Modal */}
+      {isCreateOpen && (
+        <div className="modal-backdrop" onClick={() => setIsCreateOpen(false)}>
+          <form className="modal-content fade-in" onSubmit={handleCreateSubmit} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+            <div className="card-head" style={{ borderBottom: '1px solid var(--border)', padding: '20px 24px', margin: 0 }}>
+              <span className="card-title" style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <UserPlus size={20} /> Create New Account
+              </span>
+              <button type="button" className="btn btn-ghost btn-xs" onClick={() => setIsCreateOpen(false)} style={{ padding: '4px', borderRadius: '50%' }}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ gap: '16px' }}>
+              <div className="form-group">
+                <label className="form-label">Full Name</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  required
+                  placeholder="e.g. Rahul Sharma"
+                  value={createForm.fullName}
+                  onChange={(e) => setCreateForm({ ...createForm, fullName: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Phone Number</label>
+                <input
+                  type="tel"
+                  className="form-control"
+                  required
+                  placeholder="e.g. 9876543210"
+                  value={createForm.phoneNumber}
+                  onChange={(e) => setCreateForm({ ...createForm, phoneNumber: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email ID</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  placeholder="e.g. rahul@gmail.com"
+                  value={createForm.email}
+                  onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                />
+              </div>
+              <div className="grid-cols-2" style={{ gap: '12px' }}>
+                <div className="form-group">
+                  <label className="form-label">KYC Status</label>
+                  <select
+                    className="form-control"
+                    value={createForm.kycLevel}
+                    onChange={(e) => setCreateForm({ ...createForm, kycLevel: e.target.value })}
+                  >
+                    <option value="NONE">NONE</option>
+                    <option value="BASIC">BASIC</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="FULL">FULL</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Account Status</label>
+                  <select
+                    className="form-control"
+                    value={createForm.isActive ? 'true' : 'false'}
+                    onChange={(e) => setCreateForm({ ...createForm, isActive: e.target.value === 'true' })}
+                  >
+                    <option value="true">Active</option>
+                    <option value="false">Suspended</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '16px' }}>
+                <button type="button" className="btn btn-outline" onClick={() => setIsCreateOpen(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Create Account'}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* User Edit Modal */}
+      {isEditOpen && (
+        <div className="modal-backdrop" onClick={() => setIsEditOpen(false)}>
+          <form className="modal-content fade-in" onSubmit={handleEditSubmit} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+            <div className="card-head" style={{ borderBottom: '1px solid var(--border)', padding: '20px 24px', margin: 0 }}>
+              <span className="card-title" style={{ fontSize: '18px' }}>Edit Subscriber Details</span>
+              <button type="button" className="btn btn-ghost btn-xs" onClick={() => setIsEditOpen(false)} style={{ padding: '4px', borderRadius: '50%' }}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ gap: '16px' }}>
+              <div className="form-group">
+                <label className="form-label">Full Name</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  required
+                  placeholder="e.g. Rahul Sharma"
+                  value={editForm.fullName}
+                  onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Phone Number</label>
+                <input
+                  type="tel"
+                  className="form-control"
+                  required
+                  placeholder="e.g. 9876543210"
+                  value={editForm.phoneNumber}
+                  onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email ID</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  placeholder="e.g. rahul@gmail.com"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                />
+              </div>
+              <div className="grid-cols-2" style={{ gap: '12px' }}>
+                <div className="form-group">
+                  <label className="form-label">KYC Status</label>
+                  <select
+                    className="form-control"
+                    value={editForm.kycLevel}
+                    onChange={(e) => setEditForm({ ...editForm, kycLevel: e.target.value })}
+                  >
+                    <option value="NONE">NONE</option>
+                    <option value="BASIC">BASIC</option>
+                    <option value="PENDING">PENDING</option>
+                    <option value="FULL">FULL</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Account Status</label>
+                  <select
+                    className="form-control"
+                    value={editForm.isActive ? 'true' : 'false'}
+                    onChange={(e) => setEditForm({ ...editForm, isActive: e.target.value === 'true' })}
+                  >
+                    <option value="true">Active</option>
+                    <option value="false">Suspended</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '16px' }}>
+                <button type="button" className="btn btn-outline" onClick={() => setIsEditOpen(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : 'Update Details'}
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
       )}
     </>
