@@ -317,6 +317,7 @@ namespace Aishwaryam.Application.Services
             }
 
             // Verify BCrypt hash
+            // Verify BCrypt hash
             if (!BCrypt.Net.BCrypt.Verify(request.Mpin, user.MpinHash))
             {
                 // In a real app, track failed attempts here for lockout
