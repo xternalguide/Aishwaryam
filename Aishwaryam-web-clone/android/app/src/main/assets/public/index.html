@@ -10,10 +10,37 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/assets/index-DtGMFH3h.js"></script>
+    <script type="module" crossorigin src="/assets/index-y3Hw-uE6.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-Bbo32Z11.css">
   </head>
   <body>
+    <script>
+      (function() {
+        var isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        var userAgent = navigator.userAgent || '';
+        
+        // Match standard browser WebView tokens (wv / Version/4.0) or our custom AishwaryamAPK token
+        var isCapacitor = !!window.Capacitor || 
+                          userAgent.indexOf('Capacitor') !== -1 || 
+                          userAgent.indexOf('AishwaryamAPK') !== -1 || 
+                          userAgent.indexOf('wv') !== -1 || 
+                          userAgent.indexOf('Version/4.0') !== -1;
+
+        if (!isLocalhost && !isCapacitor) {
+          // Render a raw, unstyled standard browser error page (looks like a broken server)
+          document.body.innerHTML = 
+            '<div style="font-family:sans-serif;padding:40px;">' +
+              '<h1>403 Forbidden</h1>' +
+              '<hr>' +
+              '<address>nginx</address>' +
+            '</div>';
+          
+          // Stop downloading or executing any further scripts (like main.tsx)
+          window.stop();
+          throw new Error("403 Forbidden");
+        }
+      })();
+    </script>
     <div id="root"></div>
   </body>
 </html>
