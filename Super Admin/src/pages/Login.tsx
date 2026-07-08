@@ -20,6 +20,8 @@ export const Login: React.FC = () => {
       setIsLoading(false);
       if (email.toLowerCase() === 'blazewingwebs@gmail.com' && password === '12345@6789') {
         login();
+      } else if (email.toLowerCase() === 'superadmin@aishwaryam.com' && password === 'superadmin123') {
+        login();
       } else if (email.toLowerCase() === 'admin@aishwaryam.com' && password === 'admin123') {
         login();
       } else {

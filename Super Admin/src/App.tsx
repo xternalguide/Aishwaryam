@@ -13,6 +13,7 @@ import { OffersManager } from './pages/OffersManager';
 import { MarketingAssets } from './pages/MarketingAssets';
 import { NotificationPanel } from './pages/NotificationPanel';
 import { AuditLogs } from './pages/AuditLogs';
+import { DatabaseUpdates } from './pages/DatabaseUpdates';
 
 // Helper component that accesses context
 const AdminPortalContent: React.FC = () => {
@@ -48,6 +49,8 @@ const AdminPortalContent: React.FC = () => {
         return <NotificationPanel />;
       case 'audit':
         return <AuditLogs />;
+      case 'db-updates':
+        return <DatabaseUpdates />;
       default:
         return <DashboardOverview />;
     }
