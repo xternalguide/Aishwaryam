@@ -80,6 +80,7 @@ namespace Aishwaryam.Infrastructure.Data
         public DbSet<SchemeRedemption> SchemeRedemptions { get; set; }
         public DbSet<RedemptionStatusHistory> RedemptionStatusHistories { get; set; }
         public DbSet<ChatbotLog> ChatbotLogs { get; set; }
+        public DbSet<FestivalTheme> FestivalThemes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -387,6 +388,46 @@ namespace Aishwaryam.Infrastructure.Data
                 entity.Property(e => e.ReceiptDisclaimerSilver).HasColumnName("receipt_disclaimer_silver").HasDefaultValue("* Silver credited is subject to the terms and rules of the locked scheme plan.");
                 entity.Property(e => e.ReceiptRegisteredOffice).HasColumnName("receipt_registered_office").HasDefaultValue("Registered Office: No. 123, Gandhi Road, Chennai, Tamil Nadu - 600001");
 
+                entity.Property(e => e.ActiveThemeId).HasColumnName("active_theme_id").HasDefaultValue("default").HasMaxLength(50);
+                entity.HasOne(e => e.ActiveTheme)
+                    .WithMany()
+                    .HasForeignKey(e => e.ActiveThemeId);
+
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
+            // FestivalThemes
+            modelBuilder.Entity<FestivalTheme>(entity =>
+            {
+                entity.ToTable("festival_themes");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id").HasMaxLength(50);
+                entity.Property(e => e.Name).HasColumnName("name").IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Description).HasColumnName("description");
+                entity.Property(e => e.PrimaryColorHex).HasColumnName("primary_color_hex").IsRequired().HasMaxLength(7);
+                entity.Property(e => e.SecondaryColorHex).HasColumnName("secondary_color_hex").IsRequired().HasMaxLength(7);
+                entity.Property(e => e.StatusBarColorHex).HasColumnName("status_bar_color_hex").IsRequired().HasMaxLength(7);
+                entity.Property(e => e.SplashBgColorHex).HasColumnName("splash_bg_color_hex").IsRequired().HasMaxLength(7);
+                
+                entity.Property(e => e.SplashIllustrationUrl).HasColumnName("splash_illustration_url");
+                entity.Property(e => e.LoginIllustrationUrl).HasColumnName("login_illustration_url");
+                entity.Property(e => e.HomeIllustrationUrl).HasColumnName("home_illustration_url");
+                entity.Property(e => e.SidebarIllustrationUrl).HasColumnName("sidebar_illustration_url");
+                entity.Property(e => e.WelcomeBannerUrl).HasColumnName("welcome_banner_url");
+                
+                entity.Property(e => e.DecorationsJson).HasColumnName("decorations_json");
+                entity.Property(e => e.LottieAnimationsJson).HasColumnName("lottie_animations_json");
+                
+                entity.Property(e => e.StartDate).HasColumnName("start_date");
+                entity.Property(e => e.EndDate).HasColumnName("end_date");
+                entity.Property(e => e.IsRecurring).HasColumnName("is_recurring").HasDefaultValue(false);
+                entity.Property(e => e.StartMonth).HasColumnName("start_month");
+                entity.Property(e => e.StartDay).HasColumnName("start_day");
+                entity.Property(e => e.EndMonth).HasColumnName("end_month");
+                entity.Property(e => e.EndDay).HasColumnName("end_day");
+                
+                entity.Property(e => e.IsSystemDefault).HasColumnName("is_system_default").HasDefaultValue(false);
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 

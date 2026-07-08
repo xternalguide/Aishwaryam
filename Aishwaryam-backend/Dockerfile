@@ -28,8 +28,8 @@ WORKDIR /app
 # Copy published output from build stage
 COPY --from=build /app/publish .
 
-# Railway/Render inject $PORT at runtime — ASP.NET Core reads this automatically
-ENV ASPNETCORE_URLS=http://+:${PORT:-8080}
+ARG PORT=8080
+ENV ASPNETCORE_URLS=http://+:${PORT}
 
 EXPOSE 8080
 

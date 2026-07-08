@@ -16,6 +16,9 @@ namespace Aishwaryam.Domain.Entities
         public string PrimaryColorHex { get; set; } = "#01211A"; // Dark Green
         public string SecondaryColorHex { get; set; } = "#E8A83A"; // Gold
         public string FestivalBannerUrl { get; set; } = "https://images.unsplash.com/photo-1610652492500-ded49ceeb378?auto=format&fit=crop&q=80&w=800";
+        public string ActiveThemeId { get; set; } = "default";
+        public virtual FestivalTheme ActiveTheme { get; set; }
+        
         public bool IsReferralEnabled { get; set; } = true;
         public bool IsAutoSaveEnabled { get; set; } = true;
         public long ReferrerRewardMg { get; set; } = 100;
