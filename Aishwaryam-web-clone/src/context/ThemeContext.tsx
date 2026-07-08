@@ -43,7 +43,7 @@ const defaultSystemTheme: FestivalTheme = {
   id: 'default',
   name: 'Default Theme',
   description: 'Aishwaryam default color scheme and illustrations',
-  primaryColorHex: '#01211A',
+  primaryColorHex: '#4A0E4E',
   secondaryColorHex: '#E8A83A',
   statusBarColorHex: '#4A0E4E',
   splashBgColorHex: '#FFFFFF',

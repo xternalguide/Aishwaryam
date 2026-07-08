@@ -13,7 +13,7 @@ namespace Aishwaryam.Domain.Entities
         public string ReferralBonusMsg { get; set; } = "Invite friends and earn 1mg of 24K Gold!";
         
         // Remote Config & Theme (Backend-driven UI)
-        public string PrimaryColorHex { get; set; } = "#01211A"; // Dark Green
+        public string PrimaryColorHex { get; set; } = "#4A0E4E"; // Purple/Magenta
         public string SecondaryColorHex { get; set; } = "#E8A83A"; // Gold
         public string FestivalBannerUrl { get; set; } = "https://images.unsplash.com/photo-1610652492500-ded49ceeb378?auto=format&fit=crop&q=80&w=800";
         public string ActiveThemeId { get; set; } = "default";

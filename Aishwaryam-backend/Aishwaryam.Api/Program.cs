@@ -453,7 +453,7 @@ using (var scope = app.Services.CreateScope())
     );", "app_configs");
 
     TryExec(@"INSERT INTO app_configs (id, support_email, support_phone, terms_url, privacy_url, faq_json, referral_bonus_msg, primary_color_hex, secondary_color_hex, festival_banner_url, is_referral_enabled, is_autosave_enabled, referrer_reward_mg, referee_reward_mg)
-        VALUES ('global_config', 'support@aishwaryamgold.com', '+91-9876543210', 'https://aishwaryamgold.com/terms', 'https://aishwaryamgold.com/privacy', '[{""q"":""How to buy gold?"",""a"":""Go to Market tab and buy.""}]', 'Invite friends and earn 1mg of 24K Gold!', '#01211A', '#E8A83A', 'https://images.unsplash.com/photo-1610652492500-ded49ceeb378?auto=format&fit=crop&q=80&w=800', true, true, 100, 50)
+        VALUES ('global_config', 'support@aishwaryamgold.com', '+91-9876543210', 'https://aishwaryamgold.com/terms', 'https://aishwaryamgold.com/privacy', '[{""q"":""How to buy gold?"",""a"":""Go to Market tab and buy.""}]', 'Invite friends and earn 1mg of 24K Gold!', '#4A0E4E', '#E8A83A', 'https://images.unsplash.com/photo-1610652492500-ded49ceeb378?auto=format&fit=crop&q=80&w=800', true, true, 100, 50)
         ON CONFLICT (id) DO NOTHING;", "seed_app_configs");
 
     // Overwrite default placeholder URLs with the scraped Pothys terms/privacy contents
@@ -512,6 +512,56 @@ You can view and update your personal details in the Profile section of the app.
     TryExec("ALTER TABLE app_configs ADD COLUMN IF NOT EXISTS referrer_reward_mg bigint DEFAULT 100 NOT NULL;", "app_configs.referrer_reward_mg");
     TryExec("ALTER TABLE app_configs ADD COLUMN IF NOT EXISTS referee_reward_mg bigint DEFAULT 50 NOT NULL;", "app_configs.referee_reward_mg");
     TryExec("ALTER TABLE gold_price_snapshots ADD COLUMN IF NOT EXISTS price_silver_per_gram numeric(14,4) DEFAULT 0 NOT NULL;", "gold_price_snapshots.price_silver_per_gram");
+
+    // ── Festival Theme Management System Tables ────────────────────────────────
+    TryExec(@"CREATE TABLE IF NOT EXISTS festival_themes (
+        id varchar(50) PRIMARY KEY,
+        name varchar(100) NOT NULL,
+        description text,
+        primary_color_hex varchar(7) NOT NULL,
+        secondary_color_hex varchar(7) NOT NULL,
+        status_bar_color_hex varchar(7) NOT NULL,
+        splash_bg_color_hex varchar(7) NOT NULL,
+        splash_illustration_url text,
+        login_illustration_url text,
+        home_illustration_url text,
+        sidebar_illustration_url text,
+        welcome_banner_url text,
+        decorations_json text,
+        lottie_animations_json text,
+        start_date timestamp with time zone,
+        end_date timestamp with time zone,
+        is_recurring boolean DEFAULT false NOT NULL,
+        start_month integer,
+        start_day integer,
+        end_month integer,
+        end_day integer,
+        is_system_default boolean DEFAULT false NOT NULL,
+        created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    );", "festival_themes");
+
+    TryExec(@"INSERT INTO festival_themes (id, name, description, primary_color_hex, secondary_color_hex, status_bar_color_hex, splash_bg_color_hex, is_system_default) 
+        VALUES ('default', 'Default Theme', 'Aishwaryam default color scheme and illustrations', '#4A0E4E', '#E8A83A', '#4A0E4E', '#FFFFFF', true)
+        ON CONFLICT (id) DO NOTHING;", "seed_default_theme");
+
+    // Force update old database seeded green configurations to default brand purple
+    TryExec("UPDATE app_configs SET primary_color_hex = '#4A0E4E' WHERE primary_color_hex = '#01211A';", "update_config_primary_color");
+    TryExec("UPDATE festival_themes SET primary_color_hex = '#4A0E4E' WHERE id = 'default' AND primary_color_hex = '#01211A';", "update_theme_primary_color");
+
+    TryExec(@"INSERT INTO festival_themes (id, name, description, primary_color_hex, secondary_color_hex, status_bar_color_hex, splash_bg_color_hex, is_recurring, start_month, start_day, end_month, end_day, is_system_default) 
+        VALUES ('pongal', 'Pongal Theme', 'Harvest festival theme with traditional Tamil decorations, sugarcanes and kolam art', '#D35400', '#F1C40F', '#D35400', '#FDF2E9', true, 1, 13, 1, 17, false)
+        ON CONFLICT (id) DO NOTHING;", "seed_pongal_theme");
+
+    TryExec(@"INSERT INTO festival_themes (id, name, description, primary_color_hex, secondary_color_hex, status_bar_color_hex, splash_bg_color_hex, is_recurring, start_month, start_day, end_month, end_day, is_system_default) 
+        VALUES ('deepavali', 'Deepavali Theme', 'Festival of lights theme with diyas, crackers and golden sparkle graphics', '#7D3C98', '#F39C12', '#7D3C98', '#F5EEF8', true, 11, 10, 11, 16, false)
+        ON CONFLICT (id) DO NOTHING;", "seed_deepavali_theme");
+
+    TryExec(@"INSERT INTO festival_themes (id, name, description, primary_color_hex, secondary_color_hex, status_bar_color_hex, splash_bg_color_hex, is_recurring, start_month, start_day, end_month, end_day, is_system_default) 
+        VALUES ('christmas', 'Christmas Theme', 'Winter festive theme with Christmas trees, ornaments, bells and snowflakes', '#1E8449', '#C0392B', '#1E8449', '#EAECEE', true, 12, 23, 12, 26, false)
+        ON CONFLICT (id) DO NOTHING;", "seed_christmas_theme");
+
+    TryExec("ALTER TABLE app_configs ADD COLUMN IF NOT EXISTS active_theme_id varchar(50) DEFAULT 'default' NOT NULL;", "app_configs.active_theme_id");
 
     // ── ALTER TABLE: gold_transactions idempotency & new columns ─────────────
     TryExec("ALTER TABLE gold_transactions ADD COLUMN IF NOT EXISTS razorpay_payment_id varchar(100);",
