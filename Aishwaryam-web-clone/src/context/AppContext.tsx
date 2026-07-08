@@ -211,7 +211,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }, 8000);
 
-    return () => clearInterval(interval);
+    // Instant refresh when app resumes from phone lock / background focus state
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const currentUserId = SessionManager.getUserId();
+        const currentStage = SessionManager.getOnboardingStage();
+        if (currentUserId && currentStage === OnboardingStage.FULLY_VERIFIED) {
+          refreshData(true);
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   useEffect(() => {
