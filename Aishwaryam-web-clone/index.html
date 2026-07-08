@@ -15,14 +15,22 @@
     <script>
       (function() {
         var isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        var isCapacitor = !!window.Capacitor || navigator.userAgent.includes('Capacitor');
+        var userAgent = navigator.userAgent || '';
+        
+        // Match standard browser WebView tokens (wv / Version/4.0) or our custom AishwaryamAPK token
+        var isCapacitor = !!window.Capacitor || 
+                          userAgent.indexOf('Capacitor') !== -1 || 
+                          userAgent.indexOf('AishwaryamAPK') !== -1 || 
+                          userAgent.indexOf('wv') !== -1 || 
+                          userAgent.indexOf('Version/4.0') !== -1;
+
         if (!isLocalhost && !isCapacitor) {
-          // Immediately block the page and render 403 styling
+          // Immediately block the page and render brand-colored 403 styling (Purple & Gold)
           document.body.innerHTML = 
-            '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background-color:#0F172A;font-family:sans-serif;color:#F8FAFC;padding:24px;text-align:center;">' +
-              '<h1 style="font-size:72px;font-weight:800;color:#E2E8F0;margin:0 0 16px 0;letter-spacing:-1px;">403</h1>' +
-              '<h2 style="font-size:20px;font-weight:600;color:#F1F5F9;margin:0 0 12px 0;">Access Denied</h2>' +
-              '<p style="font-size:14px;color:#94A3B8;max-width:320px;line-height:20px;margin:0;">This application is restricted. Please install and run the official mobile app from the Google Play Store.</p>' +
+            '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg, #29001D 0%, #4A0E4E 100%);font-family:sans-serif;color:#E5E7EB;padding:24px;text-align:center;">' +
+              '<h1 style="font-size:72px;font-weight:900;color:#FFD700;margin:0 0 16px 0;letter-spacing:-1px;text-shadow:0 4px 12px rgba(255,215,0,0.15)">403</h1>' +
+              '<h2 style="font-size:22px;font-weight:700;color:#FFFFFF;margin:0 0 12px 0;">Access Denied</h2>' +
+              '<p style="font-size:14px;color:#D1D5DB;max-width:320px;line-height:22px;margin:0;">This application is restricted. Please install and run the official mobile app from the Google Play Store.</p>' +
             '</div>';
           
           // Stop downloading or executing any further scripts (like main.tsx)

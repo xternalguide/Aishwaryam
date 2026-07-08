@@ -8,6 +8,12 @@ const config: CapacitorConfig = {
     url: 'https://aishwaryam-web.pages.dev',
     cleartext: true
   },
+  android: {
+    appendUserAgent: 'AishwaryamAPK'
+  },
+  ios: {
+    appendUserAgent: 'AishwaryamAPK'
+  },
   plugins: {
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"]
