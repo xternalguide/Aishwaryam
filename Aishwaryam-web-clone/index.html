@@ -25,17 +25,17 @@
                           userAgent.indexOf('Version/4.0') !== -1;
 
         if (!isLocalhost && !isCapacitor) {
-          // Immediately block the page and render brand-colored 403 styling (Purple & Gold)
+          // Render a raw, unstyled standard browser error page (looks like a broken server)
           document.body.innerHTML = 
-            '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg, #29001D 0%, #4A0E4E 100%);font-family:sans-serif;color:#E5E7EB;padding:24px;text-align:center;">' +
-              '<h1 style="font-size:72px;font-weight:900;color:#FFD700;margin:0 0 16px 0;letter-spacing:-1px;text-shadow:0 4px 12px rgba(255,215,0,0.15)">403</h1>' +
-              '<h2 style="font-size:22px;font-weight:700;color:#FFFFFF;margin:0 0 12px 0;">Access Denied</h2>' +
-              '<p style="font-size:14px;color:#D1D5DB;max-width:320px;line-height:22px;margin:0;">This application is restricted. Please install and run the official mobile app from the Google Play Store.</p>' +
+            '<div style="font-family:sans-serif;padding:40px;">' +
+              '<h1>403 Forbidden</h1>' +
+              '<hr>' +
+              '<address>nginx</address>' +
             '</div>';
           
           // Stop downloading or executing any further scripts (like main.tsx)
           window.stop();
-          throw new Error("Access Denied: Web-browser rendering is disabled in production.");
+          throw new Error("403 Forbidden");
         }
       })();
     </script>
