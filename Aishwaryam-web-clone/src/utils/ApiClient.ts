@@ -3,7 +3,12 @@ import type { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
 import { SessionManager } from './SessionManager';
 import { AuditLogger } from './auditLogger';
 
-export const BASE_URL = 'http://localhost:5044/';
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const isCapacitor = !!(window as any).Capacitor || navigator.userAgent.includes('Capacitor') || navigator.userAgent.includes('AishwaryamAPK') || navigator.userAgent.includes('wv') || navigator.userAgent.includes('Version/4.0');
+
+export const BASE_URL = (isLocalhost && !isCapacitor)
+  ? 'http://localhost:5044/'
+  : 'https://aishwaryam-production.up.railway.app/';
 
 export const getDeviceFingerprint = (): string => {
   const isCapacitor = !!(window as any).Capacitor;
