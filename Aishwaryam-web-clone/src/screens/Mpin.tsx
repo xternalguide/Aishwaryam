@@ -366,7 +366,7 @@ export const Mpin: React.FC = () => {
 
           {/* State Renderers */}
           {flowState === MpinFlowState.ENTER_PIN && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', position: 'relative' }}>
               {/* Hidden input for PIN */}
               <input
                 ref={mpinInputRef}
@@ -388,15 +388,18 @@ export const Mpin: React.FC = () => {
                 onBlur={() => setIsMpinFocused(false)}
                 style={{
                   position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '56px',
                   opacity: 0,
-                  pointerEvents: 'none',
-                  width: '1px',
-                  height: '1px'
+                  zIndex: 2,
+                  cursor: 'pointer',
+                  fontSize: '24px'
                 }}
               />
 
               <div 
-                onClick={() => mpinInputRef.current?.focus()}
                 style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginBottom: '24px', cursor: 'pointer' }}
               >
                 {Array.from({ length: 4 }).map((_, i) => {
@@ -472,62 +475,39 @@ export const Mpin: React.FC = () => {
           {(flowState === MpinFlowState.SETUP_PIN || flowState === MpinFlowState.FORGOT_NEW_PIN) && (
             <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '16px' }}>
               {/* Hidden inputs for Set PIN */}
-              <input
-                ref={newMpinInputRef}
-                type="tel"
-                pattern="[0-9]*"
-                inputMode="numeric"
-                maxLength={4}
-                value={newMpin}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '').slice(0, 4);
-                  setNewMpin(val);
-                  if (errorMsg) setErrorMsg(null);
-                  if (val.length === 4) {
-                    confirmMpinInputRef.current?.focus();
-                  }
-                }}
-                onFocus={() => setIsNewMpinFocused(true)}
-                onBlur={() => setIsNewMpinFocused(false)}
-                style={{
-                  position: 'absolute',
-                  opacity: 0,
-                  pointerEvents: 'none',
-                  width: '1px',
-                  height: '1px'
-                }}
-              />
-              <input
-                ref={confirmMpinInputRef}
-                type="tel"
-                pattern="[0-9]*"
-                inputMode="numeric"
-                maxLength={4}
-                value={confirmMpin}
-                disabled={newMpin.length !== 4}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '').slice(0, 4);
-                  setConfirmMpin(val);
-                  if (errorMsg) setErrorMsg(null);
-                  if (val.length === 4) {
-                    confirmMpinInputRef.current?.blur();
-                  }
-                }}
-                onFocus={() => setIsConfirmMpinFocused(true)}
-                onBlur={() => setIsConfirmMpinFocused(false)}
-                style={{
-                  position: 'absolute',
-                  opacity: 0,
-                  pointerEvents: 'none',
-                  width: '1px',
-                  height: '1px'
-                }}
-              />
 
-              <div>
+              <div style={{ position: 'relative' }}>
                 <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginLeft: '4px' }}>{t('enter_new_pin')}</span>
+                <input
+                  ref={newMpinInputRef}
+                  type="tel"
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={newMpin}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setNewMpin(val);
+                    if (errorMsg) setErrorMsg(null);
+                    if (val.length === 4) {
+                      confirmMpinInputRef.current?.focus();
+                    }
+                  }}
+                  onFocus={() => setIsNewMpinFocused(true)}
+                  onBlur={() => setIsNewMpinFocused(false)}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    opacity: 0,
+                    zIndex: 2,
+                    cursor: 'pointer',
+                    fontSize: '24px'
+                  }}
+                />
                 <div 
-                  onClick={() => newMpinInputRef.current?.focus()}
                   style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '6px', cursor: 'pointer' }}
                 >
                   {Array.from({ length: 4 }).map((_, i) => {
@@ -559,10 +539,39 @@ export const Mpin: React.FC = () => {
                 </div>
               </div>
 
-              <div>
+              <div style={{ position: 'relative' }}>
                 <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginLeft: '4px' }}>{t('confirm_new_pin')}</span>
+                <input
+                  ref={confirmMpinInputRef}
+                  type="tel"
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={confirmMpin}
+                  disabled={newMpin.length !== 4}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setConfirmMpin(val);
+                    if (errorMsg) setErrorMsg(null);
+                    if (val.length === 4) {
+                      confirmMpinInputRef.current?.blur();
+                    }
+                  }}
+                  onFocus={() => setIsConfirmMpinFocused(true)}
+                  onBlur={() => setIsConfirmMpinFocused(false)}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    opacity: 0,
+                    zIndex: 2,
+                    cursor: newMpin.length === 4 ? 'pointer' : 'default',
+                    fontSize: '24px'
+                  }}
+                />
                 <div 
-                  onClick={() => { if (newMpin.length === 4) confirmMpinInputRef.current?.focus(); }}
                   style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '6px', cursor: newMpin.length === 4 ? 'pointer' : 'default' }}
                 >
                   {Array.from({ length: 4 }).map((_, i) => {
