@@ -4,10 +4,12 @@ import { SessionManager, OnboardingStage } from '../utils/SessionManager';
 import { useTranslation } from '../utils/translation';
 import { ApiClient } from '../utils/ApiClient';
 import { Phone, CheckCircle } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { activeTheme } = useTheme();
   const [phone, setPhone] = useState('');
   const [isOtpFlow, setIsOtpFlow] = useState(false);
   const [otp, setOtp] = useState('');
@@ -193,6 +195,19 @@ export const Login: React.FC = () => {
         {/* Top Section */}
         <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
           {/* Branding Logo */}
+          {activeTheme && activeTheme.loginIllustrationUrl ? (
+            <img 
+              src={activeTheme.loginIllustrationUrl} 
+              alt="Festival Illustration" 
+              style={{ width: '120px', height: '120px', objectFit: 'contain', marginBottom: '16px' }}
+            />
+          ) : (
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              style={{ width: '64px', height: '64px', borderRadius: '16px', marginBottom: '16px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}
+            />
+          )}
 
           <h1 style={{
             fontFamily: 'var(--font-playfair)',

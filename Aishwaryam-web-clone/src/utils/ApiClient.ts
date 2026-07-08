@@ -3,7 +3,7 @@ import type { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
 import { SessionManager } from './SessionManager';
 import { AuditLogger } from './auditLogger';
 
-export const BASE_URL = 'https://aishwaryam-production.up.railway.app/';
+export const BASE_URL = 'http://localhost:5044/';
 
 export const getDeviceFingerprint = (): string => {
   const isCapacitor = !!(window as any).Capacitor;

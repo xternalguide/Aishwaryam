@@ -1,15 +1,15 @@
 :root {
-  /* Brand Magenta Tokens */
-  --brand-deep: #29001D;
-  --brand-dark: #4A0E4E;
-  --brand-mid: #7B1FA2;
-  --brand-accent: #C2185B;
+  /* Brand Magenta Tokens mapped dynamically */
+  --brand-deep: var(--primary-color, #29001D);
+  --brand-dark: var(--primary-color, #4A0E4E);
+  --brand-mid: var(--primary-color, #7B1FA2);
+  --brand-accent: var(--secondary-color, #C2185B);
   --brand-glow: rgba(74, 14, 78, 0.15);
 
-  /* Gold Tokens */
-  --gold-primary: #FFD700;
-  --gold-warm: #FFB300;
-  --gold-deep: #B8860B;
+  /* Gold Tokens mapped dynamically */
+  --gold-primary: var(--secondary-color, #FFD700);
+  --gold-warm: var(--secondary-color, #FFB300);
+  --gold-deep: var(--secondary-color, #B8860B);
   --gold-soft: #FFF8E1;
   --gold-glow: rgba(255, 215, 0, 0.15);
 

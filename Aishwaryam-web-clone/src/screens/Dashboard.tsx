@@ -4,6 +4,7 @@ import { SessionManager, OnboardingStage } from '../utils/SessionManager';
 import { ApiClient, BASE_URL } from '../utils/ApiClient';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from '../utils/translation';
+import { useTheme } from '../context/ThemeContext';
 import {
   Home,
   History,
@@ -131,6 +132,7 @@ interface TransactionItem {
 // ─────────────────────────────────────────────
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { activeTheme } = useTheme();
 
   const { t, autoT, lang, changeLanguage } = useTranslation();
   const [selectedTab, setSelectedTab] = useState(() => {
@@ -1213,6 +1215,39 @@ export const Dashboard: React.FC = () => {
   /** Promos & banners */
   const renderPromosAndBanners = () => (
     <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
+      {activeTheme && activeTheme.welcomeBannerUrl && (
+        <div style={{
+          position: 'relative',
+          borderRadius: '20px',
+          overflow: 'hidden',
+          height: '150px',
+          border: `1.5px solid ${activeTheme.secondaryColorHex || '#FFD700'}`,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+          marginBottom: '4px',
+          cursor: 'pointer'
+        }}>
+          <img src={activeTheme.welcomeBannerUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Festival Banner" />
+          <div style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'linear-gradient(to right, rgba(0,0,0,0.85) 0%, transparent 100%)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            padding: '20px'
+          }}>
+            <span style={{ fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', color: activeTheme.secondaryColorHex || '#FFD700', letterSpacing: '1.5px' }}>
+              Festive Campaign
+            </span>
+            <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#fff', margin: '4px 0 6px 0' }}>
+              {activeTheme.name}
+            </h2>
+            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.85)', margin: 0, maxWidth: '80%' }}>
+              {activeTheme.description}
+            </p>
+          </div>
+        </div>
+      )}
       {offerTitle && (
         offerBanner ? (
           <div 

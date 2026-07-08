@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SessionManager, OnboardingStage } from '../utils/SessionManager';
 import { useApp } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 
 export const Splash: React.FC = () => {
   const navigate = useNavigate();
   const { isLoading } = useApp();
+  const { activeTheme } = useTheme();
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
   const [maxTimeReached, setMaxTimeReached] = useState(false);
 
@@ -59,27 +61,30 @@ export const Splash: React.FC = () => {
       alignItems: 'center',
       justifyContent: 'center',
       color: 'white',
-      textAlign: 'center'
+      textAlign: 'center',
+      backgroundColor: activeTheme?.splashBgColorHex || undefined
     }}>
       <div className="splash-logo-animated">
         <img
-              src="/logo.png"
-              alt="Logo"
-              style={{
-                width: '72px',
-                height: '72px',
-                borderRadius: '20px',
-                boxShadow: '0 6px 12px rgba(74, 14, 78, 0.15)',
-                objectFit: 'cover',
-                marginBottom: '8px'
-              }}
-            />
+          src={activeTheme?.splashIllustrationUrl || "/logo.png"}
+          alt="Logo"
+          style={{
+            width: activeTheme?.splashIllustrationUrl ? '140px' : '72px',
+            height: activeTheme?.splashIllustrationUrl ? '140px' : '72px',
+            borderRadius: '20px',
+            boxShadow: '0 6px 12px rgba(0,0,0,0.15)',
+            objectFit: 'contain',
+            marginBottom: '16px'
+          }}
+        />
         <h1 style={{ color: 'var(--gold-primary)', fontFamily: 'var(--font-playfair)', fontSize: '26px', marginBottom: '8px' }}>
           AISHWARYAM @ YOUR HOME
         </h1>
-        {/* <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', letterSpacing: '2px' }}>
-          
-        </p> */}
+        {activeTheme && activeTheme.id !== 'default' && (
+          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', letterSpacing: '1px', fontWeight: 'bold' }}>
+            Celebrating {activeTheme.name}
+          </p>
+        )}
       </div>
     </div>
   );
