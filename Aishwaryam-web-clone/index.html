@@ -12,6 +12,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   </head>
   <body>
+    <script>
+      (function() {
+        var isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        var isCapacitor = !!window.Capacitor || navigator.userAgent.includes('Capacitor');
+        if (!isLocalhost && !isCapacitor) {
+          // Immediately block the page and render 403 styling
+          document.body.innerHTML = 
+            '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background-color:#0F172A;font-family:sans-serif;color:#F8FAFC;padding:24px;text-align:center;">' +
+              '<h1 style="font-size:72px;font-weight:800;color:#E2E8F0;margin:0 0 16px 0;letter-spacing:-1px;">403</h1>' +
+              '<h2 style="font-size:20px;font-weight:600;color:#F1F5F9;margin:0 0 12px 0;">Access Denied</h2>' +
+              '<p style="font-size:14px;color:#94A3B8;max-width:320px;line-height:20px;margin:0;">This application is restricted. Please install and run the official mobile app from the Google Play Store.</p>' +
+            '</div>';
+          
+          // Stop downloading or executing any further scripts (like main.tsx)
+          window.stop();
+          throw new Error("Access Denied: Web-browser rendering is disabled in production.");
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -5,21 +5,6 @@ import './android.css'
 import './web.css'
 import App from './App.tsx'
 
-// Restrict web client rendering to Capacitor Native Wrapper environments (APK) to prevent browser access
-const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const isCapacitor = !!(window as any).Capacitor || navigator.userAgent.includes('Capacitor');
-
-if (!isLocalhost && !isCapacitor) {
-  document.body.innerHTML = `
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background-color:#0F172A;font-family:sans-serif;color:#F8FAFC;padding:24px;text-align:center;">
-      <h1 style="font-size:72px;font-weight:800;color:#E2E8F0;margin:0 0 16px 0;letter-spacing:-1px;">403</h1>
-      <h2 style="font-size:20px;font-weight:600;color:#F1F5F9;margin:0 0 12px 0;">Access Denied</h2>
-      <p style="font-size:14px;color:#94A3B8;max-width:320px;line-height:20px;margin:0;">This application is restricted. Please install and run the official mobile app from the Google Play Store.</p>
-    </div>
-  `;
-  throw new Error("Access Denied: Web-browser rendering is disabled in production.");
-}
-
 
 // Override default window.alert with a premium, gold-themed dialog popup for Cordova/mobile view compatibility
 window.alert = function(message: string) {
