@@ -1,0 +1,21 @@
+# Tasks
+
+- [x] Create Database Entities and Seeding
+  - [x] Add `TokenTracker`, `ApiErrorLog`, `AdminAuditLog`, and `SuperAdminSetting` models
+  - [x] Apply database migrations
+- [x] Implement Backend Logging Infrastructure
+  - [x] Build global `ApiErrorLoggingMiddleware` to capture request/response payloads, headers, and client IP
+  - [x] Implement `AdminAuditLogger` interceptor for admin controller actions
+- [x] Configure Email Notification Pipeline
+  - [x] Add dynamic settings controller to retrieve/edit alert emails
+  - [x] Integrate background service for error summary emails using Brevo
+- [x] Create Backend Super Admin Controller Endpoints
+  - [x] API for retrieving active token lists
+  - [x] API for querying and detail-inspecting error logs
+  - [x] API for retrieving admin audit actions list
+- [x] Set up Standalone Frontend App
+  - [x] Initialize `Aishwaryam-super-admin` project
+  - [x] Implement UI dashboard, error inspector, token monitor, audit trails, and email settings views
+- [x] Verify System Functions
+  - [x] Test exception logs headers capture
+  - [x] Verify email configurations and correct routing

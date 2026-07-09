@@ -17,6 +17,7 @@ using Serilog;
 using Serilog.Events;
 
 using Aishwaryam.Domain.Entities;
+using Aishwaryam.Api.Services;
 
 System.AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
@@ -164,6 +165,7 @@ builder.Services.AddHostedService<SchemeMaturityJob>();
 builder.Services.AddHostedService<NightlyReconciliationJob>();
 builder.Services.AddHostedService<Aishwaryam.Infrastructure.BackgroundServices.GoldRateScraperWorker>();
 builder.Services.AddHostedService<Aishwaryam.Api.Services.EventOfferWorker>(); // Daily 9 AM IST: birthday/anniversary offers
+builder.Services.AddHostedService<Aishwaryam.Api.Services.DailyErrorEmailJob>();
 
 // Ensure wwwroot exists and WebRootPath is set before building the app to enable static files serving correctly
 var wwwrootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
@@ -214,6 +216,9 @@ catch (Exception ex)
     Console.WriteLine("[WARNING] Add Firebase:ServiceAccountPath or Firebase:ServiceAccountJson in configuration to enable Firebase Phone Auth.");
 }
 // ────────────────────────────────────────────────────────────────────────────
+
+// Global API Error Logging and Token Tracking Middleware
+app.UseMiddleware<ApiErrorLoggingMiddleware>();
 
 // Custom Security Headers Middleware
 app.Use(async (context, next) =>
@@ -401,6 +406,40 @@ using (var scope = app.Services.CreateScope())
         ip_address varchar(45),
         created_at timestamptz DEFAULT CURRENT_TIMESTAMP
     );", "admin_audit_logs");
+
+    TryExec(@"CREATE TABLE IF NOT EXISTS api_error_logs (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        request_path varchar(255) NOT NULL,
+        method varchar(10) NOT NULL,
+        headers text NOT NULL,
+        request_payload text,
+        response_payload text,
+        client_ip varchar(45) NOT NULL,
+        error_message text NOT NULL,
+        stack_trace text,
+        created_at timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL
+    );", "api_error_logs");
+
+    TryExec(@"CREATE TABLE IF NOT EXISTS token_trackers (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id uuid NOT NULL,
+        phone_number varchar(15) NOT NULL,
+        full_name varchar(100),
+        token text NOT NULL,
+        created_at timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        expires_at timestamptz NOT NULL,
+        is_revoked boolean DEFAULT false NOT NULL
+    );", "token_trackers");
+
+    TryExec(@"CREATE TABLE IF NOT EXISTS super_admin_settings (
+        key varchar(100) PRIMARY KEY,
+        value text NOT NULL,
+        updated_at timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL
+    );", "super_admin_settings");
+
+    TryExec(@"INSERT INTO super_admin_settings (key, value)
+        VALUES ('alert_emails', '[\""support@aishwaryamgold.com\""]')
+        ON CONFLICT (key) DO NOTHING;", "seed_super_admin_settings");
 
     TryExec(@"CREATE TABLE IF NOT EXISTS webhook_event_logs (
         id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

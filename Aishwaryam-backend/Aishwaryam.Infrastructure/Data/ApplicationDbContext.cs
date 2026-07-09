@@ -81,6 +81,10 @@ namespace Aishwaryam.Infrastructure.Data
         public DbSet<RedemptionStatusHistory> RedemptionStatusHistories { get; set; }
         public DbSet<ChatbotLog> ChatbotLogs { get; set; }
         public DbSet<FestivalTheme> FestivalThemes { get; set; }
+        public DbSet<AdminAuditLog> AdminAuditLogs { get; set; }
+        public DbSet<ApiErrorLog> ApiErrorLogs { get; set; }
+        public DbSet<TokenTracker> TokenTrackers { get; set; }
+        public DbSet<SuperAdminSetting> SuperAdminSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -816,6 +820,62 @@ namespace Aishwaryam.Infrastructure.Data
                     .WithMany()
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // AdminAuditLogs
+            modelBuilder.Entity<AdminAuditLog>(entity =>
+            {
+                entity.ToTable("admin_audit_logs");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+                entity.Property(e => e.AdminEmail).HasColumnName("admin_email").HasMaxLength(100).IsRequired();
+                entity.Property(e => e.ActionType).HasColumnName("action_type").HasMaxLength(100).IsRequired();
+                entity.Property(e => e.TargetEntityId).HasColumnName("target_entity_id").HasMaxLength(100);
+                entity.Property(e => e.Notes).HasColumnName("notes");
+                entity.Property(e => e.IpAddress).HasColumnName("ip_address").HasMaxLength(45);
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
+            // ApiErrorLogs
+            modelBuilder.Entity<ApiErrorLog>(entity =>
+            {
+                entity.ToTable("api_error_logs");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+                entity.Property(e => e.RequestPath).HasColumnName("request_path").HasMaxLength(255).IsRequired();
+                entity.Property(e => e.Method).HasColumnName("method").HasMaxLength(10).IsRequired();
+                entity.Property(e => e.Headers).HasColumnName("headers").IsRequired();
+                entity.Property(e => e.RequestPayload).HasColumnName("request_payload");
+                entity.Property(e => e.ResponsePayload).HasColumnName("response_payload");
+                entity.Property(e => e.ClientIp).HasColumnName("client_ip").HasMaxLength(45).IsRequired();
+                entity.Property(e => e.ErrorMessage).HasColumnName("error_message").IsRequired();
+                entity.Property(e => e.StackTrace).HasColumnName("stack_trace");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
+            });
+
+            // TokenTrackers
+            modelBuilder.Entity<TokenTracker>(entity =>
+            {
+                entity.ToTable("token_trackers");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).HasColumnName("id").HasDefaultValueSql("gen_random_uuid()");
+                entity.Property(e => e.UserId).HasColumnName("user_id").IsRequired();
+                entity.Property(e => e.PhoneNumber).HasColumnName("phone_number").HasMaxLength(15).IsRequired();
+                entity.Property(e => e.FullName).HasColumnName("full_name").HasMaxLength(100);
+                entity.Property(e => e.Token).HasColumnName("token").IsRequired();
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.ExpiresAt).HasColumnName("expires_at").IsRequired();
+                entity.Property(e => e.IsRevoked).HasColumnName("is_revoked").HasDefaultValue(false);
+            });
+
+            // SuperAdminSettings
+            modelBuilder.Entity<SuperAdminSetting>(entity =>
+            {
+                entity.ToTable("super_admin_settings");
+                entity.HasKey(e => e.Key);
+                entity.Property(e => e.Key).HasColumnName("key").HasMaxLength(100);
+                entity.Property(e => e.Value).HasColumnName("value").IsRequired();
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
         }
     }
