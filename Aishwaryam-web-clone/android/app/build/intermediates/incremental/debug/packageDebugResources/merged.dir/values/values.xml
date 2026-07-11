@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#FFFFFF</color>
+    <color name="ic_launcher_background">#AA0B5B</color>
     <string name="app_name">Aishwaryam@yourhome</string>
     <string name="custom_url_scheme">com.aishwaryam.app</string>
     <string name="default_web_client_id" translatable="false">596096286505-68m99q8rcp0gjt85vcntn1ao0uturmvs.apps.googleusercontent.com</string>

@@ -39,6 +39,10 @@ namespace Aishwaryam.Tests.Services
             _authRepoMock = new Mock<IAuthRepository>();
             _emailServiceMock = new Mock<IEmailService>();
 
+            // Setup default behaviors
+            _goldRepoMock.Setup(r => r.GetActiveOffersAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(new System.Collections.Generic.List<PromotionalOffer>());
+
             _goldService = new GoldService(
                 _goldRepoMock.Object,
                 _walletServiceMock.Object,

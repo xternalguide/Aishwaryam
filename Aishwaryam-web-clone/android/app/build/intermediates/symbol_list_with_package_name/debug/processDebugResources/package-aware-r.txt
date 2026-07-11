@@ -749,6 +749,7 @@ drawable ic_call_decline
 drawable ic_call_decline_low
 drawable ic_launcher_background
 drawable ic_launcher_foreground
+drawable ic_notification
 drawable ic_tick_mark
 drawable icon_background
 drawable notification_action_background

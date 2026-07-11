@@ -19,9 +19,9 @@
   --text-2: #475569; 
   --text-3: #94a3b8; 
 
-  /* Accent: Clean charcoal/black buttons inspired by the new screenshot */
-  --accent: #0f172a;
-  --accent-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  /* Accent: Mapped dynamically to active festival primary color */
+  --accent: var(--primary-color, #0f172a);
+  --accent-gradient: linear-gradient(135deg, var(--primary-color, #0f172a) 0%, var(--secondary-color, #1e293b) 100%);
   --accent-dim: rgba(15, 23, 42, 0.05);
   --accent-glow: rgba(15, 23, 42, 0.1);
 
@@ -215,7 +215,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Inverted Curved Cutout for the active item */
 .nav-link.active {
   background: var(--bg);
-  color: var(--text);
+  color: var(--accent);
   border-radius: 20px 0 0 20px;
   width: 92px;
   height: auto;
@@ -267,7 +267,7 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--topbar-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--accent);
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -17,7 +17,8 @@ import {
   LogOut,
   ChevronRight,
   Menu,
-  X
+  X,
+  Palette
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -61,6 +62,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentTab, setCurrent
     // { id: 'offers', label: 'Offers & Promos', icon: <Tag size={18} /> },
     // { id: 'marketing', label: 'Marketing Assets', icon: <Image size={18} /> },
     { id: 'notifications', label: 'Notifications', icon: <Bell size={18} /> },
+    { id: 'themes', label: 'Festival Themes', icon: <Palette size={18} /> },
     { id: 'audit', label: 'Audit Logs', icon: <Terminal size={18} /> },
   ];
 

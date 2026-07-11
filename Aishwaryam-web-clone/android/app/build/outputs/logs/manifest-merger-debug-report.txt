@@ -1,27 +1,27 @@
 -- Merging decision tree log ---
 provider#androidx.core.content.FileProvider
-INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:28:9-36:20
+INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:28:9-36:20
 	android:grantUriPermissions
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:32:13-47
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:32:13-47
 	android:authorities
-		INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:30:13-64
+		INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:30:13-64
 	android:exported
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:31:13-37
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:31:13-37
 	android:name
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:29:13-62
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:29:13-62
 manifest
-ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:2:1-43:12
-INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:2:1-43:12
-INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:2:1-43:12
-INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:2:1-43:12
+ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:2:1-48:12
+INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:2:1-48:12
+INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:2:1-48:12
+INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:2:1-48:12
 MERGED from [:capacitor-app] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\@capacitor\app\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:2:1-7:12
 MERGED from [:capacitor-push-notifications] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\@capacitor\push-notifications\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:2:1-17:12
 MERGED from [:capacitor-share] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\@capacitor\share\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:2:1-7:12
 MERGED from [:capacitor-status-bar] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\@capacitor\status-bar\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:2:1-7:12
 MERGED from [:capacitor-razorpay] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\capacitor-razorpay\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:2:1-7:12
 MERGED from [:capacitor-android] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\@capacitor\android\capacitor\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:2:1-7:12
-MERGED from [:capacitor-cordova-android-plugins] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:2:1-11:12
+MERGED from [:capacitor-cordova-android-plugins] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:2:1-11:12
 MERGED from [org.apache.cordova:framework:14.0.1] C:\Users\srive\.gradle\caches\8.14.3\transforms\e47013dec160bb8e8e78795049f410c2\transformed\framework-14.0.1\AndroidManifest.xml:20:1-27:12
 MERGED from [androidx.core:core-splashscreen:1.2.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\4f5eb2e1ae45a07736e2f6ed862ea36a\transformed\core-splashscreen-1.2.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.appcompat:appcompat-resources:1.7.1] C:\Users\srive\.gradle\caches\8.14.3\transforms\bee8f78bb28e6cb788edd05c601f4778\transformed\appcompat-resources-1.7.1\AndroidManifest.xml:2:1-7:12
@@ -91,20 +91,20 @@ MERGED from [androidx.annotation:annotation-experimental:1.4.1] C:\Users\srive\.
 MERGED from [androidx.core:core-viewtree:1.0.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\9275faa7fc56368462609e8a34802ec7\transformed\core-viewtree-1.0.0\AndroidManifest.xml:2:1-7:12
 MERGED from [com.razorpay:core:1.0.16] C:\Users\srive\.gradle\caches\8.14.3\transforms\b95e92518864fdd4b20b2c0008bc90da\transformed\core-1.0.16\AndroidManifest.xml:2:1-30:12
 	package
-		INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
 	android:versionName
-		INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
 	android:versionCode
-		INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
 	xmlns:android
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:2:11-69
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:2:11-69
 application
-ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:4:5-37:19
-INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:4:5-37:19
+ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:4:5-42:19
+INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:4:5-42:19
 MERGED from [:capacitor-push-notifications] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\@capacitor\push-notifications\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:5-15:19
 MERGED from [:capacitor-push-notifications] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\@capacitor\push-notifications\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:7:5-15:19
-MERGED from [:capacitor-cordova-android-plugins] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:5-9:19
-MERGED from [:capacitor-cordova-android-plugins] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:5-9:19
+MERGED from [:capacitor-cordova-android-plugins] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:5-9:19
+MERGED from [:capacitor-cordova-android-plugins] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:5-9:19
 MERGED from [com.google.firebase:firebase-messaging:25.0.1] C:\Users\srive\.gradle\caches\8.14.3\transforms\fee7827030cf30b9c64fc7d59fae02bb\transformed\firebase-messaging-25.0.1\AndroidManifest.xml:28:5-64:19
 MERGED from [com.google.firebase:firebase-messaging:25.0.1] C:\Users\srive\.gradle\caches\8.14.3\transforms\fee7827030cf30b9c64fc7d59fae02bb\transformed\firebase-messaging-25.0.1\AndroidManifest.xml:28:5-64:19
 MERGED from [com.google.firebase:firebase-installations:18.0.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\df907beae055c1d2434697ac5cd0594d\transformed\firebase-installations-18.0.0\AndroidManifest.xml:11:5-22:19
@@ -154,81 +154,87 @@ MERGED from [com.google.android.datatransport:transport-runtime:3.1.9] C:\Users\
 MERGED from [com.razorpay:core:1.0.16] C:\Users\srive\.gradle\caches\8.14.3\transforms\b95e92518864fdd4b20b2c0008bc90da\transformed\core-1.0.16\AndroidManifest.xml:12:5-28:19
 MERGED from [com.razorpay:core:1.0.16] C:\Users\srive\.gradle\caches\8.14.3\transforms\b95e92518864fdd4b20b2c0008bc90da\transformed\core-1.0.16\AndroidManifest.xml:12:5-28:19
 	android:extractNativeLibs
-		INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.17.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:9:9-35
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:9:9-35
 	android:label
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:7:9-41
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:7:9-41
 	android:roundIcon
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:8:9-54
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:8:9-54
 	android:icon
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:6:9-43
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:6:9-43
 	android:allowBackup
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:5:9-35
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:5:9-35
 	android:theme
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:10:9-40
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:10:9-40
 	android:usesCleartextTraffic
-		ADDED from [:capacitor-cordova-android-plugins] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:18-53
+		ADDED from [:capacitor-cordova-android-plugins] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:18-53
 activity#com.aishwaryam.app.MainActivity
-ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:12:9-26:20
+ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:12:9-26:20
 	android:screenOrientation
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:18:13-49
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:18:13-49
 	android:label
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:15:13-56
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:15:13-56
 	android:launchMode
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:17:13-44
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:17:13-44
 	android:exported
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:19:13-36
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:19:13-36
 	android:configChanges
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:13:13-148
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:13:13-148
 	android:theme
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:16:13-62
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:16:13-62
 	android:name
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:14:13-41
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:14:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:21:13-24:29
+ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:21:13-24:29
 action#android.intent.action.MAIN
-ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:17-69
+ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:17-69
 	android:name
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:25-66
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:22:25-66
 category#android.intent.category.LAUNCHER
-ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:23:17-77
+ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:23:17-77
 	android:name
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:23:27-74
-uses-permission#android.permission.INTERNET
-ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:41:5-67
-MERGED from [com.google.firebase:firebase-installations:18.0.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\df907beae055c1d2434697ac5cd0594d\transformed\firebase-installations-18.0.0\AndroidManifest.xml:8:5-67
-MERGED from [com.google.firebase:firebase-installations:18.0.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\df907beae055c1d2434697ac5cd0594d\transformed\firebase-installations-18.0.0\AndroidManifest.xml:8:5-67
-MERGED from [com.google.android.gms:play-services-cloud-messaging:17.2.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\d5d0932ac3ca2fd5a9a9d50c7fd4445d\transformed\play-services-cloud-messaging-17.2.0\AndroidManifest.xml:8:5-67
-MERGED from [com.google.android.gms:play-services-cloud-messaging:17.2.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\d5d0932ac3ca2fd5a9a9d50c7fd4445d\transformed\play-services-cloud-messaging-17.2.0\AndroidManifest.xml:8:5-67
-MERGED from [com.razorpay:standard-core:1.7.15] C:\Users\srive\.gradle\caches\8.14.3\transforms\c70bffb82c833c8c7c78e3f374882410\transformed\standard-core-1.7.15\AndroidManifest.xml:8:5-67
-MERGED from [com.razorpay:standard-core:1.7.15] C:\Users\srive\.gradle\caches\8.14.3\transforms\c70bffb82c833c8c7c78e3f374882410\transformed\standard-core-1.7.15\AndroidManifest.xml:8:5-67
-MERGED from [com.google.android.gms:play-services-maps:17.0.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\125b318fa5b4525196110529fa1a5f88\transformed\play-services-maps-17.0.0\AndroidManifest.xml:24:5-67
-MERGED from [com.google.android.gms:play-services-maps:17.0.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\125b318fa5b4525196110529fa1a5f88\transformed\play-services-maps-17.0.0\AndroidManifest.xml:24:5-67
-MERGED from [com.google.android.datatransport:transport-backend-cct:3.1.9] C:\Users\srive\.gradle\caches\8.14.3\transforms\ea620a6b5afc7c5e432bbec109041d91\transformed\transport-backend-cct-3.1.9\AndroidManifest.xml:25:5-67
-MERGED from [com.google.android.datatransport:transport-backend-cct:3.1.9] C:\Users\srive\.gradle\caches\8.14.3\transforms\ea620a6b5afc7c5e432bbec109041d91\transformed\transport-backend-cct-3.1.9\AndroidManifest.xml:25:5-67
-MERGED from [com.razorpay:core:1.0.16] C:\Users\srive\.gradle\caches\8.14.3\transforms\b95e92518864fdd4b20b2c0008bc90da\transformed\core-1.0.16\AndroidManifest.xml:7:5-67
-MERGED from [com.razorpay:core:1.0.16] C:\Users\srive\.gradle\caches\8.14.3\transforms\b95e92518864fdd4b20b2c0008bc90da\transformed\core-1.0.16\AndroidManifest.xml:7:5-67
-	android:name
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:41:22-64
-uses-permission#android.permission.POST_NOTIFICATIONS
-ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:42:5-77
-MERGED from [com.google.firebase:firebase-messaging:25.0.1] C:\Users\srive\.gradle\caches\8.14.3\transforms\fee7827030cf30b9c64fc7d59fae02bb\transformed\firebase-messaging-25.0.1\AndroidManifest.xml:23:5-77
-MERGED from [com.google.firebase:firebase-messaging:25.0.1] C:\Users\srive\.gradle\caches\8.14.3\transforms\fee7827030cf30b9c64fc7d59fae02bb\transformed\firebase-messaging-25.0.1\AndroidManifest.xml:23:5-77
-	android:name
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:42:22-74
-meta-data#android.support.FILE_PROVIDER_PATHS
-ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:33:13-35:64
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:23:27-74
+meta-data#com.google.firebase.messaging.default_notification_icon
+ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:39:9-41:60
 	android:resource
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:35:17-51
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:41:13-57
 	android:name
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:34:17-67
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:40:13-83
+uses-permission#android.permission.INTERNET
+ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:46:5-67
+MERGED from [com.google.firebase:firebase-installations:18.0.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\df907beae055c1d2434697ac5cd0594d\transformed\firebase-installations-18.0.0\AndroidManifest.xml:8:5-67
+MERGED from [com.google.firebase:firebase-installations:18.0.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\df907beae055c1d2434697ac5cd0594d\transformed\firebase-installations-18.0.0\AndroidManifest.xml:8:5-67
+MERGED from [com.google.android.gms:play-services-cloud-messaging:17.2.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\d5d0932ac3ca2fd5a9a9d50c7fd4445d\transformed\play-services-cloud-messaging-17.2.0\AndroidManifest.xml:8:5-67
+MERGED from [com.google.android.gms:play-services-cloud-messaging:17.2.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\d5d0932ac3ca2fd5a9a9d50c7fd4445d\transformed\play-services-cloud-messaging-17.2.0\AndroidManifest.xml:8:5-67
+MERGED from [com.razorpay:standard-core:1.7.15] C:\Users\srive\.gradle\caches\8.14.3\transforms\c70bffb82c833c8c7c78e3f374882410\transformed\standard-core-1.7.15\AndroidManifest.xml:8:5-67
+MERGED from [com.razorpay:standard-core:1.7.15] C:\Users\srive\.gradle\caches\8.14.3\transforms\c70bffb82c833c8c7c78e3f374882410\transformed\standard-core-1.7.15\AndroidManifest.xml:8:5-67
+MERGED from [com.google.android.gms:play-services-maps:17.0.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\125b318fa5b4525196110529fa1a5f88\transformed\play-services-maps-17.0.0\AndroidManifest.xml:24:5-67
+MERGED from [com.google.android.gms:play-services-maps:17.0.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\125b318fa5b4525196110529fa1a5f88\transformed\play-services-maps-17.0.0\AndroidManifest.xml:24:5-67
+MERGED from [com.google.android.datatransport:transport-backend-cct:3.1.9] C:\Users\srive\.gradle\caches\8.14.3\transforms\ea620a6b5afc7c5e432bbec109041d91\transformed\transport-backend-cct-3.1.9\AndroidManifest.xml:25:5-67
+MERGED from [com.google.android.datatransport:transport-backend-cct:3.1.9] C:\Users\srive\.gradle\caches\8.14.3\transforms\ea620a6b5afc7c5e432bbec109041d91\transformed\transport-backend-cct-3.1.9\AndroidManifest.xml:25:5-67
+MERGED from [com.razorpay:core:1.0.16] C:\Users\srive\.gradle\caches\8.14.3\transforms\b95e92518864fdd4b20b2c0008bc90da\transformed\core-1.0.16\AndroidManifest.xml:7:5-67
+MERGED from [com.razorpay:core:1.0.16] C:\Users\srive\.gradle\caches\8.14.3\transforms\b95e92518864fdd4b20b2c0008bc90da\transformed\core-1.0.16\AndroidManifest.xml:7:5-67
+	android:name
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:46:22-64
+uses-permission#android.permission.POST_NOTIFICATIONS
+ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:47:5-77
+MERGED from [com.google.firebase:firebase-messaging:25.0.1] C:\Users\srive\.gradle\caches\8.14.3\transforms\fee7827030cf30b9c64fc7d59fae02bb\transformed\firebase-messaging-25.0.1\AndroidManifest.xml:23:5-77
+MERGED from [com.google.firebase:firebase-messaging:25.0.1] C:\Users\srive\.gradle\caches\8.14.3\transforms\fee7827030cf30b9c64fc7d59fae02bb\transformed\firebase-messaging-25.0.1\AndroidManifest.xml:23:5-77
+	android:name
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:47:22-74
+meta-data#android.support.FILE_PROVIDER_PATHS
+ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:33:13-35:64
+	android:resource
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:35:17-51
+	android:name
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:34:17-67
 uses-sdk
-INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
-INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
 MERGED from [:capacitor-app] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\@capacitor\app\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:5:5-44
 MERGED from [:capacitor-app] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\@capacitor\app\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:5:5-44
 MERGED from [:capacitor-push-notifications] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\@capacitor\push-notifications\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:5:5-44
@@ -241,8 +247,8 @@ MERGED from [:capacitor-razorpay] C:\Users\srive\Desktop\Blazewing-projects\App\
 MERGED from [:capacitor-razorpay] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\capacitor-razorpay\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:5:5-44
 MERGED from [:capacitor-android] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\@capacitor\android\capacitor\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:5:5-44
 MERGED from [:capacitor-android] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\@capacitor\android\capacitor\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:5:5-44
-MERGED from [:capacitor-cordova-android-plugins] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:6:5-44
-MERGED from [:capacitor-cordova-android-plugins] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:6:5-44
+MERGED from [:capacitor-cordova-android-plugins] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:6:5-44
+MERGED from [:capacitor-cordova-android-plugins] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\capacitor-cordova-android-plugins\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:6:5-44
 MERGED from [org.apache.cordova:framework:14.0.1] C:\Users\srive\.gradle\caches\8.14.3\transforms\e47013dec160bb8e8e78795049f410c2\transformed\framework-14.0.1\AndroidManifest.xml:25:5-44
 MERGED from [org.apache.cordova:framework:14.0.1] C:\Users\srive\.gradle\caches\8.14.3\transforms\e47013dec160bb8e8e78795049f410c2\transformed\framework-14.0.1\AndroidManifest.xml:25:5-44
 MERGED from [androidx.core:core-splashscreen:1.2.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\4f5eb2e1ae45a07736e2f6ed862ea36a\transformed\core-splashscreen-1.2.0\AndroidManifest.xml:20:5-44
@@ -380,9 +386,9 @@ MERGED from [androidx.core:core-viewtree:1.0.0] C:\Users\srive\.gradle\caches\8.
 MERGED from [com.razorpay:core:1.0.16] C:\Users\srive\.gradle\caches\8.14.3\transforms\b95e92518864fdd4b20b2c0008bc90da\transformed\core-1.0.16\AndroidManifest.xml:5:5-44
 MERGED from [com.razorpay:core:1.0.16] C:\Users\srive\.gradle\caches\8.14.3\transforms\b95e92518864fdd4b20b2c0008bc90da\transformed\core-1.0.16\AndroidManifest.xml:5:5-44
 	android:targetSdkVersion
-		INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml
 service#com.capacitorjs.plugins.pushnotifications.MessagingService
 ADDED from [:capacitor-push-notifications] C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\node_modules\@capacitor\push-notifications\android\build\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:8:9-14:19
 	android:exported

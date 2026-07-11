@@ -193,6 +193,31 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => clearInterval(interval);
   }, [isAuthenticated, apiBase]);
 
+  const applyThemeColors = (theme: any) => {
+    if (!theme) return;
+    const root = document.documentElement;
+    root.style.setProperty('--primary-color', theme.primaryColorHex || '#0f172a');
+    root.style.setProperty('--secondary-color', theme.secondaryColorHex || '#1e293b');
+    root.style.setProperty('--status-bar-color', theme.statusBarColorHex || '#0f172a');
+    root.style.setProperty('--splash-bg-color', theme.splashBgColorHex || '#ffffff');
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchActiveTheme = async () => {
+      try {
+        const res = await fetch(`${apiBase}/api/themes/active`);
+        if (res.ok) {
+          const theme = await res.json();
+          applyThemeColors(theme);
+        }
+      } catch (e) {
+        console.warn('Failed to load active theme styles', e);
+      }
+    };
+    fetchActiveTheme();
+  }, [isAuthenticated, apiBase, globalReloadToken]);
+
   return (
     <AdminContext.Provider
       value={{

@@ -99,6 +99,11 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <!-- Set custom default icon for push notifications -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+
         <service
             android:name="com.capacitorjs.plugins.pushnotifications.MessagingService"
             android:exported="false" >

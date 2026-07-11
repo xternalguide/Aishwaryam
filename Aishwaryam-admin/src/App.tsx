@@ -13,6 +13,7 @@ import { OffersManager } from './pages/OffersManager';
 import { MarketingAssets } from './pages/MarketingAssets';
 import { NotificationPanel } from './pages/NotificationPanel';
 import { AuditLogs } from './pages/AuditLogs';
+import { FestivalThemes } from './pages/FestivalThemes';
 
 // Helper component that accesses context
 const AdminPortalContent: React.FC = () => {
@@ -46,6 +47,8 @@ const AdminPortalContent: React.FC = () => {
         return <MarketingAssets />;
       case 'notifications':
         return <NotificationPanel />;
+      case 'themes':
+        return <FestivalThemes />;
       case 'audit':
         return <AuditLogs />;
       default:

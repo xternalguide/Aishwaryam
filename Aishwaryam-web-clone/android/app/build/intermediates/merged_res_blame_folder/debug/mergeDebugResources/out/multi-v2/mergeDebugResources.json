@@ -2660,23 +2660,6 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\srive\\Desktop\\Blazewing-projects\\App\\Digital-Gold\\Aishwaryam-web-clone\\Aishwaryam-web-clone\\android\\app\\src\\main\\res\\values\\strings.xml",
-                    "from": {
-                        "startLines": "2,5,4,3",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "57,245,184,115",
-                        "endColumns": "56,64,59,67",
-                        "endOffsets": "109,305,239,178"
-                    },
-                    "to": {
-                        "startLines": "344,370,380,384",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "22615,25516,26469,26730",
-                        "endColumns": "56,64,59,67",
-                        "endOffsets": "22667,25576,26524,26793"
-                    }
-                },
-                {
                     "source": "C:\\Users\\srive\\Desktop\\Blazewing-projects\\App\\Digital-Gold\\Aishwaryam-web-clone\\node_modules\\@capacitor\\android\\capacitor\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\values\\values.xml",
                     "from": {
                         "startLines": "2,3,4,5",
@@ -2694,22 +2677,20 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\srive\\Desktop\\Blazewing-projects\\App\\Digital-Gold\\Aishwaryam-web-clone\\Aishwaryam-web-clone\\android\\app\\src\\main\\res\\values\\styles.xml",
+                    "source": "C:\\Users\\srive\\Desktop\\Blazewing-projects\\App\\Digital-Gold\\Aishwaryam-web-clone\\android\\app\\src\\main\\res\\values\\strings.xml",
                     "from": {
-                        "startLines": "4,11,21",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "97,424,869",
-                        "endLines": "9,18,23",
-                        "endColumns": "12,12,12",
-                        "endOffsets": "416,859,1017"
+                        "startLines": "2,5,4,3",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "57,245,184,115",
+                        "endColumns": "56,64,59,67",
+                        "endOffsets": "109,305,239,178"
                     },
                     "to": {
-                        "startLines": "391,397,405",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "27315,27599,28032",
-                        "endLines": "396,404,407",
-                        "endColumns": "12,12,12",
-                        "endOffsets": "27594,28027,28178"
+                        "startLines": "344,370,380,384",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "22615,25516,26469,26730",
+                        "endColumns": "56,64,59,67",
+                        "endOffsets": "22667,25576,26524,26793"
                     }
                 },
                 {
@@ -2802,23 +2783,6 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\srive\\Desktop\\Blazewing-projects\\App\\Digital-Gold\\Aishwaryam-web-clone\\Aishwaryam-web-clone\\android\\app\\build\\generated\\res\\processDebugGoogleServices\\values\\values.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8",
-                        "startColumns": "4,4,4,4,4,4,4",
-                        "startOffsets": "55,199,281,385,494,614,722",
-                        "endColumns": "143,81,103,108,119,107,76",
-                        "endOffsets": "194,276,380,489,609,717,794"
-                    },
-                    "to": {
-                        "startLines": "371,373,374,375,376,377,381",
-                        "startColumns": "4,4,4,4,4,4,4",
-                        "startOffsets": "25581,25807,25889,25993,26102,26222,26529",
-                        "endColumns": "143,81,103,108,119,107,76",
-                        "endOffsets": "25720,25884,25988,26097,26217,26325,26601"
-                    }
-                },
-                {
                     "source": "C:\\Users\\srive\\Desktop\\Blazewing-projects\\App\\Digital-Gold\\Aishwaryam-web-clone\\node_modules\\capacitor-razorpay\\android\\build\\intermediates\\packaged_res\\debug\\packageDebugResources\\values\\values.xml",
                     "from": {
                         "startLines": "2",
@@ -2852,6 +2816,25 @@
                         "endLines": "4,5,8,26,27,40,41,76,77,190,191,192,193,194,195,196,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,260,261,262,263,264,265,266,267,268,269,270,277,278,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,299,300,301,315,345,346,347,348,349,350,351,383,1790,1794,1795,1799,1800,2002,2003,2657,2695,2885,2906,2914,2956,2962",
                         "endColumns": "63,56,59,71,87,64,65,68,62,69,67,71,69,60,73,72,60,60,61,63,61,60,67,99,59,65,72,68,56,51,61,71,75,64,58,58,59,59,59,59,59,59,59,59,59,59,58,59,59,59,59,59,59,59,59,59,59,58,59,59,58,58,58,58,58,58,34,34,54,62,54,57,55,57,60,62,56,50,57,49,60,56,65,33,34,34,69,66,71,68,68,73,71,87,70,116,12,109,12,128,71,66,24,24,24,24,24,24,24",
                         "endOffsets": "325,382,536,1701,1789,2814,2880,5261,5324,13008,13076,13148,13218,13279,13353,13426,14271,14332,14394,14458,14520,14581,14649,14749,14809,14875,14948,15017,15074,15126,15188,16227,16303,16368,16427,16486,16546,16606,16666,16726,16786,16846,16906,16966,17026,17086,17145,17205,17265,17325,17385,17445,17505,17565,17625,17685,17745,17804,17864,17924,17983,18042,18101,18160,18219,18278,18609,18644,18948,19011,19066,19124,19180,19238,19299,19362,19419,19470,19528,19578,19639,19696,19762,19796,19831,19866,20661,22734,22806,22875,22944,23018,23090,23178,26725,119448,119649,119759,119960,120089,135002,135069,156546,158217,167062,167727,167975,168976,169143"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\srive\\Desktop\\Blazewing-projects\\App\\Digital-Gold\\Aishwaryam-web-clone\\android\\app\\src\\main\\res\\values\\styles.xml",
+                    "from": {
+                        "startLines": "4,11,21",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "97,424,869",
+                        "endLines": "9,18,23",
+                        "endColumns": "12,12,12",
+                        "endOffsets": "416,859,1017"
+                    },
+                    "to": {
+                        "startLines": "391,397,405",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "27315,27599,28032",
+                        "endLines": "396,404,407",
+                        "endColumns": "12,12,12",
+                        "endOffsets": "27594,28027,28178"
                     }
                 },
                 {
@@ -2910,23 +2893,6 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\srive\\Desktop\\Blazewing-projects\\App\\Digital-Gold\\Aishwaryam-web-clone\\Aishwaryam-web-clone\\android\\app\\src\\main\\res\\values\\ic_launcher_background.xml",
-                    "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "57",
-                        "endColumns": "56",
-                        "endOffsets": "109"
-                    },
-                    "to": {
-                        "startLines": "63",
-                        "startColumns": "4",
-                        "startOffsets": "4468",
-                        "endColumns": "56",
-                        "endOffsets": "4520"
-                    }
-                },
-                {
                     "source": "C:\\Users\\srive\\.gradle\\caches\\8.14.3\\transforms\\125b318fa5b4525196110529fa1a5f88\\transformed\\play-services-maps-17.0.0\\res\\values\\values.xml",
                     "from": {
                         "startLines": "4",
@@ -2943,6 +2909,23 @@
                         "endLines": "3070",
                         "endColumns": "20",
                         "endOffsets": "172093"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\srive\\Desktop\\Blazewing-projects\\App\\Digital-Gold\\Aishwaryam-web-clone\\android\\app\\src\\main\\res\\values\\ic_launcher_background.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "56",
+                        "endOffsets": "107"
+                    },
+                    "to": {
+                        "startLines": "63",
+                        "startColumns": "4",
+                        "startOffsets": "4468",
+                        "endColumns": "56",
+                        "endOffsets": "4520"
                     }
                 },
                 {
@@ -3070,6 +3053,23 @@
                         "startOffsets": "20528,24223",
                         "endColumns": "67,166",
                         "endOffsets": "20591,24385"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\srive\\Desktop\\Blazewing-projects\\App\\Digital-Gold\\Aishwaryam-web-clone\\android\\app\\build\\generated\\res\\processDebugGoogleServices\\values\\values.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8",
+                        "startColumns": "4,4,4,4,4,4,4",
+                        "startOffsets": "55,199,281,385,494,614,722",
+                        "endColumns": "143,81,103,108,119,107,76",
+                        "endOffsets": "194,276,380,489,609,717,794"
+                    },
+                    "to": {
+                        "startLines": "371,373,374,375,376,377,381",
+                        "startColumns": "4,4,4,4,4,4,4",
+                        "startOffsets": "25581,25807,25889,25993,26102,26222,26529",
+                        "endColumns": "143,81,103,108,119,107,76",
+                        "endOffsets": "25720,25884,25988,26097,26217,26325,26601"
                     }
                 }
             ]

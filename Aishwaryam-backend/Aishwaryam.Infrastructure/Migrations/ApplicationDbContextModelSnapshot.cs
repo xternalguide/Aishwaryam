@@ -1204,7 +1204,7 @@ namespace Aishwaryam.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("promotional_offers");
+                    b.ToTable("promotional_offers", (string)null);
                 });
 
             modelBuilder.Entity("Aishwaryam.Domain.Entities.RedemptionStatusHistory", b =>
@@ -1720,7 +1720,7 @@ namespace Aishwaryam.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("user_claimed_offers");
+                    b.ToTable("user_claimed_offers", (string)null);
                 });
 
             modelBuilder.Entity("Aishwaryam.Domain.Entities.UserDevice", b =>
