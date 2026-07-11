@@ -267,7 +267,7 @@ namespace Aishwaryam.Application.Services
                 var baseUrl = _configuration != null ? _configuration["Api:BaseUrl"] : null;
                 if (string.IsNullOrEmpty(baseUrl))
                 {
-                    baseUrl = "https://aishwaryam-production.up.railway.app/";
+                    baseUrl = "https://aiswaryam.onrender.com/";
                 }
                 if (!baseUrl.EndsWith("/"))
                 {

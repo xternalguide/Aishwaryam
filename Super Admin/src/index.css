@@ -1,47 +1,47 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Clean light theme background inspired by the new screenshot */
+  /* Wehiu style: Clean light theme background */
   --bg: #f4f6fa;
   --bg-fallback: #f4f6fa;
 
-  /* Card Surfaces: Clean, high-contrast white */
+  /* Card Surfaces: Clean white surface */
   --surface: #ffffff;
   --surface-hover: #fafbfc;
   --surface2: #f8fafc;
   --surface3: #f1f5f9;
   
-  --border: rgba(0, 0, 0, 0.05);
+  --border: rgba(91, 77, 255, 0.08);
   --border2: rgba(0, 0, 0, 0.02);
 
-  /* Clean Typography colors */
-  --text: #0f172a; 
-  --text-2: #475569; 
+  /* Typography colors */
+  --text: #1a1b2f; 
+  --text-2: #64748b; 
   --text-3: #94a3b8; 
 
-  /* Accent: Clean charcoal/black buttons inspired by the new screenshot */
-  --accent: #0f172a;
-  --accent-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  --accent-dim: rgba(15, 23, 42, 0.05);
-  --accent-glow: rgba(15, 23, 42, 0.1);
+  /* Accent: Clean, premium violet/purple from the Wehiu mockup */
+  --accent: #5B4DFF;
+  --accent-gradient: linear-gradient(135deg, #5B4DFF 0%, #7C3AED 100%);
+  --accent-dim: rgba(91, 77, 255, 0.08);
+  --accent-glow: rgba(91, 77, 255, 0.15);
 
-  /* Status Colors */
-  --green: #10b981;
-  --green-dim: rgba(16, 185, 129, 0.1);
-  --red: #f43f5e;
-  --red-dim: rgba(244, 63, 94, 0.1);
-  --amber: #f59e0b;
-  --amber-dim: rgba(245, 158, 11, 0.1);
-  --blue: #3b82f6;
-  --blue-dim: rgba(59, 130, 246, 0.1);
+  /* Status Colors (Soft colored pills and cards) */
+  --green: #047857;
+  --green-dim: #D1FAE5;
+  --red: #BE185D;
+  --red-dim: #FCE7F3;
+  --amber: #B45309;
+  --amber-dim: #FEF3C7;
+  --blue: #0369A1;
+  --blue-dim: #E0F2FE;
 
-  /* Sidebar: Deep charcoal/black in both modes as per the screenshot */
-  --sidebar-bg: #0f1115;
+  /* Sidebar: Clean white as per mockup */
+  --sidebar-bg: #ffffff;
   --topbar-bg: rgba(244, 246, 250, 0.85);
   
-  --shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
-  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.02);
-  --shadow-lg: 0 20px 40px -10px rgba(15, 23, 42, 0.1);
+  --shadow: 0 10px 25px -5px rgba(91, 77, 255, 0.05), 0 8px 16px -6px rgba(91, 77, 255, 0.05);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.015);
+  --shadow-lg: 0 20px 40px -15px rgba(91, 77, 255, 0.08);
   --radius: 20px;
 }
 
@@ -61,16 +61,16 @@
   --text-2: #94a3b8;
   --text-3: #475569;
 
-  --sidebar-bg: #08090d;
+  --sidebar-bg: #0c0d14;
   --topbar-bg: rgba(11, 12, 16, 0.85);
 
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.15);
   --shadow-lg: 0 24px 50px rgba(0, 0, 0, 0.35);
 
-  --accent: #f1f5f9;
-  --accent-gradient: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
-  --accent-dim: rgba(255, 255, 255, 0.08);
+  --accent: #5B4DFF;
+  --accent-gradient: linear-gradient(135deg, #5B4DFF 0%, #8b5cf6 100%);
+  --accent-dim: rgba(91, 77, 255, 0.15);
 }
 
 *, *::before, *::after {
@@ -80,7 +80,7 @@
 }
 
 body {
-  font-family: 'Montserrat', -apple-system, sans-serif;
+  font-family: 'Poppins', 'Outfit', sans-serif;
   background-color: var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -90,7 +90,8 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
   letter-spacing: -0.5px;
 }
 

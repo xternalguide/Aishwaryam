@@ -5,9 +5,10 @@ import { SuperAdminTokens } from './pages/SuperAdminTokens';
 import { SuperAdminErrors } from './pages/SuperAdminErrors';
 import { SuperAdminAudit } from './pages/SuperAdminAudit';
 import { SuperAdminSettings } from './pages/SuperAdminSettings';
-import { Shield, Key, ShieldAlert, FileSpreadsheet, Settings, LogOut, LayoutDashboard } from 'lucide-react';
+import { SuperAdminEnv } from './pages/SuperAdminEnv';
+import { Shield, Key, ShieldAlert, FileSpreadsheet, Settings, LogOut, LayoutDashboard, Sliders } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5044';
 
 function App() {
   const [apiKey, setApiKey] = useState<string | null>(() => sessionStorage.getItem('super_admin_key'));
@@ -126,6 +127,8 @@ function App() {
         return <SuperAdminErrors errors={errors} isLoading={isLoading} />;
       case 'admin-logs':
         return <SuperAdminAudit logs={logs} isLoading={isLoading} />;
+      case 'env':
+        return <SuperAdminEnv />;
       case 'settings':
         return <SuperAdminSettings emails={emails} onSave={handleSaveEmails} />;
       default:
@@ -138,142 +141,111 @@ function App() {
       display: 'flex',
       minHeight: '100vh',
       background: 'var(--bg)',
-      fontFamily: 'Montserrat, sans-serif'
+      fontFamily: "'Poppins', 'Outfit', sans-serif"
     }}>
       {/* Sidebar */}
       <div style={{
         width: '260px',
         background: 'var(--sidebar-bg)',
-        color: '#f8fafc',
+        borderRight: '1px solid rgba(91, 77, 255, 0.08)',
         display: 'flex',
         flexDirection: 'column',
-        padding: '24px 16px',
+        padding: '32px 20px',
         boxSizing: 'border-box'
       }}>
-        {/* Brand */}
+        {/* Brand Logo matching weihu style */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '40px', paddingLeft: '8px' }}>
-          <Shield size={24} color="#f8fafc" />
-          <span style={{ fontWeight: 'bold', fontSize: '16px', letterSpacing: '0.5px' }}>
-            SUPER ADMIN
+          <div style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '10px',
+            background: 'linear-gradient(135deg, #5B4DFF 0%, #7C3AED 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#ffffff'
+          }}>
+            <Shield size={16} />
+          </div>
+          <span style={{ fontWeight: '800', fontSize: '18px', color: 'var(--text)', fontFamily: "'Outfit', sans-serif" }}>
+            super admin
           </span>
         </div>
 
-        {/* Navigation Items */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              width: '100%',
-              height: '46px',
-              borderRadius: '10px',
-              background: activeTab === 'dashboard' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-              color: activeTab === 'dashboard' ? 'white' : '#94a3b8',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '13px',
-              padding: '0 16px',
-              textAlign: 'left',
-              transition: 'background 0.2s'
-            }}
-          >
-            <LayoutDashboard size={18} /> Dashboard
-          </button>
+        {/* Navigation Items with Wehiu active styling */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
+          {[
+            { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+            { id: 'tokens', label: 'Telemetry Tokens', icon: <Key size={18} /> },
+            { id: 'errors', label: 'Exception Inspector', icon: <ShieldAlert size={18} /> },
+            { id: 'admin-logs', label: 'Admin Activities', icon: <FileSpreadsheet size={18} /> },
+            { id: 'env', label: 'ENV Config', icon: <Sliders size={18} /> },
+            { id: 'settings', label: 'Settings', icon: <Settings size={18} /> }
+          ].map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  width: '100%',
+                  height: '46px',
+                  borderRadius: '14px',
+                  background: isActive ? '#F1F0FF' : 'transparent',
+                  color: isActive ? '#5B4DFF' : 'var(--text-2)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '13.5px',
+                  padding: '0 16px',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease',
+                  fontFamily: 'inherit'
+                }}
+              >
+                {item.icon}
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
 
-          <button
-            onClick={() => setActiveTab('tokens')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              width: '100%',
-              height: '46px',
-              borderRadius: '10px',
-              background: activeTab === 'tokens' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-              color: activeTab === 'tokens' ? 'white' : '#94a3b8',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '13px',
-              padding: '0 16px',
-              textAlign: 'left',
-              transition: 'background 0.2s'
-            }}
-          >
-            <Key size={18} /> Telemetry Tokens
-          </button>
-
-          <button
-            onClick={() => setActiveTab('errors')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              width: '100%',
-              height: '46px',
-              borderRadius: '10px',
-              background: activeTab === 'errors' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-              color: activeTab === 'errors' ? 'white' : '#94a3b8',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '13px',
-              padding: '0 16px',
-              textAlign: 'left',
-              transition: 'background 0.2s'
-            }}
-          >
-            <ShieldAlert size={18} /> Exception Inspector
-          </button>
-
-          <button
-            onClick={() => setActiveTab('admin-logs')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              width: '100%',
-              height: '46px',
-              borderRadius: '10px',
-              background: activeTab === 'admin-logs' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-              color: activeTab === 'admin-logs' ? 'white' : '#94a3b8',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '13px',
-              padding: '0 16px',
-              textAlign: 'left',
-              transition: 'background 0.2s'
-            }}
-          >
-            <FileSpreadsheet size={18} /> Admin Activities
-          </button>
-
-          <button
-            onClick={() => setActiveTab('settings')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              width: '100%',
-              height: '46px',
-              borderRadius: '10px',
-              background: activeTab === 'settings' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-              color: activeTab === 'settings' ? 'white' : '#94a3b8',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '13px',
-              padding: '0 16px',
-              textAlign: 'left',
-              transition: 'background 0.2s'
-            }}
-          >
-            <Settings size={18} /> Settings
-          </button>
+        {/* Profile Card Footer at Bottom Left */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '12px',
+          borderRadius: '16px',
+          background: '#F8FAFC',
+          marginBottom: '16px',
+          border: '1px solid rgba(91, 77, 255, 0.04)'
+        }}>
+          <div style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            background: '#E0E7FF',
+            color: '#5B4DFF',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 'bold',
+            fontSize: '14px'
+          }}>
+            SA
+          </div>
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            <div style={{ fontSize: '12.5px', fontWeight: '700', color: 'var(--text)', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+              Super Admin
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--text-2)', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+              system@aishwaryam.com
+            </div>
+          </div>
         </div>
 
         {/* Footer Logout */}
@@ -285,16 +257,17 @@ function App() {
             gap: '12px',
             width: '100%',
             height: '46px',
-            borderRadius: '10px',
+            borderRadius: '14px',
             background: 'transparent',
             color: '#f43f5e',
             border: 'none',
             cursor: 'pointer',
-            fontWeight: 'bold',
-            fontSize: '13px',
+            fontWeight: '600',
+            fontSize: '13.5px',
             padding: '0 16px',
             textAlign: 'left',
-            marginTop: 'auto'
+            fontFamily: 'inherit',
+            transition: 'background 0.2s'
           }}
         >
           <LogOut size={18} /> Log Out
@@ -302,33 +275,63 @@ function App() {
       </div>
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg)' }}>
+      <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
         <header style={{
-          height: '70px',
-          background: 'var(--surface)',
-          borderBottom: '1px solid var(--border)',
+          height: '80px',
+          background: 'transparent',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'flex-end',
-          padding: '0 32px'
+          justifyContent: 'space-between',
+          padding: '0 40px',
+          boxSizing: 'border-box'
         }}>
+          {/* Welcome and Search Bar inspired by the mockup */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <div>
+              <div style={{ fontSize: '13px', color: 'var(--text-2)' }}>Welcome,</div>
+              <div style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text)', fontFamily: "'Outfit', sans-serif" }}>System Controller</div>
+            </div>
+            <div style={{ position: 'relative', width: '280px' }}>
+              <input
+                type="text"
+                placeholder="Find something..."
+                style={{
+                  width: '100%',
+                  height: '40px',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(91, 77, 255, 0.08)',
+                  background: 'var(--surface)',
+                  padding: '0 16px 0 16px',
+                  fontSize: '13px',
+                  outline: 'none',
+                  color: 'var(--text)'
+                }}
+              />
+            </div>
+          </div>
+
           <button
             onClick={fetchData}
             style={{
-              background: 'var(--surface2)',
-              border: '1px solid var(--border)',
-              borderRadius: '8px',
-              padding: '8px 16px',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              color: 'var(--text)',
-              cursor: 'pointer'
+              background: 'var(--surface)',
+              border: '1px solid rgba(91, 77, 255, 0.08)',
+              borderRadius: '20px',
+              padding: '10px 20px',
+              fontSize: '12.5px',
+              fontWeight: '600',
+              color: '#5B4DFF',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-sm)',
+              fontFamily: 'inherit',
+              transition: 'all 0.2s'
             }}
           >
             Refresh Telemetry
           </button>
         </header>
-        {renderContent()}
+        <div style={{ flex: 1, padding: '0 40px 40px 40px' }}>
+          {renderContent()}
+        </div>
       </div>
     </div>
   );

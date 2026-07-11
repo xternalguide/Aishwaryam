@@ -340,10 +340,12 @@ namespace Aishwaryam.Application.Services
                 {
                     var activeOffers = await _goldRepository.GetActiveOffersAsync(request.UserId);
 
-                    foreach (var offer in activeOffers)
+                    if (activeOffers != null)
                     {
-                        var alreadyClaimed = await _goldRepository.IsOfferClaimedAsync(request.UserId, offer.Id);
-                        if (alreadyClaimed) continue;
+                        foreach (var offer in activeOffers)
+                        {
+                            var alreadyClaimed = await _goldRepository.IsOfferClaimedAsync(request.UserId, offer.Id);
+                            if (alreadyClaimed) continue;
 
                         // Check Thresholds (rupees or grams/mg)
                         bool isEligible = true;
@@ -439,6 +441,7 @@ namespace Aishwaryam.Application.Services
                         }
                     }
                 }
+            }
 
                 // Check if referee has any pending referral event to credit rewards on their FIRST gold purchase
                 var isFirstGoldPurchase = !await _goldRepository.HasAnyBuyTransactionAsync(request.UserId, txId);
@@ -542,7 +545,7 @@ namespace Aishwaryam.Application.Services
                             var bUrl = request.BaseUrl;
                             if (string.IsNullOrEmpty(bUrl))
                             {
-                                bUrl = "https://aishwaryam-production.up.railway.app/";
+                                bUrl = "https://aiswaryam.onrender.com/";
                             }
                             if (!bUrl.EndsWith("/"))
                             {

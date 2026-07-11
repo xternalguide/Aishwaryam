@@ -22,6 +22,39 @@ using Aishwaryam.Api.Services;
 System.AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
+// Load local .env file if present (Recommended setup)
+void LoadDotEnv()
+{
+    var currentDir = new DirectoryInfo(Directory.GetCurrentDirectory());
+    while (currentDir != null)
+    {
+        var envFile = Path.Combine(currentDir.FullName, ".env");
+        if (File.Exists(envFile))
+        {
+            foreach (var line in File.ReadAllLines(envFile))
+            {
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
+                    continue;
+
+                var parts = line.Split('=', 2);
+                if (parts.Length != 2)
+                    continue;
+
+                var key = parts[0].Trim();
+                var val = parts[1].Trim().Trim('"').Trim('\'');
+                
+                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+                {
+                    Environment.SetEnvironmentVariable(key, val);
+                }
+            }
+            break;
+        }
+        currentDir = currentDir.Parent;
+    }
+}
+LoadDotEnv();
+
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -112,7 +145,29 @@ builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
 
 // Setup Database Context
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var rawConnection = Environment.GetEnvironmentVariable("DATABASE_URL") 
+                    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
+string connectionString = rawConnection;
+if (!string.IsNullOrEmpty(rawConnection) && (rawConnection.StartsWith("postgres://") || rawConnection.StartsWith("postgresql://")))
+{
+    try
+    {
+        var uri = new Uri(rawConnection);
+        var userInfo = uri.UserInfo.Split(':');
+        var username = userInfo[0];
+        var password = userInfo.Length > 1 ? userInfo[1] : "";
+        var host = uri.Host;
+        var port = uri.Port > 0 ? uri.Port : 5432;
+        var database = uri.AbsolutePath.TrimStart('/');
+        connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true;";
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error parsing DATABASE_URL URL: {ex.Message}");
+    }
+}
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 

@@ -8,7 +8,7 @@ const isCapacitor = !!(window as any).Capacitor || navigator.userAgent.includes(
 
 export const BASE_URL = (isLocalhost && !isCapacitor)
   ? 'http://localhost:5044/'
-  : 'https://aishwaryam-production.up.railway.app/';
+  : 'https://aiswaryam.onrender.com/';
 
 export const getDeviceFingerprint = (): string => {
   const isCapacitor = !!(window as any).Capacitor;

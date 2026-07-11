@@ -25,43 +25,46 @@ export const SuperAdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
       justifyContent: 'center',
       minHeight: '100vh',
       background: 'var(--bg)',
-      fontFamily: 'Montserrat, sans-serif',
+      fontFamily: "'Poppins', 'Outfit', sans-serif",
       padding: '20px'
     }}>
       <div style={{
         width: '100%',
-        maxWidth: '420px',
+        maxWidth: '400px',
         background: 'var(--surface)',
-        borderRadius: 'var(--radius)',
+        borderRadius: '24px',
         border: '1px solid var(--border)',
-        boxShadow: 'var(--shadow-lg)',
-        padding: '40px 32px',
+        boxShadow: '0 20px 40px -15px rgba(91, 77, 255, 0.08)',
+        padding: '48px 36px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center'
       }}>
+        {/* Wehiu style purple brand logo icon */}
         <div style={{
-          width: '64px',
-          height: '64px',
-          borderRadius: '16px',
-          background: 'var(--accent-dim)',
+          width: '60px',
+          height: '60px',
+          borderRadius: '18px',
+          background: 'linear-gradient(135deg, #5B4DFF 0%, #7C3AED 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          marginBottom: '20px',
-          color: 'var(--text)'
+          marginBottom: '24px',
+          color: '#ffffff',
+          boxShadow: '0 8px 20px rgba(91, 77, 255, 0.3)'
         }}>
-          <Shield size={32} />
+          <Shield size={28} />
         </div>
 
         <h1 style={{
           fontSize: '22px',
-          fontWeight: 'bold',
+          fontWeight: '700',
           color: 'var(--text)',
           marginBottom: '8px',
-          textAlign: 'center'
+          textAlign: 'center',
+          fontFamily: "'Outfit', sans-serif"
         }}>
-          Super Admin Console
+          super admin
         </h1>
         <p style={{
           fontSize: '13px',
@@ -70,7 +73,7 @@ export const SuperAdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
           textAlign: 'center',
           lineHeight: '18px'
         }}>
-          Authenticate using your secure master API access credential.
+          Securely log in to manage your system settings and integrations.
         </p>
 
         {error && (
@@ -78,11 +81,11 @@ export const SuperAdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
             width: '100%',
             background: 'var(--red-dim)',
             color: 'var(--red)',
-            fontSize: '12px',
-            fontWeight: 'bold',
+            fontSize: '12.5px',
+            fontWeight: '600',
             padding: '12px 16px',
-            borderRadius: '12px',
-            marginBottom: '20px',
+            borderRadius: '14px',
+            marginBottom: '24px',
             textAlign: 'center'
           }}>
             {error}
@@ -93,16 +96,18 @@ export const SuperAdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
           <div style={{ marginBottom: '24px' }}>
             <label style={{
               display: 'block',
-              fontSize: '12px',
-              fontWeight: 'bold',
+              fontSize: '11px',
+              fontWeight: '600',
               color: 'var(--text-2)',
-              marginBottom: '8px'
+              marginBottom: '8px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
             }}>
               API ACCESS KEY
             </label>
             <input
               type="password"
-              placeholder="Enter X-Super-Admin-Key"
+              placeholder="Enter access token..."
               value={key}
               onChange={(e) => {
                 setKey(e.target.value);
@@ -111,14 +116,16 @@ export const SuperAdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
               style={{
                 width: '100%',
                 height: '48px',
-                borderRadius: '12px',
+                borderRadius: '14px',
                 border: '1px solid var(--border)',
                 background: 'var(--surface2)',
                 color: 'var(--text)',
                 padding: '0 16px',
                 fontSize: '14px',
                 outline: 'none',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                transition: 'border-color 0.2s',
+                fontFamily: 'inherit'
               }}
             />
           </div>
@@ -128,14 +135,16 @@ export const SuperAdminLogin: React.FC<LoginProps> = ({ onLogin }) => {
             style={{
               width: '100%',
               height: '48px',
-              borderRadius: '12px',
-              background: 'var(--accent-gradient)',
+              borderRadius: '14px',
+              background: 'linear-gradient(135deg, #5B4DFF 0%, #7C3AED 100%)',
               color: 'white',
               border: 'none',
-              fontWeight: 'bold',
+              fontWeight: '600',
               fontSize: '14px',
               cursor: 'pointer',
-              boxShadow: 'var(--accent-glow)'
+              boxShadow: '0 8px 16px rgba(91, 77, 255, 0.2)',
+              fontFamily: 'inherit',
+              transition: 'transform 0.1s ease'
             }}
           >
             Access Dashboard
