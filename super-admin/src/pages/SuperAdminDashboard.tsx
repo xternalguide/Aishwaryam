@@ -22,7 +22,9 @@ export const SuperAdminDashboard: React.FC<StatsProps> = ({
 
   const checkHealth = async () => {
     setHealth(prev => ({ ...prev, loading: true }));
-    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5044';
+    const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:5044'
+      : 'https://aishwaryam-backend.onrender.com';
     try {
       const res = await fetch(`${apiBase}/api/SuperAdmin/health`, { signal: AbortSignal.timeout(5000) });
       if (res.ok) {
