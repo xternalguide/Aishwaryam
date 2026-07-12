@@ -118,7 +118,7 @@ export const SuperAdminDashboard: React.FC<StatsProps> = ({
           </div>
           <div>
             <div style={{ fontSize: '11px', fontWeight: '700', color: health.server === 'UP' ? 'var(--green)' : 'var(--red)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Railway Host API
+              Render Host API
             </div>
             <div style={{ fontSize: '18px', fontWeight: '800', color: health.server === 'UP' ? 'var(--green)' : 'var(--red)', margin: '2px 0 0 0' }}>
               {health.server === 'UP' ? 'ONLINE' : health.server === 'PENDING' ? 'CHECKING...' : 'OFFLINE / DOWN'}
