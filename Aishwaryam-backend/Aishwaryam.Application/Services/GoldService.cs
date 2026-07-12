@@ -545,7 +545,7 @@ namespace Aishwaryam.Application.Services
                             var bUrl = request.BaseUrl;
                             if (string.IsNullOrEmpty(bUrl))
                             {
-                                bUrl = "https://aiswaryam.onrender.com/";
+                                bUrl = "https://aishwaryam-backend.onrender.com/";
                             }
                             if (!bUrl.EndsWith("/"))
                             {

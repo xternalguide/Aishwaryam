@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 window.fetchWithCache = async function (url: string, options: any = {}) {
   const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:5044'
-    : 'https://aiswaryam.onrender.com';
+    : 'https://aishwaryam-backend.onrender.com';
     
   const isGet = !options.method || options.method.toUpperCase() === 'GET';
 
@@ -138,7 +138,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:5044'
-    : 'https://aiswaryam.onrender.com';
+    : 'https://aishwaryam-backend.onrender.com';
 
   const showToast = (text: string, type: 'info' | 'success' | 'error' = 'info') => {
     const id = Math.random().toString(36).substr(2, 9);

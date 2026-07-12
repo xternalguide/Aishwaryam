@@ -107,7 +107,7 @@ namespace Aishwaryam.Infrastructure.Services
                     else
                     {
                         // Prefix relative image path with the backend's base URL
-                        string baseUrl = "https://aiswaryam.onrender.com";
+                        string baseUrl = "https://aishwaryam-backend.onrender.com";
                         fcmImageUrl = $"{baseUrl.TrimEnd('/')}/{imageUrl.TrimStart('/')}";
                     }
 

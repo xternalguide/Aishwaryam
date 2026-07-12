@@ -542,7 +542,7 @@ export const Dashboard: React.FC = () => {
       }
       return `data:${mime};base64,${url}`;
     }
-    const activeBaseUrl = 'https://aiswaryam.onrender.com/';
+    const activeBaseUrl = 'https://aishwaryam-backend.onrender.com/';
     const activeBase = activeBaseUrl.endsWith('/') ? activeBaseUrl : activeBaseUrl + '/';
     if (url.includes('/uploads/')) { const parts = url.split('/uploads/'); return activeBase + 'uploads/' + parts[1]; }
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
