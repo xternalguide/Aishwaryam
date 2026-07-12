@@ -166,7 +166,7 @@ MERGED from [com.razorpay:core:1.0.16] C:\Users\srive\.gradle\caches\8.14.3\tran
 	android:icon
 		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:6:9-43
 	android:allowBackup
-		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:5:9-35
+		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:5:9-36
 	android:theme
 		ADDED from C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:10:9-40
 	android:usesCleartextTraffic

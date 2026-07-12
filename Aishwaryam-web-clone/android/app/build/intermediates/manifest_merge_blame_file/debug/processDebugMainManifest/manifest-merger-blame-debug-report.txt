@@ -116,8 +116,8 @@
 65
 66    <application
 66-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:4:5-42:19
-67        android:allowBackup="true"
-67-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:5:9-35
+67        android:allowBackup="false"
+67-->C:\Users\srive\Desktop\Blazewing-projects\App\Digital-Gold\Aishwaryam-web-clone\android\app\src\main\AndroidManifest.xml:5:9-36
 68        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
 68-->[androidx.core:core:1.17.0] C:\Users\srive\.gradle\caches\8.14.3\transforms\11094a199bb7945826b161d8a9c17beb\transformed\core-1.17.0\AndroidManifest.xml:28:18-86
 69        android:debuggable="true"
